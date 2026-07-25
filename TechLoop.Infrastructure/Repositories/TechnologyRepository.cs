@@ -56,6 +56,7 @@ public sealed partial class TechnologyRepository : ITechnologyRepository
                 cancellationToken: cancellationToken));
     }
 
+    
     // Checks if the specified position is already assigned within the category
     public async Task<bool> PositionExistsAsync(
         int categoryId,
@@ -78,6 +79,7 @@ public sealed partial class TechnologyRepository : ITechnologyRepository
                 cancellationToken: cancellationToken));
     }
 
+    
     // Checks if the specified technology category exists.
     public async Task<bool> CategoryExistsAsync(
         int categoryId,
@@ -98,6 +100,7 @@ public sealed partial class TechnologyRepository : ITechnologyRepository
                 cancellationToken: cancellationToken));
     }
 
+    
     // Creates a new technology and returns the generated ID
     public async Task<int> CreateAsync(Technology technology, CancellationToken cancellationToken)
     {
@@ -140,6 +143,7 @@ SELECT fn_create_technology
                 },
                 cancellationToken: cancellationToken));
     }
+    
     
     // Updates the specified technology)
 public async Task<int> UpdateAsync(Technology technology, CancellationToken cancellationToken)
@@ -232,19 +236,22 @@ public async Task<IEnumerable<Technology>> GetPublishedAsync(CancellationToken c
     using var connection = _context.CreateConnection();
     return await connection.QueryAsync<Technology>(new CommandDefinition(sql, cancellationToken: cancellationToken));
 }
-// Retrieves a published technology by its ID
-public async Task<Technology?> GetPublishedByIdAsync(
-    int id,
-    CancellationToken cancellationToken)
+
+
+
+// Retrieves a published technology by its slug
+public async Task<Technology?> GetPublishedBySlugAsync(string slug, CancellationToken cancellationToken)
 {
-    const string sql = @"SELECT * FROM fn_get_published_technology_by_id(@Id);";
+    const string sql = @"SELECT * FROM fn_get_published_technology_by_slug(@Slug);";
+
     using var connection = _context.CreateConnection();
+
     return await connection.QuerySingleOrDefaultAsync<Technology>(
         new CommandDefinition(
             sql,
             new
             {
-                Id = id
+                Slug = slug
             },
             cancellationToken: cancellationToken));
 }

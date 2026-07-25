@@ -1,7 +1,7 @@
 ﻿import React from "react";
-import Hero from "../../components/landing/Hero";
-import Metrics from "../../components/landing/Metrics";
-import Features from "../../components/landing/Features";
+import Hero from "./LandingPageContents/Hero.tsx";
+import Metrics from "./LandingPageContents/Metrics.tsx";
+import Features from "./LandingPageContents/Features.tsx";
 
 const LandingPage: React.FC = () => {
     return (

@@ -20,5 +20,5 @@ public interface ITechnologyRepository
     Task<Technology?> GetByIdAsync(int id, CancellationToken cancellationToken);
     //Learner
     Task<IEnumerable<Technology>> GetPublishedAsync(CancellationToken cancellationToken);
-    Task<Technology?> GetPublishedByIdAsync(int id, CancellationToken cancellationToken);
+    Task<Technology?> GetPublishedBySlugAsync(string slug, CancellationToken cancellationToken);
 }
