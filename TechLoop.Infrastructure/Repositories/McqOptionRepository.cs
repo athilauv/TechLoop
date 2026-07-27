@@ -4,11 +4,9 @@ using TechLoop.Application.Interfaces.Repositories;
 using TechLoop.Domain.Entities;
 
 namespace TechLoop.Infrastructure.Repositories;
-
 public sealed class McqOptionRepository : IMcqOptionRepository
 {
     private readonly IDapperContext _context;
-
     public McqOptionRepository(IDapperContext context)
     {
         _context = context;
@@ -17,19 +15,9 @@ public sealed class McqOptionRepository : IMcqOptionRepository
     // Exists
     public async Task<bool> ExistsAsync(int questionId, string optionText, CancellationToken cancellationToken)
     {
-        const string sql = @"
-SELECT EXISTS
-(
-    SELECT 1
-    FROM mcq_options
-    WHERE question_id = @QuestionId
-      AND LOWER(option_text) = LOWER(@OptionText)
-      AND deleted_at IS NULL
-);";
-
+        const string sql = @"SELECT fn_mcq_option_exists(@QuestionId, @OptionText);";
         using var connection = _context.CreateConnection();
-        return await connection.ExecuteScalarAsync<bool>(new CommandDefinition(
-                sql,
+        return await connection.ExecuteScalarAsync<bool>(new CommandDefinition(sql,
                 new
                 {
                     QuestionId = questionId,
@@ -41,16 +29,7 @@ SELECT EXISTS
     // Position Exists
     public async Task<bool> PositionExistsAsync(int questionId, int position, CancellationToken cancellationToken)
     {
-        const string sql = @"
-SELECT EXISTS
-(
-    SELECT 1
-    FROM mcq_options
-    WHERE question_id = @QuestionId
-      AND position = @Position
-      AND deleted_at IS NULL
-);";
-
+        const string sql = @"SELECT fn_mcq_option_position_exists(@QuestionId, @Position);";
         using var connection = _context.CreateConnection();
         return await connection.ExecuteScalarAsync<bool>(new CommandDefinition(sql,
                 new
@@ -60,68 +39,32 @@ SELECT EXISTS
                 },
                 cancellationToken: cancellationToken));
     }
-    
-    
-    //position count
+
+    // Option Count
     public async Task<int> GetOptionCountAsync(int questionId, CancellationToken cancellationToken)
     {
-        const string sql = @"
-SELECT COUNT(*)
-FROM mcq_options
-WHERE question_id = @QuestionId
-AND deleted_at IS NULL;";
-
+        const string sql = @"SELECT fn_mcq_option_count(@QuestionId);";
         using var connection = _context.CreateConnection();
-        return await connection.ExecuteScalarAsync<int>(
-            new CommandDefinition(
-                sql,
-                new { QuestionId = questionId },
+        return await connection.ExecuteScalarAsync<int>(new CommandDefinition(sql,
+                new
+                {
+                    QuestionId = questionId
+                },
                 cancellationToken: cancellationToken));
     }
 
     // Create
     public async Task<int> CreateAsync(McqOption option, CancellationToken cancellationToken)
     {
-        const string sql = @"
-INSERT INTO mcq_options
-(
-    question_id,
-    option_text,
-    is_correct,
-    position,
-    created_by,
-    created_at
-)
-VALUES
-(
-    @QuestionId,
-    @OptionText,
-    @IsCorrect,
-    @Position,
-    @CreatedBy,
-    @CreatedAt
-)
-RETURNING id;";
-
+        const string sql = @"SELECT fn_create_mcq_option(@QuestionId,@OptionText,@IsCorrect,@Position,@CreatedBy,@CreatedAt);";
         using var connection = _context.CreateConnection();
-        return await connection.ExecuteScalarAsync<int>(
-            new CommandDefinition(sql, option, cancellationToken: cancellationToken));
+        return await connection.ExecuteScalarAsync<int>(new CommandDefinition(sql, option, cancellationToken: cancellationToken));
     }
 
     // Update
     public async Task<int> UpdateAsync(McqOption option, CancellationToken cancellationToken)
     {
-        const string sql = @"
-UPDATE mcq_options
-SET
-    option_text = @OptionText,
-    is_correct = @IsCorrect,
-    position = @Position,
-    updated_by = @UpdatedBy,
-    updated_at = @UpdatedAt
-WHERE id = @Id
-AND deleted_at IS NULL;";
-
+        const string sql = @"CALL sp_update_mcq_option(@Id,@OptionText,@IsCorrect,@Position,@UpdatedBy,@UpdatedAt);";
         using var connection = _context.CreateConnection();
         return await connection.ExecuteAsync(new CommandDefinition(sql, option, cancellationToken: cancellationToken));
     }
@@ -129,17 +72,9 @@ AND deleted_at IS NULL;";
     // Soft Delete
     public async Task<int> SoftDeleteAsync(int id, Guid deletedBy, CancellationToken cancellationToken)
     {
-        const string sql = @"
-UPDATE mcq_options
-SET
-    deleted_at = @DeletedAt,
-    deleted_by = @DeletedBy
-WHERE id = @Id
-AND deleted_at IS NULL;";
-
+        const string sql = @"CALL sp_soft_delete_mcq_option(@Id,@DeletedBy,@DeletedAt);";
         using var connection = _context.CreateConnection();
-        return await connection.ExecuteAsync(
-            new CommandDefinition(
+        return await connection.ExecuteAsync(new CommandDefinition(
                 sql,
                 new
                 {
@@ -149,18 +84,11 @@ AND deleted_at IS NULL;";
                 },
                 cancellationToken: cancellationToken));
     }
-    
-    //
+
+    // Soft Delete By Question
     public async Task<int> SoftDeleteByQuestionIdAsync(int questionId, Guid deletedBy, CancellationToken cancellationToken)
     {
-        const string sql = @"
-UPDATE mcq_options
-SET
-    deleted_at = @DeletedAt,
-    deleted_by = @DeletedBy
-WHERE question_id = @QuestionId
-AND deleted_at IS NULL;";
-
+        const string sql = @"CALL sp_soft_delete_mcq_option_by_question(@QuestionId,@DeletedBy,@DeletedAt);";
         using var connection = _context.CreateConnection();
         return await connection.ExecuteAsync(new CommandDefinition(
                 sql,
@@ -172,77 +100,40 @@ AND deleted_at IS NULL;";
                 },
                 cancellationToken: cancellationToken));
     }
-    
-    
+
+    // Has Correct Option
     public async Task<bool> HasCorrectOptionAsync(int questionId, CancellationToken cancellationToken)
     {
-        const string sql = @"
-SELECT EXISTS
-(
-    SELECT 1
-    FROM mcq_options
-    WHERE question_id = @QuestionId
-    AND is_correct = TRUE
-    AND deleted_at IS NULL
-);";
-
+        const string sql = @"SELECT fn_mcq_has_correct_option(@QuestionId);";
         using var connection = _context.CreateConnection();
-        return await connection.ExecuteScalarAsync<bool>(
-            new CommandDefinition(
+        return await connection.ExecuteScalarAsync<bool>(new CommandDefinition(
                 sql,
-                new { QuestionId = questionId },
+                new
+                {
+                    QuestionId = questionId
+                },
                 cancellationToken: cancellationToken));
     }
 
-    // Get by id
+    // Get By Id
     public async Task<McqOption?> GetByIdAsync(int id, CancellationToken cancellationToken)
     {
-        const string sql = @"
-SELECT
-    id,
-    question_id AS QuestionId,
-    option_text AS OptionText,
-    is_correct AS IsCorrect,
-    position,
-    created_by AS CreatedBy,
-    created_at AS CreatedAt,
-    updated_by AS UpdatedBy,
-    updated_at AS UpdatedAt
-FROM mcq_options
-WHERE id = @Id
-AND deleted_at IS NULL;";
-
+        const string sql = @"SELECT * FROM fn_get_mcq_option_by_id(@Id);";
         using var connection = _context.CreateConnection();
-        return await connection.QuerySingleOrDefaultAsync<McqOption>(
-            new CommandDefinition(
-                sql,
-                new { Id = id },
+        return await connection.QuerySingleOrDefaultAsync<McqOption>(new CommandDefinition(sql,
+                new
+                {
+                    Id = id
+                },
                 cancellationToken: cancellationToken));
     }
 
-    // Get by question
+    // Get By Question
     public async Task<IEnumerable<McqOption>> GetByQuestionIdAsync(int questionId, CancellationToken cancellationToken)
     {
-        const string sql = @"
-SELECT
-    id,
-    question_id AS QuestionId,
-    option_text AS OptionText,
-    is_correct AS IsCorrect,
-    position,
-    created_by AS CreatedBy,
-    created_at AS CreatedAt,
-    updated_by AS UpdatedBy,
-    updated_at AS UpdatedAt
-FROM mcq_options
-WHERE question_id = @QuestionId
-AND deleted_at IS NULL
-ORDER BY position;";
-
+        const string sql = @"SELECT * FROM fn_get_mcq_options_by_question_id(@QuestionId);";
         using var connection = _context.CreateConnection();
-        return await connection.QueryAsync<McqOption>(
-            new CommandDefinition(
-                sql,
+        return await connection.QueryAsync<McqOption>(new CommandDefinition(sql,
                 new
                 {
                     QuestionId = questionId

@@ -8,25 +8,15 @@ namespace TechLoop.Infrastructure.Repositories;
 public class SubTopicsRepository : ISubTopicsRepository
 {
     private readonly IDapperContext _context;
-
     public SubTopicsRepository(IDapperContext context)
     {
         _context = context;
     }
-    
-    
+
+    // Checks if a subtopic with the same title already exists
     public async Task<bool> ExistsAsync(int topicId, string title, CancellationToken cancellationToken)
     {
-        const string sql = @"
-SELECT EXISTS
-(
-    SELECT 1
-    FROM sub_topics
-    WHERE topic_id = @TopicId
-    AND LOWER(title) = LOWER(@Title)
-    AND deleted_at IS NULL
-);";
-
+        const string sql = @"SELECT fn_subtopic_exists(@TopicId, @Title);";
         using var connection = _context.CreateConnection();
         return await connection.ExecuteScalarAsync<bool>(
             new CommandDefinition(
@@ -38,39 +28,26 @@ SELECT EXISTS
                 },
                 cancellationToken: cancellationToken));
     }
-    
-    //SlugExists
+
+    // Checks if the specified slug already exists
     public async Task<bool> SlugExistsAsync(string slug, CancellationToken cancellationToken)
     {
-        const string sql = @"
-SELECT EXISTS
-(
-    SELECT 1
-    FROM sub_topics
-    WHERE LOWER(slug) = LOWER(@Slug)
-    AND deleted_at IS NULL
-);";
+        const string sql = @"SELECT fn_subtopic_slug_exists(@Slug);";
         using var connection = _context.CreateConnection();
         return await connection.ExecuteScalarAsync<bool>(
             new CommandDefinition(
                 sql,
-                new { Slug = slug },
+                new
+                {
+                    Slug = slug
+                },
                 cancellationToken: cancellationToken));
     }
-    
-    
-    //PositionExists
+
+    // Checks if the specified position is already assigned within the topic
     public async Task<bool> PositionExistsAsync(int topicId, int position, CancellationToken cancellationToken)
     {
-        const string sql = @"
-SELECT EXISTS
-(
-    SELECT 1
-    FROM sub_topics
-    WHERE topic_id=@TopicId
-    AND position=@Position
-    AND deleted_at IS NULL
-);";
+        const string sql = @"SELECT fn_subtopic_position_exists(@TopicId, @Position);";
         using var connection = _context.CreateConnection();
         return await connection.ExecuteScalarAsync<bool>(
             new CommandDefinition(
@@ -83,72 +60,56 @@ SELECT EXISTS
                 cancellationToken: cancellationToken));
     }
 
+    // Checks if the specified topic exists
+    public async Task<bool> TopicExistsAsync(int topicId, CancellationToken cancellationToken)
+    {
+        const string sql = @"SELECT fn_subtopic_topic_exists(@TopicId);";
+        using var connection = _context.CreateConnection();
+        return await connection.ExecuteScalarAsync<bool>(
+            new CommandDefinition(
+                sql,
+                new
+                {
+                    TopicId = topicId
+                },
+                cancellationToken: cancellationToken));
+    }
+
+    // Creates a new subtopic and returns the generated ID
     public async Task<int> CreateAsync(SubTopic subTopic, CancellationToken cancellationToken)
     {
-        const string sql = @"
-            INSERT INTO sub_topics
-            (
-                topic_id,
-                slug,
-                title,
-                description,
-                image_url,
-                position,
-                created_at,
-                created_by
-            )
-            VALUES
-            (
-                @TopicId,
-                @Slug,
-                @Title,
-                @Description,
-                @ImageUrl,
-                @Position,
-                @CreatedAt,
-                @CreatedBy
-            )
-            RETURNING id;";
-
+        const string sql = @"SELECT fn_create_subtopic( @TopicId,@Slug,@Title,@Description,@ImageUrl,@Position,@CreatedBy,@CreatedAt);";
         using var connection = _context.CreateConnection();
-        return await connection.ExecuteScalarAsync<int>(sql, subTopic);
+        return await connection.ExecuteScalarAsync<int>(new CommandDefinition(sql, subTopic, cancellationToken: cancellationToken));
     }
-    
-    //Update subtopic
+
+    // Retrieves a subtopic by its ID
+    public async Task<SubTopic?> GetByIdAsync(int id, CancellationToken cancellationToken)
+    {
+        const string sql = @"SELECT * FROM fn_get_subtopic_by_id(@Id);";
+        using var connection = _context.CreateConnection();
+        return await connection.QuerySingleOrDefaultAsync<SubTopic>(
+            new CommandDefinition(
+                sql,
+                new
+                {
+                    Id = id
+                },
+                cancellationToken: cancellationToken));
+    }
+
+    // Updates the specified subtopic
     public async Task<int> UpdateAsync(SubTopic subTopic, CancellationToken cancellationToken)
     {
-        const string sql = @"
-UPDATE sub_topics
-SET
-    topic_id = @TopicId,
-    title = @Title,
-    slug = @Slug,
-    description = @Description,
-    image_url = @ImageUrl,
-    position = @Position,
-    updated_by = @UpdatedBy,
-    updated_at = @UpdatedAt
-WHERE id = @Id
-AND deleted_at IS NULL;
-";
-
+        const string sql = @"CALL sp_update_subtopic(@Id,@TopicId,@Title,@Slug,@Description,@ImageUrl,@Position,@UpdatedBy,@UpdatedAt);";
         using var connection = _context.CreateConnection();
-        return await connection.ExecuteAsync(
-            new CommandDefinition(sql, subTopic, cancellationToken: cancellationToken));
+        return await connection.ExecuteAsync(new CommandDefinition(sql, subTopic, cancellationToken: cancellationToken));
     }
-    
-    //Soft delete subtopic
+
+    // Soft deletes the specified subtopic
     public async Task<int> SoftDeleteAsync(int id, Guid deletedBy, CancellationToken cancellationToken)
     {
-        const string sql = @"
-UPDATE sub_topics
-SET
-    deleted_at = @DeletedAt,
-    deleted_by = @DeletedBy
-WHERE id = @Id
-AND deleted_at IS NULL;
-";
-
+        const string sql = @"CALL sp_soft_delete_subtopic(@Id, @DeletedBy, @DeletedAt);";
         using var connection = _context.CreateConnection();
         return await connection.ExecuteAsync(
             new CommandDefinition(
@@ -156,153 +117,56 @@ AND deleted_at IS NULL;
                 new
                 {
                     Id = id,
-                    DeletedAt = DateTime.UtcNow,
-                    DeletedBy = deletedBy
+                    DeletedBy = deletedBy,
+                    DeletedAt = DateTime.UtcNow
                 },
                 cancellationToken: cancellationToken));
     }
-    
-    //topic exista
-    public async Task<bool> TopicExistsAsync(int topicId, CancellationToken cancellationToken)
+
+    // Retrieves all active subtopics
+    public async Task<IEnumerable<SubTopic>> GetAllAsync(CancellationToken cancellationToken)
     {
-        const string sql = @"
-SELECT EXISTS
-(
-    SELECT 1
-    FROM topics
-    WHERE id = @TopicId
-    AND deleted_at IS NULL
-);";
-
-        using var connection = _context.CreateConnection();
-
-        return await connection.ExecuteScalarAsync<bool>(
-            new CommandDefinition(
-                sql,
-                new { TopicId = topicId },
-                cancellationToken: cancellationToken));
-    }
-    
-    //update publish
-    public async Task<int> PublishAsync(SubTopic subTopic, CancellationToken cancellationToken)
-    {
-        const string sql = @"
-UPDATE sub_topics
-SET
-    published_at = @PublishedAt,
-    published_by = @PublishedBy
-WHERE id = @Id
-AND deleted_at IS NULL;";
-
-        using var connection = _context.CreateConnection();
-        return await connection.ExecuteAsync(new CommandDefinition(sql, subTopic, cancellationToken: cancellationToken));
-    }
-    
-    
-    //get all published subtopic( for learner)
-    public async Task<IEnumerable<SubTopic>> GetPublishedAsync(CancellationToken cancellationToken)
-    {
-        const string sql = @"
-SELECT
-    id,
-    topic_id AS TopicId,
-    slug,
-    title,
-    description,
-    image_url AS ImageUrl,
-    position
-FROM sub_topics
-WHERE
-    published_at IS NOT NULL
-AND deleted_at IS NULL
-ORDER BY position;";
-
+        const string sql = @"SELECT * FROM fn_get_all_subtopics();";
         using var connection = _context.CreateConnection();
         return await connection.QueryAsync<SubTopic>(new CommandDefinition(sql, cancellationToken: cancellationToken));
     }
-    
-    //Get subtopic by id (for meantor)
-    public async Task<SubTopic?> GetByIdAsync(int id, CancellationToken cancellationToken)
-    {
-        const string sql = @"
-SELECT
-    id,
-    topic_id AS TopicId,
-    slug,
-    title,
-    description,
-    image_url AS ImageUrl,
-    position,
-    published_at AS PublishedAt,
-    published_by AS PublishedBy,
-    created_by AS CreatedBy,
-    created_at AS CreatedAt,
-    updated_by AS UpdatedBy,
-    updated_at AS UpdatedAt
-FROM sub_topics
-WHERE id = @Id
-AND deleted_at IS NULL;
-";
 
+    // Publishes the specified subtopic
+    public async Task<int> PublishAsync(SubTopic subTopic, CancellationToken cancellationToken)
+    {
+        const string sql = @"CALL sp_publish_subtopic(@Id,@PublishedBy,@PublishedAt);";
         using var connection = _context.CreateConnection();
-        return await connection.QuerySingleOrDefaultAsync<SubTopic>(
+        return await connection.ExecuteAsync(
             new CommandDefinition(
                 sql,
-                new { Id = id },
+                new
+                {
+                    subTopic.Id,
+                    subTopic.PublishedBy,
+                    subTopic.PublishedAt
+                },
                 cancellationToken: cancellationToken));
     }
-    
-    //Get all subtopics (for mentor)
-    public async Task<IEnumerable<SubTopic>> GetAllAsync(CancellationToken cancellationToken)
-    {
-        const string sql = @"
-SELECT
-    id,
-    topic_id AS TopicId,
-    slug,
-    title,
-    description,
-    image_url AS ImageUrl,
-    position,
-    published_at AS PublishedAt,
-    published_by AS PublishedBy,
-    created_at AS CreatedAt,
-    created_by AS CreatedBy,
-    updated_at AS UpdatedAt,
-    updated_by AS UpdatedBy,
-FROM sub_topics
-WHERE deleted_at IS NULL
-ORDER BY position;
-";
 
+    // Retrieves all published subtopics
+    public async Task<IEnumerable<SubTopic>> GetPublishedAsync(CancellationToken cancellationToken)
+    {
+        const string sql = @"SELECT * FROM fn_get_published_subtopics();";
         using var connection = _context.CreateConnection();
-        return await connection.QueryAsync<SubTopic>(
-            new CommandDefinition(sql, cancellationToken: cancellationToken));
+        return await connection.QueryAsync<SubTopic>(new CommandDefinition(sql, cancellationToken: cancellationToken));
     }
-    
-    //get published subtopic by id (for learner)
-    public async Task<SubTopic?> GetPublishedByIdAsync(int id, CancellationToken cancellationToken)
-    {
-        const string sql = @"
-SELECT
-    id,
-    topic_id AS TopicId,
-    slug,
-    title,
-    description,
-    image_url AS ImageUrl,
-    position
-FROM sub_topics
-WHERE
-    id = @Id
-AND published_at IS NOT NULL
-AND deleted_at IS NULL;";
 
+    // Retrieves a published subtopic by its slug
+    public async Task<SubTopic?> GetPublishedBySlugAsync(string slug, CancellationToken cancellationToken)
+    {
+        const string sql = @"SELECT * FROM fn_get_published_subtopic_by_slug(@Slug);";
         using var connection = _context.CreateConnection();
         return await connection.QuerySingleOrDefaultAsync<SubTopic>(
-            new CommandDefinition(
-                sql,
-                new { Id = id },
+            new CommandDefinition(sql,
+                new
+                {
+                    Slug = slug
+                },
                 cancellationToken: cancellationToken));
     }
 }

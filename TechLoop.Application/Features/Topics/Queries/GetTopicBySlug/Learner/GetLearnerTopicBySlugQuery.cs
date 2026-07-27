@@ -5,7 +5,7 @@ using TechLoop.Application.Interfaces.Repositories;
 
 namespace TechLoop.Application.Features.Topics.Queries.GetTopicById.Learner;
 
-public sealed class GetLearnerTopicByIdQueryHandler : IRequestHandler<GetLearnerTopicByIdQuery, LearnerTopicResponse>
+public sealed class GetLearnerTopicByIdQueryHandler : IRequestHandler<GetLearnerTopicBySlugQueryHandler, LearnerTopicResponse>
 {
     private readonly ITopicsRepository _repository;
     public GetLearnerTopicByIdQueryHandler(ITopicsRepository repository)
@@ -13,7 +13,7 @@ public sealed class GetLearnerTopicByIdQueryHandler : IRequestHandler<GetLearner
         _repository = repository;
     }
 
-    public async Task<LearnerTopicResponse> Handle(GetLearnerTopicByIdQuery request, CancellationToken cancellationToken)
+    public async Task<LearnerTopicResponse> Handle(GetLearnerTopicBySlugQueryHandler request, CancellationToken cancellationToken)
     {
         var topic = await _repository.GetPublishedByIdAsync(request.Id, cancellationToken);
         if (topic is null)
@@ -29,7 +29,9 @@ public sealed class GetLearnerTopicByIdQueryHandler : IRequestHandler<GetLearner
             Slug = topic.Slug,
             Description = topic.Description,
             ImageUrl = topic.ImageUrl,
-            Position = topic.Position
+            Position = topic.Position,
+            CreatedAt = topic.CreatedAt,
+            UpdatedAt = topic.UpdatedAt,
         };
     }
 }

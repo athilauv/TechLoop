@@ -10,7 +10,6 @@ namespace TechLoop.Infrastructure.Repositories;
 public sealed class TopicRepository : ITopicsRepository
 {
     private readonly IDapperContext _context;
-
     public TopicRepository(IDapperContext context)
     {
         _context = context;
@@ -176,11 +175,11 @@ public sealed class TopicRepository : ITopicsRepository
     public async Task<int> PublishAsync(Topic topic, CancellationToken cancellationToken)
     {
         using var connection = _context.CreateConnection();
+
         return await connection.ExecuteAsync(
             new CommandDefinition(
                 """
-                CALL sp_publish_topic
-                (
+                CALL sp_publish_topic(
                     @Id,
                     @PublishedBy,
                     @PublishedAt
@@ -200,16 +199,15 @@ public sealed class TopicRepository : ITopicsRepository
     }
     
 
-    // Get a published topic by its ID.
-    public async Task<Topic?> GetPublishedByIdAsync(int id, CancellationToken cancellationToken)
+    // Get a published topic by its slug.
+    public async Task<Topic?> GetPublishedBySlugAsync(string slug, CancellationToken cancellationToken)
     {
         using var connection = _context.CreateConnection();
-        return await connection.QuerySingleOrDefaultAsync<Topic>(
-            new CommandDefinition(
-                "SELECT * FROM fn_get_published_topic_by_id(@Id);",
+        return await connection.QuerySingleOrDefaultAsync<Topic>(new CommandDefinition(
+                "SELECT * FROM fn_get_published_topic_by_slug(@Slug);",
                 new
                 {
-                    Id = id
+                    Slug = slug
                 },
                 cancellationToken: cancellationToken));
     }
