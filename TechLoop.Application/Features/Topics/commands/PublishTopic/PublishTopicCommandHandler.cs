@@ -33,11 +33,11 @@ public sealed class PublishTopicCommandHandler : IRequestHandler<PublishTopicCom
         topic.PublishedAt = DateTime.UtcNow;
         topic.PublishedBy = _currentUser.UserId;
 
-        var rowsAffected = await _repository.PublishAsync(topic, cancellationToken);
-        if (rowsAffected <= 0)
-        {
-            throw new Exception("Failed to publish topic.");
-        }
+       //var rowsAffected = await _repository.PublishAsync(topic, cancellationToken);
+        // if (rowsAffected <= 0)
+        // {
+        //     throw new Exception("Failed to publish topic.");
+        // }
 
         return new PublishTopicResponse
         {

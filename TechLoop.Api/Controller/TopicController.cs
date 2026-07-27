@@ -2,7 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using TechLoop.Application.Features.Topics.DTOs;
 using TechLoop.Application.Features.Topics.Queries.GetAllTopics.Learner;
-using TechLoop.Application.Features.Topics.Queries.GetTopicById.Learner;
+using TechLoop.Application.Features.Topics.Queries.GetTopicBySlug.Learner;
 
 namespace TechLoop.Api.Controllers;
 
@@ -17,7 +17,7 @@ public sealed class TopicController : ControllerBase
         _mediator = mediator;
     }
 
-    // GET /topics
+    // Get all published topics 
     [HttpGet]
     public async Task<ActionResult<IEnumerable<LearnerTopicResponse>>> GetAllTopics(
         CancellationToken cancellationToken)
@@ -29,16 +29,11 @@ public sealed class TopicController : ControllerBase
         return Ok(result);
     }
 
-    // GET /topics/{id}
-    [HttpGet("{id:int}")]
-    public async Task<ActionResult<LearnerTopicResponse>> GetTopicById(
-        int id,
-        CancellationToken cancellationToken)
+    // Get published topic by slug
+    [HttpGet("{slug}")]
+    public async Task<ActionResult<LearnerTopicResponse>> GetTopicBySlug(string slug, CancellationToken cancellationToken)
     {
-        var result = await _mediator.Send(
-            new GetLearnerTopicByIdQuery(id),
-            cancellationToken);
-
+        var result = await _mediator.Send(new GetLearnerTopicBySlugQuery(slug), cancellationToken);
         return Ok(result);
     }
 }

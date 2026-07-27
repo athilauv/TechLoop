@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("TechLoop.Infrastructure")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+e21de7570bdd90f140299d4e6c6a70d982f9b846")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+d2b57543bd838f6e0c4c554a4ead2047b8bb430d")]
 [assembly: System.Reflection.AssemblyProductAttribute("TechLoop.Infrastructure")]
 [assembly: System.Reflection.AssemblyTitleAttribute("TechLoop.Infrastructure")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

@@ -21,5 +21,5 @@ public interface ITopicsRepository
     
     //Learner
     Task<IEnumerable<Topic>> GetPublishedAsync(CancellationToken cancellationToken);
-    Task<Topic?> GetPublishedByIdAsync(int id, CancellationToken cancellationToken);
+    Task<Topic?> GetPublishedBySlugAsync(string slug, CancellationToken cancellationToken);
 }

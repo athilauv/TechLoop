@@ -34,11 +34,11 @@ public sealed class PublishTechnologyCommandHandler : IRequestHandler<PublishTec
         technology.PublishedAt = DateTime.UtcNow;
         technology.PublishedBy = _currentUserService.UserId;
 
-        var rowsAffected = await _technologyRepository.PublishAsync(technology, cancellationToken);
-        if (rowsAffected <= 0)
-        {
-            throw new Exception("Failed to publish technology.");
-        }
+        // var rowsAffected = await _technologyRepository.PublishAsync(technology, cancellationToken);
+        // if (rowsAffected <= 0)
+        // {
+        //     throw new Exception("Failed to publish technology.");
+        // }
 
         return new PublishTechnologyResponse
         {

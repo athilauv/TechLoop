@@ -10,7 +10,10 @@
     <Folder Include="Features\MCQ\Queries\GetMcqOptionsByQuestionQuery\" />
     <Folder Include="Features\SubTopics\Queries\GetAllSubTopic\" />
     <Folder Include="Features\SubTopics\Queries\GetSubTopicById\" />
+    <Folder Include="Features\SubTopics\Queries\GetSubTopicBySlug\" />
+    <Folder Include="Features\Technologies\Queries\GetTechnologyBySlug\" />
     <Folder Include="Features\TechnologyCategories\Queries\GetTechnologyCategoryById\" />
+    <Folder Include="Features\Topics\Queries\GetTopicBySlug\" />
   </ItemGroup>
 
   <ItemGroup>

@@ -6,11 +6,8 @@ interface CategoryTabsProps {
     onCategoryChange: (id: number) => void;
 }
 
-export default function CategoryTabs({
-                                         categories,
-                                         selectedCategory,
-                                         onCategoryChange,
-                                     }: CategoryTabsProps) {
+export default function CategoryTabs({categories, selectedCategory, onCategoryChange,}: CategoryTabsProps)
+{
     return (
         <div className="flex flex-wrap gap-3">
             {categories.map((category) => {

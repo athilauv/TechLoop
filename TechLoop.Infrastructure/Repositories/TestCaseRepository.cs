@@ -13,23 +13,12 @@ public sealed class TestCaseRepository : ITestCaseRepository
         _context = context;
     }
 
-    // Position exists
+    // Position Exists
     public async Task<bool> PositionExistsAsync(int questionId, int position, CancellationToken cancellationToken)
     {
-        const string sql = @"
-SELECT EXISTS
-(
-    SELECT 1
-    FROM test_cases
-    WHERE question_id = @QuestionId
-      AND position = @Position
-      AND deleted_at IS NULL
-);";
-
+        const string sql = @"SELECT fn_test_case_position_exists(@QuestionId, @Position);";
         using var connection = _context.CreateConnection();
-        return await connection.ExecuteScalarAsync<bool>(
-            new CommandDefinition(
-                sql,
+        return await connection.ExecuteScalarAsync<bool>(new CommandDefinition(sql,
                 new
                 {
                     QuestionId = questionId,
@@ -41,66 +30,26 @@ SELECT EXISTS
     // Create
     public async Task<int> CreateAsync(TestCase testCase, CancellationToken cancellationToken)
     {
-        const string sql = @"
-INSERT INTO test_cases
-(
-    question_id,
-    input,
-    expected_output,
-    is_hidden,
-    position,
-    created_by,
-    created_at
-)
-VALUES
-(
-    @QuestionId,
-    @Input,
-    @ExpectedOutput,
-    @IsHidden,
-    @Position,
-    @CreatedBy,
-    @CreatedAt
-)
-RETURNING id;";
-
+        const string sql = @"SELECT fn_create_test_case( @QuestionId, @Input, @ExpectedOutput, @IsHidden, @Position, @CreatedBy,@CreatedAt);";
         using var connection = _context.CreateConnection();
-        return await connection.ExecuteScalarAsync<int>(
-            new CommandDefinition(sql, testCase, cancellationToken: cancellationToken));
+        return await connection.ExecuteScalarAsync<int>(new CommandDefinition(sql, testCase, cancellationToken: cancellationToken));
     }
 
     // Update
     public async Task<int> UpdateAsync(TestCase testCase, CancellationToken cancellationToken)
     {
-        const string sql = @"
-UPDATE test_cases
-SET
-    input = @Input,
-    expected_output = @ExpectedOutput,
-    is_hidden = @IsHidden,
-    position = @Position,
-    updated_by = @UpdatedBy,
-    updated_at = @UpdatedAt
-WHERE id = @Id
-AND deleted_at IS NULL;";
-
+        const string sql = @"CALL sp_update_test_case( @Id, @Input, @ExpectedOutput, @IsHidden, @Position,@UpdatedBy,@UpdatedAt);";
         using var connection = _context.CreateConnection();
         return await connection.ExecuteAsync(new CommandDefinition(sql, testCase, cancellationToken: cancellationToken));
     }
 
-    // Soft delete
+    // Soft Delete
     public async Task<int> SoftDeleteAsync(int id, Guid deletedBy, CancellationToken cancellationToken)
     {
-        const string sql = @"
-UPDATE test_cases
-SET
-    deleted_by = @DeletedBy,
-    deleted_at = @DeletedAt
-WHERE id = @Id
-AND deleted_at IS NULL;";
-
+        const string sql = @"CALL sp_soft_delete_test_case(@Id,@DeletedBy,@DeletedAt);";
         using var connection = _context.CreateConnection();
-        return await connection.ExecuteAsync(new CommandDefinition(sql,
+        return await connection.ExecuteAsync(new CommandDefinition(
+                sql,
                 new
                 {
                     Id = id,
@@ -109,22 +58,13 @@ AND deleted_at IS NULL;";
                 },
                 cancellationToken: cancellationToken));
     }
-    
-    // Soft delete by Question
+
+    // Soft Delete By Question
     public async Task<int> SoftDeleteByQuestionIdAsync(int questionId, Guid deletedBy, CancellationToken cancellationToken)
     {
-        const string sql = @"
-UPDATE test_cases
-SET
-    deleted_by = @DeletedBy,
-    deleted_at = @DeletedAt
-WHERE question_id = @QuestionId
-AND deleted_at IS NULL;";
-
+        const string sql = @"CALL sp_soft_delete_test_case_by_question(@QuestionId, @DeletedBy,@DeletedAt);";
         using var connection = _context.CreateConnection();
-        return await connection.ExecuteAsync(
-            new CommandDefinition(
-                sql,
+        return await connection.ExecuteAsync(new CommandDefinition(sql,
                 new
                 {
                     QuestionId = questionId,
@@ -134,80 +74,36 @@ AND deleted_at IS NULL;";
                 cancellationToken: cancellationToken));
     }
 
-    // Get by id
+    // Get By Id
     public async Task<TestCase?> GetByIdAsync(int id, CancellationToken cancellationToken)
     {
-        const string sql = @"
-SELECT
-    id,
-    question_id AS QuestionId,
-    input,
-    expected_output AS ExpectedOutput,
-    is_hidden AS IsHidden,
-    position,
-    created_by AS CreatedBy,
-    created_at AS CreatedAt,
-    updated_by AS UpdatedBy,
-    updated_at AS UpdatedAt
-FROM test_cases
-WHERE id = @Id
-AND deleted_at IS NULL;";
-
+        const string sql = @"SELECT * FROM fn_get_test_case_by_id(@Id);";
         using var connection = _context.CreateConnection();
-        return await connection.QuerySingleOrDefaultAsync<TestCase>(
-            new CommandDefinition(
-                sql,
-                new { Id = id },
+        return await connection.QuerySingleOrDefaultAsync<TestCase>(new CommandDefinition(sql,
+                new
+                {
+                    Id = id
+                },
                 cancellationToken: cancellationToken));
     }
 
     // Get By Question
     public async Task<IEnumerable<TestCase>> GetByQuestionIdAsync(int questionId, CancellationToken cancellationToken)
     {
-        const string sql = @"
-SELECT
-    id,
-    question_id AS QuestionId,
-    input,
-    expected_output AS ExpectedOutput,
-    is_hidden AS IsHidden,
-    position,
-    created_by AS CreatedBy,
-    created_at AS CreatedAt,
-    updated_by AS UpdatedBy,
-    updated_at AS UpdatedAt
-FROM test_cases
-WHERE question_id = @QuestionId
-AND deleted_at IS NULL
-ORDER BY position;";
-
+        const string sql = @"SELECT * FROM fn_get_test_cases_by_question_id(@QuestionId);";
         using var connection = _context.CreateConnection();
-        return await connection.QueryAsync<TestCase>(new CommandDefinition(sql, 
-            new { QuestionId = questionId },
+        return await connection.QueryAsync<TestCase>(new CommandDefinition(sql,
+                new
+                {
+                    QuestionId = questionId
+                },
                 cancellationToken: cancellationToken));
     }
-    
+
     // Get Visible Test Cases (Learner)
     public async Task<IEnumerable<TestCase>> GetVisibleByQuestionIdAsync(int questionId, CancellationToken cancellationToken)
     {
-        const string sql = @"
-SELECT
-    id,
-    question_id AS QuestionId,
-    input,
-    expected_output AS ExpectedOutput,
-    is_hidden AS IsHidden,
-    position,
-    created_by AS CreatedBy,
-    created_at AS CreatedAt,
-    updated_by AS UpdatedBy,
-    updated_at AS UpdatedAt
-FROM test_cases
-WHERE question_id = @QuestionId
-AND is_hidden = FALSE
-AND deleted_at IS NULL
-ORDER BY position;";
-
+        const string sql = @"SELECT * FROM fn_get_visible_test_cases_by_question_id(@QuestionId);";
         using var connection = _context.CreateConnection();
         return await connection.QueryAsync<TestCase>(new CommandDefinition(sql,
                 new

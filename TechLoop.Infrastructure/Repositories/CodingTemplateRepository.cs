@@ -4,7 +4,6 @@ using TechLoop.Application.Interfaces.Repositories;
 using TechLoop.Domain.Entities;
 
 namespace TechLoop.Infrastructure.Repositories;
-
 public sealed class CodingTemplateRepository : ICodingTemplateRepository
 {
     private readonly IDapperContext _context;
@@ -16,18 +15,10 @@ public sealed class CodingTemplateRepository : ICodingTemplateRepository
     // Exists
     public async Task<bool> ExistsAsync(int questionId, int technologyId, CancellationToken cancellationToken)
     {
-        const string sql = @"
-SELECT EXISTS
-(
-    SELECT 1
-    FROM coding_templates
-    WHERE question_id = @QuestionId
-      AND technology_id = @TechnologyId
-      AND deleted_at IS NULL
-);";
-
+        const string sql = @"SELECT fn_coding_template_exists(@QuestionId, @TechnologyId);";
         using var connection = _context.CreateConnection();
-        return await connection.ExecuteScalarAsync<bool>(new CommandDefinition(sql,
+        return await connection.ExecuteScalarAsync<bool>(new CommandDefinition(
+                sql,
                 new
                 {
                     QuestionId = questionId,
@@ -39,27 +30,7 @@ SELECT EXISTS
     // Create
     public async Task<int> CreateAsync(CodingTemplate template, CancellationToken cancellationToken)
     {
-        const string sql = @"
-INSERT INTO coding_templates
-(
-    question_id,
-    technology_id,
-    starter_code,
-    solution_code,
-    created_by,
-    created_at
-)
-VALUES
-(
-    @QuestionId,
-    @TechnologyId,
-    @StarterCode,
-    @SolutionCode,
-    @CreatedBy,
-    @CreatedAt
-)
-RETURNING id;";
-
+        const string sql = @"SELECT fn_create_coding_template( @QuestionId,@TechnologyId,@StarterCode,@SolutionCode,@CreatedBy,@CreatedAt);";
         using var connection = _context.CreateConnection();
         return await connection.ExecuteScalarAsync<int>(new CommandDefinition(sql, template, cancellationToken: cancellationToken));
     }
@@ -67,17 +38,7 @@ RETURNING id;";
     // Update
     public async Task<int> UpdateAsync(CodingTemplate template, CancellationToken cancellationToken)
     {
-        const string sql = @"
-UPDATE coding_templates
-SET
-    technology_id = @TechnologyId,
-    starter_code = @StarterCode,
-    solution_code = @SolutionCode,
-    updated_by = @UpdatedBy,
-    updated_at = @UpdatedAt
-WHERE id = @Id
-AND deleted_at IS NULL;";
-
+        const string sql = @"CALL sp_update_coding_template( @Id, @TechnologyId, @StarterCode, @SolutionCode, @UpdatedBy, @UpdatedAt);";
         using var connection = _context.CreateConnection();
         return await connection.ExecuteAsync(new CommandDefinition(sql, template, cancellationToken: cancellationToken));
     }
@@ -85,14 +46,7 @@ AND deleted_at IS NULL;";
     // Soft Delete
     public async Task<int> SoftDeleteAsync(int id, Guid deletedBy, CancellationToken cancellationToken)
     {
-        const string sql = @"
-UPDATE coding_templates
-SET
-    deleted_by = @DeletedBy,
-    deleted_at = @DeletedAt
-WHERE id = @Id
-AND deleted_at IS NULL;";
-
+        const string sql = @"CALL sp_soft_delete_coding_template( @Id,@DeletedBy, @DeletedAt);";
         using var connection = _context.CreateConnection();
         return await connection.ExecuteAsync(new CommandDefinition(sql,
                 new
@@ -103,22 +57,13 @@ AND deleted_at IS NULL;";
                 },
                 cancellationToken: cancellationToken));
     }
-    
-    // Soft delete by Question
+
+    // Soft Delete By Question
     public async Task<int> SoftDeleteByQuestionIdAsync(int questionId, Guid deletedBy, CancellationToken cancellationToken)
     {
-        const string sql = @"
-UPDATE coding_templates
-SET
-    deleted_by = @DeletedBy,
-    deleted_at = @DeletedAt
-WHERE question_id = @QuestionId
-AND deleted_at IS NULL;";
-
+        const string sql = @"CALL sp_soft_delete_coding_template_by_question(@QuestionId, @DeletedBy, @DeletedAt);";
         using var connection = _context.CreateConnection();
-        return await connection.ExecuteAsync(
-            new CommandDefinition(
-                sql,
+        return await connection.ExecuteAsync(new CommandDefinition(sql,
                 new
                 {
                     QuestionId = questionId,
@@ -131,47 +76,26 @@ AND deleted_at IS NULL;";
     // Get By Id
     public async Task<CodingTemplate?> GetByIdAsync(int id, CancellationToken cancellationToken)
     {
-        const string sql = @"
-SELECT
-    id,
-    question_id AS QuestionId,
-    technology_id AS TechnologyId,
-    starter_code AS StarterCode,
-    solution_code AS SolutionCode,
-    created_by AS CreatedBy,
-    created_at AS CreatedAt,
-    updated_by AS UpdatedBy,
-    updated_at AS UpdatedAt
-FROM coding_templates
-WHERE id = @Id
-AND deleted_at IS NULL;";
-
+        const string sql = @"SELECT * FROM fn_get_coding_template_by_id(@Id);";
         using var connection = _context.CreateConnection();
-        return await connection.QuerySingleOrDefaultAsync<CodingTemplate>(new CommandDefinition( sql,
-                new { Id = id },
+        return await connection.QuerySingleOrDefaultAsync<CodingTemplate>(new CommandDefinition(sql,
+                new
+                {
+                    Id = id
+                },
                 cancellationToken: cancellationToken));
     }
 
     // Get By Question
     public async Task<IEnumerable<CodingTemplate>> GetByQuestionIdAsync(int questionId, CancellationToken cancellationToken)
     {
-        const string sql = @"
-SELECT
-    id,
-    question_id AS QuestionId,
-    technology_id AS TechnologyId,
-    starter_code AS StarterCode,
-    solution_code AS SolutionCode,
-    created_by AS CreatedBy,
-    created_at AS CreatedAt,
-    updated_by AS UpdatedBy,
-    updated_at AS UpdatedAt
-FROM coding_templates
-WHERE question_id = @QuestionId
-AND deleted_at IS NULL
-ORDER BY technology_id;";
-
+        const string sql = @"SELECT * FROM fn_get_coding_templates_by_question_id(@QuestionId);";
         using var connection = _context.CreateConnection();
-        return await connection.QueryAsync<CodingTemplate>(new CommandDefinition(sql, new { QuestionId = questionId }, cancellationToken: cancellationToken));
+        return await connection.QueryAsync<CodingTemplate>(new CommandDefinition(sql,
+                new
+                {
+                    QuestionId = questionId
+                },
+                cancellationToken: cancellationToken));
     }
 }

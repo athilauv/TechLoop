@@ -17,5 +17,5 @@ public interface ISubTopicsRepository
     Task<IEnumerable<SubTopic>> GetAllAsync(CancellationToken cancellationToken);
     //Learner
     Task<IEnumerable<SubTopic>> GetPublishedAsync(CancellationToken cancellationToken);
-    Task<SubTopic?> GetPublishedByIdAsync(int id, CancellationToken cancellationToken);
+    Task<SubTopic?> GetPublishedBySlugAsync(string slug, CancellationToken cancellationToken);
 }

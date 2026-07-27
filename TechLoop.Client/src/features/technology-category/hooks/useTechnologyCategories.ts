@@ -1,5 +1,5 @@
 ﻿import { useEffect, useState } from "react";
-import technologyCategoryService from "../services/technologyCategoryService";
+import technologyCategoryService from "../api/technologyCategoryService.ts";
 import type { TechnologyCategory } from "../types/technologyCategory";
 
 export function useTechnologyCategories() {

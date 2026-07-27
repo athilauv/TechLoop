@@ -2,7 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using TechLoop.Application.Features.Technologies.DTOs;
 using TechLoop.Application.Features.Technologies.Queries.GetAllTechnologies.Learner;
-using TechLoop.Application.Features.Technologies.Queries.GetTechnologyById.Learner;
+using TechLoop.Application.Features.Technologies.Queries.GetTechnologyBySlug.Learner;
 
 namespace TechLoop.Api.Controllers;
 
@@ -24,10 +24,10 @@ public sealed class TechnologyController : ControllerBase
         return Ok(result);
     }
 
-    [HttpGet("{id:int}")]
-    public async Task<ActionResult<LearnerTechnologyResponse>> GetById(int id, CancellationToken cancellationToken)
+    [HttpGet("{slug}")]
+    public async Task<ActionResult<LearnerTechnologyResponse>> GetBySlug(string slug, CancellationToken cancellationToken)
     {
-        var result = await _mediator.Send(new GetLearnerTechnologyByIdQuery(id), cancellationToken);
+        var result = await _mediator.Send(new GetLearnerTechnologyBySlugQuery(slug), cancellationToken);
         return Ok(result);
     }
 }

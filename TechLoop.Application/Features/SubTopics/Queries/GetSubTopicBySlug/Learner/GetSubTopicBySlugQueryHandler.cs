@@ -5,13 +5,11 @@ using TechLoop.Application.Interfaces.Repositories;
 
 namespace TechLoop.Application.Features.SubTopics.Queries.GetSubTopicById.Learner;
 
-public sealed class GetLearnerSubTopicByIdQueryHandler
-    : IRequestHandler<GetSubTopicBySlugQuery, LearnerSubTopicResponse>
+public sealed class GetSubTopicBySlugQueryHandler : IRequestHandler<GetSubTopicBySlugQuery, LearnerSubTopicResponse>
 {
     private readonly ISubTopicsRepository _repository;
 
-    public GetLearnerSubTopicByIdQueryHandler(
-        ISubTopicsRepository repository)
+    public GetSubTopicBySlugQueryHandler(ISubTopicsRepository repository)
     {
         _repository = repository;
     }
@@ -20,8 +18,8 @@ public sealed class GetLearnerSubTopicByIdQueryHandler
         GetSubTopicBySlugQuery request,
         CancellationToken cancellationToken)
     {
-        var subTopic = await _repository.GetPublishedByIdAsync(
-            request.Id,
+        var subTopic = await _repository.GetPublishedBySlugAsync(
+            request.Slug,
             cancellationToken);
 
         if (subTopic is null)

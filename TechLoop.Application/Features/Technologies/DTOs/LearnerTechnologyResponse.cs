@@ -8,4 +8,6 @@ public sealed class LearnerTechnologyResponse
     public string Description { get; set; } = string.Empty;
     public string? ImageUrl { get; set; }
     public int Position { get; set; }
+    public DateTime CreatedAt { get; set; }
+    public DateTime? UpdatedAt { get; set; } 
 }

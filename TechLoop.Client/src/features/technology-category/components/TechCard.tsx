@@ -1,7 +1,6 @@
 ﻿import { BookOpen, ArrowRight } from "lucide-react";
 import { Link } from "react-router-dom";
-
-import type { Technology } from "../../../types/technology";
+import type { Technology} from "../types/technology.ts";
 
 interface TechCardProps {
     technology: Technology;
@@ -11,9 +10,7 @@ export default function TechCard({
                                      technology,
                                  }: TechCardProps) {
     return (
-        <Link
-            to={`/learn/${technology.id}`}
-            className="
+        <Link  to={`/learner/learning/${technology.slug}`} className="
                 group
                 flex
                 flex-col
@@ -46,30 +43,20 @@ export default function TechCard({
                     "
                 >
                     {technology.imageUrl ? (
-                        <img
-                            src={technology.imageUrl}
-                            alt={technology.name}
-                            className="h-10 w-10 object-contain"
-                        />
+                        <img src={technology.imageUrl} alt={technology.name} className="h-10 w-10 object-contain"/>
                     ) : (
-                        <BookOpen
-                            className="text-sky-400"
-                            size={26}
-                        />
+                        <BookOpen className="text-sky-400" size={26}/>
                     )}
                 </div>
 
-                <span
-                    className="
+                <span className="
                         rounded-full
                         bg-sky-500/10
                         px-3
                         py-1
                         text-xs
                         font-medium
-                        text-sky-300
-                    "
-                >
+                        text-sky-300">
                     Technology
                 </span>
             </div>
@@ -77,15 +64,12 @@ export default function TechCard({
             {/* Content */}
 
             <div className="mt-6 flex-1">
-                <h3
-                    className="
+                <h3 className="
                         text-xl
                         font-bold
                         text-white
                         transition-colors
-                        group-hover:text-sky-400
-                    "
-                >
+                        group-hover:text-sky-400">
                     {technology.name}
                 </h3>
 
@@ -93,51 +77,38 @@ export default function TechCard({
                     {technology.slug}
                 </p>
 
-                <p
-                    className="
+                <p className="
                         mt-4
                         line-clamp-3
                         text-sm
                         leading-7
-                        text-slate-300
-                    "
-                >
+                        text-slate-300">
                     {technology.description}
                 </p>
             </div>
 
             {/* Footer */}
 
-            <div
-                className="
+            <div className="
                     mt-8
                     flex
                     items-center
                     justify-between
                     border-t
                     border-slate-800
-                    pt-5
-                "
-            >
-                <span
-                    className="
+                    pt-5">
+                <span className="
                         text-sm
                         font-semibold
-                        text-sky-400
-                    "
-                >
+                        text-sky-400">
                     Start Learning
                 </span>
 
-                <ArrowRight
-                    size={20}
-                    className="
+                <ArrowRight size={20} className="
                         text-sky-400
                         transition-transform
                         duration-300
-                        group-hover:translate-x-2
-                    "
-                />
+                        group-hover:translate-x-2"/>
             </div>
         </Link>
     );

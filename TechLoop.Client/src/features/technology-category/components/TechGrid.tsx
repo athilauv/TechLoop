@@ -1,4 +1,4 @@
-﻿import type { Technology } from "../../../types/technology";
+﻿import type { Technology} from "../types/technology.ts";
 import TechCard from "./TechCard";
 
 interface TechGridProps {
@@ -9,16 +9,12 @@ export default function TechGrid({
                                      technologies,
                                  }: TechGridProps) {
     return (
-        <div
-            className="grid gap-6
+        <div className="grid gap-6
                 sm:grid-cols-2
                 lg:grid-cols-3
                 xl:grid-cols-4">
             {technologies.map((technology) => (
-                <TechCard
-                    key={technology.id}
-                    technology={technology}
-                />
+                <TechCard key={technology.id} technology={technology}/>
             ))}
         </div>
     );

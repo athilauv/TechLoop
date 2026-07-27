@@ -1,5 +1,5 @@
 ﻿import { useState } from "react";
-import { login } from "../../services/authService";
+import { login } from "./api/authService.ts";
 import { Link,useNavigate  } from "react-router-dom";
 import { showToast} from "../../utils/toast.ts";
 import authImage from "../../assets/AuthImage.jpg";

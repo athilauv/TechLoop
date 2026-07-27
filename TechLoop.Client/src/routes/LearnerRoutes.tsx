@@ -1,8 +1,9 @@
 ﻿import { Routes, Route } from "react-router-dom";
-import LearnerLayout from "../components/layout/learner/LearnerLayout";
-import LandingPage from "../pages/landing/LandingPage";
-import Learn from "../pages/learning/Learn";
+import LearnerLayout from "../layouts/learner/Pages/LearnerLayout.tsx";
+import LandingPage from "../features/landing/pages/LandingPage.tsx";
 import ProtectedRoute from "./ProtectedRoute";
+import TechnologyPage from "../features/learning/pages/TechnologyPage.tsx";
+import TechnologyCategory from "../features/technology-category/pages/TechnologyCategoryPage.tsx";
 
 export default function LearnerRoutes() {
     return (
@@ -10,7 +11,9 @@ export default function LearnerRoutes() {
             <Route element={<ProtectedRoute />}>
                 <Route element={<LearnerLayout />}>
                     <Route index element={<LandingPage />} />
-                    <Route path="learn" element={<Learn />} />
+                    <Route path="learning" element={<TechnologyCategory />}/>
+                    <Route path="learning/:technologySlug" element={<TechnologyPage />}/>
+                    <Route path="learning/:technologySlug/:topicSlug/:subTopicSlug" element={<TechnologyPage />}/>
                 </Route>
             </Route>
         </Routes>
