@@ -287,18 +287,18 @@
           }
         }
       },
-      "Npgsql/10.0.3": {
+      "Npgsql/9.0.4": {
         "type": "package",
         "dependencies": {
-          "Microsoft.Extensions.Logging.Abstractions": "10.0.0"
+          "Microsoft.Extensions.Logging.Abstractions": "8.0.2"
         },
         "compile": {
-          "lib/net10.0/Npgsql.dll": {
+          "lib/net8.0/Npgsql.dll": {
             "related": ".xml"
           }
         },
         "runtime": {
-          "lib/net10.0/Npgsql.dll": {
+          "lib/net8.0/Npgsql.dll": {
             "related": ".xml"
           }
         }
@@ -789,21 +789,19 @@
         "microsoft.identitymodel.tokens.nuspec"
       ]
     },
-    "Npgsql/10.0.3": {
-      "sha512": "7nb5YzXuvWWJxB0J8DiyL3we+X4FOctZrt0fIBnucOIaIevFEEwGQVZKtiu9olXdlNAK1eNgqSral6r/jlhI4w==",
+    "Npgsql/9.0.4": {
+      "sha512": "68BASXH0FAEuL/J4J0eRfYC8/3vzqQTmoW8zDzNf0JgaVxc7LZeEkS6jaG0ib3voFLxY5ZiCwJG+uQM+mzuu0Q==",
       "type": "package",
-      "path": "npgsql/10.0.3",
+      "path": "npgsql/9.0.4",
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
         "README.md",
-        "lib/net10.0/Npgsql.dll",
-        "lib/net10.0/Npgsql.xml",
+        "lib/net6.0/Npgsql.dll",
+        "lib/net6.0/Npgsql.xml",
         "lib/net8.0/Npgsql.dll",
         "lib/net8.0/Npgsql.xml",
-        "lib/net9.0/Npgsql.dll",
-        "lib/net9.0/Npgsql.xml",
-        "npgsql.10.0.3.nupkg.sha512",
+        "npgsql.9.0.4.nupkg.sha512",
         "npgsql.nuspec",
         "postgresql.png"
       ]
@@ -849,7 +847,7 @@
       "FluentValidation >= 12.1.1",
       "Microsoft.AspNetCore.Authentication.JwtBearer >= 10.0.9",
       "Microsoft.Extensions.DependencyInjection.Abstractions >= 10.0.9",
-      "Npgsql >= 10.0.3",
+      "Npgsql >= 9.0.4",
       "TechLoop.Application >= 1.0.0",
       "TechLoop.Domain >= 1.0.0"
     ]
@@ -933,7 +931,7 @@
           },
           "Npgsql": {
             "target": "Package",
-            "version": "[10.0.3, )"
+            "version": "[9.0.4, )"
           }
         },
         "imports": [

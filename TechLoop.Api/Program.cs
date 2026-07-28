@@ -74,6 +74,7 @@ builder.Services.AddScoped<IQuestionRepository, QuestionRepository>();
 builder.Services.AddScoped<IMcqOptionRepository, McqOptionRepository>();
 builder.Services.AddScoped<ICodingTemplateRepository, CodingTemplateRepository>();
 builder.Services.AddScoped<ITestCaseRepository, TestCaseRepository>();
+builder.Services.AddScoped<ISubmissionRepository, SubmissionRepository>();
 
 // Infrastructure
 builder.Services.AddScoped<IDapperContext, DapperContext>();

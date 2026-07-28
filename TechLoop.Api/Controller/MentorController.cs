@@ -47,6 +47,8 @@ using TechLoop.Application.Features.Coding.DTOs;
 using TechLoop.Application.Features.Coding.Queries.GetCodingTemplatesByQuestion.Mentor;
 using TechLoop.Application.Features.Coding.Queries.GetTestCasesByQuestion.Mentor;
 using TechLoop.Application.Features.MCQ.Queries.GetMcqOptionsByQuestionQuery.Mentor;
+using TechLoop.Application.Features.Submissions.Commands.UpdateSubmissionResult;
+using TechLoop.Application.Features.Submissions.DTOs;
 
 namespace TechLoop.Api.Controllers;
 
@@ -369,8 +371,7 @@ public sealed class MentorController : ControllerBase
      
     //Create mcq option
     [HttpPost("questions/{questionId:int}/mcq_options")]
-    public async Task<IActionResult> CreateMcqOption(int questionId,
-        [FromBody] CreateMcqOptionRequest request, CancellationToken cancellationToken)
+    public async Task<IActionResult> CreateMcqOption(int questionId, [FromBody] CreateMcqOptionRequest request, CancellationToken cancellationToken)
     {
         var command = new CreateMcqOptionCommand
         {
@@ -414,8 +415,7 @@ public sealed class MentorController : ControllerBase
     
     // create coding templates
     [HttpPost("questions/{questionId:int}/coding-templates")]
-    public async Task<IActionResult> CreateCodingTemplate(int questionId,
-        [FromBody] CreateCodingTemplateRequest request, CancellationToken cancellationToken)
+    public async Task<IActionResult> CreateCodingTemplate(int questionId,[FromBody] CreateCodingTemplateRequest request, CancellationToken cancellationToken)
     {
         var command = new CreateCodingTemplateCommand()
         {
@@ -431,8 +431,7 @@ public sealed class MentorController : ControllerBase
     
     //update coding template
     [HttpPut("coding-templates/{id:int}")]
-    public async Task<IActionResult> UpdateCodingTemplate(int id,
-        [FromBody] UpdateCodingTemplateRequest request, CancellationToken cancellationToken)
+    public async Task<IActionResult> UpdateCodingTemplate(int id,[FromBody] UpdateCodingTemplateRequest request, CancellationToken cancellationToken)
     {
         var command = new UpdateCodingTemplateCommand()
         {
@@ -493,5 +492,14 @@ public sealed class MentorController : ControllerBase
     {
         var result = await _mediator.Send(new DeleteTestCaseCommand(id), cancellationToken);
         return Ok(result);
+    }
+    
+    // Updates the execution result of the specified submission
+    [HttpPut("submissions/{id:int}/result")]
+    public async Task<IActionResult> UpdateSubmissionResult(int id, [FromBody] UpdateSubmissionRequest request, CancellationToken cancellationToken)
+    {
+        var command = new UpdateSubmissionCommand(id, request);
+        var response = await _mediator.Send(command, cancellationToken);
+        return Ok(response);
     }
 }

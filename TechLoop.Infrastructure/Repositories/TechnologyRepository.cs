@@ -243,9 +243,7 @@ public async Task<IEnumerable<Technology>> GetPublishedAsync(CancellationToken c
 public async Task<Technology?> GetPublishedBySlugAsync(string slug, CancellationToken cancellationToken)
 {
     const string sql = @"SELECT * FROM fn_get_published_technology_by_slug(@Slug);";
-
     using var connection = _context.CreateConnection();
-
     return await connection.QuerySingleOrDefaultAsync<Technology>(
         new CommandDefinition(
             sql,
