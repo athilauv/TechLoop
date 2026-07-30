@@ -7,6 +7,7 @@ namespace TechLoop.Application.Features.SubTopics.Commands.UpdateSubTopic;
 public sealed record UpdateSubTopicCommand(
     int Id,
     int TopicId,
+    int? ParentSubTopicId,
     string Title,
     string Description,
     string? ImageUrl,

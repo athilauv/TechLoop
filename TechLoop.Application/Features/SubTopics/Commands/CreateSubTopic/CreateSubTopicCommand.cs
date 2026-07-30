@@ -6,6 +6,7 @@ namespace TechLoop.Application.Features.SubTopics.Commands.CreateSubTopic;
 
 public sealed record CreateSubTopicCommand(
     int TopicId,
+    int? ParentSubTopicId,
     string Title,
     string Description,
     string? ImageUrl,

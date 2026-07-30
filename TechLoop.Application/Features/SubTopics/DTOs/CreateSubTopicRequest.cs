@@ -5,6 +5,7 @@ namespace TechLoop.Application.DTOs.SubTopics.Requests;
 public class CreateSubTopicRequest
 {
     public int TopicId { get; set; }
+    public int? ParentSubTopicId { get; set; }
     public string Title { get; set; } = string.Empty;
     public string Description { get; set; } = string.Empty;
     public string? ImageUrl { get; set; } = string.Empty;

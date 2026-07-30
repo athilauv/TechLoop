@@ -28,6 +28,18 @@ public sealed class CreateSubTopicCommandHandler : IRequestHandler<CreateSubTopi
         {
             throw new InvalidOperationException("Topic not found.");
         }
+
+        if (request.ParentSubTopicId.HasValue)
+        {
+            var parentExists = await _subTopicsRepository.SubTopicIdExistsAsync(
+                request.ParentSubTopicId.Value,
+                cancellationToken);
+
+            if (!parentExists)
+            {
+                throw new InvalidOperationException("Parent sub topic not found.");
+            }
+        }
             
         var slugExists = await _topicsRepository.SlugExistsAsync(request.Slug, cancellationToken);
         if (slugExists)
@@ -48,6 +60,7 @@ public sealed class CreateSubTopicCommandHandler : IRequestHandler<CreateSubTopi
         var subTopic = new SubTopic
         {
             TopicId = request.TopicId,
+            ParentSubTopicId = request.ParentSubTopicId,
             Title = request.Title.Trim(),
             Slug = request.Slug.Trim().ToLowerInvariant(),
             Description = request.Description ?? string.Empty,

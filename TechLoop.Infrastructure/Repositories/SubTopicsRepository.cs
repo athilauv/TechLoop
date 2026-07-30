@@ -13,6 +13,20 @@ public class SubTopicsRepository : ISubTopicsRepository
         _context = context;
     }
 
+    // Checks whether a subtopic exists by its ID.
+    public async Task<bool> SubTopicIdExistsAsync(int subTopicId, CancellationToken cancellationToken)
+    {
+        const string sql = @"SELECT fn_subtopic_id_exists(@SubTopicId);";
+        using var connection = _context.CreateConnection();
+        return await connection.ExecuteScalarAsync<bool>(new CommandDefinition(
+                sql,
+                new
+                {
+                    SubTopicId = subTopicId
+                },
+                cancellationToken: cancellationToken));
+    }
+    
     // Checks if a subtopic with the same title already exists
     public async Task<bool> ExistsAsync(int topicId, string title, CancellationToken cancellationToken)
     {
