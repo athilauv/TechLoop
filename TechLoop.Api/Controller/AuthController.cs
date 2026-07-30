@@ -1,8 +1,12 @@
-﻿using TechLoop.Application.DTOs.Auth;
+﻿using MediatR;
+using TechLoop.Application.DTOs.Auth;
 using TechLoop.Application.Interfaces.Services;
 using TechLoop.Domain.Entities;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
+using TechLoop.Application.Features.Mentor.Commands.UpdateProfile;
+using TechLoop.Application.Features.Mentor.DTOs;
+
 namespace TechLoop.Api.Controllers;
 
 
@@ -11,10 +15,11 @@ namespace TechLoop.Api.Controllers;
 public class AuthController : ControllerBase
 {
     private readonly IAuthService _authService;
-    
-    public AuthController(IAuthService authService)
+    private readonly IMediator _mediator;
+    public AuthController(IAuthService authService, IMediator mediator)
     {
         _authService = authService;
+        _mediator = mediator;
     }
 
     [EnableRateLimiting("login")]
@@ -22,9 +27,7 @@ public class AuthController : ControllerBase
     public async Task<IActionResult> Login(LoginRequest request)
     {
         var response = await _authService.LoginAsync(request);
-
         SetAuthCookies(response);
-
         return Ok(new
         {
             response.Message
@@ -57,11 +60,8 @@ public class AuthController : ControllerBase
     public async Task<IActionResult> Logout()
     {
         var refreshToken = Request.Cookies["refreshToken"];
-
         await _authService.LogoutAsync(refreshToken);
-
         DeleteAuthCookies();
-
         return Ok(new
         {
             Message = "Logged out successfully."
@@ -101,5 +101,14 @@ public class AuthController : ControllerBase
         Response.Cookies.Delete("accessToken", options);
         Response.Cookies.Delete("refreshToken", options);
     }
+    
+     //Update mentor profile
+     [HttpPut("update-profile/{email}")]
+     public async Task<IActionResult> UpdateProfile(string email, [FromBody] UpdateMentorProfileRequest request)
+     {
+         var command = new UpdateProfileCommand(email, request.Password, request.ConfirmPassword, request.PhoneNumber, request.Bio, request.LinkedInUrl, request.GithubUrl, request.ProfileImageUrl);
+         var result = await _mediator.Send(command);
+         return Ok(result);
+     }
 }
 

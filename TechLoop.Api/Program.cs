@@ -18,6 +18,8 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.IdentityModel.Tokens;
 using System.Security.Claims;
+using TechLoop.Infrastructure.Configuration;
+using TechLoop.Infrastructure.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -75,6 +77,16 @@ builder.Services.AddScoped<IMcqOptionRepository, McqOptionRepository>();
 builder.Services.AddScoped<ICodingTemplateRepository, CodingTemplateRepository>();
 builder.Services.AddScoped<ITestCaseRepository, TestCaseRepository>();
 builder.Services.AddScoped<ISubmissionRepository, SubmissionRepository>();
+builder.Services.AddScoped<ICurriculumRepository, CurriculumRepository>();
+builder.Services.AddScoped<IMentorRepository, MentorRepository>();
+builder.Services.Configure<EmailSettings>(
+    builder.Configuration.GetSection("EmailSettings"));
+
+builder.Services.AddScoped<IEmailService, EmailService>();
+builder.Services.AddHttpClient<IJudge0Service, Judge0Service>(client =>
+{
+    client.BaseAddress = new Uri(builder.Configuration["Judge0:BaseUrl"]!);
+});
 
 // Infrastructure
 builder.Services.AddScoped<IDapperContext, DapperContext>();

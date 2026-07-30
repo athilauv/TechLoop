@@ -26,9 +26,14 @@ public class ExceptionMiddleware
         catch(NotFoundException e){
             await HandleException(context, 404, e.Message);
         }
+        catch (Judge0Exception e)
+        {
+            await HandleException(context, 502, e.Message);
+        }
         catch(Exception ex){
             await HandleException(context , 500, ex.Message);
         }
+        
     }
     private static async Task HandleException(
         HttpContext context,

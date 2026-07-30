@@ -46,7 +46,11 @@ using TechLoop.Application.Features.Coding.Commands.UpdateTestCase;
 using TechLoop.Application.Features.Coding.DTOs;
 using TechLoop.Application.Features.Coding.Queries.GetCodingTemplatesByQuestion.Mentor;
 using TechLoop.Application.Features.Coding.Queries.GetTestCasesByQuestion.Mentor;
+using TechLoop.Application.Features.Curriculum.Queries.Mentor;
 using TechLoop.Application.Features.MCQ.Queries.GetMcqOptionsByQuestionQuery.Mentor;
+using TechLoop.Application.Features.Mentor.Commands.UpdateProfile;
+using TechLoop.Application.Features.Mentor.DTOs;
+using TechLoop.Application.Features.Mentor.Queries.Mentor.GetMyProfile;
 using TechLoop.Application.Features.Submissions.Commands.UpdateSubmissionResult;
 using TechLoop.Application.Features.Submissions.DTOs;
 
@@ -63,27 +67,7 @@ public sealed class MentorController : ControllerBase
     {
         _mediator = mediator;
     }
-
-    // Create Technology
-    [HttpPost("technologies")]
-    public async Task<ActionResult<CreateTechnologyResponse>> CreateTechnology(
-        [FromBody] CreateTechnologyRequest request,
-        CancellationToken cancellationToken)
-    {
-        var command = new CreateTechnologyCommand(
-            request.CategoryId,
-            request.Name,
-            request.Description,
-            request.Slug,
-            request.ImageUrl,
-            request.Position);
-
-        var result = await _mediator.Send(command, cancellationToken);
-
-        return Ok(result);
-    }
-
-
+    
     //update publish
     [HttpPatch("technologies/{id:int}/publish")]
     public async Task<ActionResult<PublishTechnologyResponse>> PublishTechnology(int id,
@@ -91,9 +75,8 @@ public sealed class MentorController : ControllerBase
     {
         var result = await _mediator.Send(new PublishTechnologyCommand(id), cancellationToken);
         return Ok(result);
-    }
-
-
+    } 
+    
     //Update Technology
     [HttpPut("technologies/{id:int}")]
     public async Task<ActionResult<UpdateTechnologyResponse>> UpdateTechnology(
@@ -112,32 +95,6 @@ public sealed class MentorController : ControllerBase
 
         var result = await _mediator.Send(command, cancellationToken);
 
-        return Ok(result);
-    }
-
-
-    //Soft Delete Technology
-    [HttpDelete("technologies/{id:int}")]
-    public async Task<IActionResult> DeleteTechnology(int id, CancellationToken cancellationToken)
-    {
-        var command = new DeleteTechnologyCommand(id);
-        var result = await _mediator.Send(command, cancellationToken);
-        return Ok(result);
-    }
-
-    // Get all technologies with all details
-    [HttpGet("technologies")]
-    public async Task<ActionResult<IEnumerable<MentorTechnologyResponse>>> GetAllTechnologies(CancellationToken cancellationToken)
-    {
-        var result = await _mediator.Send(new GetAllMentorTechnologiesQuery(), cancellationToken);
-        return Ok(result);
-    }
-
-    // Get all details of  technology by Id
-    [HttpGet("technologies/{id:int}")]
-    public async Task<ActionResult<MentorTechnologyResponse>> GetTechnologyById(int id, CancellationToken cancellationToken)
-    {
-        var result = await _mediator.Send(new GetMentorTechnologyByIdQuery(id), cancellationToken);
         return Ok(result);
     }
 
@@ -252,6 +209,17 @@ public sealed class MentorController : ControllerBase
     {
         var command = new DeleteSubTopicCommand(id);
         var result = await _mediator.Send(command, cancellationToken);
+        return Ok(result);
+    }
+    
+    //get curriculum
+    [HttpGet("curriculum")]
+    public async Task<IActionResult> GetMentorCurriculum(CancellationToken cancellationToken)
+    {
+        var result = await _mediator.Send(new GetMentorCurriculumQuery(), cancellationToken);
+        if (result is null)
+            return NotFound();
+
         return Ok(result);
     }
 
@@ -501,5 +469,16 @@ public sealed class MentorController : ControllerBase
         var command = new UpdateSubmissionCommand(id, request);
         var response = await _mediator.Send(command, cancellationToken);
         return Ok(response);
+    }
+    
+    //Get profile
+    [HttpGet("profile")]
+    public async Task<IActionResult> GetMyProfile()
+    {
+        var result = await _mediator.Send( new GetMyProfileQuery());
+        if (result is null)
+            return NotFound();
+
+        return Ok(result);
     }
 }

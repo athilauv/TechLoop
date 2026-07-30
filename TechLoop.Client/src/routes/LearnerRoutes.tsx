@@ -13,6 +13,7 @@ export default function LearnerRoutes() {
                     <Route index element={<LandingPage />} />
                     <Route path="learning" element={<TechnologyCategory />}/>
                     <Route path="learning/:technologySlug" element={<TechnologyPage />}/>
+                    <Route path="learning/:technologySlug/:topicSlug" element={<TechnologyPage />}/>
                     <Route path="learning/:technologySlug/:topicSlug/:subTopicSlug" element={<TechnologyPage />}/>
                 </Route>
             </Route>
