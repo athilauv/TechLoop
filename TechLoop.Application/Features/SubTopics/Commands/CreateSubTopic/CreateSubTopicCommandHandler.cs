@@ -65,6 +65,8 @@ public sealed class CreateSubTopicCommandHandler : IRequestHandler<CreateSubTopi
             Slug = request.Slug.Trim().ToLowerInvariant(),
             Description = request.Description ?? string.Empty,
             ImageUrl = request.ImageUrl ?? string.Empty,
+            Example = request.Example ?? string.Empty,
+            ExampleType =  request.ExampleType,
             Position = request.Position,
             CreatedBy = _currentUserService.UserId,
             CreatedAt = DateTime.UtcNow,

@@ -1,6 +1,6 @@
 ﻿using MediatR;
 using TechLoop.Application.Features.TopicContributions.DTOs;
 
-namespace TechLoop.Application.Features.TopicContributions.Queries.GetMyTopicContributions;
+namespace TechLoop.Application.Features.TopicContributions.Queries.Learner.GetMyTopicContributions;
 
-public sealed record GetMyTopicContributionsQuery(GetMyTopicContributionsRequest Request) : IRequest<IEnumerable<TopicContributionSummaryResponse>>;
+public sealed record GetMyTopicContributionsQuery() : IRequest<IEnumerable<TopicContributionSummaryResponse>>;

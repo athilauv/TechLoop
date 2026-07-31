@@ -23,6 +23,8 @@ public sealed class GetAllMentorTopicsQueryHandler : IRequestHandler<GetAllMento
             Slug = topic.Slug,
             Description = topic.Description,
             ImageUrl = topic.ImageUrl,
+            Example =  topic.Example,
+            ExampleType = topic.ExampleType,
             Position = topic.Position,
             PublishedAt = topic.PublishedAt,
             PublishedBy = topic.PublishedBy,

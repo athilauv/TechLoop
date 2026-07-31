@@ -10,7 +10,6 @@ public sealed class PublishSubTopicCommandHandler : IRequestHandler<PublishSubTo
 {
     private readonly ISubTopicsRepository _repository;
     private readonly ICurrentUserService _currentUser;
-
     public PublishSubTopicCommandHandler(ISubTopicsRepository repository, ICurrentUserService currentUser)
     {
         _repository = repository;
@@ -30,12 +29,27 @@ public sealed class PublishSubTopicCommandHandler : IRequestHandler<PublishSubTo
             throw new ValidationException("Sub topic is already published.");
         }
 
+        var mentorTechnologyId = await _repository.GetMentorTechnologyIdAsync(_currentUser.UserId, cancellationToken);
+        if (mentorTechnologyId is null)
+        {
+            throw new ValidationException("No technology is assigned to the mentor.");
+        }
+
+        var subTopicTechnologyId = await _repository.GetTechnologyIdAsync(request.Id, cancellationToken);
+        if (subTopicTechnologyId is null)
+        {
+            throw new ValidationException("Unable to determine the sub topic technology.");
+        }
+
+        if (mentorTechnologyId != subTopicTechnologyId)
+        {
+            throw new ValidationException("You are not allowed to publish this sub topic.");
+        }
+
         subTopic.PublishedAt = DateTime.UtcNow;
         subTopic.PublishedBy = _currentUser.UserId;
 
-
         var rowsAffected = await _repository.PublishAsync(subTopic, cancellationToken);
-
         if (rowsAffected <= 0)
         {
             throw new Exception("Failed to publish sub topic.");

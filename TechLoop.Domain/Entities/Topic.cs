@@ -9,6 +9,8 @@ public class Topic
     public string Title { get; set; } = string.Empty;
     public string Description { get; set; } = string.Empty;
     public string? ImageUrl { get; set; } = string.Empty;
+    public string? Example { get; set; }
+    public ExampleType? ExampleType { get; set; }
     public int Position { get; set; }
     public DateTime? PublishedAt { get; set; }
     public Guid? PublishedBy { get; set; }

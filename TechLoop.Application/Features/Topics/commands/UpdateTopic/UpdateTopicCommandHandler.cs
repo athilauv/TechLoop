@@ -55,6 +55,8 @@ public sealed class UpdateTopicCommandHandler : IRequestHandler<UpdatedTopicComm
         topic.Description = request.Description;
         topic.ImageUrl = request.ImageUrl;
         topic.Slug = request.Slug.Trim().ToLowerInvariant();
+        topic.Example = request.Example ?? string.Empty;
+        topic.ExampleType = request.ExampleType;
         topic.Position = request.Position;
         topic.UpdatedBy = _currentUser.UserId;
         topic.UpdatedAt = DateTime.UtcNow;

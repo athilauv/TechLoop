@@ -3,6 +3,7 @@ using TechLoop.Application.Common.Exceptions;
 using TechLoop.Application.Features.SubTopics.DTOs;
 using TechLoop.Application.Interfaces.Repositories;
 using TechLoop.Application.Interfaces.Services;
+using TechLoop.Domain.Enums;
 
 namespace TechLoop.Application.Features.SubTopics.Commands.UpdateSubTopic;
 
@@ -69,6 +70,8 @@ public sealed class UpdateSubTopicCommandHandler : IRequestHandler<UpdateSubTopi
         subTopic.Description = request.Description ?? string.Empty;
         subTopic.ImageUrl = request.ImageUrl ?? string.Empty;
         subTopic.Slug = request.Slug.Trim().ToLowerInvariant();
+        subTopic.Example = request.Example ?? string.Empty;
+        subTopic.ExampleType = request.ExampleType;;
         subTopic.Position = request.Position;
         subTopic.UpdatedBy = _currentUserService.UserId;
         subTopic.UpdatedAt = DateTime.UtcNow;

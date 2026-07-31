@@ -1,4 +1,6 @@
-﻿namespace TechLoop.Application.Features.Topics.DTOs;
+﻿using TechLoop.Domain.Enums;
+
+namespace TechLoop.Application.Features.Topics.DTOs;
 
 public class CreateTopicRequest
 {
@@ -7,5 +9,7 @@ public class CreateTopicRequest
     public string Title { get; set; } = string.Empty;
     public string Description { get; set; } = string.Empty;
     public string ImageUrl { get; set; } = string.Empty;
+    public string? Example { get; set; }
+    public ExampleType? ExampleType { get; set; }
     public int Position { get; set; }
 }

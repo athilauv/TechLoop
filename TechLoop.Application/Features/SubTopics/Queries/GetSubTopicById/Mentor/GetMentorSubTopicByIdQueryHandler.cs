@@ -29,6 +29,8 @@ public sealed class GetMentorSubTopicByIdQueryHandler : IRequestHandler<GetMento
             Slug = subTopic.Slug,
             Description = subTopic.Description,
             ImageUrl = subTopic.ImageUrl,
+            Example =  subTopic.Example,
+            ExampleType = subTopic.ExampleType,
             Position = subTopic.Position,
             PublishedAt = subTopic.PublishedAt,
             PublishedBy = subTopic.PublishedBy,

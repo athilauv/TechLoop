@@ -29,6 +29,8 @@ public sealed class GetLearnerTopicBySlugQueryHandler : IRequestHandler<GetLearn
             Slug = topic.Slug,
             Description = topic.Description,
             ImageUrl = topic.ImageUrl,
+            Example = topic.Example,
+            ExampleType = topic.ExampleType,
             Position = topic.Position,
             CreatedAt = topic.CreatedAt,
             UpdatedAt = topic.UpdatedAt,

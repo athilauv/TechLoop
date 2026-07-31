@@ -53,6 +53,9 @@ using TechLoop.Application.Features.Mentor.DTOs;
 using TechLoop.Application.Features.Mentor.Queries.Mentor.GetMyProfile;
 using TechLoop.Application.Features.Submissions.Commands.UpdateSubmissionResult;
 using TechLoop.Application.Features.Submissions.DTOs;
+using TechLoop.Application.Features.TopicContributions.Commands.ReviewTopicContribution;
+using TechLoop.Application.Features.TopicContributions.DTOs;
+using TechLoop.Application.Features.TopicContributions.Queries.GetTechnologyTopicContributions;
 
 namespace TechLoop.Api.Controllers;
 
@@ -127,6 +130,8 @@ public sealed class MentorController : ControllerBase
             request.Title,
             request.Description,
             request.ImageUrl,
+            request.Example,
+            request.ExampleType,
             request.Slug,
             request.Position);
 
@@ -167,10 +172,13 @@ public sealed class MentorController : ControllerBase
     {
         var command = new CreateSubTopicCommand(
             request.TopicId,
+            request.ParentSubTopicId,
             request.Title,
             request.Description,
             request.ImageUrl,
             request.Slug,
+            request.Example,
+            request.ExampleType,
             request.Position);
 
         var result = await _mediator.Send(command, cancellationToken);
@@ -191,12 +199,15 @@ public sealed class MentorController : ControllerBase
         [FromBody] UpdateSubTopicRequest request, CancellationToken cancellationToken)
     {
         var command = new UpdateSubTopicCommand(
-            id,
+            id = id,
             request.TopicId,
+            request.ParentSubTopicId,
             request.Title,
             request.Description,
             request.ImageUrl,
             request.Slug,
+            request.Example,
+            request.ExampleType,
             request.Position);
 
         var result = await _mediator.Send(command, cancellationToken);
@@ -471,6 +482,31 @@ public sealed class MentorController : ControllerBase
         return Ok(response);
     }
     
+    // Get all contributions of a technology (Admin / Mentor)
+    [Authorize(Roles = "Mentor")]
+    [HttpGet("technology/{technologyId:int}")]
+    public async Task<IActionResult> GetTechnologyContributions(int technologyId, CancellationToken cancellationToken)
+    {
+        var result = await _mediator.Send(new GetTechnologyTopicContributionsQuery(
+                new GetTechnologyTopicContributionsRequest
+                {
+                    TechnologyId = technologyId
+                }),
+            cancellationToken);
+
+        return Ok(result);
+    }
+
+    // Review a contribution (Approve / Reject / Publish)
+    [Authorize(Roles = "Mentor")]
+    [HttpPut("review")]
+    public async Task<IActionResult> Review([FromBody] ReviewTopicContributionRequest request, CancellationToken cancellationToken)
+    {
+        var reviewerId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+        var success = await _mediator.Send(new ReviewTopicContributionCommand(reviewerId, request), cancellationToken);
+        return success ? NoContent() : BadRequest();
+    }
+    
     //Get profile
     [HttpGet("profile")]
     public async Task<IActionResult> GetMyProfile()
@@ -481,4 +517,6 @@ public sealed class MentorController : ControllerBase
 
         return Ok(result);
     }
+    
+    
 }

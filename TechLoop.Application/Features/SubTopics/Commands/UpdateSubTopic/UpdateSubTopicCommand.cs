@@ -12,5 +12,7 @@ public sealed record UpdateSubTopicCommand(
     string Description,
     string? ImageUrl,
     string Slug,
+    string? Example,
+    ExampleType? ExampleType,
     int Position
 ) : IRequest<UpdateSubTopicResponse>;

@@ -78,6 +78,7 @@ builder.Services.AddScoped<ICodingTemplateRepository, CodingTemplateRepository>(
 builder.Services.AddScoped<ITestCaseRepository, TestCaseRepository>();
 builder.Services.AddScoped<ISubmissionRepository, SubmissionRepository>();
 builder.Services.AddScoped<ICurriculumRepository, CurriculumRepository>();
+builder.Services.AddScoped<ITopicContributionRepository, TopicContributionRepository>();
 builder.Services.AddScoped<IMentorRepository, MentorRepository>();
 builder.Services.Configure<EmailSettings>(
     builder.Configuration.GetSection("EmailSettings"));

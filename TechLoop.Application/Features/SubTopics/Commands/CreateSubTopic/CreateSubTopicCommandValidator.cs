@@ -13,7 +13,7 @@ public class CreateSubTopicCommandValidator : AbstractValidator<CreateSubTopicCo
         RuleFor(x => x.Title)
             .NotEmpty()
             .WithMessage("Title is required.")
-            .MaximumLength(200);
+            .MaximumLength(500);
 
         RuleFor(x => x.Slug)
             .NotEmpty();

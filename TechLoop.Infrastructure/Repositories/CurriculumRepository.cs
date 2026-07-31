@@ -56,22 +56,24 @@ public sealed class CurriculumRepository : ICurriculumRepository
                     CreatedAt = first.TopicCreatedAt!.Value,
                     UpdatedAt = first.TopicUpdatedAt,
                     PublishedAt = first.TopicPublishedAt,
-
-                    SubTopics = group
-                        .Where(x => x.SubTopicId.HasValue)
-                        .Select(x => new CurriculumSubTopicResponse
-                        {
-                            Id = x.SubTopicId!.Value,
-                            TopicId = x.TopicId!.Value,
-                            Title = x.SubTopicTitle!,
-                            Slug = x.SubTopicSlug!,
-                            Position = x.SubTopicPosition!.Value,
-                            CreatedAt = x.SubTopicCreatedAt!.Value,
-                            UpdatedAt = x.SubTopicUpdatedAt,
-                            PublishedAt = x.SubTopicPublishedAt
-                        })
-                        .OrderBy(x => x.Position)
-                        .ToList()
+                    //subtopic
+                    SubTopics = OrderSubTopics(
+                        group
+                            .Where(x => x.SubTopicId.HasValue)
+                            .Select(x => new CurriculumSubTopicResponse
+                            {
+                                Id = x.SubTopicId!.Value,
+                                TopicId = x.TopicId!.Value,
+                                ParentSubTopicId = x.ParentSubTopicId,
+                                Title = x.SubTopicTitle!,
+                                Slug = x.SubTopicSlug!,
+                                Position = x.SubTopicPosition!.Value,
+                                CreatedAt = x.SubTopicCreatedAt!.Value,
+                                UpdatedAt = x.SubTopicUpdatedAt,
+                                PublishedAt = x.SubTopicPublishedAt
+                            })
+                            .ToList()
+                    )
                 };
             })
             .OrderBy(x => x.Position)
@@ -121,32 +123,62 @@ public sealed class CurriculumRepository : ICurriculumRepository
                     Position = first.TopicPosition!.Value,
                     CreatedAt = first.TopicCreatedAt!.Value,
                     UpdatedAt = first.TopicUpdatedAt,
-
-                    // Learner doesn't receive PublishedAt
                     PublishedAt = null,
-
-                    SubTopics = group
-                        .Where(x => x.SubTopicId.HasValue)
-                        .Select(x => new CurriculumSubTopicResponse
-                        {
-                            Id = x.SubTopicId!.Value,
-                            TopicId = x.TopicId!.Value,
-                            Title = x.SubTopicTitle!,
-                            Slug = x.SubTopicSlug!,
-                            Position = x.SubTopicPosition!.Value,
-                            CreatedAt = x.SubTopicCreatedAt!.Value,
-                            UpdatedAt = x.SubTopicUpdatedAt,
-
-                            // Learner doesn't receive PublishedAt
-                            PublishedAt = null
-                        })
-                        .OrderBy(x => x.Position)
-                        .ToList()
+                    //subtopic
+                    SubTopics = OrderSubTopics(
+                        group
+                            .Where(x => x.SubTopicId.HasValue)
+                            .Select(x => new CurriculumSubTopicResponse
+                            {
+                                Id = x.SubTopicId!.Value,
+                                TopicId = x.TopicId!.Value,
+                                ParentSubTopicId = x.ParentSubTopicId,
+                                Title = x.SubTopicTitle!,
+                                Slug = x.SubTopicSlug!,
+                                Position = x.SubTopicPosition!.Value,
+                                CreatedAt = x.SubTopicCreatedAt!.Value,
+                                UpdatedAt = x.SubTopicUpdatedAt,
+                                PublishedAt = null
+                            })
+                            .ToList()
+                    )
                 };
             })
             .OrderBy(x => x.Position)
             .ToList();
 
         return response;
+    }
+    
+    
+    private static List<CurriculumSubTopicResponse> OrderSubTopics(
+        List<CurriculumSubTopicResponse> subTopics)
+    {
+        var ordered = new List<CurriculumSubTopicResponse>();
+
+        void AddSubTopic(CurriculumSubTopicResponse subTopic)
+        {
+            ordered.Add(subTopic);
+
+            var children = subTopics
+                .Where(x => x.ParentSubTopicId == subTopic.Id)
+                .OrderBy(x => x.Position);
+
+            foreach (var child in children)
+            {
+                AddSubTopic(child);
+            }
+        }
+
+        var rootSubTopics = subTopics
+            .Where(x => x.ParentSubTopicId == null)
+            .OrderBy(x => x.Position);
+
+        foreach (var root in rootSubTopics)
+        {
+            AddSubTopic(root);
+        }
+
+        return ordered;
     }
 }

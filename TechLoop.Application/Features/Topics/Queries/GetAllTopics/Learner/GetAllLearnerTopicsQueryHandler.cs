@@ -24,6 +24,8 @@ public sealed class GetAllLearnerTopicsQueryHandler : IRequestHandler<GetAllLear
             Slug = topic.Slug,
             Description = topic.Description,
             ImageUrl = topic.ImageUrl,
+            Example =  topic.Example,
+            ExampleType = topic.ExampleType,
             Position = topic.Position
         });
     }

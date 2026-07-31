@@ -53,6 +53,8 @@ public sealed class CreateTopicCommandHandler : IRequestHandler<CreateTopicComma
             Slug = request.Slug.Trim().ToLowerInvariant(),
             Description = request.Description ?? string.Empty,
             ImageUrl = request.ImageUrl ?? string.Empty,
+            Example = request.Example,
+            ExampleType = request.ExampleType,
             Position = request.Position,
             CreatedAt = DateTime.UtcNow,
             CreatedBy = _currentUser.UserId

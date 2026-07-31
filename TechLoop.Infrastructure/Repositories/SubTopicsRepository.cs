@@ -92,7 +92,7 @@ public class SubTopicsRepository : ISubTopicsRepository
     // Creates a new subtopic and returns the generated ID
     public async Task<int> CreateAsync(SubTopic subTopic, CancellationToken cancellationToken)
     {
-        const string sql = @"SELECT fn_create_subtopic( @TopicId,@Slug,@Title,@Description,@ImageUrl,@Position,@CreatedBy,@CreatedAt);";
+        const string sql = @"SELECT fn_create_subtopic( @TopicId, @ParentSubTopicId, @Slug, @Title, @Description, @ImageUrl, @Example, @ExampleType, @Position, @CreatedBy, @CreatedAt);";
         using var connection = _context.CreateConnection();
         return await connection.ExecuteScalarAsync<int>(new CommandDefinition(sql, subTopic, cancellationToken: cancellationToken));
     }
@@ -115,7 +115,7 @@ public class SubTopicsRepository : ISubTopicsRepository
     // Updates the specified subtopic
     public async Task<int> UpdateAsync(SubTopic subTopic, CancellationToken cancellationToken)
     {
-        const string sql = @"CALL sp_update_subtopic(@Id,@TopicId,@Title,@Slug,@Description,@ImageUrl,@Position,@UpdatedBy,@UpdatedAt);";
+        const string sql = @"CALL sp_update_subtopic(@Id, @TopicId, @ParentSubTopicId, @Title, @Slug, @Description, @ImageUrl, @Example, @ExampleType, @Position, @UpdatedBy, @UpdatedAt);";
         using var connection = _context.CreateConnection();
         return await connection.ExecuteAsync(new CommandDefinition(sql, subTopic, cancellationToken: cancellationToken));
     }
@@ -180,6 +180,34 @@ public class SubTopicsRepository : ISubTopicsRepository
                 new
                 {
                     Slug = slug
+                },
+                cancellationToken: cancellationToken));
+    }
+    
+    // Gets the technology ID associated with the specified subtopic.
+    public async Task<int?> GetTechnologyIdAsync(int subTopicId, CancellationToken cancellationToken)
+    {
+        const string sql = @"SELECT fn_get_subtopic_technology(@SubTopicId);";
+        using var connection = _context.CreateConnection();
+        return await connection.ExecuteScalarAsync<int?>(new CommandDefinition(sql,
+                new
+                {
+                    SubTopicId = subTopicId
+                },
+                cancellationToken: cancellationToken));
+    }
+
+// Gets the technology ID associated with the specified mentor.
+    public async Task<int?> GetMentorTechnologyIdAsync(Guid userId, CancellationToken cancellationToken)
+    {
+        const string sql = @"SELECT fn_get_mentor_technology(@UserId);";
+        using var connection = _context.CreateConnection();
+        return await connection.ExecuteScalarAsync<int?>(
+            new CommandDefinition(
+                sql,
+                new
+                {
+                    UserId = userId
                 },
                 cancellationToken: cancellationToken));
     }

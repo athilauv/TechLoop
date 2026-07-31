@@ -1,4 +1,6 @@
-﻿namespace TechLoop.Application.Features.SubTopics.DTOs;
+﻿using TechLoop.Domain.Enums;
+
+namespace TechLoop.Application.Features.SubTopics.DTOs;
 
 public sealed class MentorSubTopicResponse
 {
@@ -8,6 +10,8 @@ public sealed class MentorSubTopicResponse
     public string Slug { get; set; } = string.Empty;
     public string Description { get; set; } = string.Empty;
     public string? ImageUrl { get; set; }
+    public string? Example { get; set; }
+    public ExampleType? ExampleType { get; set; }
     public int Position { get; set; }
     public DateTime? PublishedAt { get; set; }
     public Guid? PublishedBy { get; set; }

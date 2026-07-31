@@ -16,12 +16,12 @@ public sealed class CreateTechnologyCommandValidator
         RuleFor(x => x.Name)
             .NotEmpty()
             .WithMessage("Name is required.")
-            .MaximumLength(100);
+            .MaximumLength(500);
 
         RuleFor(x => x.Description)
             .NotEmpty()
             .WithMessage("Description is required.")
-            .MaximumLength(1000);
+            .MaximumLength(100000);
 
         RuleFor(x => x.ImageUrl)
             .MaximumLength(500);

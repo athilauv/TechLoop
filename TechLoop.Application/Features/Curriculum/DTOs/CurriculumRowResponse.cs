@@ -5,6 +5,7 @@ public sealed class CurriculumRowResponse
     public int TechnologyId { get; set; }
     public string TechnologyName { get; set; } = string.Empty;
     public int? TopicId { get; set; }
+    public int? ParentSubTopicId { get; set; }
     public string? TopicTitle { get; set; }
     public string? TopicSlug { get; set; }
     public int? TopicPosition { get; set; }

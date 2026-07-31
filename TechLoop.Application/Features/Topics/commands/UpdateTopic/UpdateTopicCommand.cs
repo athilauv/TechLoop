@@ -10,6 +10,8 @@ public sealed record UpdatedTopicCommand(
     string Title,
     string Description,
     string? ImageUrl,
+    string? Example,
+    ExampleType? ExampleType,
     string Slug,
     int Position
     ):IRequest<UpdateTopicResponse>;

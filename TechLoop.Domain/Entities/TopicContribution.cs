@@ -1,21 +1,30 @@
 ﻿using TechLoop.Domain.Enums;
 
 namespace TechLoop.Domain.Entities;
-public class TopicContribution
+
+public sealed class TopicContribution
 {
     public int Id { get; set; }
-    public Guid LearnerId { get; set; }
     public int TechnologyId { get; set; }
-    public string TopicName { get; set; } = string.Empty;
+    public int? TopicId { get; set; }
+    public int? SubTopicId { get; set; }
+    public CurriculumContributionType ContributionType { get; set; }
+    public string Title { get; set; } = string.Empty;
     public string Description { get; set; } = string.Empty;
-    public string ImageUrl { get; set; } =  string.Empty;
+    public string? Example { get; set; }
+    public ExampleType? ExampleType { get; set; }
+    public string? ReferenceUrl { get; set; }
     public ContributionStatus Status { get; set; }
-    public string ReviewNote { get; set; }  = string.Empty;
+    public Guid CreatedBy { get; set; }
+    public DateTimeOffset CreatedAt { get; set; }
     public Guid? ReviewedBy { get; set; }
-    public DateTime? PublishedAt { get; set; }
+    public DateTimeOffset? ReviewedAt { get; set; }
     public Guid? PublishedBy { get; set; }
-    public DateTime CreatedAt { get; set; }
-    public DateTime? UpdatedAt { get; set; }
+    public DateTimeOffset? PublishedAt { get; set; }
+    public Guid? RejectedBy { get; set; }
+    public DateTimeOffset? RejectedAt { get; set; }
     public Guid? UpdatedBy { get; set; }
-
+    public DateTimeOffset? UpdatedAt { get; set; }
+    public Guid? DeletedBy { get; set; }
+    public DateTimeOffset? DeletedAt { get; set; }
 }

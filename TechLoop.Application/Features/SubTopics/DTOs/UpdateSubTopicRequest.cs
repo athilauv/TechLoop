@@ -10,5 +10,7 @@ public sealed class UpdateSubTopicRequest
     public string Description { get; set; } = string.Empty;
     public string? ImageUrl { get; set; }
     public string Slug { get; set; } = string.Empty;
+    public string? Example { get; set; }
+    public ExampleType? ExampleType { get; set; }
     public int Position { get; set; }
 }

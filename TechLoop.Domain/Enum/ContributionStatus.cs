@@ -1,9 +1,8 @@
 ﻿namespace TechLoop.Domain.Enums;
 
-public enum ContributionStatus
+public enum ContributionStatus : short
 {
-    Draft = 1,
-    PendingReview = 2,
-    Published = 3,
-    Rejected = 4
+    Pending = 1,
+    Published = 2,
+    Rejected = 3
 }

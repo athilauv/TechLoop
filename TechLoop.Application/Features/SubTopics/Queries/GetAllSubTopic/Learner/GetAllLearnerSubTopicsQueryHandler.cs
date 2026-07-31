@@ -25,6 +25,8 @@ public sealed class GetAllLearnerSubTopicsQueryHandler : IRequestHandler<GetAllL
             Slug = subTopic.Slug,
             Description = subTopic.Description,
             ImageUrl = subTopic.ImageUrl,
+            Example =  subTopic.Example,    
+            ExampleType = subTopic.ExampleType, 
             Position = subTopic.Position
         });
     }

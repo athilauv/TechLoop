@@ -61,13 +61,6 @@ public sealed class UpdateTechnologyCommandHandler : IRequestHandler<UpdateTechn
       technology.UpdatedAt = DateTime.UtcNow;
       technology.UpdatedBy = _currentUserService.UserId;
 
-      var result = await _technologyRepository.UpdateAsync(technology, cancellationToken);
-
-      if (result <= 0)
-      {
-         throw new Exception("Technology update failed.");
-      }
-
       return new UpdateTechnologyResponse
       {
          Success = true,

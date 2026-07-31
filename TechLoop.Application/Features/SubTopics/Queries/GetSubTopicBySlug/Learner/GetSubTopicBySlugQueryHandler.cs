@@ -35,6 +35,8 @@ public sealed class GetSubTopicBySlugQueryHandler : IRequestHandler<GetSubTopicB
             Slug = subTopic.Slug,
             Description = subTopic.Description,
             ImageUrl = subTopic.ImageUrl,
+            Example = subTopic.Example,
+            ExampleType = subTopic.ExampleType,
             Position = subTopic.Position,
             CreatedAt = subTopic.CreatedAt,
             UpdatedAt = subTopic.UpdatedAt,

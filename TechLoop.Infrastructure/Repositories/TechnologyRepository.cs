@@ -148,21 +148,7 @@ SELECT fn_create_technology
     // Updates the specified technology)
 public async Task<int> UpdateAsync(Technology technology, CancellationToken cancellationToken)
 {
-    const string sql =
-        @"
-CALL sp_update_technology
-(
-    @Id,
-    @CategoryId,
-    @Name,
-    @Slug,
-    @Description,
-    @ImageUrl,
-    @Position,
-    @UpdatedBy,
-    @UpdatedAt
-);";
-
+    const string sql = @"CALL sp_update_technology(@Id, @CategoryId, @Name, @Slug, @Description, @ImageUrl, @Position, @UpdatedBy,@UpdatedAt);";
     using var connection = _context.CreateConnection();
     return await connection.ExecuteAsync(new CommandDefinition(sql, technology, cancellationToken: cancellationToken));
 }
@@ -171,15 +157,7 @@ CALL sp_update_technology
 // Soft deletes the specified technology
 public async Task<int> SoftDeleteAsync(int id, Guid deletedBy, CancellationToken cancellationToken)
 {
-    const string sql =
-        @"
-CALL sp_soft_delete_technology
-(
-    @Id,
-    @DeletedBy,
-    @DeletedAt
-);";
-
+    const string sql = @"CALL sp_soft_delete_technology(@Id, @DeletedBy, @DeletedAt);";
     using var connection = _context.CreateConnection();
     return await connection.ExecuteAsync(
         new CommandDefinition(
@@ -207,15 +185,7 @@ public async Task<IEnumerable<Technology>> GetAllAsync(CancellationToken cancell
 // Publishes the specified technology
 public async Task<int> PublishAsync(Technology technology, CancellationToken cancellationToken)
 {
-    const string sql =
-        @"
-CALL sp_publish_technology
-(
-    @Id,
-    @PublishedBy,
-    @PublishedAt
-);";
-
+    const string sql = @"CALL sp_publish_technology( @Id, @PublishedBy, @PublishedAt);";
     using var connection = _context.CreateConnection();
     return await connection.ExecuteAsync(new CommandDefinition(
             sql,
@@ -250,6 +220,35 @@ public async Task<Technology?> GetPublishedBySlugAsync(string slug, Cancellation
             new
             {
                 Slug = slug
+            },
+            cancellationToken: cancellationToken));
+}
+
+// Gets the category ID of the specified technology
+public async Task<int?> GetTechnologyIdAsync(int technologyId, CancellationToken cancellationToken)
+{
+    const string sql = @"SELECT fn_get_technology_category(@TechnologyId);";
+    using var connection = _context.CreateConnection();
+    return await connection.ExecuteScalarAsync<int?>(new CommandDefinition(
+            sql,
+            new
+            {
+                TechnologyId = technologyId
+            },
+            cancellationToken: cancellationToken));
+}
+
+
+// Gets the technology ID assigned to the current mentor
+public async Task<int?> GetMentorTechnologyIdAsync(Guid userId, CancellationToken cancellationToken)
+{
+    const string sql = @"SELECT fn_get_mentor_technology(@UserId);";
+    using var connection = _context.CreateConnection();
+    return await connection.ExecuteScalarAsync<int?>(new CommandDefinition(
+            sql,
+            new
+            {
+                UserId = userId
             },
             cancellationToken: cancellationToken));
 }

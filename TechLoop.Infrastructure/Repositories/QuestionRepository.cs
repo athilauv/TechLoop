@@ -151,4 +151,73 @@ public sealed class QuestionRepository : IQuestionRepository
                 },
                 cancellationToken: cancellationToken));
     }
+   
+    // Returns the number of active MCQ options for a question
+    public async Task<int> GetMcqOptionCountAsync(int questionId, CancellationToken cancellationToken)
+    {
+        const string sql = @"SELECT fn_get_mcq_option_count(@QuestionId);";
+        using var connection = _context.CreateConnection();
+        return await connection.ExecuteScalarAsync<int>(new CommandDefinition(
+                sql,
+                new
+                {
+                    QuestionId = questionId
+                },
+                cancellationToken: cancellationToken));
+    }
+    
+    // Checks whether the coding question has at least one template
+    public async Task<bool> HasCodingTemplateAsync(int questionId, CancellationToken cancellationToken)
+    {
+        const string sql = @"SELECT fn_has_coding_template(@QuestionId);";
+        using var connection = _context.CreateConnection();
+        return await connection.ExecuteScalarAsync<bool>(new CommandDefinition(
+                sql,
+                new
+                {
+                    QuestionId = questionId
+                },
+                cancellationToken: cancellationToken));
+    }
+   
+    // Checks whether the coding question has at least one test case
+    public async Task<bool> HasTestCasesAsync(int questionId, CancellationToken cancellationToken)
+    {
+        const string sql = @"SELECT fn_has_test_cases(@QuestionId);";
+        using var connection = _context.CreateConnection();
+        return await connection.ExecuteScalarAsync<bool>(new CommandDefinition(
+                sql,
+                new
+                {
+                    QuestionId = questionId
+                },
+                cancellationToken: cancellationToken));
+    }
+    
+    // Returns the technology of the question
+    public async Task<int?> GetQuestionTechnologyIdAsync(int questionId, CancellationToken cancellationToken)
+    {
+        const string sql = @"SELECT fn_get_question_technology(@QuestionId);";
+        using var connection = _context.CreateConnection();
+        return await connection.ExecuteScalarAsync<int?>(new CommandDefinition(sql,
+                new
+                {
+                    QuestionId = questionId
+                },
+                cancellationToken: cancellationToken));
+    }
+    
+    // Returns the technology assigned to the logged-in mentor
+    public async Task<int?> GetMentorTechnologyIdAsync(Guid userId, CancellationToken cancellationToken)
+    {
+        const string sql = @"SELECT fn_get_mentor_technology(@UserId);";
+        using var connection = _context.CreateConnection();
+        return await connection.ExecuteScalarAsync<int?>(new CommandDefinition(
+                sql,
+                new
+                {
+                    UserId = userId
+                },
+                cancellationToken: cancellationToken));
+    }
 }

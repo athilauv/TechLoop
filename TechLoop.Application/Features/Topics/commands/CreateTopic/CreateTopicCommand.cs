@@ -9,6 +9,8 @@ public sealed record CreateTopicCommand(
     string Title,
     string Description,
     string? ImageUrl,
+    string? Example,
+    ExampleType? ExampleType,
     string Slug,
     int Position
 ) : IRequest<CreateTopicResponse>;

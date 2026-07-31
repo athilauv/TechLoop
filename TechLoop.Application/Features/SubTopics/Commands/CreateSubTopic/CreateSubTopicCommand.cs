@@ -11,5 +11,7 @@ public sealed record CreateSubTopicCommand(
     string Description,
     string? ImageUrl,
     string Slug,
+    string? Example,
+    ExampleType? ExampleType,
     int Position
 ) : IRequest<CreateSubTopicResponse>;

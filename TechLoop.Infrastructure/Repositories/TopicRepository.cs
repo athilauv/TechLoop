@@ -87,6 +87,8 @@ public sealed class TopicRepository : ITopicsRepository
                     @Slug,
                     @Description,
                     @ImageUrl,
+                    @Example,
+                    @ExampleType,                    
                     @Position,
                     @CreatedBy,
                     @CreatedAt
@@ -128,6 +130,8 @@ public sealed class TopicRepository : ITopicsRepository
                     @Slug,
                     @Description,
                     @ImageUrl,
+                    @Example,
+                    @ExampleType,
                     @Position,
                     @UpdatedBy,
                     @UpdatedAt
@@ -208,6 +212,28 @@ public sealed class TopicRepository : ITopicsRepository
                 new
                 {
                     Slug = slug
+                },
+                cancellationToken: cancellationToken));
+    }
+    
+    public async Task<int?> GetTechnologyIdAsync(int topicId, CancellationToken cancellationToken)
+    {
+        using var connection = _context.CreateConnection();
+        return await connection.ExecuteScalarAsync<int?>(new CommandDefinition("SELECT fn_get_topic_technology(@TopicId);",
+                new
+                {
+                    TopicId = topicId
+                },
+                cancellationToken: cancellationToken));
+    }
+
+    public async Task<int?> GetMentorTechnologyIdAsync(Guid userId, CancellationToken cancellationToken)
+    {
+        using var connection = _context.CreateConnection();
+        return await connection.ExecuteScalarAsync<int?>(new CommandDefinition("SELECT fn_get_mentor_technology(@UserId);",
+                new
+                {
+                    UserId = userId
                 },
                 cancellationToken: cancellationToken));
     }

@@ -13,12 +13,10 @@ public interface ITechnologyRepository
     
     Task<int> SoftDeleteAsync(int id, Guid deletedBy, CancellationToken cancellationToken);
     Task<int> PublishAsync(Technology technology, CancellationToken cancellationToken);
-    
-    
-    //Mentor
     Task<IEnumerable<Technology>> GetAllAsync(CancellationToken cancellationToken);
     Task<Technology?> GetByIdAsync(int id, CancellationToken cancellationToken);
-    //Learner
     Task<IEnumerable<Technology>> GetPublishedAsync(CancellationToken cancellationToken);
     Task<Technology?> GetPublishedBySlugAsync(string slug, CancellationToken cancellationToken);
+    Task<int?> GetTechnologyIdAsync(int topicId, CancellationToken cancellationToken);
+    Task<int?> GetMentorTechnologyIdAsync(Guid userId, CancellationToken cancellationToken);
 }

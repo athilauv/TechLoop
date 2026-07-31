@@ -13,10 +13,10 @@ public interface ISubTopicsRepository
     Task<int> SoftDeleteAsync(int id, Guid deletedBy, CancellationToken cancellationToken);
     Task<bool> TopicExistsAsync(int topicId, CancellationToken cancellationToken);
     Task<int> PublishAsync(SubTopic subTopic, CancellationToken cancellationToken);
-    //Mentor
     Task<SubTopic?> GetByIdAsync(int id, CancellationToken cancellationToken);
     Task<IEnumerable<SubTopic>> GetAllAsync(CancellationToken cancellationToken);
-    //Learner
     Task<IEnumerable<SubTopic>> GetPublishedAsync(CancellationToken cancellationToken);
     Task<SubTopic?> GetPublishedBySlugAsync(string slug, CancellationToken cancellationToken);
+    Task<int?> GetTechnologyIdAsync(int subTopicId, CancellationToken cancellationToken);
+    Task<int?> GetMentorTechnologyIdAsync(Guid userId, CancellationToken cancellationToken);
 }

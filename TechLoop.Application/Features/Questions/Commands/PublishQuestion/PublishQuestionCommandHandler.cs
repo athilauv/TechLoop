@@ -3,6 +3,7 @@ using TechLoop.Application.Common.Exceptions;
 using TechLoop.Application.Features.Questions.DTOs;
 using TechLoop.Application.Interfaces.Repositories;
 using TechLoop.Application.Interfaces.Services;
+using TechLoop.Domain.Enums;
 
 namespace TechLoop.Application.Features.Questions.Commands.PublishQuestion;
 
@@ -29,15 +30,41 @@ public sealed class PublishQuestionCommandHandler : IRequestHandler<PublishQuest
         {
             throw new ValidationException("Question is already published.");
         }
+        
+        if (question.QuestionType == QuestionType.mcq)
+        {
+            var optionCount = await _repository.GetMcqOptionCountAsync(question.Id, cancellationToken);
+
+            if (optionCount != 4)
+            {
+                throw new ValidationException(
+                    "MCQ question must contain exactly 4 options before publishing.");
+            }
+        }
+        
+        if (question.QuestionType == QuestionType.coding)
+        {
+            var hasTemplate = await _repository.HasCodingTemplateAsync(question.Id, cancellationToken);
+            if (!hasTemplate)
+            {
+                throw new ValidationException("Coding question must contain at least one coding template before publishing.");
+            }
+
+            var hasTestCases = await _repository.HasTestCasesAsync(question.Id, cancellationToken);
+            if (!hasTestCases)
+            {
+                throw new ValidationException("Coding question must contain at least one test case before publishing.");
+            }
+        }
 
         question.PublishedAt = DateTime.UtcNow;
         question.PublishedBy = _currentUser.UserId;
         
         var rowsAffected = await _repository.PublishAsync(question, cancellationToken);
-        if (rowsAffected <= 0)
-        {
-            throw new Exception("Failed to publish question.");
-        }
+        // if (rowsAffected <= 0)
+        // {
+        //     throw new Exception("Failed to publish question.");
+        // }
 
         return new PublishQuestionResponse
         {
