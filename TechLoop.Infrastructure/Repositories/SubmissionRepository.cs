@@ -2,6 +2,7 @@
 using TechLoop.Application.Interfaces.Infrastructure;
 using TechLoop.Application.Interfaces.Repositories;
 using TechLoop.Domain.Entities;
+using TechLoop.Domain.Enums;
 
 namespace TechLoop.Infrastructure.Repositories;
 
@@ -26,12 +27,26 @@ public class SubmissionRepository : ISubmissionRepository
                 },
                 cancellationToken: cancellationToken));
     }
-
+    
     // Creates a new submission and returns the generated ID
-    public async Task<int> CreateAsync(Submission submission, CancellationToken cancellationToken)
+    public async Task<int> CreateAsync(
+        Submission submission,
+        CancellationToken cancellationToken)
     {
-        const string sql = @"SELECT fn_create_submission(@UserId,@QuestionId,@TechnologyId,@SourceCode,@Status,@SubmittedAt);";
+        const string sql = @"
+        SELECT fn_create_submission(
+            @UserId,
+            @QuestionId,
+            @TechnologyId,
+            @SourceCode,
+            @SelectedOptionId,
+            @AttemptNumber,
+            @Status,
+            @SubmittedAt
+        );";
+
         using var connection = _context.CreateConnection();
+
         return await connection.ExecuteScalarAsync<int>(
             new CommandDefinition(
                 sql,
@@ -41,11 +56,26 @@ public class SubmissionRepository : ISubmissionRepository
                     submission.QuestionId,
                     submission.TechnologyId,
                     submission.SourceCode,
-                    Status = submission.Status.ToString(),
+                    submission.SelectedOptionId,
+                    submission.AttemptNumber,
+
+                    Status = submission.Status switch
+                    {
+                        SubmissionStatus.Pending => "pending",
+                        SubmissionStatus.Accepted => "accepted",
+                        SubmissionStatus.WrongAnswer => "wrong_answer",
+                        SubmissionStatus.RuntimeError => "runtime_error",
+                        SubmissionStatus.CompileError => "compile_error",
+                        SubmissionStatus.TimeLimitExceeded => "time_limit_exceeded",
+                        SubmissionStatus.MemoryLimitExceeded => "memory_limit_exceeded",
+                        _ => throw new ArgumentOutOfRangeException(nameof(submission.Status))
+                    },
+
                     submission.SubmittedAt
                 },
                 cancellationToken: cancellationToken));
     }
+    
 
 // Retrieves a submission by its ID
     public async Task<Submission?> GetByIdAsync(int id, CancellationToken cancellationToken)
@@ -108,6 +138,21 @@ public class SubmissionRepository : ISubmissionRepository
                     submission.RuntimeOutput,
                     submission.AiReview,
                     submission.JudgeToken
+                },
+                cancellationToken: cancellationToken));
+    }
+    
+    public async Task<int> GetNextAttemptNumberAsync(Guid userId, int questionId, CancellationToken cancellationToken)
+    {
+        const string sql = @"SELECT fn_get_next_attempt_number(@UserId, @QuestionId);";
+        using var connection = _context.CreateConnection();
+        return await connection.ExecuteScalarAsync<int>(
+            new CommandDefinition(
+                sql,
+                new
+                {
+                    UserId = userId,
+                    QuestionId = questionId
                 },
                 cancellationToken: cancellationToken));
     }

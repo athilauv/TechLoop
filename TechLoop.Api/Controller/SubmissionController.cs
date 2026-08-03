@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 using TechLoop.Application.Features.Submissions.Commands.CreateSubmission;
+using TechLoop.Application.Features.Submissions.Commands.SubmitMcqAnswer;
 using TechLoop.Application.Features.Submissions.Commands.UpdateSubmissionResult;
 using TechLoop.Application.Features.Submissions.DTOs;
 using TechLoop.Application.Features.Submissions.Queries.GetQuestionSubmissions;
@@ -63,6 +64,17 @@ public class SubmissionController : ControllerBase
     {
         var query = new GetQuestionSubmissionsQuery(questionId);
         var response = await _mediator.Send(query, cancellationToken);
+        return Ok(response);
+    }
+    
+    [HttpPost("mcq")]
+    public async Task<IActionResult> SubmitMcqAnswer(
+        [FromBody] SubmitMcqAnswerRequest request,
+        CancellationToken cancellationToken)
+    {
+        var userId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+        var command = new SubmitMcqAnswerCommand(userId, request);
+        var response = await _mediator.Send(command, cancellationToken);
         return Ok(response);
     }
     

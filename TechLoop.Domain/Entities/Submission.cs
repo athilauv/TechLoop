@@ -8,6 +8,8 @@ public class Submission
     public Guid UserId { get; set; }
     public int QuestionId { get; set; }
     public int TechnologyId { get; set; }
+    public int AttemptNumber { get; set; }
+    public int? SelectedOptionId { get; set; }
     public string SourceCode { get; set; } = string.Empty;
     public SubmissionStatus Status { get; set; }
     public int? ExecutionTimeMs  { get; set; }

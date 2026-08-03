@@ -50,11 +50,11 @@ const sections: NavSection[] = [
                 path: "/learner/learning",
                 icon: BookOpen,
             },
-            {
-                label: "Practice",
-                path: "/learner/practice",
-                icon: Dumbbell,
-            },
+            // {
+            //     label: "Practice",
+            //     path: "/learner/practice",
+            //     icon: Dumbbell,
+            // },
             {
                 label: "Coding",
                 path: "/learner/coding",
