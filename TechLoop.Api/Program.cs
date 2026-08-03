@@ -2,24 +2,16 @@ using System.Text;
 using Dapper;
 using TechLoop.Api.Middleware;
 using TechLoop.Application;
-using TechLoop.Application.Interfaces;
 using TechLoop.Application.Interfaces.Authentication;
-using TechLoop.Application.Interfaces.Infrastructure;
-using TechLoop.Application.Interfaces.Repositories;
 using TechLoop.Application.Interfaces.Services;
-using TechLoop.Application.Validators;
 using TechLoop.Infrastructure.Authentication;
-using TechLoop.Infrastructure.Data;
-using TechLoop.Infrastructure.Repositories;
 using TechLoop.Application.Services;
-using FluentValidation;
 using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.IdentityModel.Tokens;
 using System.Security.Claims;
-using TechLoop.Infrastructure.Configuration;
-using TechLoop.Infrastructure.Services;
+using TechLoop.Infrastructure.DependencyInjection;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -41,17 +33,16 @@ builder.Services.AddControllers();
 // Application -
 builder.Services.AddApplication();
 
+//validation
 builder.Services.AddFluentValidationAutoValidation();
+
+// Infrastructure
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddInfrastructure(builder.Configuration);
 
 // Swagger
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
-
-// Authentication Module 
-builder.Services.AddScoped<IAuthService, AuthService>();
-
-builder.Services.AddScoped<IJwtGenerator, JwtTokenGenerator>();
-builder.Services.AddScoped<IPasswordHasher, PasswordHasher>();
 
 //Authorization
 builder.Services.AddAuthorization(options =>
@@ -61,37 +52,6 @@ builder.Services.AddAuthorization(options =>
         policy.RequireRole("Mentor");
     });
 });
-
-// Repositories
-builder.Services.AddHttpContextAccessor();
-
-builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
-builder.Services.AddScoped<IUserRepository, UserRepository>();
-builder.Services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
-builder.Services.AddScoped<ITechnologyRepository, TechnologyRepository>();
-builder.Services.AddScoped<ITopicsRepository, TopicRepository>();
-builder.Services.AddScoped<ISubTopicsRepository, SubTopicsRepository>();
-builder.Services.AddScoped<ITechnologyCategoryRepository, TechnologyCategoryRepository>();
-builder.Services.AddScoped<IQuestionRepository, QuestionRepository>();
-builder.Services.AddScoped<IMcqOptionRepository, McqOptionRepository>();
-builder.Services.AddScoped<ICodingTemplateRepository, CodingTemplateRepository>();
-builder.Services.AddScoped<ITestCaseRepository, TestCaseRepository>();
-builder.Services.AddScoped<ISubmissionRepository, SubmissionRepository>();
-builder.Services.AddScoped<ICurriculumRepository, CurriculumRepository>();
-builder.Services.AddScoped<ITopicContributionRepository, TopicContributionRepository>();
-builder.Services.AddScoped<IMentorRepository, MentorRepository>();
-builder.Services.Configure<EmailSettings>(
-    builder.Configuration.GetSection("EmailSettings"));
-
-builder.Services.AddScoped<IEmailService, EmailService>();
-builder.Services.AddHttpClient<IJudge0Service, Judge0Service>(client =>
-{
-    client.BaseAddress = new Uri(builder.Configuration["Judge0:BaseUrl"]!);
-});
-
-// Infrastructure
-builder.Services.AddScoped<IDapperContext, DapperContext>();
-builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 
 // JWT Authentication
 var jwtSecret = builder.Configuration["Jwt:Secret"];
