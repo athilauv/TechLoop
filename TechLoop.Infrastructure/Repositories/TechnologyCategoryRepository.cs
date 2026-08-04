@@ -1,4 +1,5 @@
-﻿using Dapper;
+﻿using System.Data;
+using Dapper;
 using TechLoop.Application.Features.TechnologyCategories.DTOs;
 using TechLoop.Application.Interfaces.Infrastructure;
 using TechLoop.Application.Interfaces.Repositories;
@@ -9,120 +10,144 @@ namespace TechLoop.Infrastructure.Repositories;
 public sealed class TechnologyCategoryRepository : ITechnologyCategoryRepository
 {
     private readonly IDapperContext _context;
-
     public TechnologyCategoryRepository(IDapperContext context)
     {
         _context = context;
     }
 
-    public async Task<int> CreateAsync(TechnologyCategory technologyCategory, CancellationToken cancellationToken)
+    // Connection Helper
+    private async Task<T> WithConnection<T>(Func<IDbConnection, Task<T>> action)
     {
         using var connection = _context.CreateConnection();
-
-        return await connection.ExecuteAsync(
-            "CALL sp_technology_category_create(@Name,@CreatedBy)",
-            new
-            {
-                technologyCategory.Name,
-                technologyCategory.CreatedBy
-            });
-    }
-
-    public async Task<int> UpdateAsync(TechnologyCategory technologyCategory, CancellationToken cancellationToken)
-    {
-        using var connection = _context.CreateConnection();
-
-        return await connection.ExecuteAsync(
-            "CALL sp_technology_category_update(@Id,@Name,@UpdatedBy)",
-            new
-            {
-                technologyCategory.Id,
-                technologyCategory.Name,
-                technologyCategory.UpdatedBy
-            });
-    }
-
-    public async Task<int> PublishAsync(int id, CancellationToken cancellationToken)
-    {
-        using var connection = _context.CreateConnection();
-
-        return await connection.ExecuteAsync(
-            "CALL sp_technology_category_publish(@Id)",
-            new { Id = id });
-    }
-
-    public async Task<int> DeleteAsync(int id, Guid deletedBy, CancellationToken cancellationToken)
-    {
-        using var connection = _context.CreateConnection();
-
-        return await connection.ExecuteAsync(
-            "CALL sp_technology_category_delete(@Id,@DeletedBy)",
-            new
-            {
-                Id = id,
-                DeletedBy = deletedBy
-            });
-    }
-
-    public async Task<IEnumerable<AdminTechnologyCategoryResponse>> GetAllForAdminAsync()
-    {
-        using var connection = _context.CreateConnection();
-
-        return await connection.QueryAsync<AdminTechnologyCategoryResponse>(
-            "SELECT * FROM fn_technology_category_admin_get_all()");
-    }
-
-    public async Task<IEnumerable<LearnerMentorTechnologyCategoryResponse>> GetAllForPublicAsync()
-    {
-        using var connection = _context.CreateConnection();
-
-        return await connection.QueryAsync<LearnerMentorTechnologyCategoryResponse>(
-            "SELECT * FROM fn_technology_category_public_get_all()");
-    }
-
-    public async Task<AdminTechnologyCategoryResponse?> GetByIdForAdminAsync(int id, CancellationToken cancellationToken)
-    {
-        using var connection = _context.CreateConnection();
-        return await connection.QuerySingleOrDefaultAsync<AdminTechnologyCategoryResponse>(
-            new CommandDefinition(
-                "SELECT * FROM fn_technology_category_admin_get_by_id(@Id)",
-                new { Id = id },
-                cancellationToken: cancellationToken));
-    }
-
-    public async Task<LearnerMentorTechnologyCategoryResponse?> GetByIdForPublicAsync(int id)
-    {
-        using var connection = _context.CreateConnection();
-
-        return await connection.QuerySingleOrDefaultAsync<LearnerMentorTechnologyCategoryResponse>(
-            "SELECT * FROM fn_technology_category_public_get_by_id(@Id)",
-            new { Id = id });
-    }
-
-    public async Task<bool> ExistsAsync(int id, CancellationToken cancellationToken)
-    {
-        using var connection = _context.CreateConnection();
-
-        return await connection.ExecuteScalarAsync<bool>(
-            new CommandDefinition(
-                "SELECT fn_technology_category_exists(@Id)",
-                new { Id = id },
-                cancellationToken: cancellationToken));
+        return await action(connection);
     }
     
-    public async Task<bool> NameExistsAsync(string name, int? excludeId, CancellationToken cancellationToken)
+    // Create
+    public Task<int> CreateAsync(TechnologyCategory technologyCategory, CancellationToken cancellationToken)
     {
-        using var connection = _context.CreateConnection();
-        const string sql = "SELECT fn_technology_category_name_exists(@Name, @ExcludeId);";
+        const string sql = "CALL sp_technology_category_create(@Name,@CreatedBy);";
+        return WithConnection(connection => connection.ExecuteAsync(
+                new CommandDefinition(
+                    sql,
+                    new
+                    {
+                        technologyCategory.Name,
+                        technologyCategory.CreatedBy
+                    },
+                    cancellationToken: cancellationToken)));
+    }
+    
+    // Update
+    public Task<int> UpdateAsync(TechnologyCategory technologyCategory, CancellationToken cancellationToken)
+    {
+        const string sql = "CALL sp_technology_category_update(@Id,@Name,@UpdatedBy);";
+        return WithConnection(connection => connection.ExecuteAsync(
+                new CommandDefinition(
+                    sql,
+                    new
+                    {
+                        technologyCategory.Id,
+                        technologyCategory.Name,
+                        technologyCategory.UpdatedBy
+                    },
+                    cancellationToken: cancellationToken)));
+    }
+    
+    // Publish
+    public Task<int> PublishAsync(int id, CancellationToken cancellationToken)
+    {
+        const string sql = "CALL sp_technology_category_publish(@Id);";
+        return WithConnection(connection => connection.ExecuteAsync(
+                new CommandDefinition(
+                    sql,
+                    new
+                    {
+                        Id = id
+                    },
+                    cancellationToken: cancellationToken)));
+    }
+    
+    // Delete
+    public Task<int> DeleteAsync(int id, Guid deletedBy, CancellationToken cancellationToken)
+    {
+        const string sql = "CALL sp_technology_category_delete(@Id,@DeletedBy);";
+        return WithConnection(connection => connection.ExecuteAsync(
+                new CommandDefinition(
+                    sql,
+                    new
+                    {
+                        Id = id,
+                        DeletedBy = deletedBy
+                    },
+                    cancellationToken: cancellationToken)));
+    }
 
-        return await connection.ExecuteScalarAsync<bool>(
-            new CommandDefinition(
+    // Get All (Admin)
+    public Task<IEnumerable<AdminTechnologyCategoryResponse>> GetAllForAdminAsync()
+    {
+        const string sql = "SELECT * FROM fn_technology_category_get_all();";
+        return WithConnection(connection => connection.QueryAsync<AdminTechnologyCategoryResponse>(sql));
+    }
+    
+    // Get All (Public)
+    public Task<IEnumerable<LearnerMentorTechnologyCategoryResponse>> GetAllForPublicAsync()
+    {
+        const string sql = "SELECT * FROM fn_technology_category_get_all();";
+        return WithConnection(connection => connection.QueryAsync<LearnerMentorTechnologyCategoryResponse>(sql));
+    }
+
+    // Get By Id (Admin)
+    public Task<AdminTechnologyCategoryResponse?> GetByIdForAdminAsync(int id, CancellationToken cancellationToken)
+    {
+        const string sql = "SELECT * FROM fn_technology_category_get_by_id(@Id);";
+        return WithConnection(connection => connection.QuerySingleOrDefaultAsync<AdminTechnologyCategoryResponse>(
+                new CommandDefinition(
+                    sql,
+                    new
+                    {
+                        Id = id
+                    },
+                    cancellationToken: cancellationToken)));
+    }
+    
+    // Get By Id (Public)
+    public Task<LearnerMentorTechnologyCategoryResponse?> GetByIdForPublicAsync(int id)
+    {
+        const string sql = "SELECT * FROM fn_technology_category_get_by_id(@Id);";
+        return WithConnection(connection => connection.QuerySingleOrDefaultAsync<LearnerMentorTechnologyCategoryResponse>(
                 sql,
                 new
                 {
-                    Name = name,
-                    ExcludeId = excludeId
-                },
-                cancellationToken: cancellationToken));
+                    Id = id
+                }));
+    }
+
+    // Exists
+    public Task<bool> ExistsAsync(int id, CancellationToken cancellationToken)
+    {
+        const string sql = "SELECT fn_technology_category_exists(@Id);";
+        return WithConnection(connection => connection.ExecuteScalarAsync<bool>(
+                new CommandDefinition(
+                    sql,
+                    new
+                    {
+                        Id = id
+                    },
+                    cancellationToken: cancellationToken)));
+    }
+
+    // Name Exists
+    public Task<bool> NameExistsAsync(string name,int? excludeId, CancellationToken cancellationToken)
+    {
+        const string sql = "SELECT fn_technology_category_name_exists(@Name,@ExcludeId);";
+        return WithConnection(connection => connection.ExecuteScalarAsync<bool>(
+                new CommandDefinition(
+                    sql,
+                    new
+                    {
+                        Name = name,
+                        ExcludeId = excludeId
+                    },
+                    cancellationToken: cancellationToken)));
     }
 }

@@ -128,7 +128,17 @@ public class SubmissionRepository : ISubmissionRepository
                 new
                 {
                     submission.Id,
-                    Status = submission.Status.ToString(),
+                    Status = submission.Status switch
+                    {
+                        SubmissionStatus.Pending => "pending",
+                        SubmissionStatus.Accepted => "accepted",
+                        SubmissionStatus.WrongAnswer => "wrong_answer",
+                        SubmissionStatus.RuntimeError => "runtime_error",
+                        SubmissionStatus.CompileError => "compile_error",
+                        SubmissionStatus.TimeLimitExceeded => "time_limit_exceeded",
+                        SubmissionStatus.MemoryLimitExceeded => "memory_limit_exceeded",
+                        _ => throw new ArgumentOutOfRangeException(nameof(submission.Status))
+                    },
                     submission.ExecutionTimeMs,
                     submission.MemoryUsedMb,
                     submission.PassedTestCases,

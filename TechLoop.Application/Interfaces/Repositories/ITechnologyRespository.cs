@@ -19,4 +19,5 @@ public interface ITechnologyRepository
     Task<Technology?> GetPublishedBySlugAsync(string slug, CancellationToken cancellationToken);
     Task<int?> GetTechnologyIdAsync(int topicId, CancellationToken cancellationToken);
     Task<int?> GetMentorTechnologyIdAsync(Guid userId, CancellationToken cancellationToken);
+    Task<int> GetJudge0LanguageIdAsync(int technologyId, CancellationToken cancellationToken);
 }
