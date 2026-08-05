@@ -211,4 +211,18 @@ public class SubTopicsRepository : ISubTopicsRepository
                 },
                 cancellationToken: cancellationToken));
     }
+    
+    //
+    public async Task<int> GetTopicIdAsync(int subTopicId, CancellationToken cancellationToken)
+    {
+        const string sql = @"SELECT fn_get_topic_id(@SubTopicId);";
+        using var connection = _context.CreateConnection();
+        return await connection.ExecuteScalarAsync<int>(new CommandDefinition(
+                sql,
+                new
+                {
+                    SubTopicId = subTopicId
+                },
+                cancellationToken: cancellationToken));
+    }
 }

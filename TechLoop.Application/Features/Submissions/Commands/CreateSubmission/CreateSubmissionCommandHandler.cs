@@ -7,8 +7,7 @@ using TechLoop.Domain.Enums;
 
 namespace TechLoop.Application.Features.Submissions.Commands.CreateSubmission;
 
-public sealed class CreateSubmissionCommandHandler
-    : IRequestHandler<CreateSubmissionCommand, CreateSubmissionResponse>
+public sealed class CreateSubmissionCommandHandler : IRequestHandler<CreateSubmissionCommand, CreateSubmissionResponse>
 {
     private readonly ISubmissionRepository _submissionRepository;
     private readonly IQuestionRepository _questionRepository;
@@ -27,10 +26,14 @@ public sealed class CreateSubmissionCommandHandler
     public async Task<CreateSubmissionResponse> Handle(CreateSubmissionCommand request, CancellationToken cancellationToken)
     {
         var question = await _questionRepository.GetByIdAsync(request.Request.QuestionId, cancellationToken);
-
         if (question is null)
         {
             throw new NotFoundException("Question not found.");
+        }
+        var alreadySolved = await _submissionRepository.IsQuestionSolvedAsync(request.UserId, request.Request.QuestionId, cancellationToken);
+        if (alreadySolved)
+        {
+            throw new BadRequestException("You have already solved this question.");
         }
 
         var attemptNumber = await _submissionRepository.GetNextAttemptNumberAsync(request.UserId, request.Request.QuestionId, cancellationToken);

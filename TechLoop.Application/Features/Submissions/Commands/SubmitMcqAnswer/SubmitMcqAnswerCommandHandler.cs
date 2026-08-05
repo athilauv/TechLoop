@@ -1,51 +1,85 @@
 ﻿using MediatR;
 using TechLoop.Application.Common.Exceptions;
 using TechLoop.Application.Features.Submissions.DTOs;
+using TechLoop.Application.Features.UserStatistics.UpdateUserStatistics;
+using TechLoop.Application.Features.UserTopicProgress.UpdateUserTopicProgress;
 using TechLoop.Application.Interfaces.Repositories;
 using TechLoop.Domain.Entities;
 using TechLoop.Domain.Enums;
 
 namespace TechLoop.Application.Features.Submissions.Commands.SubmitMcqAnswer;
 
-public sealed class SubmitMcqAnswerCommandHandler : IRequestHandler<SubmitMcqAnswerCommand, SubmitMcqAnswerResponse>
+public sealed class SubmitMcqAnswerCommandHandler
+    : IRequestHandler<SubmitMcqAnswerCommand, SubmitMcqAnswerResponse>
 {
     private readonly ISubmissionRepository _submissionRepository;
     private readonly IQuestionRepository _questionRepository;
     private readonly IMcqOptionRepository _mcqOptionRepository;
+    private readonly IMediator _mediator;
 
     public SubmitMcqAnswerCommandHandler(
         ISubmissionRepository submissionRepository,
         IQuestionRepository questionRepository,
-        IMcqOptionRepository mcqOptionRepository)
+        IMcqOptionRepository mcqOptionRepository,
+        IMediator mediator)
     {
         _submissionRepository = submissionRepository;
         _questionRepository = questionRepository;
         _mcqOptionRepository = mcqOptionRepository;
+        _mediator = mediator;
     }
 
-    public async Task<SubmitMcqAnswerResponse> Handle(SubmitMcqAnswerCommand request, CancellationToken cancellationToken)
+    public async Task<SubmitMcqAnswerResponse> Handle(
+        SubmitMcqAnswerCommand request,
+        CancellationToken cancellationToken)
     {
-        // Check question
-        var question = await _questionRepository.GetByIdAsync(request.Request.QuestionId, cancellationToken);
+        Console.WriteLine("===== SubmitMcqAnswer Started =====");
+
+        var question = await _questionRepository.GetByIdAsync(
+            request.Request.QuestionId,
+            cancellationToken);
+
         if (question is null)
             throw new NotFoundException("Question not found.");
+
+        Console.WriteLine($"Question Id : {question.Id}");
+        Console.WriteLine($"SubTopic Id : {question.SubTopicId}");
 
         if (question.QuestionType != QuestionType.mcq)
             throw new BadRequestException("Selected question is not an MCQ.");
 
-        // Check option
-        var option = await _mcqOptionRepository.GetByIdAsync(request.Request.SelectedOptionId, cancellationToken);
+        var alreadySolved = await _submissionRepository.IsQuestionSolvedAsync(
+            request.UserId,
+            question.Id,
+            cancellationToken);
+
+        Console.WriteLine($"Already Solved : {alreadySolved}");
+
+        if (alreadySolved)
+            throw new BadRequestException("You have already solved this question.");
+
+        var option = await _mcqOptionRepository.GetByIdAsync(
+            request.Request.SelectedOptionId,
+            cancellationToken);
+
         if (option is null)
             throw new NotFoundException("MCQ option not found.");
 
+        Console.WriteLine($"Selected Option : {option.Id}");
+        Console.WriteLine($"Is Correct : {option.IsCorrect}");
+
         if (option.QuestionId != question.Id)
-            throw new BadRequestException("Selected option does not belong to this question.");
+            throw new BadRequestException(
+                "Selected option does not belong to this question.");
 
-        // Next attempt
-        var attemptNumber = await _submissionRepository.GetNextAttemptNumberAsync(
-            request.UserId, question.Id, cancellationToken);
+        var attemptNumber =
+            await _submissionRepository.GetNextAttemptNumberAsync(
+                request.UserId,
+                question.Id,
+                cancellationToken);
 
-        // Create submission
+        Console.WriteLine($"Attempt Number : {attemptNumber}");
+
         var submission = new Submission
         {
             UserId = request.UserId,
@@ -65,7 +99,32 @@ public sealed class SubmitMcqAnswerCommandHandler : IRequestHandler<SubmitMcqAns
             SubmittedAt = DateTime.UtcNow
         };
 
-        var submissionId = await _submissionRepository.CreateAsync(submission, cancellationToken);
+        Console.WriteLine($"Submission Status : {submission.Status}");
+
+        var submissionId = await _submissionRepository.CreateAsync(
+            submission,
+            cancellationToken);
+
+        submission.Id = submissionId;
+
+        Console.WriteLine($"Submission Created : {submissionId}");
+
+        Console.WriteLine("Calling UpdateUserStatistics...");
+        await _mediator.Send(
+            new UpdateUserStatisticsCommand(submission),
+            cancellationToken);
+        Console.WriteLine("UpdateUserStatistics Completed");
+
+        Console.WriteLine("Calling UpdateUserTopicProgress...");
+        await _mediator.Send(
+            new UpdateUserTopicProgressCommand(
+                submission,
+                question),
+            cancellationToken);
+        Console.WriteLine("UpdateUserTopicProgress Completed");
+
+        Console.WriteLine("===== SubmitMcqAnswer Finished =====");
+
         return new SubmitMcqAnswerResponse
         {
             SubmissionId = submissionId,

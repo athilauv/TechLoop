@@ -1,6 +1,6 @@
-﻿namespace TechLoop.Domain.Entities;
+﻿namespace TechLoop.Application.Features.UserTopicProgress.Queries.GetUserTopicProgressList;
 
-public class UserTopicProgress
+public sealed class GetUserTopicProgressListResponse
 {
     public Guid Id { get; set; }
     public Guid UserId { get; set; }

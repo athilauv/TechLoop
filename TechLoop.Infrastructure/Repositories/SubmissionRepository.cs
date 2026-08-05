@@ -166,4 +166,18 @@ public class SubmissionRepository : ISubmissionRepository
                 },
                 cancellationToken: cancellationToken));
     }
+    
+    public async Task<bool> IsQuestionSolvedAsync(Guid userId, int questionId, CancellationToken cancellationToken)
+    {
+        const string sql = @" SELECT fn_submission_already_solved( @UserId, @QuestionId);";
+        using var connection = _context.CreateConnection();
+        return await connection.ExecuteScalarAsync<bool>(new CommandDefinition(
+                sql,
+                new
+                {
+                    UserId = userId,
+                    QuestionId = questionId
+                },
+                cancellationToken: cancellationToken));
+    }
 }

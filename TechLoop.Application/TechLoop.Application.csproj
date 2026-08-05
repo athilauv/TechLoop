@@ -7,6 +7,7 @@
   <ItemGroup>
     <Folder Include="Common\Behaviors\" />
     <Folder Include="Common\Mappings\" />
+    <Folder Include="Features\Discussions\" />
     <Folder Include="Features\MCQ\Queries\GetMcqOptionsByQuestionQuery\" />
     <Folder Include="Features\SubTopics\Queries\GetAllSubTopic\" />
     <Folder Include="Features\SubTopics\Queries\GetSubTopicById\" />
@@ -15,6 +16,8 @@
     <Folder Include="Features\TechnologyCategories\Queries\GetTechnologyCategoryById\" />
     <Folder Include="Features\TopicContributions\Queries\Admin-Mentor\" />
     <Folder Include="Features\Topics\Queries\GetTopicBySlug\" />
+    <Folder Include="Features\UserStatistics\Commands\" />
+    <Folder Include="Features\UserTopicProgress\Commands\" />
   </ItemGroup>
 
   <ItemGroup>

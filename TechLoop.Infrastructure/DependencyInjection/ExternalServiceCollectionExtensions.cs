@@ -19,7 +19,6 @@ public static class ExternalServiceCollectionExtensions
             client.BaseAddress = new Uri(configuration["Judge0:BaseUrl"]!);
         });
         services.AddScoped<ISubmissionExecutionService, SubmissionExecutionService>();
-
         return services;
     }
 }

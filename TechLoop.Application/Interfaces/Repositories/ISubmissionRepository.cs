@@ -11,4 +11,5 @@ public interface ISubmissionRepository
     Task<IEnumerable<Submission>> GetByUserIdAsync(Guid userId, CancellationToken cancellationToken);
     Task<IEnumerable<Submission>> GetByQuestionIdAsync(int questionId, CancellationToken cancellationToken);
     Task<int> GetNextAttemptNumberAsync(Guid userId, int questionId, CancellationToken cancellationToken);
+    Task<bool> IsQuestionSolvedAsync(Guid userId, int questionId, CancellationToken cancellationToken);
 }

@@ -19,4 +19,5 @@ public interface ISubTopicsRepository
     Task<SubTopic?> GetPublishedBySlugAsync(string slug, CancellationToken cancellationToken);
     Task<int?> GetTechnologyIdAsync(int subTopicId, CancellationToken cancellationToken);
     Task<int?> GetMentorTechnologyIdAsync(Guid userId, CancellationToken cancellationToken);
+    Task<int> GetTopicIdAsync(int subTopicId, CancellationToken cancellationToken);
 }

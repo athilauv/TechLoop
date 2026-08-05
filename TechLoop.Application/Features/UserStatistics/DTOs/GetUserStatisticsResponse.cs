@@ -1,5 +1,6 @@
-﻿namespace TechLoop.Domain.Entities;
-public class UserStatistics
+﻿namespace TechLoop.Application.Features.UserStatistics.Queries.GetUserStatistics;
+
+public sealed class GetUserStatisticsResponse
 {
     public Guid Id { get; set; }
     public Guid UserId { get; set; }
