@@ -48,6 +48,7 @@ using TechLoop.Application.Features.Coding.Queries.GetCodingTemplatesByQuestion.
 using TechLoop.Application.Features.Coding.Queries.GetTestCasesByQuestion.Mentor;
 using TechLoop.Application.Features.Curriculum.Queries.Mentor;
 using TechLoop.Application.Features.Discussions.Commands.PinDiscussion;
+using TechLoop.Application.Features.Discussions.Commands.UnpinDiscussion;
 using TechLoop.Application.Features.Discussions.Queries.GetDiscussionById;
 using TechLoop.Application.Features.Discussions.Queries.GetDiscussions;
 using TechLoop.Application.Features.MCQ.Queries.GetMcqOptionsByQuestionQuery.Mentor;
@@ -535,17 +536,19 @@ public sealed class MentorController : ControllerBase
         var result = await _mediator.Send(new GetDiscussionByIdQuery(id));
         return Ok(result);
     }
-
-    // Pins or unpins a discussion.
+// Pins a discussion.
     [HttpPatch("discussions/{id:int}/pin")]
-    public async Task<IActionResult> Pin(int id, [FromBody] PinDiscussionCommand command)
+    public async Task<IActionResult> PinDiscussion(int id)
     {
-        if (id != command.Id)
-        {
-            return BadRequest("Route id and request id do not match.");
-        }
+        var result = await _mediator.Send(new PinDiscussionCommand(id));
+        return Ok(result);
+    }
 
-        var result = await _mediator.Send(command);
+// Unpins a discussion.
+    [HttpPatch("discussions/{id:int}/unpin")]
+    public async Task<IActionResult> UnpinDiscussion(int id)
+    {
+        var result = await _mediator.Send(new UnpinDiscussionCommand(id));
         return Ok(result);
     }
     
