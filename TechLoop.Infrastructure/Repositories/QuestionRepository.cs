@@ -220,4 +220,16 @@ public sealed class QuestionRepository : IQuestionRepository
                 },
                 cancellationToken: cancellationToken));
     }
+  
+    public async Task<bool> ExistsAsync(int id, CancellationToken cancellationToken)
+    {
+        const string sql = @"SELECT fn_question_exists(@Id);";
+        using var connection = _context.CreateConnection();
+        return await connection.ExecuteScalarAsync<bool>(new CommandDefinition(sql,
+                new
+                {
+                    Id = id
+                },
+                cancellationToken: cancellationToken));
+    }
 }

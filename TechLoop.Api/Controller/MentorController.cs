@@ -47,6 +47,9 @@ using TechLoop.Application.Features.Coding.DTOs;
 using TechLoop.Application.Features.Coding.Queries.GetCodingTemplatesByQuestion.Mentor;
 using TechLoop.Application.Features.Coding.Queries.GetTestCasesByQuestion.Mentor;
 using TechLoop.Application.Features.Curriculum.Queries.Mentor;
+using TechLoop.Application.Features.Discussions.Commands.PinDiscussion;
+using TechLoop.Application.Features.Discussions.Queries.GetDiscussionById;
+using TechLoop.Application.Features.Discussions.Queries.GetDiscussions;
 using TechLoop.Application.Features.MCQ.Queries.GetMcqOptionsByQuestionQuery.Mentor;
 using TechLoop.Application.Features.Mentor.Commands.UpdateProfile;
 using TechLoop.Application.Features.Mentor.DTOs;
@@ -518,5 +521,33 @@ public sealed class MentorController : ControllerBase
         return Ok(result);
     }
     
+    // Returns all discussions.
+    [HttpGet]
+    public async Task<IActionResult> GetAll()
+    {
+        var result = await _mediator.Send(new GetDiscussionsQuery());
+        return Ok(result);
+    }
+
+    // Returns a discussion by id.
+    [HttpGet("{id:int}")]
+    public async Task<IActionResult> GetById(int id)
+    {
+        var result = await _mediator.Send(new GetDiscussionByIdQuery(id));
+        return Ok(result);
+    }
+
+    // Pins or unpins a discussion.
+    [HttpPatch("{id:int}/pin")]
+    public async Task<IActionResult> Pin(int id, [FromBody] PinDiscussionCommand command)
+    {
+        if (id != command.Id)
+        {
+            return BadRequest("Route id and request id do not match.");
+        }
+
+        var result = await _mediator.Send(command);
+        return Ok(result);
+    }
     
 }

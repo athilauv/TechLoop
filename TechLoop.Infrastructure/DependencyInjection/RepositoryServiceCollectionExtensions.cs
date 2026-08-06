@@ -24,6 +24,7 @@ public static class RepositoryServiceCollectionExtensions
         services.AddScoped<IMentorRepository, MentorRepository>();
         services.AddScoped<IUserStatisticsRepository, UserStatisticsRepository>();
         services.AddScoped<IUserTopicProgressRepository, UserTopicProgressRepository>();
+        services.AddScoped<IDiscussionRepository, DiscussionRepository>();
         return services;
     }
 }
