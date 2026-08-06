@@ -6,6 +6,8 @@ public sealed class DiscussionDto
 
     public Guid UserId { get; set; }
 
+    public string UserName { get; set; } = string.Empty;
+
     public int QuestionId { get; set; }
 
     public string Title { get; set; } = string.Empty;
@@ -16,5 +18,7 @@ public sealed class DiscussionDto
 
     public bool IsLocked { get; set; }
 
-    public DateTime CreatedAt { get; set; }
+    public int CommentCount { get; set; }
+
+    public DateTimeOffset CreatedAt { get; set; }
 }

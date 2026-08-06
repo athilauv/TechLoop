@@ -1,5 +1,6 @@
 ﻿using System.Data;
 using Dapper;
+using TechLoop.Application.Features.Discussions.DTOs;
 using TechLoop.Application.Interfaces.Infrastructure;
 using TechLoop.Application.Interfaces.Repositories;
 using TechLoop.Domain.Entities;
@@ -75,25 +76,25 @@ public sealed class DiscussionRepository : IDiscussionRepository
                 });
         });
 
-    public Task<Discussion?> GetByIdAsync(int id)
+    public Task<DiscussionDto?> GetByIdAsync(int id)
         => WithConnection(async connection =>
         {
-            return await connection.QueryFirstOrDefaultAsync<Discussion>(
+            return await connection.QueryFirstOrDefaultAsync<DiscussionDto>(
                 "SELECT * FROM fn_discussion_get_by_id(@Id)",
                 new { Id = id });
         });
 
-    public Task<IEnumerable<Discussion>> GetAllAsync()
+    public Task<IEnumerable<DiscussionDto>> GetAllAsync()
         => WithConnection(async connection =>
         {
-            return await connection.QueryAsync<Discussion>(
+            return await connection.QueryAsync<DiscussionDto>(
                 "SELECT * FROM fn_discussion_get_all()");
         });
 
-    public Task<IEnumerable<Discussion>> GetByQuestionIdAsync(int questionId)
+    public Task<IEnumerable<DiscussionDto>> GetByQuestionIdAsync(int questionId)
         => WithConnection(async connection =>
         {
-            return await connection.QueryAsync<Discussion>(
+            return await connection.QueryAsync<DiscussionDto>(
                 "SELECT * FROM fn_discussion_get_by_question(@QuestionId)",
                 new
                 {
@@ -106,6 +107,14 @@ public sealed class DiscussionRepository : IDiscussionRepository
         {
             return await connection.ExecuteScalarAsync<bool>(
                 "SELECT fn_discussion_exists(@Id)",
+                new { Id = id });
+        });
+    
+    public Task<Discussion?> GetEntityByIdAsync(int id)
+        => WithConnection(async connection =>
+        {
+            return await connection.QueryFirstOrDefaultAsync<Discussion>(
+                "SELECT * FROM discussions WHERE id = @Id AND deleted_at IS NULL",
                 new { Id = id });
         });
 }

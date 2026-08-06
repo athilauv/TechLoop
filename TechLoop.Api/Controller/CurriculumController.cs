@@ -27,4 +27,5 @@ public sealed class CurriculumController : ControllerBase
         return Ok(result);
     }
     
+    
 }

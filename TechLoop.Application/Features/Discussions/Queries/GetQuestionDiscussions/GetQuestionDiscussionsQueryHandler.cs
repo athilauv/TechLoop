@@ -23,17 +23,6 @@ public sealed class GetQuestionDiscussionsQueryHandler : IRequestHandler<GetQues
             throw new KeyNotFoundException("Question not found.");
         }
 
-        var discussions = await _discussionRepository.GetByQuestionIdAsync(request.QuestionId);
-        return discussions.Select(d => new DiscussionDto
-        {
-            Id = d.Id,
-            UserId = d.UserId,
-            QuestionId = d.QuestionId,
-            Title = d.Title,
-            Content = d.Content,
-            IsPinned = d.IsPinned,
-            IsLocked = d.IsLocked,
-            CreatedAt = d.CreatedAt
-        });
+        return await _discussionRepository.GetByQuestionIdAsync(request.QuestionId);
     }
 }

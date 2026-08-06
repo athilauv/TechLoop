@@ -486,7 +486,6 @@ public sealed class MentorController : ControllerBase
     }
     
     // Get all contributions of a technology (Admin / Mentor)
-    [Authorize(Roles = "Mentor")]
     [HttpGet("technology/{technologyId:int}")]
     public async Task<IActionResult> GetTechnologyContributions(int technologyId, CancellationToken cancellationToken)
     {
@@ -522,7 +521,7 @@ public sealed class MentorController : ControllerBase
     }
     
     // Returns all discussions.
-    [HttpGet]
+    [HttpGet("discussions")]
     public async Task<IActionResult> GetAll()
     {
         var result = await _mediator.Send(new GetDiscussionsQuery());
@@ -530,7 +529,7 @@ public sealed class MentorController : ControllerBase
     }
 
     // Returns a discussion by id.
-    [HttpGet("{id:int}")]
+    [HttpGet("discussions/{id:int}")]
     public async Task<IActionResult> GetById(int id)
     {
         var result = await _mediator.Send(new GetDiscussionByIdQuery(id));
@@ -538,7 +537,7 @@ public sealed class MentorController : ControllerBase
     }
 
     // Pins or unpins a discussion.
-    [HttpPatch("{id:int}/pin")]
+    [HttpPatch("discussions/{id:int}/pin")]
     public async Task<IActionResult> Pin(int id, [FromBody] PinDiscussionCommand command)
     {
         if (id != command.Id)

@@ -6,7 +6,8 @@ using TechLoop.Domain.Entities;
 
 namespace TechLoop.Application.Features.Discussions.Commands.CreateDiscussion;
 
-public sealed class CreateDiscussionCommandHandler : IRequestHandler<CreateDiscussionCommand, DiscussionDto>
+public sealed class CreateDiscussionCommandHandler
+    : IRequestHandler<CreateDiscussionCommand, DiscussionDto>
 {
     private readonly IDiscussionRepository _discussionRepository;
     private readonly IQuestionRepository _questionRepository;
@@ -23,14 +24,18 @@ public sealed class CreateDiscussionCommandHandler : IRequestHandler<CreateDiscu
     }
 
     public async Task<DiscussionDto> Handle(
-        CreateDiscussionCommand request, CancellationToken cancellationToken)
+        CreateDiscussionCommand request,
+        CancellationToken cancellationToken)
     {
         if (_currentUser.UserId == Guid.Empty)
         {
             throw new UnauthorizedAccessException("User is not authenticated.");
         }
 
-        var question = await _questionRepository.GetByIdAsync(request.QuestionId, cancellationToken);
+        var question = await _questionRepository.GetByIdAsync(
+            request.QuestionId,
+            cancellationToken);
+
         if (question is null)
         {
             throw new KeyNotFoundException("Question not found.");
@@ -46,27 +51,19 @@ public sealed class CreateDiscussionCommandHandler : IRequestHandler<CreateDiscu
         };
 
         var discussionId = await _discussionRepository.CreateAsync(discussion);
+
         if (discussionId <= 0)
         {
             throw new InvalidOperationException("Failed to create discussion.");
         }
 
         var createdDiscussion = await _discussionRepository.GetByIdAsync(discussionId);
+
         if (createdDiscussion is null)
         {
             throw new KeyNotFoundException("Discussion not found.");
         }
 
-        return new DiscussionDto
-        {
-            Id = createdDiscussion.Id,
-            UserId = createdDiscussion.UserId,
-            QuestionId = createdDiscussion.QuestionId,
-            Title = createdDiscussion.Title,
-            Content = createdDiscussion.Content,
-            IsPinned = createdDiscussion.IsPinned,
-            IsLocked = createdDiscussion.IsLocked,
-            CreatedAt = createdDiscussion.CreatedAt
-        };
+        return createdDiscussion;
     }
 }

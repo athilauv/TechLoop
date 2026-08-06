@@ -24,7 +24,7 @@ public sealed class PinDiscussionCommandHandler : IRequestHandler<PinDiscussionC
             throw new UnauthorizedAccessException("User is not authenticated.");
         }
 
-        var discussion = await _discussionRepository.GetByIdAsync(request.Id);
+        var discussion = await _discussionRepository.GetEntityByIdAsync(request.Id);
         if (discussion is null)
         {
             throw new KeyNotFoundException("Discussion not found.");

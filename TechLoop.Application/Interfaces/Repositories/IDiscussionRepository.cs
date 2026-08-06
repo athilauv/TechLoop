@@ -1,4 +1,5 @@
-﻿using TechLoop.Domain.Entities;
+﻿using TechLoop.Application.Features.Discussions.DTOs;
+using TechLoop.Domain.Entities;
 
 namespace TechLoop.Application.Interfaces.Repositories;
 
@@ -8,8 +9,12 @@ public interface IDiscussionRepository
     Task<bool> UpdateAsync(Discussion discussion);
     Task<bool> DeleteAsync(int id, Guid userId);
     Task<bool> PinAsync(int id, bool isPinned, Guid updatedBy);
-    Task<Discussion?> GetByIdAsync(int id);
-    Task<IEnumerable<Discussion>> GetAllAsync();
-    Task<IEnumerable<Discussion>> GetByQuestionIdAsync(int questionId);
+    // Read operations return DTOs
+    Task<DiscussionDto?> GetByIdAsync(int id);
+    Task<IEnumerable<DiscussionDto>> GetAllAsync();
+    Task<IEnumerable<DiscussionDto>> GetByQuestionIdAsync(int questionId);
+    // Validation
     Task<bool> ExistsAsync(int id);
+    Task<Discussion?> GetEntityByIdAsync(int id);
+
 }
