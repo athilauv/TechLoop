@@ -1,15 +1,14 @@
-﻿import api from "../../../api/axios";
-import type { TechnologyCategory } from "../types/technologyCategory";
+﻿import api from "../../../api/axios.ts";
+import type { TechnologyCategory } from '../types/technologyCategory';
 
-class TechnologyCategoryService {
-    async getAll(): Promise<TechnologyCategory[]> {
-        const response = await api.get<TechnologyCategory[]>("/technology-categories");
+export const technologyCategoryService = {
+    getCategories: async (): Promise<TechnologyCategory[]> => {
+        const response = await api.get('/technology-categories');
         return response.data;
-    }
+    },
 
-    async getById(id: number): Promise<TechnologyCategory> {
-        const response = await api.get<TechnologyCategory>(`/technology-categories/${id}`);
+    getCategoryById: async (id: number): Promise<TechnologyCategory> => {
+        const response = await api.get(`/technology-categories/${id}`);
         return response.data;
-    }
-}
-export default new TechnologyCategoryService();
+    },
+};

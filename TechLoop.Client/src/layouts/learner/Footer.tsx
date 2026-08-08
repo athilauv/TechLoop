@@ -68,11 +68,6 @@ export default function Footer() {
                         </p>
 
                         <div className="mt-6 flex gap-3">
-
-                            {/*<button className="flex h-10 w-10 items-center justify-center rounded-lg border border-white/5 text-slate-400 transition hover:border-[#17D4C3]/30 hover:text-[#17D4C3]">*/}
-                            {/*    <Github size={18} />*/}
-                            {/*</button>*/}
-
                             <button className="flex h-10 w-10 items-center justify-center rounded-lg border border-white/5 text-slate-400 transition hover:border-[#17D4C3]/30 hover:text-[#17D4C3]">
                                 <MessageSquare size={18} />
                             </button>

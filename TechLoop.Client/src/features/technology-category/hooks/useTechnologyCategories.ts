@@ -1,32 +1,44 @@
-﻿import { useEffect, useState } from "react";
-import technologyCategoryService from "../api/technologyCategoryService.ts";
-import type { TechnologyCategory } from "../types/technologyCategory";
+﻿// import { useQuery } from '@tanstack/react-query';
+// import { technologyCategoryService } from '../api/technologyCategoryService';
+// import { technologyService } from '../api/technologyService';
+//
+// export const useTechnologyCategories = () => {
+//     return useQuery({
+//         queryKey: ['technology-categories'],
+//         queryFn: () => technologyCategoryService.getCategories(),
+//     });
+// };
+//
+// export const useTechnologyCategory = (id: number) => {
+//     return useQuery({
+//         queryKey: ['technology-category', id],
+//         queryFn: () => technologyCategoryService.getCategoryById(id),
+//         enabled: !!id,
+//     });
+// };
+//
+// export const useTechnologies = () => {
+//     return useQuery({
+//         queryKey: ['technologies'],
+//         queryFn: () => technologyService.getTechnologies(),
+//     });
+// };
+//
+// export const useTechnologyBySlug = (slug: string) => {
+//     return useQuery({
+//         queryKey: ['technology', slug],
+//         queryFn: () => technologyService.getTechnologyBySlug(slug),
+//         enabled: !!slug,
+//     });
+// };
 
-export function useTechnologyCategories() {
-    const [categories, setCategories] = useState<TechnologyCategory[]>([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
 
-    useEffect(() => {
-        void loadCategories();
-    }, []);
+import { useQuery } from "@tanstack/react-query";
+import { technologyCategoryService } from "../api/technologyCategoryService";
 
-    async function loadCategories() {
-        try {
-            const data = await technologyCategoryService.getAll();
-            setCategories(data);
-        } catch (err) {
-            console.error(err);
-            setError("Failed to load technology categories.");
-        } finally {
-            setLoading(false);
-        }
-    }
-
-    return {
-        categories,
-        loading,
-        error,
-        reload: loadCategories,
-    };
-}
+export const useTechnologyCategories = () => {
+    return useQuery({
+        queryKey: ["technology-categories"],
+        queryFn: technologyCategoryService.getCategories,
+    });
+};

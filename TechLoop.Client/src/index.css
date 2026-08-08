@@ -1,7 +1,5 @@
 @import "tailwindcss";
 
-/* ===== TechLoop Toast ===== */
-
 .techloop-toast {
   background: #12213b !important;
   color: #ffffff !important;
@@ -50,4 +48,20 @@
 ::-webkit-scrollbar-thumb:hover {
   background: rgba(23,212,195,.65);
   background-clip: content-box;
+}
+@theme {
+  --color-background: #0a0e17;
+  --color-surface: #131925;
+  --color-surface-hover: #1c263a;
+  --color-primary: #00e5c0;
+  --color-primary-dark: #00b89a;
+  --color-border: #2a3449;
+  --color-text-muted: #94a3b8;
+}
+
+/* Define the base dark theme for your body */
+body {
+  background-color: var(--color-background);
+  color: #ffffff;
+  font-family: 'Inter', sans-serif;
 }

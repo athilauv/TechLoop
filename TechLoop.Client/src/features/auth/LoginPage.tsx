@@ -184,15 +184,7 @@ export default function LoginPage() {
                             error={errors.email}
                         />
 
-                        <Field
-                            label="Password"
-                            type="password"
-                            placeholder="Password"
-                            value={password}
-                            onChange={setPassword}
-                            error={errors.password}
-                        />
-
+                        <Field label="Password" type="password" placeholder="Password" value={password} onChange={setPassword} error={errors.password}/>
                         <button
                             onClick={handleSignIn}
                             disabled={loading}

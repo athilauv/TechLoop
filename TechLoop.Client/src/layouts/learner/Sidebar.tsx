@@ -1,7 +1,6 @@
 ﻿import {
     LayoutDashboard,
     BookOpen,
-    Dumbbell,
     Code2,
     Users,
     MessagesSquare,

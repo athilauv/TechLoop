@@ -1,112 +1,159 @@
-﻿import { useEffect, useMemo, useState } from "react";
-import LearningHeader from "../components/LearningHeader.tsx";
-import SearchBar from "../components/SearchBar.tsx";
-import CategoryTabs from "../components/CategoryTabs.tsx";
-import TechGrid from "../components/TechGrid.tsx";
-import type { Technology } from "../types/technology.ts";
-import { LoaderBar } from "../../../shared/components/common/feedback/Loader.tsx";
-import EmptyState from "../../../shared/components/common/feedback/EmptyState.tsx";
-import type { TechnologyCategory } from "../types/technologyCategory.ts";
-import technologyService from "../api/technologyService.ts";
-import technologyCategoryService from "../api/technologyCategoryService.ts";
+﻿import { useMemo, useState } from "react";
+import { LearningHeader } from "../components/LearningHeader";
+import SearchBar from "../components/SearchBar";
+import CategoryTabs from "../components/CategoryTabs";
+import TechGrid from "../components/TechGrid";
+import TechGridSkeleton from "../components/TechGridSkeleton";
+import EmptyState from "../../../shared/components/common/feedback/EmptyState";
+import { useTechnologyCategories } from "../hooks/useTechnologyCategories.ts";
+import { useTechnologies } from "../hooks/useTechnology.ts";
 
-export default function TechnologyCategory() {
-    const [categories, setCategories] = useState<TechnologyCategory[]>([]);
-    const [technologies, setTechnologies] = useState<Technology[]>([]);
-    const [loading, setLoading] = useState(true);
+export default function TechnologyCategoryPage() {
     const [search, setSearch] = useState("");
-    const [selectedCategory, setSelectedCategory] = useState<number | null>(null);
+    const [selectedCategoryId, setSelectedCategoryId] =
+        useState<number | null>(null);
 
-    useEffect(() => {
-        void loadData();
-    }, []);
+    const {
+        data: technologies = [],
+        isLoading: technologiesLoading,
+        isError: technologiesError,
+    } = useTechnologies();
 
-    async function loadData() {
-        setLoading(true);
+    const {
+        data: categories = [],
+        isLoading: categoriesLoading,
+        isError: categoriesError,
+    } = useTechnologyCategories();
 
-        try {
-            const technologiesData = await technologyService.getAll();
+    const activeCategoryId =
+        selectedCategoryId ?? categories[0]?.id ?? null;
 
-            console.log("Technologies Response:", technologiesData);
-            console.log("Is Technologies Array:", Array.isArray(technologiesData));
-
-            if (Array.isArray(technologiesData)) {
-                setTechnologies(technologiesData);
-            } else {
-                console.error("Expected technologies array but received:", technologiesData);
-                setTechnologies([]);
-            }
-
-            const categoriesData = await technologyCategoryService.getAll();
-
-            console.log("Categories Response:", categoriesData);
-            console.log("Is Categories Array:", Array.isArray(categoriesData));
-
-            if (Array.isArray(categoriesData)) {
-                setCategories(categoriesData);
-
-                if (categoriesData.length > 0) {
-                    setSelectedCategory(categoriesData[0].id);
-                }
-            } else {
-                console.error("Expected categories array but received:", categoriesData);
-                setCategories([]);
-            }
-        } catch (error) {
-            console.error("Failed to load data.", error);
-        } finally {
-            setLoading(false);
+    const selectedCategory = useMemo(() => {
+        if (activeCategoryId === null) {
+            return null;
         }
-    }
+
+        return (
+            categories.find(
+                (category) => category.id === activeCategoryId
+            ) ?? null
+        );
+    }, [categories, activeCategoryId]);
 
     const filteredTechnologies = useMemo(() => {
-        if (!Array.isArray(technologies)) {
-            return [];
+        let filtered = [...technologies];
+
+        if (activeCategoryId !== null) {
+            filtered = filtered.filter(
+                (technology) =>
+                    technology.categoryId === activeCategoryId
+            );
         }
 
-        return technologies.filter((technology) =>
-            technology.name.toLowerCase().includes(search.toLowerCase())
-        );
-    }, [technologies, search]);
+        const keyword = search.trim().toLowerCase();
+
+        if (keyword) {
+            filtered = filtered.filter(
+                (technology) =>
+                    technology.name
+                        .toLowerCase()
+                        .includes(keyword) ||
+                    technology.description
+                        ?.toLowerCase()
+                        .includes(keyword)
+            );
+        }
+
+        return filtered;
+    }, [
+        technologies,
+        activeCategoryId,
+        search,
+    ]);
+
+    const handleCategoryChange = (categoryId: number) => {
+        setSelectedCategoryId(categoryId);
+        setSearch("");
+    };
 
     return (
         <div className="mx-auto w-full max-w-7xl px-8 py-8">
-            <LearningHeader />
 
-            <div className="mt-8">
+            {/* Header */}
+            {categoriesLoading ? (
+                <div className="mb-8 flex animate-pulse items-center gap-4">
+                    <div className="h-14 w-14 rounded-xl bg-slate-800" />
+
+                    <div className="space-y-2">
+                        <div className="h-7 w-48 rounded bg-slate-800" />
+                        <div className="h-4 w-72 rounded bg-slate-800" />
+                    </div>
+                </div>
+            ) : (
+                <LearningHeader
+                    category={selectedCategory}
+                />
+            )}
+
+            {/* Search */}
+            <div className="sticky top-0 z-10 -mx-8 mt-8 bg-[#0B1120]/80 px-8 py-4 backdrop-blur-md">
                 <SearchBar
                     value={search}
                     onChange={setSearch}
                 />
             </div>
 
+            {/* Category Tabs */}
             <div className="mt-6">
                 <CategoryTabs
                     categories={categories}
-                    selectedCategory={selectedCategory}
-                    onCategoryChange={setSelectedCategory}
+                    selectedCategory={activeCategoryId}
+                    onCategoryChange={handleCategoryChange}
+                    isLoading={categoriesLoading}
                 />
             </div>
 
-            <div className="mt-10 flex items-center justify-between border-b border-slate-800 pb-4">
-                <h2 className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">
-                    All Technologies
-                </h2>
+            {/* Category API error */}
+            {categoriesError ? (
+                <div className="mt-6">
+                    <EmptyState
+                        title="Unable to load technology categories"
+                        description="We couldn't load the technology categories. Please refresh the page and try again."
+                    />
+                </div>
+            ) : null}
 
-                <span className="text-xs text-slate-500">
-                    {filteredTechnologies.length} Technologies
-                </span>
-            </div>
-
-            <div className="mt-8">
-                {loading && <LoaderBar />}
-
-                {!loading && filteredTechnologies.length === 0 && (
-                    <EmptyState title="No Technologies" description="No technologies found."/>
-                )}
-
-                {!loading && filteredTechnologies.length > 0 && (
-                    <TechGrid technologies={filteredTechnologies} />
+            {/* Technologies */}
+            <div className="mt-10">
+                {technologiesLoading ? (
+                    <TechGridSkeleton />
+                ) : technologiesError ? (
+                    <EmptyState
+                        title="Unable to load technologies"
+                        description="We couldn't load the technologies. Please refresh the page and try again."
+                    />
+                ) : filteredTechnologies.length === 0 ? (
+                    search.trim() ? (
+                        <EmptyState
+                            title="No technologies found"
+                            description={`Nothing matches "${search}" in this category. Try a different keyword.`}
+                            actionLabel="Clear Search"
+                            onAction={() => setSearch("")}
+                        />
+                    ) : (
+                        <EmptyState
+                            title="No technologies available"
+                            description={
+                                selectedCategory
+                                    ? `No technologies are available in ${selectedCategory.name} yet.`
+                                    : "No technologies are available yet."
+                            }
+                        />
+                    )
+                ) : (
+                    <TechGrid
+                        technologies={filteredTechnologies}
+                    />
                 )}
             </div>
         </div>

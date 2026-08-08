@@ -1,16 +1,14 @@
 ﻿import api from "../../../api/axios.ts";
-import type { Technology } from "../types/technology";
+import type { Technology } from '../types/technology';
 
-class TechnologyService {
-    async getAll(): Promise<Technology[]> {
-        const response = await api.get<Technology[]>("/technologies");
+export const technologyService = {
+    getTechnologies: async (): Promise<Technology[]> => {
+        const response = await api.get('/technologies');
         return response.data;
-    }
+    },
 
-    async getById(id: number): Promise<Technology> {
-        const response = await api.get<Technology>(`/technologies/${id}`);
+    getTechnologyBySlug: async (slug: string): Promise<Technology> => {
+        const response = await api.get(`/technologies/${slug}`);
         return response.data;
-    }
-}
-
-export default new TechnologyService();
+    },
+};
