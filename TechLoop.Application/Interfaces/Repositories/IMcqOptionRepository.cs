@@ -14,5 +14,6 @@ public interface IMcqOptionRepository
     Task<bool> ExistsAsync( int questionId, string optionText, CancellationToken cancellationToken);
     Task<bool> PositionExistsAsync( int questionId, int position, CancellationToken cancellationToken);
     Task<int> GetOptionCountAsync(int questionId, CancellationToken cancellationToken);
+    Task<bool?> IsCorrectOptionAsync(int questionId, int optionId, CancellationToken cancellationToken);
 
 }

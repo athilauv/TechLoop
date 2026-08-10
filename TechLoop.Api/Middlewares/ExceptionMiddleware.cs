@@ -30,9 +30,13 @@ public class ExceptionMiddleware
         {
             await HandleException(context, 502, e.Message);
         }
+        catch (ConflictException ex) {
+            await HandleException(context , 409, ex.Message);
+        }
         catch(Exception ex){
             await HandleException(context , 500, ex.Message);
         }
+        
         
     }
     private static async Task HandleException(

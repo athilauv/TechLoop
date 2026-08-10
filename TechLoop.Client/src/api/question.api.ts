@@ -1,13 +1,41 @@
-import api from "../../../api/axios.ts";
+import api from "./axios.ts";
 import type {
     LearnerCodingTemplate,
     LearnerMcqOption,
     LearnerQuestion,
-    LearnerTestCase
+    LearnerTestCase,
+    LearnerCodingQuestion
 } from "../types/question.types.ts";
 
 export const getQuestions = async (): Promise<LearnerQuestion[]> => {
     const { data } = await api.get<LearnerQuestion[]>("/questions");
+
+    return data;
+};
+
+export const getCodingQuestions = async (
+    page: number,
+    pageSize: number,
+    technologyId?: number,
+    difficulty?: number,
+    subTopicId?: number,
+    search?: string,
+    sort?: string
+): Promise<LearnerCodingQuestion[]> => {
+    const { data } = await api.get<LearnerCodingQuestion[]>(
+        "/questions/coding",
+        {
+            params: {
+                page,
+                pageSize,
+                technologyId,
+                difficulty,
+                subTopicId,
+                search,
+                sort,
+            },
+        }
+    );
 
     return data;
 };
@@ -24,8 +52,8 @@ export const getQuestionById = async (
 
 export const getQuestionDetails = async (
     questionId: number
-): Promise<LearnerQuestion> => {
-    const { data } = await api.get<LearnerQuestion>(
+) => {
+    const { data } = await api.get(
         `/questions/${questionId}/details`
     );
 

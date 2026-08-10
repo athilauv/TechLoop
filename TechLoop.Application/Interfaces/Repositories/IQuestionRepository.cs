@@ -22,5 +22,13 @@ public interface IQuestionRepository
     Task<int?> GetQuestionTechnologyIdAsync(int questionId, CancellationToken cancellationToken);
     Task<int?> GetMentorTechnologyIdAsync(Guid userId, CancellationToken cancellationToken);
     Task<bool> ExistsAsync(int id, CancellationToken cancellationToken);
-    
+    Task<IEnumerable<LearnerCodingQuestionDto>> GetCodingQuestionsAsync(
+        int page,
+        int pageSize,
+        int? technologyId,
+        int? difficulty,
+        int? subTopicId,
+        string? search,
+        string? sort,
+        CancellationToken cancellationToken);
 }

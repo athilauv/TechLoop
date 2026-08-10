@@ -140,4 +140,19 @@ public sealed class McqOptionRepository : IMcqOptionRepository
                 },
                 cancellationToken: cancellationToken));
     }
+    
+    public async Task<bool?> IsCorrectOptionAsync(int questionId, int optionId, CancellationToken cancellationToken)
+    {
+        const string sql = """
+                           SELECT public.fn_mcq_option_is_correct( @QuestionId, @OptionId);
+                           """;
+        using var connection = _context.CreateConnection();
+        return await connection.QuerySingleOrDefaultAsync<bool?>(new CommandDefinition(sql,
+                new
+                {
+                    QuestionId = questionId,
+                    OptionId = optionId
+                },
+                cancellationToken: cancellationToken));
+    }
 }

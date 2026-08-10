@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 
-import { getCurriculum } from "../api/curriculum.api";
+import { getCurriculum } from "../api/curriculum.api.ts";
 
 export const useCurriculum = (technologyId: number) => {
     return useQuery({

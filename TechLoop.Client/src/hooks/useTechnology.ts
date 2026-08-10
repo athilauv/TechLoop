@@ -4,7 +4,7 @@ import {
     getTechnologies,
     getTechnologyBySlug,
     getTechnologyCategories,
-} from "../api/technology.api";
+} from "../api/technology.api.ts";
 
 export const useTechnologyCategories = () => {
     return useQuery({

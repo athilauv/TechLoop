@@ -20,7 +20,7 @@ public sealed class UnpinDiscussionCommandHandler : IRequestHandler<UnpinDiscuss
         _currentUser = currentUser;
     }
 
-    public async Task<bool> Handle(sgitUnpinDiscussionCommand request, CancellationToken cancellationToken)
+    public async Task<bool> Handle(UnpinDiscussionCommand request, CancellationToken cancellationToken)
     {
         if (_currentUser.UserId == Guid.Empty)
         {

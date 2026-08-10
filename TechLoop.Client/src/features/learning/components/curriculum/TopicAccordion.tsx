@@ -1,7 +1,7 @@
 import { ChevronDown } from "lucide-react";
 import { useState } from "react";
 
-import type { CurriculumTopic } from "../../types/curriculum.types";
+import type { CurriculumTopic } from "../../../../types/curriculum.types.ts";
 import SubTopicItem from "./SubTopicItem";
 
 interface TopicAccordionProps {

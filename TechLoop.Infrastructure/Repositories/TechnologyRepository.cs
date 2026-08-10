@@ -50,14 +50,14 @@ public sealed class TechnologyRepository : ITechnologyRepository
         return WithConnection(connection => connection.ExecuteAsync(
                 new CommandDefinition(sql, technology, cancellationToken: cancellationToken)));
     }
-    
-    public Task<IEnumerable<Technology>> GetAllAsync(CancellationToken cancellationToken)
+
+    public Task<IEnumerable<Technology>> GetAllAsync(
+        CancellationToken cancellationToken)
     {
-        const string sql = "SELECT * FROM fn_get_all_technologies();";
-        return WithConnection(connection => connection.QueryAsync<Technology>(
-                new CommandDefinition(sql, cancellationToken: cancellationToken)));
+        const string sql = "SELECT * FROM public.fn_technology_get_all();";
+        return WithConnection(connection => connection.QueryAsync<Technology>( new CommandDefinition( sql, cancellationToken: cancellationToken)));
     }
-    
+
     public Task<Technology?> GetByIdAsync( int id, CancellationToken cancellationToken)
     {
         const string sql = "SELECT * FROM fn_get_technology_by_id(@Id);";

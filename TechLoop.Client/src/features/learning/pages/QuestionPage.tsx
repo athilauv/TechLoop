@@ -1,14 +1,13 @@
 import { useNavigate, useParams } from "react-router-dom";
 import { Code2, ListChecks } from "lucide-react";
-
 import LearningLayout from "../components/layout/LearningLayout";
 import QuestionCard from "../components/question/QuestionCard";
 import QuestionFooter from "../components/question/QuestionFooter";
 import Breadcrumb from "../components/common/Breadcrumb";
 import ErrorState from "../components/common/ErrorState";
 import LoadingSkeleton from "../components/common/LoadingSkeleton";
-import { useQuestion } from "../hooks/useQuestion";
-import { QuestionType } from "../types/enums/question-type";
+import { useQuestion} from "../../../hooks/useQuestion.ts";
+import { QuestionType } from "../../../types/enums/question-type";
 
 export default function QuestionPage() {
     const navigate = useNavigate();

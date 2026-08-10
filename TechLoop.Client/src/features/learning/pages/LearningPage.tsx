@@ -9,7 +9,7 @@ import EmptyState from "../components/common/EmptyState";
 import ErrorState from "../components/common/ErrorState";
 import LoadingSkeleton from "../components/common/LoadingSkeleton";
 
-import { useSubTopic } from "../hooks/useSubTopic";
+import { useSubTopic } from "../../../hooks/useSubTopic.ts";
 
 export default function LearningPage() {
     const { subTopicSlug } = useParams();

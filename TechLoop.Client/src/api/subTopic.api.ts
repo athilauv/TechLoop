@@ -1,4 +1,4 @@
-import api from "../../../api/axios.ts";
+import api from "./axios.ts";
 import type { LearnerSubTopic } from "../types/subTopic.types.ts";
 
 export const getSubTopicBySlug = async (

@@ -5,6 +5,7 @@ using TechLoop.Application.Features.Coding.Queries.GetTestCasesByQuestion.Learne
 using TechLoop.Application.Features.MCQ.Queries.GetMcqOptionsByQuestionQuery.Learner;
 using TechLoop.Application.Features.Questions.DTOs;
 using TechLoop.Application.Features.Questions.Queries.GetAllQuestions.Learner;
+using TechLoop.Application.Features.Questions.Queries.GetCodingQuestions;
 using TechLoop.Application.Features.Questions.Queries.GetLearnerQuestionById;
 using TechLoop.Application.Features.Questions.Queries.GetQuestionDetailsById;
 
@@ -43,6 +44,32 @@ public sealed class QuestionController : ControllerBase
     {
         var result = await _mediator.Send(
             new GetLearnerQuestionByIdQuery(id),
+            cancellationToken);
+
+        return Ok(result);
+    }
+    
+    //get question by filtering
+    [HttpGet("coding")]
+    public async Task<IActionResult> GetCodingQuestions(
+        [FromQuery] int page = 1,
+        [FromQuery] int pageSize = 10,
+        [FromQuery] int? technologyId = null,
+        [FromQuery] int? difficulty = null,
+        [FromQuery] int? subTopicId = null,
+        [FromQuery] string? search = null,
+        [FromQuery] string? sort = null,
+        CancellationToken cancellationToken = default)
+    {
+        var result = await _mediator.Send(
+            new GetCodingQuestionsQuery(
+                page,
+                pageSize,
+                technologyId,
+                difficulty,
+                subTopicId,
+                search,
+                sort),
             cancellationToken);
 
         return Ok(result);

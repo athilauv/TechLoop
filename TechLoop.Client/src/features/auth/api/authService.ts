@@ -1,7 +1,6 @@
 ﻿const API_URL = "http://localhost:5264/Auth";
 
-
-//LOGIN
+// LOGIN
 export async function login(data: {
     email: string;
     password: string;
@@ -17,16 +16,18 @@ export async function login(data: {
 
     const result = await response.json();
 
-    if (!response.ok || result.Success === false) {
-        throw new Error(result.Message || "Something went wrong");
+    if (!response.ok) {
+        throw new Error(
+            result?.message ||
+            result?.Message ||
+            "Login failed"
+        );
     }
-    console.log(result);
-    localStorage.setItem("accessToken", result.accessToken);
+
     return result;
 }
 
-
-//REGISTERATION
+// REGISTER
 export async function register(data: {
     username: string;
     email: string;
@@ -43,12 +44,37 @@ export async function register(data: {
 
     const result = await response.json();
 
-    if (!response.ok || result.Success === false) {
-        throw new Error(result.Message || "Something went wrong");
+    if (!response.ok) {
+        throw new Error(
+            result?.message ||
+            result?.Message ||
+            "Registration failed"
+        );
     }
 
     return result;
 }
+
+// REFRESH TOKEN
+export async function refreshToken() {
+    const response = await fetch(`${API_URL}/refresh`, {
+        method: "POST",
+        credentials: "include",
+    });
+
+    const result = await response.json();
+
+    if (!response.ok) {
+        throw new Error(
+            result?.message ||
+            result?.Message ||
+            "Session expired"
+        );
+    }
+
+    return result;
+}
+
 
 // LOGOUT
 export async function logout() {
@@ -60,7 +86,11 @@ export async function logout() {
     const result = await response.json();
 
     if (!response.ok) {
-        throw new Error(result.Message || "Logout failed");
+        throw new Error(
+            result?.message ||
+            result?.Message ||
+            "Logout failed"
+        );
     }
 
     return result;

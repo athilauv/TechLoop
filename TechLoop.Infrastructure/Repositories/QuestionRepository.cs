@@ -1,4 +1,5 @@
 ﻿using Dapper;
+using TechLoop.Application.Features.Questions.DTOs;
 using TechLoop.Application.Interfaces.Infrastructure;
 using TechLoop.Application.Interfaces.Repositories;
 using TechLoop.Domain.Entities;
@@ -229,6 +230,47 @@ public sealed class QuestionRepository : IQuestionRepository
                 new
                 {
                     Id = id
+                },
+                cancellationToken: cancellationToken));
+    }
+    
+    public async Task<IEnumerable<LearnerCodingQuestionDto>> GetCodingQuestionsAsync(
+        int page,
+        int pageSize,
+        int? technologyId,
+        int? difficulty,
+        int? subTopicId,
+        string? search,
+        string? sort,
+        CancellationToken cancellationToken)
+    {
+        const string sql = """
+                           SELECT *
+                           FROM fn_get_coding_questions(
+                               @Page,
+                               @PageSize,
+                               @TechnologyId,
+                               @Difficulty,
+                               @SubTopicId,
+                               @Search,
+                               @Sort
+                           );
+                           """;
+
+        using var connection = _context.CreateConnection();
+
+        return await connection.QueryAsync<LearnerCodingQuestionDto>(
+            new CommandDefinition(
+                sql,
+                new
+                {
+                    Page = page,
+                    PageSize = pageSize,
+                    TechnologyId = technologyId,
+                    Difficulty = difficulty,
+                    SubTopicId = subTopicId,
+                    Search = search,
+                    Sort = sort
                 },
                 cancellationToken: cancellationToken));
     }

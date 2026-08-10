@@ -79,9 +79,69 @@ builder.Services
                 IssuerSigningKey =
                     new SymmetricSecurityKey(
                         Encoding.UTF8.GetBytes(jwtSecret)),
-                
-                RoleClaimType = ClaimTypes.Role
+
+                RoleClaimType = ClaimTypes.Role,
+                NameClaimType = ClaimTypes.NameIdentifier,
+
+                ClockSkew = TimeSpan.FromMinutes(1)
             };
+
+        options.Events = new JwtBearerEvents
+        {
+            OnMessageReceived = context =>
+            {
+                Console.WriteLine(
+                    $"JWT Header: {context.Request.Headers.Authorization}"
+                );
+
+                if (string.IsNullOrEmpty(context.Token))
+                {
+                    context.Token =
+                        context.Request.Cookies["accessToken"];
+                }
+
+                return Task.CompletedTask;
+            },
+
+            OnAuthenticationFailed = context =>
+            {
+                Console.WriteLine(
+                    $"JWT Authentication Failed: {context.Exception.Message}"
+                );
+
+                return Task.CompletedTask;
+            },
+
+            OnTokenValidated = context =>
+            {
+                Console.WriteLine(
+                    "JWT Token Validated Successfully"
+                );
+
+                Console.WriteLine(
+                    $"User: {context.Principal?.Identity?.Name}"
+                );
+
+                Console.WriteLine(
+                    $"NameIdentifier: {context.Principal?.FindFirst(ClaimTypes.NameIdentifier)?.Value}"
+                );
+
+                return Task.CompletedTask;
+            },
+
+            OnChallenge = context =>
+            {
+                Console.WriteLine(
+                    $"JWT Challenge: {context.Error}"
+                );
+
+                Console.WriteLine(
+                    $"JWT Error Description: {context.ErrorDescription}"
+                );
+
+                return Task.CompletedTask;
+            }
+        };
 
         options.Events = new JwtBearerEvents
         {

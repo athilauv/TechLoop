@@ -1,4 +1,4 @@
-import api from "../../../api/axios.ts";
+import api from "./axios.ts";
 import type { LearnerTechnology, LearnerTechnologyCategory } from "../types/technology.types.ts";
 
 export const getTechnologyCategories = async (): Promise<

@@ -6,7 +6,7 @@ import {
     getQuestionSubmissions,
     getSubmissionById,
     submitMcqAnswer,
-} from "../api/submission.api";
+} from "../api/submission.api.ts";
 
 export const useCreateSubmission = () => {
     return useMutation({

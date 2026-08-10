@@ -1,7 +1,7 @@
 import { Clock3, Trophy } from "lucide-react";
 
-import { DifficultyLevel } from "../../types/enums/difficulty-level";
-import { QuestionType } from "../../types/enums/question-type";
+import { DifficultyLevel } from "../../../../types/enums/difficulty-level";
+import { QuestionType } from "../../../../types/enums/question-type";
 
 interface QuestionCardProps {
     title: string;

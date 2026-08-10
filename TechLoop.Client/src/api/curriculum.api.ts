@@ -1,4 +1,4 @@
-import api from "../../../api/axios.ts";
+import api from "./axios.ts";
 import type { LearnerCurriculum } from "../types/curriculum.types.ts";
 
 export const getCurriculum = async (

@@ -1,7 +1,7 @@
 import { useParams } from "react-router-dom";
 import { BookOpen } from "lucide-react";
 
-import { useSubTopic } from "../../hooks/useSubTopic";
+import { useSubTopic } from "../../../../hooks/useSubTopic.ts";
 
 import EmptyState from "../common/EmptyState";
 import ErrorState from "../common/ErrorState";

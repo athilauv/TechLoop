@@ -1,5 +1,5 @@
-import { DifficultyLevel } from "./enums/difficulty-level";
-import { QuestionType } from "./enums/question-type";
+import { DifficultyLevel } from "./enums/difficulty-level.ts";
+import { QuestionType } from "./enums/question-type.ts";
 
 export interface LearnerQuestion {
     id: number;
@@ -14,6 +14,21 @@ export interface LearnerQuestion {
     explanation: string;
     timeLimitSeconds: number | null;
     memoryLimitMb: number | null;
+    difficulty: DifficultyLevel;
+    position: number;
+}
+
+export interface LearnerCodingQuestion {
+    id: number;
+    subTopicId: number;
+    technologyId: number;
+    technologyName: string;
+    subTopicName: string;
+    title: string;
+    slug: string;
+    description: string;
+    imageUrl: string | null;
+    marks: number;
     difficulty: DifficultyLevel;
     position: number;
 }

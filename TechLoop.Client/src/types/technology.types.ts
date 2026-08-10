@@ -1,5 +1,6 @@
 export interface LearnerTechnology {
     id: number;
+    categoryId: number;
     name: string;
     slug: string;
     description: string;

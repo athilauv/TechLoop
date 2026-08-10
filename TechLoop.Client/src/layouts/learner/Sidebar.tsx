@@ -56,9 +56,8 @@ const sections: NavSection[] = [
             // },
             {
                 label: "Coding",
-                path: "/learner/coding",
+                path: "/learner/coding-questions",
                 icon: Code2,
-                badge: 12,
             },
             {
                 label: "Classrooms",

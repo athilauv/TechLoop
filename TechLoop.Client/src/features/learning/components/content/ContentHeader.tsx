@@ -1,6 +1,6 @@
 import { useParams } from "react-router-dom";
 
-import { useSubTopic } from "../../hooks/useSubTopic";
+import { useSubTopic } from "../../../../hooks/useSubTopic.ts";
 import ErrorState from "../common/ErrorState";
 
 export default function ContentHeader() {
