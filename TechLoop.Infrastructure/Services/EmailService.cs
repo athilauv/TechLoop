@@ -9,14 +9,20 @@ namespace TechLoop.Infrastructure.Services;
 public sealed class EmailService : IEmailService
 {
     private readonly EmailSettings _settings;
+
     public EmailService(IOptions<EmailSettings> options)
     {
         _settings = options.Value;
     }
 
-    public async Task SendMentorInvitationAsync(string mentorName, string email, string invitationLink)
+    // Mentor invitation
+    public async Task SendMentorInvitationAsync(
+        string mentorName,
+        string email,
+        string invitationLink)
     {
         var subject = "Mentor Invitation";
+
         var body = $"""
                     Hi {mentorName},
 
@@ -35,11 +41,16 @@ public sealed class EmailService : IEmailService
         await SendEmailAsync(email, subject, body);
     }
 
-    public async Task SendPasswordResetAsync(string mentorName, string email, string resetLink)
+    // Password reset - common for all users
+    public async Task SendPasswordResetAsync(
+        string username,
+        string email,
+        string resetLink)
     {
         var subject = "Reset Password";
+
         var body = $"""
-                    Hi {mentorName},
+                    Hi {username},
 
                     Click the link below to reset your password.
 
@@ -52,20 +63,32 @@ public sealed class EmailService : IEmailService
         await SendEmailAsync(email, subject, body);
     }
 
-    private async Task SendEmailAsync(string to, string subject, string body)
+    private async Task SendEmailAsync(
+        string to,
+        string subject,
+        string body)
     {
         using var message = new MailMessage
         {
-            From = new MailAddress(_settings.SenderEmail, _settings.SenderName),
+            From = new MailAddress(
+                _settings.SenderEmail,
+                _settings.SenderName),
+
             Subject = subject,
             Body = body,
             IsBodyHtml = false
         };
 
         message.To.Add(to);
-        using var client = new SmtpClient(_settings.Host, _settings.Port)
+
+        using var client = new SmtpClient(
+            _settings.Host,
+            _settings.Port)
         {
-            Credentials = new NetworkCredential(_settings.Username, _settings.Password),
+            Credentials = new NetworkCredential(
+                _settings.Username,
+                _settings.Password),
+
             EnableSsl = _settings.EnableSsl
         };
 

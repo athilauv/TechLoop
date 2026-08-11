@@ -20,7 +20,7 @@
 
 import type { LucideIcon } from "lucide-react";
 import { NavLink } from "react-router-dom";
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 
 type NavItem = {
     label: string;
@@ -138,9 +138,9 @@ export default function Sidebar({
                                     mobileOpen,
                                     onCloseMobile,
                                     isAuthenticated = true,
-                                    userName = "Arjun Mehta",
-                                    userRole = "Contributor • Level 14",
-                                    userInitials = "AM",
+                                    userName,
+                                    userRole,
+                                    userInitials,
                                     onLogin,
                                     onLogout,
                                 }: SidebarProps) {
@@ -151,6 +151,64 @@ export default function Sidebar({
             document.body.style.overflow = "";
         };
     }, [mobileOpen]);
+
+    const loggedInUser = useMemo(() => {
+        try {
+            const token = localStorage.getItem("accessToken");
+
+            if (!token) {
+                return {
+                    username: "",
+                    role: "Learner",
+                    initial: "",
+                };
+            }
+
+            const payload = token.split(".")[1];
+
+            if (!payload) {
+                return {
+                    username: "",
+                    role: "Learner",
+                    initial: "",
+                };
+            }
+
+            const decodedPayload = JSON.parse(
+                atob(payload.replace(/-/g, "+").replace(/_/g, "/"))
+            );
+
+            const username =
+                decodedPayload.username ||
+                decodedPayload.unique_name ||
+                decodedPayload.name ||
+                "";
+
+            const role =
+                decodedPayload.role ||
+                decodedPayload[
+                    "http://schemas.microsoft.com/ws/2008/06/identity/claims/role"
+                    ] ||
+                "Learner";
+
+            return {
+                username,
+                role,
+                initial: username.charAt(0).toUpperCase(),
+            };
+        } catch {
+            return {
+                username: "",
+                role: "Learner",
+                initial: "",
+            };
+        }
+    }, []);
+
+    const displayName = userName || loggedInUser.username;
+    const displayRole = userRole || loggedInUser.role;
+    const displayInitial =
+        userInitials || loggedInUser.initial;
 
     const sidebarWidth = collapsed ? "w-[72px]" : "w-64";
 
@@ -291,6 +349,7 @@ export default function Sidebar({
                         </div>
                     ))}
                 </nav>
+
                 <div className="border-t border-white/5 p-4">
                     {isAuthenticated ? (
                         <div
@@ -301,18 +360,18 @@ export default function Sidebar({
                             }`}
                         >
                             <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#17D4C3]/20 font-semibold text-[#17D4C3]">
-                                {userInitials}
+                                {displayInitial}
                             </div>
 
                             {!collapsed && (
                                 <>
                                     <div className="min-w-0 flex-1">
                                         <p className="truncate text-sm text-white">
-                                            {userName}
+                                            {displayName}
                                         </p>
 
                                         <p className="truncate text-xs text-slate-500">
-                                            {userRole}
+                                            {displayRole}
                                         </p>
                                     </div>
 

@@ -1,5 +1,5 @@
 ﻿import { useState } from "react";
-import { login } from "./api/authService.ts";
+import { login } from "../../api/auth.api.ts";
 import { Link,useNavigate  } from "react-router-dom";
 import { showToast} from "../../utils/toast.ts";
 import authImage from "../../assets/AuthImage.jpg";
@@ -109,8 +109,9 @@ export default function LoginPage() {
             showToast.success("Login successful");
 
             navigate("/learner"); 
-        } catch (err: any) {
-            showToast.error(err.message || "Login failed");
+        }  catch (err: unknown) {
+            const message = err instanceof Error ? err.message : "Login failed";
+            showToast.error(message);
         } finally {
             setLoading(false);
         }

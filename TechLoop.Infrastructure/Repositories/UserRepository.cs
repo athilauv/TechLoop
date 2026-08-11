@@ -157,4 +157,24 @@ public class UserRepository : IUserRepository
             """;
         await connection.ExecuteAsync(sql, new { Id = userId });
     }
+    
+    public async Task UpdatePasswordAsync(Guid userId, string passwordHash, DateTime updatedAt)
+    {
+        using var connection = _context.CreateConnection();
+        const string sql = """
+                           UPDATE users
+                           SET
+                               password_hash = @PasswordHash,
+                               updated_at = @UpdatedAt
+                           WHERE id = @Id;
+                           """;
+
+        await connection.ExecuteAsync(sql,
+            new
+            {
+                Id = userId,
+                PasswordHash = passwordHash,
+                UpdatedAt = updatedAt
+            });
+    }
 }

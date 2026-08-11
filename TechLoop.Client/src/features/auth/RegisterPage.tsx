@@ -1,6 +1,6 @@
 ﻿import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { register } from "./api/authService.ts";
+import { register } from "../../api/auth.api.ts";
 import { showToast } from "../../utils/toast.ts";
 import authImage from "../../assets/AuthImage.jpg";
 
@@ -105,8 +105,9 @@ export default function RegisterPage() {
             setTimeout(() => {
                 navigate("/login");
             }, 1500);
-        } catch (err: any) {
-            showToast.error(err.message);
+        } catch (err: unknown) {
+            const message = err instanceof Error ? err.message : "Registration failed";
+            showToast.error(message);
         } finally {
             setLoading(false);
         }
@@ -114,9 +115,7 @@ export default function RegisterPage() {
 
     return (
         <div className="min-h-screen flex items-center justify-center bg-[#0b1628] font-[Inter,system-ui,sans-serif]"
-             style={{
-                 backgroundImage: 'linear-gradient(rgba(30,50,84,0.35) 1px, transparent 1px), linear-gradient(90deg, rgba(30,50,84,0.35) 1px, transparent 1px)',
-                 backgroundSize: '40px 40px',
+             style={{ backgroundImage: 'linear-gradient(rgba(30,50,84,0.35) 1px, transparent 1px), linear-gradient(90deg, rgba(30,50,84,0.35) 1px, transparent 1px)', backgroundSize: '40px 40px',
              }}
         >
             <div className="flex w-[780px] min-h-[520px] bg-[#0f1e35] rounded-2xl border border-[#1e3254] overflow-hidden shadow-[0_24px_80px_rgba(0,0,0,0.6)]">
@@ -173,11 +172,7 @@ export default function RegisterPage() {
                     </div>
 
                     {/* CTA */}
-                    <button
-                        onClick={handleCreateAccount}
-                        disabled={loading}
-                        className="w-full py-[13px] bg-[#00e5c0] border-none rounded-lg text-[#001a14] text-[15px] font-bold cursor-pointer tracking-[0.1px] font-[inherit] transition-all duration-150 hover:bg-[#00b89a] active:scale-[0.99]"
-                    >
+                    <button onClick={handleCreateAccount} disabled={loading} className="w-full py-[13px] bg-[#00e5c0] border-none rounded-lg text-[#001a14] text-[15px] font-bold cursor-pointer tracking-[0.1px] font-[inherit] transition-all duration-150 hover:bg-[#00b89a] active:scale-[0.99]">
                         {loading ? "Creating..." : "Create Account"}
                     </button>
 
@@ -195,7 +190,6 @@ export default function RegisterPage() {
                         </Link>
                     </p>
                 </div>
-
             </div>
         </div>
     )

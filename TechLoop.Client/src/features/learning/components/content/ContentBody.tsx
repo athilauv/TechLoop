@@ -1,8 +1,6 @@
 import { useParams } from "react-router-dom";
 import { BookOpen } from "lucide-react";
-
 import { useSubTopic } from "../../../../hooks/useSubTopic.ts";
-
 import EmptyState from "../common/EmptyState";
 import ErrorState from "../common/ErrorState";
 import LoadingSkeleton from "../common/LoadingSkeleton";
@@ -21,11 +19,7 @@ export default function ContentBody() {
 
     if (!subTopicSlug) {
         return (
-            <EmptyState
-                icon={BookOpen}
-                title="No lesson selected"
-                description="Pick a topic from the sidebar to start learning."
-            />
+            <EmptyState icon={BookOpen} title="No lesson selected" description="Pick a topic from the sidebar to start learning."/>
         );
     }
 
@@ -41,11 +35,7 @@ export default function ContentBody() {
 
     if (isError || !subTopic) {
         return (
-            <ErrorState
-                title="Unable to load lesson"
-                description="Something went wrong while fetching this lesson. Try refreshing the page."
-                onRetry={refetch}
-            />
+            <ErrorState title="Unable to load lesson" description="Something went wrong while fetching this lesson. Try refreshing the page." onRetry={refetch}/>
         );
     }
 
@@ -60,11 +50,7 @@ export default function ContentBody() {
             )}
 
             {subTopic.example && (
-                <ExampleViewer
-                    title="Example"
-                    code={subTopic.example}
-                    language={subTopic.exampleType?.toString()}
-                />
+                <ExampleViewer title="Example" code={subTopic.example} language={subTopic.exampleType?.toString()}/>
             )}
         </section>
     );

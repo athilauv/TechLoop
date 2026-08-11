@@ -1,11 +1,5 @@
-// Navbar.tsx
-
-import {
-    Menu,
-    Search,
-    Bell,
-    ChevronDown,
-} from "lucide-react";
+import { useMemo } from "react";
+import { Menu, Search, Bell, ChevronDown } from "lucide-react";
 
 interface NavbarProps {
     hidden?: boolean;
@@ -16,6 +10,60 @@ export default function Navbar({
                                    hidden = false,
                                    onMenuClick,
                                }: NavbarProps) {
+
+    const user = useMemo(() => {
+        try {
+            const token = localStorage.getItem("accessToken");
+
+            if (!token) {
+                return {
+                    username: "",
+                    initial: "",
+                    role: "Learner",
+                };
+            }
+
+            const payload = token.split(".")[1];
+
+            if (!payload) {
+                return {
+                    username: "",
+                    initial: "",
+                    role: "Learner",
+                };
+            }
+
+            const decodedPayload = JSON.parse(
+                atob(payload.replace(/-/g, "+").replace(/_/g, "/"))
+            );
+
+            const username =
+                decodedPayload.username ||
+                decodedPayload.unique_name ||
+                decodedPayload.name ||
+                "";
+
+            const role =
+                decodedPayload.role ||
+                decodedPayload[
+                    "http://schemas.microsoft.com/ws/2008/06/identity/claims/role"
+                    ] ||
+                "Learner";
+
+            return {
+                username,
+                initial: username.charAt(0).toUpperCase(),
+                role,
+            };
+        } catch {
+            return {
+                username: "",
+                initial: "",
+                role: "Learner",
+            };
+        }
+    }, []);
+
     return (
         <header
             className={`
@@ -46,14 +94,7 @@ export default function Navbar({
 
                     <button
                         onClick={onMenuClick}
-                        className="
-                            rounded-lg
-                            p-2
-                            text-slate-400
-                            hover:bg-white/10
-                            hover:text-white
-                            md:hidden
-                        "
+                        className=" rounded-lg p-2 text-slate-400 hover:bg-white/10 hover:text-white md:hidden"
                     >
                         <Menu size={20} />
                     </button>
@@ -67,7 +108,6 @@ export default function Navbar({
                 {/* Center */}
 
                 <div className="hidden flex-1 justify-center px-8 md:flex">
-
                     <div className="relative w-full max-w-xl">
 
                         <Search
@@ -161,17 +201,17 @@ export default function Navbar({
                                 text-[#17D4C3]
                             "
                         >
-                            AM
+                            {user.initial}
                         </div>
 
                         <div className="hidden text-left lg:block">
 
                             <p className="text-sm font-medium text-white">
-                                Arjun Mehta
+                                {user.username}
                             </p>
 
                             <p className="text-xs text-slate-500">
-                                Learner
+                                {user.role}
                             </p>
 
                         </div>
