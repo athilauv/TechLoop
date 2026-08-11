@@ -9,7 +9,6 @@
     Trophy,
     Bell,
     User,
-    Settings,
     LogOut,
     LogIn,
     ChevronLeft,
@@ -20,7 +19,7 @@
 
 import type { LucideIcon } from "lucide-react";
 import { NavLink } from "react-router-dom";
-import { useEffect, useMemo } from "react";
+import { useEffect } from "react";
 
 type NavItem = {
     label: string;
@@ -49,11 +48,6 @@ const sections: NavSection[] = [
                 path: "/learner/learning",
                 icon: BookOpen,
             },
-            // {
-            //     label: "Practice",
-            //     path: "/learner/practice",
-            //     icon: Dumbbell,
-            // },
             {
                 label: "Coding",
                 path: "/learner/coding-questions",
@@ -110,11 +104,6 @@ const sections: NavSection[] = [
                 path: "/learner/profile",
                 icon: User,
             },
-            {
-                label: "Settings",
-                path: "/learner/settings",
-                icon: Settings,
-            },
         ],
     },
 ];
@@ -145,81 +134,43 @@ export default function Sidebar({
                                     onLogout,
                                 }: SidebarProps) {
     useEffect(() => {
-        document.body.style.overflow = mobileOpen ? "hidden" : "";
+        document.body.style.overflow = mobileOpen
+            ? "hidden"
+            : "";
 
         return () => {
             document.body.style.overflow = "";
         };
     }, [mobileOpen]);
 
-    const loggedInUser = useMemo(() => {
-        try {
-            const token = localStorage.getItem("accessToken");
-
-            if (!token) {
-                return {
-                    username: "",
-                    role: "Learner",
-                    initial: "",
-                };
-            }
-
-            const payload = token.split(".")[1];
-
-            if (!payload) {
-                return {
-                    username: "",
-                    role: "Learner",
-                    initial: "",
-                };
-            }
-
-            const decodedPayload = JSON.parse(
-                atob(payload.replace(/-/g, "+").replace(/_/g, "/"))
-            );
-
-            const username =
-                decodedPayload.username ||
-                decodedPayload.unique_name ||
-                decodedPayload.name ||
-                "";
-
-            const role =
-                decodedPayload.role ||
-                decodedPayload[
-                    "http://schemas.microsoft.com/ws/2008/06/identity/claims/role"
-                    ] ||
-                "Learner";
-
-            return {
-                username,
-                role,
-                initial: username.charAt(0).toUpperCase(),
-            };
-        } catch {
-            return {
-                username: "",
-                role: "Learner",
-                initial: "",
-            };
-        }
-    }, []);
-
-    const displayName = userName || loggedInUser.username;
-    const displayRole = userRole || loggedInUser.role;
+    /*
+     * User information will eventually come from
+     * the authenticated-user/profile API.
+     *
+     * For now, use the values passed through props.
+     */
+    const displayName = userName || "User";
+    const displayRole = userRole || "Learner";
     const displayInitial =
-        userInitials || loggedInUser.initial;
+        userInitials ||
+        displayName.charAt(0).toUpperCase();
 
-    const sidebarWidth = collapsed ? "w-[72px]" : "w-64";
+    const sidebarWidth = collapsed
+        ? "w-[72px]"
+        : "w-64";
 
     return (
         <>
+            {/* MOBILE OVERLAY */}
+
             {mobileOpen && (
                 <div
                     className="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm md:hidden"
                     onClick={onCloseMobile}
                 />
             )}
+
+            {/* SIDEBAR */}
 
             <aside
                 className={`
@@ -229,12 +180,20 @@ export default function Sidebar({
                     bg-[#0A1930]
                     transition-all duration-300
                     ${sidebarWidth}
-                    ${mobileOpen ? "translate-x-0" : "-translate-x-full"}
+                    ${
+                    mobileOpen
+                        ? "translate-x-0"
+                        : "-translate-x-full"
+                }
                     md:translate-x-0
                 `}
             >
+                {/* HEADER */}
+
                 <div className="flex h-16 items-center justify-between border-b border-white/5 px-4">
+
                     <div className="flex items-center gap-3 overflow-hidden">
+
                         <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#17D4C3] font-bold text-[#081423]">
                             TL
                         </div>
@@ -252,6 +211,8 @@ export default function Sidebar({
                         )}
                     </div>
 
+                    {/* DESKTOP COLLAPSE */}
+
                     <button
                         onClick={onToggleCollapse}
                         className="hidden rounded-lg p-2 text-slate-400 transition hover:bg-white/10 hover:text-white md:flex"
@@ -263,6 +224,8 @@ export default function Sidebar({
                         )}
                     </button>
 
+                    {/* MOBILE CLOSE */}
+
                     <button
                         onClick={onCloseMobile}
                         className="rounded-lg p-2 text-slate-400 md:hidden"
@@ -271,9 +234,15 @@ export default function Sidebar({
                     </button>
                 </div>
 
+                {/* NAVIGATION */}
+
                 <nav className="flex-1 overflow-y-auto px-3 py-5">
+
                     {sections.map((section) => (
-                        <div key={section.title} className="mb-7">
+                        <div
+                            key={section.title}
+                            className="mb-7"
+                        >
                             {!collapsed && (
                                 <p className="mb-3 px-3 text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-500">
                                     {section.title}
@@ -281,6 +250,7 @@ export default function Sidebar({
                             )}
 
                             <div className="space-y-1">
+
                                 {section.items.map((item) => {
                                     const Icon = item.icon;
 
@@ -308,7 +278,7 @@ export default function Sidebar({
                                                         ? "bg-[#17D4C3]/15 text-white"
                                                         : "text-slate-400 hover:bg-white/5 hover:text-white"
                                                 }
-                                            `
+                                                `
                                             }
                                         >
                                             {({ isActive }) => (
@@ -331,7 +301,9 @@ export default function Sidebar({
                                                             {item.badge !==
                                                                 undefined && (
                                                                     <span className="rounded-full bg-[#17D4C3]/15 px-2 py-0.5 text-xs font-semibold text-[#17D4C3]">
-                                                                    {item.badge}
+                                                                    {
+                                                                        item.badge
+                                                                    }
                                                                 </span>
                                                                 )}
 
@@ -350,7 +322,10 @@ export default function Sidebar({
                     ))}
                 </nav>
 
+                {/* USER AREA */}
+
                 <div className="border-t border-white/5 p-4">
+
                     {isAuthenticated ? (
                         <div
                             className={`flex items-center ${
@@ -359,6 +334,8 @@ export default function Sidebar({
                                     : "gap-3"
                             }`}
                         >
+                            {/* INITIAL AVATAR */}
+
                             <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#17D4C3]/20 font-semibold text-[#17D4C3]">
                                 {displayInitial}
                             </div>
@@ -366,6 +343,7 @@ export default function Sidebar({
                             {!collapsed && (
                                 <>
                                     <div className="min-w-0 flex-1">
+
                                         <p className="truncate text-sm text-white">
                                             {displayName}
                                         </p>
@@ -373,6 +351,7 @@ export default function Sidebar({
                                         <p className="truncate text-xs text-slate-500">
                                             {displayRole}
                                         </p>
+
                                     </div>
 
                                     <button
@@ -424,6 +403,8 @@ export default function Sidebar({
                     )}
                 </div>
             </aside>
+
+            {/* MOBILE MENU BUTTON */}
 
             <button
                 onClick={onCloseMobile}

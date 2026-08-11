@@ -176,3 +176,41 @@ export async function resetPassword(data: {
 
     return result;
 }
+
+// MENTOR INITIAL PROFILE / PASSWORD SETUP
+export async function setupMentorProfile(
+    email: string,
+    data: {
+        password: string;
+        confirmPassword: string;
+        phoneNumber: string;
+        bio: string;
+        linkedInUrl: string;
+        githubUrl: string;
+        profileImageUrl: string;
+    }
+) {
+    const response = await fetch(
+        `${API_URL}/update-profile/${encodeURIComponent(email)}`,
+        {
+            method: "PUT",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            credentials: "include",
+            body: JSON.stringify(data),
+        }
+    );
+
+    const result = await response.json();
+
+    if (!response.ok) {
+        throw new Error(
+            result?.message ||
+            result?.Message ||
+            "Unable to activate mentor account"
+        );
+    }
+
+    return result;
+}

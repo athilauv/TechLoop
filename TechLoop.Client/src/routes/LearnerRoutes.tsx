@@ -5,6 +5,7 @@ import TechnologyCategoryPage from "../features/technology-category/pages/Techno
 import LearningPage from "../features/learning/pages/LearningPage";
 import CodingQuestionsPage from "../features/coding-question/pages/CodingQuestionsPage.tsx";
 import CodingQuestionPage from "../features/coding-question/pages/CodingQuestionPage.tsx";
+import ProfilePage from "../features/profile/pages/ProfilePage.tsx";
 
 export default function LearnerRoutes() {
     return (
@@ -17,6 +18,7 @@ export default function LearnerRoutes() {
                     <Route path="learning/:technologySlug/:topicSlug/:subTopicSlug" element={<LearningPage />}/>
                     <Route path="coding-questions" element={<CodingQuestionsPage />}/>
                     <Route path="coding-questions/:questionId" element={<CodingQuestionPage/>}/>
+                    <Route path="profile" element={<ProfilePage />}/>
                 </Route>
             </Route>
         </Routes>

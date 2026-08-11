@@ -185,7 +185,24 @@ export default function LoginPage() {
                             error={errors.email}
                         />
 
-                        <Field label="Password" type="password" placeholder="Password" value={password} onChange={setPassword} error={errors.password}/>
+                        <Field
+                            label="Password"
+                            type="password"
+                            placeholder="Password"
+                            value={password}
+                            onChange={setPassword}
+                            error={errors.password}
+                        />
+
+                        <div className="flex justify-end -mt-1">
+                            <Link
+                                to="/forgot-password"
+                                className="text-xs text-[#7a99bb] hover:text-[#00e5c0] transition-colors"
+                            >
+                                Forgot password?
+                            </Link>
+                        </div>
+
                         <button
                             onClick={handleSignIn}
                             disabled={loading}
