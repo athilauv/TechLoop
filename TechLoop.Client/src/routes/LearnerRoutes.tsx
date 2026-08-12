@@ -7,6 +7,7 @@ import CodingQuestionsPage from "../features/coding-question/pages/CodingQuestio
 import CodingQuestionPage from "../features/coding-question/pages/CodingQuestionPage.tsx";
 import ProfilePage from "../features/profile/pages/ProfilePage.tsx";
 import DashboardPage from "../features/dashboard/pages/DashboardPage.tsx";
+import AnalyticsPage from "../features/analytics/pages/AnalyticsPage";
 
 export default function LearnerRoutes() {
     return (
@@ -21,6 +22,7 @@ export default function LearnerRoutes() {
                     <Route path="coding-questions/:questionId" element={<CodingQuestionPage/>}/>
                     <Route path="profile" element={<ProfilePage />}/>
                     <Route path="dashboard" element={<DashboardPage />}/>
+                    <Route path="analytics" element={<AnalyticsPage />}/>
                 </Route>
             </Route>
         </Routes>

@@ -38,10 +38,22 @@ export interface DifficultyProgression {
     failedAttempts: number;
 }
 
+export interface DailyActivity {
+    date: string;
+    totalActivities: number;
+    questionsSolved: number;
+    codingCompleted: number;
+    mcqsCompleted: number;
+    successfulAttempts: number;
+    failedAttempts: number;
+    timeSpentMinutes: number;
+}
+
 export interface AnalyticsResponse {
     overview: AnalyticsOverview | null;
     practiceActivity: PracticeActivity[];
     technologyPractice: TechnologyPractice[];
     topicAnalytics: TopicAnalytics[];
     difficultyProgression: DifficultyProgression[];
+    dailyActivity: DailyActivity[];
 }
