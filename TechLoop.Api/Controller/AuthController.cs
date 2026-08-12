@@ -28,7 +28,6 @@ public class AuthController : ControllerBase
     {
         var response = await _authService.LoginAsync(request);
         SetAuthCookies(response);
-
         return Ok(new
         {
             response.Message
@@ -39,16 +38,13 @@ public class AuthController : ControllerBase
     public async Task<IActionResult> Register(RegisterRequest request)
     {
         var response = await _authService.RegisterAsync(request);
-
         return Created("", response);
     }
 
     [HttpPost("refresh")]
     public async Task<IActionResult> Refresh()
     {
-        var response = await _authService.RefreshTokenAsync(
-            Request.Cookies["refreshToken"]);
-
+        var response = await _authService.RefreshTokenAsync(Request.Cookies["refreshToken"]);
         SetAuthCookies(response);
 
         return Ok(new
@@ -61,11 +57,8 @@ public class AuthController : ControllerBase
     public async Task<IActionResult> Logout()
     {
         var refreshToken = Request.Cookies["refreshToken"];
-
         await _authService.LogoutAsync(refreshToken);
-
         DeleteAuthCookies();
-
         return Ok(new
         {
             Message = "Logged out successfully."
@@ -74,12 +67,8 @@ public class AuthController : ControllerBase
 
     private void SetAuthCookies(AuthResponse response)
     {
-        Console.WriteLine(
-            $"Access Token Empty: {string.IsNullOrWhiteSpace(response.AccessToken)}");
-
-        Console.WriteLine(
-            $"Refresh Token Empty: {string.IsNullOrWhiteSpace(response.RefreshToken)}");
-
+        Console.WriteLine($"Access Token Empty: {string.IsNullOrWhiteSpace(response.AccessToken)}");
+        Console.WriteLine($"Refresh Token Empty: {string.IsNullOrWhiteSpace(response.RefreshToken)}");
         Response.Cookies.Append("accessToken", response.AccessToken, new CookieOptions
         {
             HttpOnly = true,
@@ -112,8 +101,7 @@ public class AuthController : ControllerBase
 
     // Update mentor profile
     [HttpPut("update-profile/{email}")]
-    public async Task<IActionResult> UpdateProfile(
-        string email,
+    public async Task<IActionResult> UpdateProfile(string email,
         [FromBody] UpdateMentorProfileRequest request)
     {
         var command = new UpdateProfileCommand(
@@ -127,20 +115,16 @@ public class AuthController : ControllerBase
             request.ProfileImageUrl);
 
         var result = await _mediator.Send(command);
-
         return Ok(result);
     }
 
     // Change password - authenticated users only
     [Authorize]
     [HttpPut("change-password")]
-    public async Task<IActionResult> ChangePassword(
-        ChangePasswordRequest request)
+    public async Task<IActionResult> ChangePassword(ChangePasswordRequest request)
     {
         await _authService.ChangePasswordAsync(request);
-
         DeleteAuthCookies();
-
         return Ok(new
         {
             Message = "Password changed successfully. Please sign in again."
@@ -149,11 +133,9 @@ public class AuthController : ControllerBase
 
     // Forgot password - public
     [HttpPost("forgot-password")]
-    public async Task<IActionResult> ForgotPassword(
-        ForgotPasswordRequest request)
+    public async Task<IActionResult> ForgotPassword(ForgotPasswordRequest request)
     {
         await _authService.ForgotPasswordAsync(request);
-
         return Ok(new
         {
             Message =
@@ -163,11 +145,9 @@ public class AuthController : ControllerBase
 
     // Reset password - public, reset token required
     [HttpPut("reset-password")]
-    public async Task<IActionResult> ResetPassword(
-        ResetPasswordRequest request)
+    public async Task<IActionResult> ResetPassword(ResetPasswordRequest request)
     {
         await _authService.ResetPasswordAsync(request);
-
         return Ok(new
         {
             Message = "Password reset successfully. Please sign in again."

@@ -1,47 +1,53 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.Security.Claims;
-using TechLoop.Application.Features.UserStatistics.Queries.GetUserStatistics;
+using TechLoop.Application.Features.Analytics.Queries.GetAnalytics;
 using TechLoop.Application.Features.UserTopicProgress.Queries.GetUserTopicProgress;
 using TechLoop.Application.Features.UserTopicProgress.Queries.GetUserTopicProgressList;
+using TechLoop.Application.Interfaces.Services;
 
 namespace TechLoop.Api.Controllers;
 
 [ApiController]
-[Route("api/user-statistics")]
+[Route("api/analytics")]
 [Authorize]
-public sealed class UserStatisticsController : ControllerBase
+public sealed class AnalyticsController : ControllerBase
 {
     private readonly IMediator _mediator;
+    private readonly ICurrentUserService _currentUserService;
 
-    public UserStatisticsController(IMediator mediator)
+    public AnalyticsController(
+        IMediator mediator,
+        ICurrentUserService currentUserService)
     {
         _mediator = mediator;
+        _currentUserService = currentUserService;
     }
-    
-    // Returns statistics of the currently logged-in user.
+
+    // Returns combined analytics/dashboard data
+    // for the currently logged-in user.
     [HttpGet]
-    public async Task<IActionResult> GetStatistics(
+    public async Task<IActionResult> GetAnalytics(
         CancellationToken cancellationToken)
     {
-        var userId = Guid.Parse(
-            User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+        var userId = _currentUserService.UserId;
+
+        var query = new GetAnalyticsQuery(userId);
 
         var response = await _mediator.Send(
-            new GetUserStatisticsQuery(userId),
+            query,
             cancellationToken);
 
         return Ok(response);
     }
 
-    // Returns progress of all topics for the currently logged-in user.
+    // Returns progress of all topics
+    // for the currently logged-in user.
     [HttpGet("topic-progress")]
     public async Task<IActionResult> GetTopicProgress(
         CancellationToken cancellationToken)
     {
-        var userId = Guid.Parse(
-            User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+        var userId = _currentUserService.UserId;
 
         var response = await _mediator.Send(
             new GetUserTopicProgressListQuery(userId),
@@ -49,20 +55,17 @@ public sealed class UserStatisticsController : ControllerBase
 
         return Ok(response);
     }
-    
+
     // Returns progress of a specific topic.
     [HttpGet("topic-progress/{topicId:int}")]
     public async Task<IActionResult> GetTopicProgressByTopic(
         int topicId,
         CancellationToken cancellationToken)
     {
-        var userId = Guid.Parse(
-            User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+        var userId = _currentUserService.UserId;
 
         var response = await _mediator.Send(
-            new GetUserTopicProgressQuery(
-                userId,
-                topicId),
+            new GetUserTopicProgressQuery(userId, topicId),
             cancellationToken);
 
         return Ok(response);

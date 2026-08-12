@@ -91,7 +91,7 @@ builder.Services
             OnMessageReceived = context =>
             {
                 Console.WriteLine(
-                    $"JWT Header: {context.Request.Headers.Authorization}"
+                    $"Authorization Header: {context.Request.Headers.Authorization}"
                 );
 
                 if (string.IsNullOrEmpty(context.Token))
@@ -99,6 +99,10 @@ builder.Services
                     context.Token =
                         context.Request.Cookies["accessToken"];
                 }
+
+                Console.WriteLine(
+                    $"Access Token From Cookie: {!string.IsNullOrEmpty(context.Token)}"
+                );
 
                 return Task.CompletedTask;
             },
@@ -122,23 +126,15 @@ builder.Services
                     $"User: {context.Principal?.Identity?.Name}"
                 );
 
-                Console.WriteLine(
-                    $"NameIdentifier: {context.Principal?.FindFirst(ClaimTypes.NameIdentifier)?.Value}"
-                );
+                Console.WriteLine($"NameIdentifier: {context.Principal?.FindFirst(ClaimTypes.NameIdentifier)?.Value}");
 
                 return Task.CompletedTask;
             },
 
             OnChallenge = context =>
             {
-                Console.WriteLine(
-                    $"JWT Challenge: {context.Error}"
-                );
-
-                Console.WriteLine(
-                    $"JWT Error Description: {context.ErrorDescription}"
-                );
-
+                Console.WriteLine($"JWT Challenge: {context.Error}");
+                Console.WriteLine($"JWT Error Description: {context.ErrorDescription}");
                 return Task.CompletedTask;
             }
         };

@@ -1,68 +1,85 @@
-import { useMemo } from "react";
-import { Menu, Search, Bell, ChevronDown } from "lucide-react";
+import {
+    Menu,
+    Search,
+    Bell,
+    ChevronDown,
+} from "lucide-react";
 
 interface NavbarProps {
     hidden?: boolean;
     onMenuClick: () => void;
 }
 
-export default function Navbar({
-                                   hidden = false,
-                                   onMenuClick,
-                               }: NavbarProps) {
+interface NavbarUser {
+    username: string;
+    initial: string;
+    role: string;
+}
 
-    const user = useMemo(() => {
-        try {
-            const token = localStorage.getItem("accessToken");
+function getUserFromToken(): NavbarUser {
+    try {
+        const token = localStorage.getItem("accessToken");
 
-            if (!token) {
-                return {
-                    username: "",
-                    initial: "",
-                    role: "Learner",
-                };
-            }
-
-            const payload = token.split(".")[1];
-
-            if (!payload) {
-                return {
-                    username: "",
-                    initial: "",
-                    role: "Learner",
-                };
-            }
-
-            const decodedPayload = JSON.parse(
-                atob(payload.replace(/-/g, "+").replace(/_/g, "/"))
-            );
-
-            const username =
-                decodedPayload.username ||
-                decodedPayload.unique_name ||
-                decodedPayload.name ||
-                "";
-
-            const role =
-                decodedPayload.role ||
-                decodedPayload[
-                    "http://schemas.microsoft.com/ws/2008/06/identity/claims/role"
-                    ] ||
-                "Learner";
-
-            return {
-                username,
-                initial: username.charAt(0).toUpperCase(),
-                role,
-            };
-        } catch {
+        if (!token) {
             return {
                 username: "",
                 initial: "",
                 role: "Learner",
             };
         }
-    }, []);
+
+        const payload = token.split(".")[1];
+
+        if (!payload) {
+            return {
+                username: "",
+                initial: "",
+                role: "Learner",
+            };
+        }
+
+        const decodedPayload = JSON.parse(
+            atob(
+                payload
+                    .replace(/-/g, "+")
+                    .replace(/_/g, "/")
+            )
+        );
+
+        const username =
+            decodedPayload.username ||
+            decodedPayload.unique_name ||
+            decodedPayload.name ||
+            "";
+
+        const role =
+            decodedPayload.role ||
+            decodedPayload[
+                "http://schemas.microsoft.com/ws/2008/06/identity/claims/role"
+                ] ||
+            "Learner";
+
+        return {
+            username,
+            initial: username
+                ? username.charAt(0).toUpperCase()
+                : "",
+            role,
+        };
+    } catch {
+        return {
+            username: "",
+            initial: "",
+            role: "Learner",
+        };
+    }
+}
+
+export default function Navbar({
+                                   hidden = false,
+                                   onMenuClick,
+                               }: NavbarProps) {
+    const user = getUserFromToken();
 
     return (
         <header
@@ -88,13 +105,20 @@ export default function Navbar({
         >
             <div className="flex h-full items-center justify-between px-4 md:px-6">
 
-                {/* Left */}
-
+                {/* LEFT */}
                 <div className="flex items-center gap-3">
 
                     <button
+                        type="button"
                         onClick={onMenuClick}
-                        className=" rounded-lg p-2 text-slate-400 hover:bg-white/10 hover:text-white md:hidden"
+                        className="
+                            rounded-lg
+                            p-2
+                            text-slate-400
+                            hover:bg-white/10
+                            hover:text-white
+                            md:hidden
+                        "
                     >
                         <Menu size={20} />
                     </button>
@@ -105,8 +129,7 @@ export default function Navbar({
 
                 </div>
 
-                {/* Center */}
-
+                {/* CENTER SEARCH */}
                 <div className="hidden flex-1 justify-center px-8 md:flex">
                     <div className="relative w-full max-w-xl">
 
@@ -143,14 +166,14 @@ export default function Navbar({
                         />
 
                     </div>
-
                 </div>
 
-                {/* Right */}
-
+                {/* RIGHT */}
                 <div className="flex items-center gap-3">
 
+                    {/* Notifications */}
                     <button
+                        type="button"
                         className="
                             relative
                             rounded-xl
@@ -176,7 +199,9 @@ export default function Navbar({
                         />
                     </button>
 
+                    {/* User */}
                     <button
+                        type="button"
                         className="
                             flex
                             items-center
@@ -188,6 +213,7 @@ export default function Navbar({
                             hover:bg-white/5
                         "
                     >
+                        {/* Initial */}
                         <div
                             className="
                                 flex
@@ -201,13 +227,14 @@ export default function Navbar({
                                 text-[#17D4C3]
                             "
                         >
-                            {user.initial}
+                            {user.initial || "U"}
                         </div>
 
+                        {/* Username + Role */}
                         <div className="hidden text-left lg:block">
 
                             <p className="text-sm font-medium text-white">
-                                {user.username}
+                                {user.username || "User"}
                             </p>
 
                             <p className="text-xs text-slate-500">
