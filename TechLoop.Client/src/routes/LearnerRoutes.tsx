@@ -8,6 +8,10 @@ import CodingQuestionPage from "../features/coding-question/pages/CodingQuestion
 import ProfilePage from "../features/profile/pages/ProfilePage.tsx";
 import DashboardPage from "../features/dashboard/pages/DashboardPage.tsx";
 import AnalyticsPage from "../features/analytics/pages/AnalyticsPage";
+import CommunityPage from "../features/community/pages/CommunityPage.tsx";
+import CreatePostPage from "../features/community/pages/CreatePostPage.tsx";
+import CommunityPostPage from "../features/community/pages/CommunityPostPage.tsx";
+import SavedPostsPage from "../features/community/pages/SavedPostsPage.tsx";
 
 export default function LearnerRoutes() {
     return (
@@ -23,6 +27,10 @@ export default function LearnerRoutes() {
                     <Route path="profile" element={<ProfilePage />}/>
                     <Route path="dashboard" element={<DashboardPage />}/>
                     <Route path="analytics" element={<AnalyticsPage />}/>
+                    <Route path="community" element={<CommunityPage />}/>
+                    <Route path="community/create-post" element={<CreatePostPage />}/>
+                    <Route path="community/posts/:postId" element={<CommunityPostPage/>}/>
+                    //<Route path="community/saved-posts" element={<SavedPostsPage />}/>
                 </Route>
             </Route>
         </Routes>
