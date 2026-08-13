@@ -1,6 +1,5 @@
 import { useParams } from "react-router-dom";
 import { BookOpen } from "lucide-react";
-
 import LearningLayout from "../components/layout/LearningLayout";
 import ContentHeader from "../components/content/ContentHeader";
 import ContentBody from "../components/content/ContentBody";
@@ -8,7 +7,6 @@ import Breadcrumb from "../components/common/Breadcrumb";
 import EmptyState from "../components/common/EmptyState";
 import ErrorState from "../components/common/ErrorState";
 import LoadingSkeleton from "../components/common/LoadingSkeleton";
-
 import { useSubTopic } from "../../../hooks/useSubTopic.ts";
 
 export default function LearningPage() {
@@ -37,14 +35,8 @@ export default function LearningPage() {
         return (
             <LearningLayout>
                 <div className="space-y-6">
-                    <LoadingSkeleton
-                        variant="text"
-                        lines={2}
-                    />
-
-                    <LoadingSkeleton
-                        variant="card"
-                    />
+                    <LoadingSkeleton variant="text" lines={3} />
+                    <LoadingSkeleton variant="card" />
                 </div>
             </LearningLayout>
         );
@@ -68,7 +60,7 @@ export default function LearningPage() {
                 items={[
                     {
                         label: "Learning",
-                        href: "/learning",
+                        href: "/learner/learning",
                     },
                     {
                         label: subTopic.title,
@@ -76,12 +68,12 @@ export default function LearningPage() {
                 ]}
             />
 
-            <div className="mt-4">
-                <ContentHeader />
+            <div className="mt-6">
+                <ContentHeader subTopic={subTopic} />
             </div>
 
             <div className="mt-8">
-                <ContentBody />
+                <ContentBody subTopic={subTopic} />
             </div>
         </LearningLayout>
     );

@@ -1,107 +1,41 @@
-import {
-    Menu,
-    Search,
-    Bell,
-    ChevronDown,
-} from "lucide-react";
+import { Menu, Search, Bell, ChevronDown } from "lucide-react";
 
 interface NavbarProps {
     hidden?: boolean;
     onMenuClick: () => void;
-}
-
-interface NavbarUser {
-    username: string;
-    initial: string;
-    role: string;
-}
-
-function getUserFromToken(): NavbarUser {
-    try {
-        const token = localStorage.getItem("accessToken");
-
-        if (!token) {
-            return {
-                username: "",
-                initial: "",
-                role: "Learner",
-            };
-        }
-
-        const payload = token.split(".")[1];
-
-        if (!payload) {
-            return {
-                username: "",
-                initial: "",
-                role: "Learner",
-            };
-        }
-
-        const decodedPayload = JSON.parse(
-            atob(
-                payload
-                    .replace(/-/g, "+")
-                    .replace(/_/g, "/")
-            )
-        );
-
-        const username =
-            decodedPayload.username ||
-            decodedPayload.unique_name ||
-            decodedPayload.name ||
-            "";
-
-        const role =
-            decodedPayload.role ||
-            decodedPayload[
-                "http://schemas.microsoft.com/ws/2008/06/identity/claims/role"
-                ] ||
-            "Learner";
-
-        return {
-            username,
-            initial: username
-                ? username.charAt(0).toUpperCase()
-                : "",
-            role,
-        };
-    } catch {
-        return {
-            username: "",
-            initial: "",
-            role: "Learner",
-        };
-    }
+    username?: string;
+    role?: string;
+    initial?: string;
 }
 
 export default function Navbar({
-                                   hidden = false,
-                                   onMenuClick,
-                               }: NavbarProps) {
-    const user = getUserFromToken();
-
+    hidden = false,
+    onMenuClick,
+    username = "",
+    role = "Learner",
+    initial = "",
+}: NavbarProps) {
     return (
         <header
             className={`
-                fixed
-                top-0
-                right-0
-                z-30
-                h-16
-                border-b
-                border-white/5
-                bg-[#0E192A]/95
-                backdrop-blur-md
-                transition-all
-                duration-300
-                md:left-[var(--sidebar-width)]
-                ${
-                hidden
-                    ? "-translate-y-full"
-                    : "translate-y-0"
-            }
-            `}
+fixed
+top-0
+right-0
+z-30
+h-16
+border-b
+border-white/5
+bg-[#0E192A]/95
+backdrop-blur-md
+transition-all
+duration-300
+md:left-[var(--sidebar-width)]
+${
+    hidden
+        ? "-translate-y-full"
+        : "translate-y-0"
+}
+`}
         >
             <div className="flex h-full items-center justify-between px-4 md:px-6">
 
@@ -227,18 +161,18 @@ export default function Navbar({
                                 text-[#17D4C3]
                             "
                         >
-                            {user.initial || "U"}
+                            {initial || "U"}
                         </div>
 
                         {/* Username + Role */}
                         <div className="hidden text-left lg:block">
 
                             <p className="text-sm font-medium text-white">
-                                {user.username || "User"}
+                                {username || "User"}
                             </p>
 
                             <p className="text-xs text-slate-500">
-                                {user.role}
+                                {role}
                             </p>
 
                         </div>
@@ -256,3 +190,4 @@ export default function Navbar({
         </header>
     );
 }
+

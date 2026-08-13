@@ -1,10 +1,11 @@
 import api from "./axios.ts";
+
 import type {
     LearnerCodingTemplate,
     LearnerMcqOption,
     LearnerQuestion,
     LearnerTestCase,
-    LearnerCodingQuestion
+    LearnerCodingQuestion,
 } from "../types/question.types.ts";
 
 export const getQuestions = async (): Promise<LearnerQuestion[]> => {
@@ -85,6 +86,31 @@ export const getTestCases = async (
 ): Promise<LearnerTestCase[]> => {
     const { data } = await api.get<LearnerTestCase[]>(
         `/questions/questions/${questionId}/test-cases`
+    );
+
+    return data;
+};
+
+
+export interface SubmitMcqAnswerRequest {
+    questionId: number;
+    technologyId: number;
+    selectedOptionId: number;
+}
+
+export interface SubmitMcqAnswerResponse {
+    submissionId: number;
+    isCorrect: boolean;
+    score: number;
+    message: string;
+}
+
+export const submitMcqAnswer = async (
+    request: SubmitMcqAnswerRequest
+): Promise<SubmitMcqAnswerResponse> => {
+    const { data } = await api.post<SubmitMcqAnswerResponse>(
+        "/api/submissions/mcq",
+        request
     );
 
     return data;

@@ -12,12 +12,14 @@ import CommunityPage from "../features/community/pages/CommunityPage.tsx";
 import CreatePostPage from "../features/community/pages/CreatePostPage.tsx";
 import CommunityPostPage from "../features/community/pages/CommunityPostPage.tsx";
 import SavedPostsPage from "../features/community/pages/SavedPostsPage.tsx";
+import LandingPage from "../features/landing/pages/LandingPage.tsx";
 
 export default function LearnerRoutes() {
     return (
         <Routes>
+            <Route index element={<LandingPage />} />
             <Route element={<ProtectedRoute />}>
-                <Route element={<LearnerLayout />}>
+                    <Route element={<LearnerLayout />}>
                     <Route path="learning" element={<TechnologyCategoryPage />}/>
                     <Route path="learning/:technologySlug" element={<LearningPage />}/>
                     <Route path="learning/:technologySlug/:topicSlug" element={<LearningPage />}/>

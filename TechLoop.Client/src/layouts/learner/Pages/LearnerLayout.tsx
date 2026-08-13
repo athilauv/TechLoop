@@ -1,14 +1,10 @@
 ﻿import { Outlet, useLocation } from "react-router-dom";
-import {
-    useEffect,
-    useRef,
-    useState,
-    type CSSProperties,
-} from "react";
-
+import { useEffect, useRef, useState, type CSSProperties } from "react";
 import Navbar from "../Navbar";
 import Sidebar from "../Sidebar";
 import Footer from "../Footer";
+import { getLearnerProfile } from "../../../api/profile.api.ts";
+import type { UserProfile} from "../../../types/profile.types.ts";
 
 const SIDEBAR_EXPANDED = "256px";
 const SIDEBAR_COLLAPSED = "72px";
@@ -59,40 +55,43 @@ export default function LearnerLayout() {
 
     const navHidden = useAutoHideNavbar(scrollRef);
 
-    const [collapsed, setCollapsed] =
-        useState(false);
+    const [collapsed, setCollapsed] = useState(false);
+    const [mobileOpen, setMobileOpen] = useState(false);
 
-    const [mobileOpen, setMobileOpen] =
-        useState(false);
+    const [user, setUser] = useState<UserProfile | null>(null);
 
     const isLearningPage =
-        location.pathname.startsWith(
-            "/learner/learning"
-        );
+        location.pathname.startsWith("/learner/learning");
 
     useEffect(() => {
-        const mq = window.matchMedia(
-            "(min-width:768px)"
-        );
+        const loadUser = async () => {
+            try {
+                const profile = await getLearnerProfile();
+                setUser(profile);
+            } catch (error) {
+                console.error(
+                    "Unable to load current learner profile:",
+                    error
+                );
+            }
+        };
 
-        const onChange = (
-            e: MediaQueryListEvent
-        ) => {
+        loadUser();
+    }, []);
+
+    useEffect(() => {
+        const mq = window.matchMedia("(min-width:768px)");
+
+        const onChange = (e: MediaQueryListEvent) => {
             if (e.matches) {
                 setMobileOpen(false);
             }
         };
 
-        mq.addEventListener(
-            "change",
-            onChange
-        );
+        mq.addEventListener("change", onChange);
 
         return () =>
-            mq.removeEventListener(
-                "change",
-                onChange
-            );
+            mq.removeEventListener("change", onChange);
     }, []);
 
     const cssVars = {
@@ -100,6 +99,10 @@ export default function LearnerLayout() {
             ? SIDEBAR_COLLAPSED
             : SIDEBAR_EXPANDED,
     } as CSSProperties;
+
+    const userInitial = user?.username
+        ? user.username.charAt(0).toUpperCase()
+        : "";
 
     return (
         <div
@@ -119,6 +122,10 @@ export default function LearnerLayout() {
                 onCloseMobile={() =>
                     setMobileOpen(false)
                 }
+                isAuthenticated={!!user}
+                userName={user?.username}
+                userRole={user?.role}
+                userInitials={userInitial}
             />
 
             <div
@@ -128,46 +135,21 @@ export default function LearnerLayout() {
                     transition-all
                     duration-300
                     md:ml-[var(--sidebar-width)]
-                "
-            >
-                <Navbar
-                    hidden={navHidden}
-                    onMenuClick={() =>
-                        setMobileOpen(true)
-                    }
-                />
+                ">
+                <Navbar hidden={navHidden} onMenuClick={() =>
+                        setMobileOpen(true)}
+                    username={user?.username}
+                    role={user?.role} initial={userInitial}/>
 
-                <main
-                    ref={scrollRef}
-                    className="
-                        h-full
-                        overflow-y-auto
-                        bg-[#081423]
-                    "
-                    style={{
-                        paddingTop:
-                        NAVBAR_HEIGHT,
-                    }}
-                >
+                <main ref={scrollRef} className=" h-full overflow-y-auto bg-[#081423]"
+                    style={{paddingTop: NAVBAR_HEIGHT,}}>
                     {isLearningPage ? (
-                        <div
-                            className="
-                                min-h-[calc(100vh-64px)]
-                                bg-[#081423]
-                            "
-                        >
+                        <div className=" min-h-[calc(100vh-64px)] bg-[#081423]">
                             <Outlet />
                         </div>
                     ) : (
                         <>
-                            <div
-                                className="
-                                    px-4
-                                    py-4
-                                    md:px-6
-                                    lg:px-8
-                                "
-                            >
+                            <div className=" px-4 py-4 md:px-6 lg:px-8">
                                 <Outlet />
                             </div>
 

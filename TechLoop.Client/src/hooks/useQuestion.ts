@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 
 import {
     getCodingQuestions,
@@ -8,6 +8,7 @@ import {
     getQuestionDetails,
     getQuestions,
     getTestCases,
+    submitMcqAnswer,
 } from "../api/question.api.ts";
 
 export const useQuestions = () => {
@@ -38,6 +39,12 @@ export const useMcqOptions = (questionId: number) => {
         queryKey: ["mcq-options", questionId],
         queryFn: () => getMcqOptions(questionId),
         enabled: Number.isInteger(questionId) && questionId > 0,
+    });
+};
+
+export const useSubmitMcqAnswer = () => {
+    return useMutation({
+        mutationFn: submitMcqAnswer,
     });
 };
 
