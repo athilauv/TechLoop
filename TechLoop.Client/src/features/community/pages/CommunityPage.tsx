@@ -206,7 +206,7 @@ export default function CommunityPage() {
                     <button
                         type="button"
                         onClick={() =>
-                            navigate("learner/community/create-post")
+                            navigate("/learner/community/create-post")
                         }
                         className="rounded-xl bg-[#17D4C3] px-4 py-2.5 text-sm font-semibold text-[#06141f] transition hover:bg-[#35e2d3]"
                     >
@@ -233,7 +233,7 @@ export default function CommunityPage() {
                         <button
                             type="button"
                             onClick={() =>
-                                navigate("learner/community/create-post")
+                                navigate("/learner/community/create-post")
                             }
                             className="mt-5 rounded-lg border border-[#24506a] px-4 py-2 text-xs font-medium text-[#17D4C3] hover:bg-[#10283e]"
                         >

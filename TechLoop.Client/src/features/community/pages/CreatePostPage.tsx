@@ -10,7 +10,9 @@ export default function CreatePostPage() {
             <div className="mx-auto max-w-3xl px-5 py-8 sm:px-6">
                 <button
                     type="button"
-                    onClick={() => navigate("/community")}
+                    onClick={() =>
+                        navigate("/learner/community")
+                    }
                     className="inline-flex items-center gap-2 text-sm text-[#7189a8] transition hover:text-white"
                 >
                     <ArrowLeft size={16} />
