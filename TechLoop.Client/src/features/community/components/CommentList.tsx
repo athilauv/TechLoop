@@ -4,9 +4,20 @@ import CommentItem from "./CommentItem";
 interface CommentListProps {
     comments: PostComment[];
     currentUserId?: string;
-    onReply?: (comment: PostComment) => void;
-    onEdit?: (comment: PostComment) => void;
-    onDelete?: (commentId: number) => void;
+
+    onReply?: (
+        comment: PostComment,
+        content: string
+    ) => Promise<void>;
+
+    onEdit?: (
+        commentId: number,
+        content: string
+    ) => Promise<void>;
+
+    onDelete?: (
+        commentId: number
+    ) => Promise<void>;
 }
 
 export default function CommentList({
@@ -30,18 +41,70 @@ export default function CommentList({
         );
     }
 
+    /*
+     * Only top-level comments are rendered here.
+     * Replies are rendered underneath their parent.
+     */
+    const topLevelComments = comments.filter(
+        (comment) => comment.parentCommentId === null
+    );
+
+    const replies = comments.filter(
+        (comment) => comment.parentCommentId !== null
+    );
+
     return (
         <div className="space-y-3">
-            {comments.map((comment) => (
-                <CommentItem
-                    key={comment.id}
-                    comment={comment}
-                    currentUserId={currentUserId}
-                    onReply={onReply}
-                    onEdit={onEdit}
-                    onDelete={onDelete}
-                />
-            ))}
+            {topLevelComments.map((comment) => {
+                const childReplies = replies.filter(
+                    (reply) =>
+                        reply.parentCommentId ===
+                        comment.id
+                );
+
+                return (
+                    <div key={comment.id}>
+                        <CommentItem
+                            comment={comment}
+                            currentUserId={currentUserId}
+                            onReply={onReply}
+                            onEdit={
+                                onEdit
+                                    ? (comment, content) => onEdit(comment.id, content)
+                                    : undefined
+                            }
+                            onDelete={onDelete}
+                        />
+
+                        {childReplies.length > 0 && (
+                            <div className="ml-6 mt-2 space-y-2 border-l border-[#173a55] pl-3">
+                                {childReplies.map(
+                                    (reply) => (
+                                        <CommentItem
+                                            key={reply.id}
+                                            comment={reply}
+                                            currentUserId={
+                                                currentUserId
+                                            }
+                                            onReply={
+                                                onReply
+                                            }
+                                            onEdit={
+                                                onEdit
+                                                    ? (comment, content) => onEdit(comment.id, content)
+                                                    : undefined
+                                            }
+                                            onDelete={
+                                                onDelete
+                                            }
+                                        />
+                                    )
+                                )}
+                            </div>
+                        )}
+                    </div>
+                );
+            })}
         </div>
     );
 }

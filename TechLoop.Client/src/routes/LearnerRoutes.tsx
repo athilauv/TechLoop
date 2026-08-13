@@ -29,8 +29,8 @@ export default function LearnerRoutes() {
                     <Route path="analytics" element={<AnalyticsPage />}/>
                     <Route path="community" element={<CommunityPage />}/>
                     <Route path="community/create-post" element={<CreatePostPage />}/>
-                    <Route path="community/posts/:postId" element={<CommunityPostPage/>}/>
-                    //<Route path="community/saved-posts" element={<SavedPostsPage />}/>
+                    //<Route path="community/posts/:postId" element={<CommunityPostPage/>}/>
+                    <Route path="community/saved-posts" element={<SavedPostsPage />}/>
                 </Route>
             </Route>
         </Routes>

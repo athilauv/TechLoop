@@ -23,11 +23,16 @@ public sealed class CreateCommentCommandHandler
         _currentUser = currentUser;
     }
 
-    public async Task<PostCommentDto> Handle( CreateCommentCommand request, CancellationToken cancellationToken)
+    public async Task<PostCommentDto> Handle(CreateCommentCommand request, CancellationToken cancellationToken)
     {
         if (_currentUser.UserId == Guid.Empty)
         {
             throw new UnauthorizedAccessException("User is not authenticated.");
+        }
+
+        if (string.IsNullOrWhiteSpace(request.Content))
+        {
+            throw new ArgumentException("Comment content is required.");
         }
 
         var post = await _postRepository.GetEntityByIdAsync(request.PostId);
@@ -38,10 +43,15 @@ public sealed class CreateCommentCommandHandler
 
         if (request.ParentCommentId.HasValue)
         {
-            var parentComment = await _commentRepository.GetByIdAsync(request.ParentCommentId.Value);
+            var parentComment = await _commentRepository.GetEntityByIdAsync(request.ParentCommentId.Value);
             if (parentComment is null)
             {
                 throw new KeyNotFoundException("Parent comment not found.");
+            }
+
+            if (parentComment.PostId != request.PostId)
+            {
+                throw new InvalidOperationException("Parent comment does not belong to this post.");
             }
         }
 
@@ -51,7 +61,8 @@ public sealed class CreateCommentCommandHandler
             UserId = _currentUser.UserId,
             ParentCommentId = request.ParentCommentId,
             Content = request.Content.Trim(),
-            CreatedBy = _currentUser.UserId
+            CreatedBy = _currentUser.UserId,
+            CreatedAt = DateTime.UtcNow
         };
 
         var commentId = await _commentRepository.CreateAsync(comment);
@@ -63,7 +74,7 @@ public sealed class CreateCommentCommandHandler
         var createdComment = await _commentRepository.GetByIdAsync(commentId);
         if (createdComment is null)
         {
-            throw new KeyNotFoundException("Comment not found.");
+            throw new KeyNotFoundException("Created comment could not be retrieved.");
         }
 
         return createdComment;

@@ -1,7 +1,9 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { ArrowLeft, Send } from "lucide-react";
+import { toast } from "react-toastify";
 import CommentList from "../components/CommentList";
+import PostActions from "../components/PostActions";
 import {
     createComment,
     deleteComment,
@@ -15,12 +17,9 @@ import {
     unsavePost,
 } from "../../../api/community.api";
 import type { CommunityPost, PostComment } from "../../../types/community.types";
-import PostActions from "../components/PostActions";
 
 export default function CommunityPostPage() {
-    const { postId } =
-        useParams<{ postId: string }>();
-
+    const { postId } = useParams<{ postId: string }>();
     const navigate = useNavigate();
 
     const [post, setPost] =
@@ -50,17 +49,18 @@ export default function CommunityPostPage() {
     const [error, setError] =
         useState<string | null>(null);
 
-    const [commentError, setCommentError] =
-        useState<string | null>(null);
-
     useEffect(() => {
         if (!postId) {
+            setError("Post ID is missing.");
+            setLoading(false);
             return;
         }
 
         const id = Number(postId);
 
         if (!Number.isInteger(id) || id <= 0) {
+            setError("Invalid post ID.");
+            setLoading(false);
             return;
         }
 
@@ -119,6 +119,8 @@ export default function CommunityPostPage() {
         };
     }, [postId]);
 
+
+
     async function handleLike() {
         if (!post || actionLoading) {
             return;
@@ -126,7 +128,6 @@ export default function CommunityPostPage() {
 
         try {
             setActionLoading(true);
-            setError(null);
 
             if (liked) {
                 await unlikePost(post.id);
@@ -144,6 +145,10 @@ export default function CommunityPostPage() {
                         }
                         : current
                 );
+
+                toast.success(
+                    "Post unliked successfully."
+                );
             } else {
                 await likePost(post.id);
 
@@ -158,9 +163,13 @@ export default function CommunityPostPage() {
                         }
                         : current
                 );
+
+                toast.success(
+                    "Post liked successfully."
+                );
             }
         } catch (err: unknown) {
-            setError(
+            toast.error(
                 err instanceof Error
                     ? err.message
                     : "Unable to update like."
@@ -177,17 +186,26 @@ export default function CommunityPostPage() {
 
         try {
             setActionLoading(true);
-            setError(null);
 
             if (saved) {
                 await unsavePost(post.id);
+
                 setSaved(false);
+
+                toast.success(
+                    "Post removed from saved posts."
+                );
             } else {
                 await savePost(post.id);
+
                 setSaved(true);
+
+                toast.success(
+                    "Post saved successfully."
+                );
             }
         } catch (err: unknown) {
-            setError(
+            toast.error(
                 err instanceof Error
                     ? err.message
                     : "Unable to update saved post."
@@ -206,19 +224,15 @@ export default function CommunityPostPage() {
             return;
         }
 
-        const content =
-            commentText.trim();
+        const content = commentText.trim();
 
         if (!content) {
-            setCommentError(
-                "Please enter a comment."
-            );
+            toast.error("Please enter a comment.");
             return;
         }
 
         try {
             setSubmittingComment(true);
-            setCommentError(null);
 
             const newComment =
                 await createComment(
@@ -245,8 +259,12 @@ export default function CommunityPostPage() {
             );
 
             setCommentText("");
+
+            toast.success(
+                "Comment added successfully."
+            );
         } catch (err: unknown) {
-            setCommentError(
+            toast.error(
                 err instanceof Error
                     ? err.message
                     : "Unable to add comment."
@@ -280,8 +298,12 @@ export default function CommunityPostPage() {
                     }
                     : current
             );
+
+            toast.success(
+                "Comment deleted successfully."
+            );
         } catch (err: unknown) {
-            setCommentError(
+            toast.error(
                 err instanceof Error
                     ? err.message
                     : "Unable to delete comment."
@@ -312,9 +334,11 @@ export default function CommunityPostPage() {
                     <button
                         type="button"
                         onClick={() =>
-                            navigate("/community")
+                            navigate(
+                                "/learner/community"
+                            )
                         }
-                        className="mb-6 inline-flex items-center gap-2 text-sm text-[#7189a8] hover:text-white"
+                        className="mb-6 inline-flex items-center gap-2 text-sm text-[#7189a8] transition hover:text-white"
                     >
                         <ArrowLeft size={16} />
                         Back to community
@@ -338,10 +362,14 @@ export default function CommunityPostPage() {
     return (
         <div className="min-h-full bg-[#081423]">
             <div className="mx-auto max-w-4xl px-5 py-8">
+
+                {/* BACK */}
                 <button
                     type="button"
                     onClick={() =>
-                        navigate("/community")
+                        navigate(
+                            "/learner/community"
+                        )
                     }
                     className="inline-flex items-center gap-2 text-sm text-[#7189a8] transition hover:text-white"
                 >
@@ -351,6 +379,8 @@ export default function CommunityPostPage() {
 
                 {/* POST */}
                 <article className="mt-6 rounded-2xl border border-[#1e3254] bg-[#0f1e35] p-6">
+
+                    {/* AUTHOR */}
                     <div className="flex items-center gap-3">
                         <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#17D4C3] text-sm font-semibold text-[#06141f]">
                             {post.userName
@@ -371,25 +401,31 @@ export default function CommunityPostPage() {
                         </div>
                     </div>
 
+                    {/* TECHNOLOGY */}
                     {post.technologyName && (
                         <div className="mt-5 inline-flex rounded-full border border-[#24506a] bg-[#10283e] px-3 py-1 text-xs font-medium text-[#17D4C3]">
                             {post.technologyName}
                         </div>
                     )}
 
+                    {/* TITLE */}
                     <h1 className="mt-4 text-2xl font-semibold text-white">
                         {post.title}
                     </h1>
 
+                    {/* CONTENT */}
                     <div className="mt-4 whitespace-pre-wrap text-sm leading-7 text-[#a8bad0]">
                         {post.content}
                     </div>
 
+                    {/* ACTIONS */}
                     <div className="mt-6">
                         <PostActions
                             liked={liked}
                             saved={saved}
-                            likeCount={post.likeCount}
+                            likeCount={
+                                post.likeCount
+                            }
                             commentCount={
                                 post.commentCount
                             }
@@ -402,13 +438,17 @@ export default function CommunityPostPage() {
                                     )
                                     ?.focus()
                             }
-                            disabled={actionLoading}
+                            disabled={
+                                actionLoading
+                            }
                         />
                     </div>
                 </article>
 
                 {/* COMMENTS */}
                 <section className="mt-6 rounded-2xl border border-[#1e3254] bg-[#0f1e35] p-6">
+
+                    {/* HEADER */}
                     <div className="flex items-center justify-between">
                         <div>
                             <h2 className="text-lg font-semibold text-white">
@@ -448,12 +488,6 @@ export default function CommunityPostPage() {
                             placeholder="Write a comment..."
                             className="w-full resize-none rounded-xl border border-[#29466d] bg-[#081423] px-4 py-3 text-sm leading-6 text-white outline-none placeholder:text-[#526d8e] focus:border-[#17D4C3] disabled:opacity-50"
                         />
-
-                        {commentError && (
-                            <p className="mt-2 text-xs text-[#ef8b8b]">
-                                {commentError}
-                            </p>
-                        )}
 
                         <div className="mt-3 flex items-center justify-between">
                             <span className="text-[10px] text-[#526d8e]">

@@ -255,18 +255,10 @@ export default function SavedPostsPage() {
                                     post={post}
                                     liked={false}
                                     saved={true}
-                                    onLike={() =>
-                                        undefined
-                                    }
-                                    onSave={
-                                        handleUnsave
-                                    }
-                                    onOpen={(id) =>
-                                        navigate(
-                                            `/community/posts/${id}`
-                                        )
-                                    }
-                                />
+                                    onLike={() => undefined}
+                                    onSave={ handleUnsave }
+                                    onOpen={(id) => navigate(`/learner/community/posts/${id}`)
+                                    }/>
                             </div>
                         ))}
                     </div>

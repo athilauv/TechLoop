@@ -27,6 +27,10 @@ public static class RepositoryServiceCollectionExtensions
         services.AddScoped<IDiscussionRepository, DiscussionRepository>();
         services.AddScoped<IDiscussionCommentRepository, DiscussionCommentRepository>();
         services.AddScoped<IAnalyticsRepository, AnalyticsRepository>();
+        services.AddScoped<ICommunityPostRepository, CommunityPostRepository>();
+        services.AddScoped<IPostCommentRepository, PostCommentRepository>();
+        services.AddScoped<IPostLikeRepository, PostLikeRepository>();
+        services.AddScoped<ISavedPostRepository, SavedPostRepository>();
         return services;
     }
 }
