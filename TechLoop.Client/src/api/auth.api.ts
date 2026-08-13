@@ -1,4 +1,4 @@
-const API_URL = "http://localhost:5264/Auth";
+const API_URL = `${import.meta.env.VITE_API_URL}/Auth`;
 
 // LOGIN
 export async function login(data: {

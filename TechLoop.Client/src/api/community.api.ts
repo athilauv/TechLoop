@@ -1,3 +1,4 @@
+import api from "./axios.ts";
 import type {
     CommunityPost,
     CreateCommentRequest,
@@ -5,226 +6,163 @@ import type {
     PostComment,
     SavedPost,
     UpdateCommentRequest,
-    UpdatePostRequest,
-} from "../types/community.types";
+    UpdatePostRequest } from "../types/community.types";
 
-const API_URL = "http://localhost:5264/api/learner/community";
-
-async function request<T>(
-    url: string,
-    options: RequestInit = {}
-): Promise<T> {
-    const token = localStorage.getItem("accessToken");
-
-    const response = await fetch(url, {
-        ...options,
-        credentials: "include",
-        headers: {
-            Accept: "application/json",
-            "Content-Type": "application/json",
-
-            ...(token
-                ? {
-                    Authorization: `Bearer ${token}`,
-                }
-                : {}),
-
-            ...options.headers,
-        },
-    });
-
-    const text = await response.text();
-
-    if (!response.ok) {
-        let message = `Request failed with status code ${response.status}`;
-
-        if (text) {
-            try {
-                const result = JSON.parse(text);
-
-                message =
-                    result?.message ||
-                    result?.Message ||
-                    result?.title ||
-                    message;
-            } catch {
-                message = text;
-            }
-        }
-
-        throw new Error(message);
-    }
-
-    if (!text.trim()) {
-        return undefined as T;
-    }
-
-    try {
-        return JSON.parse(text) as T;
-    } catch {
-        throw new Error(
-            "Community API returned an invalid response."
-        );
-    }
-}
-
-export async function getCommunityFeed(): Promise<CommunityPost[]> {
-    return request<CommunityPost[]>(
-        `${API_URL}/posts`
+ // POSTS
+export const getCommunityFeed = async (): Promise<CommunityPost[]> => {
+    const { data } = await api.get<CommunityPost[]>(
+        "/api/learner/community/posts"
     );
-}
 
-export async function getCommunityPost(
+    return data;
+};
+
+export const getCommunityPost = async (
     postId: number
-): Promise<CommunityPost> {
-    return request<CommunityPost>(
-        `${API_URL}/posts/${postId}`
+): Promise<CommunityPost> => {
+    const { data } = await api.get<CommunityPost>(
+        `/api/learner/community/posts/${postId}`
     );
-}
 
-export async function createPost(
+    return data;
+};
+
+export const createPost = async (
     data: CreatePostRequest
-): Promise<CommunityPost> {
-    return request<CommunityPost>(
-        `${API_URL}/posts`,
-        {
-            method: "POST",
-            body: JSON.stringify(data),
-        }
+): Promise<CommunityPost> => {
+    const response = await api.post<CommunityPost>(
+        "/api/learner/community/posts",
+        data
     );
-}
 
-export async function updatePost(
+    return response.data;
+};
+
+export const updatePost = async (
     postId: number,
     data: UpdatePostRequest
-): Promise<CommunityPost> {
-    return request<CommunityPost>(
-        `${API_URL}/posts/${postId}`,
-        {
-            method: "PUT",
-            body: JSON.stringify(data),
-        }
+): Promise<CommunityPost> => {
+    const response = await api.put<CommunityPost>(
+        `/api/learner/community/posts/${postId}`,
+        data
     );
-}
 
-export async function deletePost(
+    return response.data;
+};
+
+export const deletePost = async (
     postId: number
-): Promise<void> {
-    await request<void>(
-        `${API_URL}/posts/${postId}`,
-        {
-            method: "DELETE",
-        }
+): Promise<void> => {
+    await api.delete(
+        `/api/learner/community/posts/${postId}`
     );
-}
+};
 
-export async function getPostComments(
+ // COMMENTS
+export const getPostComments = async (
     postId: number
-): Promise<PostComment[]> {
-    return request<PostComment[]>(
-        `${API_URL}/posts/${postId}/comments`
+): Promise<PostComment[]> => {
+    const { data } = await api.get<PostComment[]>(
+        `/api/learner/community/posts/${postId}/comments`
     );
-}
 
-export async function getComment(
+    return data;
+};
+
+export const getComment = async (
     commentId: number
-): Promise<PostComment> {
-    return request<PostComment>(
-        `${API_URL}/comments/${commentId}`
+): Promise<PostComment> => {
+    const { data } = await api.get<PostComment>(
+        `/api/learner/community/comments/${commentId}`
     );
-}
 
-export async function createComment(
+    return data;
+};
+
+export const createComment = async (
     postId: number,
     data: CreateCommentRequest
-): Promise<PostComment> {
-    return request<PostComment>(
-        `${API_URL}/posts/${postId}/comments`,
-        {
-            method: "POST",
-            body: JSON.stringify(data),
-        }
+): Promise<PostComment> => {
+    const response = await api.post<PostComment>(
+        `/api/learner/community/posts/${postId}/comments`,
+        data
     );
-}
 
-export async function updateComment(
+    return response.data;
+};
+
+export const updateComment = async (
     commentId: number,
     data: UpdateCommentRequest
-): Promise<PostComment> {
-    return request<PostComment>(
-        `${API_URL}/comments/${commentId}`,
-        {
-            method: "PUT",
-            body: JSON.stringify(data),
-        }
+): Promise<PostComment> => {
+    const response = await api.put<PostComment>(
+        `/api/learner/community/comments/${commentId}`,
+        data
     );
-}
 
-export async function deleteComment(
+    return response.data;
+};
+
+export const deleteComment = async (
     commentId: number
-): Promise<void> {
-    await request<void>(
-        `${API_URL}/comments/${commentId}`,
-        {
-            method: "DELETE",
-        }
+): Promise<void> => {
+    await api.delete(
+        `/api/learner/community/comments/${commentId}`
     );
-}
+};
 
-export async function likePost(
+ // LIKES
+export const likePost = async (
     postId: number
-): Promise<number> {
-    return request<number>(
-        `${API_URL}/posts/${postId}/likes`,
-        {
-            method: "POST",
-        }
+): Promise<number> => {
+    const { data } = await api.post<number>(
+        `/api/learner/community/posts/${postId}/likes`
     );
-}
 
-export async function unlikePost(
+    return data;
+};
+
+export const unlikePost = async (
     postId: number
-): Promise<void> {
-    await request<void>(
-        `${API_URL}/posts/${postId}/likes`,
-        {
-            method: "DELETE",
-        }
+): Promise<void> => {
+    await api.delete(
+        `/api/learner/community/posts/${postId}/likes`
     );
-}
+};
 
-export async function getLikeStatus(
+export const getLikeStatus = async (
     postId: number
-): Promise<boolean> {
-    return request<boolean>(
-        `${API_URL}/posts/${postId}/likes/me`
+): Promise<boolean> => {
+    const { data } = await api.get<boolean>(
+        `/api/learner/community/posts/${postId}/likes/me`
     );
-}
 
-export async function savePost(
+    return data;
+};
+
+  // SAVED POSTS
+export const savePost = async (
     postId: number
-): Promise<number> {
-    return request<number>(
-        `${API_URL}/posts/${postId}/save`,
-        {
-            method: "POST",
-        }
+): Promise<number> => {
+    const { data } = await api.post<number>(
+        `/api/learner/community/posts/${postId}/save`
     );
-}
 
-export async function unsavePost(
+    return data;
+};
+
+export const unsavePost = async (
     postId: number
-): Promise<void> {
-    await request<void>(
-        `${API_URL}/posts/${postId}/save`,
-        {
-            method: "DELETE",
-        }
+): Promise<void> => {
+    await api.delete(
+        `/api/learner/community/posts/${postId}/save`
     );
-}
+};
 
-export async function getSavedPosts(): Promise<SavedPost[]> {
-    return request<SavedPost[]>(
-        `${API_URL}/saved-posts`
+export const getSavedPosts = async (): Promise<SavedPost[]> => {
+    const { data } = await api.get<SavedPost[]>(
+        "/api/learner/community/saved-posts"
     );
-}
+
+    return data;
+};

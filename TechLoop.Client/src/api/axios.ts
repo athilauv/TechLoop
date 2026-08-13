@@ -4,7 +4,7 @@
 } from "axios";
 
 const api = axios.create({
-    baseURL: "http://localhost:5264",
+    baseURL: import.meta.env.VITE_API_URL,
     withCredentials: true,
 });
 
@@ -17,7 +17,6 @@ api.interceptors.request.use(
     }
 );
 
-// Response Interceptor
 let isRefreshing = false;
 
 let refreshSubscribers: Array<{
@@ -25,8 +24,6 @@ let refreshSubscribers: Array<{
     reject: (error: unknown) => void;
 }> = [];
 
-
-// Notify all requests waiting for refresh
 const notifyRefreshSubscribers = () => {
     refreshSubscribers.forEach((subscriber) => {
         subscriber.resolve();
@@ -35,8 +32,6 @@ const notifyRefreshSubscribers = () => {
     refreshSubscribers = [];
 };
 
-
-// Reject all requests waiting for refresh
 const rejectRefreshSubscribers = (error: unknown) => {
     refreshSubscribers.forEach((subscriber) => {
         subscriber.reject(error);
@@ -45,57 +40,44 @@ const rejectRefreshSubscribers = (error: unknown) => {
     refreshSubscribers = [];
 };
 
-
 api.interceptors.response.use(
-    // Normal successful response
     (response) => {
         return response;
     },
 
-    // Error response
     async (error: AxiosError) => {
-
         const originalRequest =
             error.config as InternalAxiosRequestConfig & {
                 _retry?: boolean;
             };
 
-        // Only handle 401
+        // Only handle 401 responses
         if (error.response?.status !== 401) {
             return Promise.reject(error);
         }
 
-        // Don't refresh the refresh endpoint itself
-        if (
-            originalRequest.url?.includes("/Auth/refresh")
-        ) {
+        // Do not refresh the refresh request itself
+        if (originalRequest.url?.includes("/Auth/refresh")) {
             return Promise.reject(error);
         }
 
-        // Don't retry same request twice
+        // Do not retry the same request twice
         if (originalRequest._retry) {
             return Promise.reject(error);
         }
 
         originalRequest._retry = true;
 
-
-        // ==================================================
         // Another request is already refreshing
-        // ==================================================
-
         if (isRefreshing) {
             return new Promise((resolve, reject) => {
-
                 refreshSubscribers.push({
                     resolve: () => resolve(api(originalRequest)),
                     reject,
                 });
-
             });
         }
 
-        // Start refresh
         isRefreshing = true;
 
         try {
@@ -107,26 +89,19 @@ api.interceptors.response.use(
                 }
             );
 
-
-            // New cookies have now been set by backend
             notifyRefreshSubscribers();
 
-            // Retry original request
             return api(originalRequest);
-
         } catch (refreshError) {
-
             rejectRefreshSubscribers(refreshError);
+
             localStorage.removeItem("accessToken");
+
             return Promise.reject(refreshError);
-
         } finally {
-
             isRefreshing = false;
-
         }
     }
 );
-
 
 export default api;
