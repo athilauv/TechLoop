@@ -1,83 +1,67 @@
-import { useEffect, useState } from "react";
 import { ArrowLeft, Bookmark } from "lucide-react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-
 import {
-    getCommunityPost,
+    deletePost,
+    getCommunityFeed,
+    getLikeStatus,
     getSavedPosts,
+    likePost,
+    savePost,
+    unlikePost,
     unsavePost,
+    updatePost,
 } from "../../../api/community.api";
-
-import type {
-    CommunityPost,
-} from "../../../types/community.types";
-
+import type { CommunityPost } from "../../../types/community.types";
 import CommunityPostCard from "../components/CommunityPostCard";
 
 export default function SavedPostsPage() {
     const navigate = useNavigate();
-
-    const [posts, setPosts] =
-        useState<CommunityPost[]>([]);
-
-    const [loading, setLoading] =
-        useState(true);
-
-    const [error, setError] =
-        useState<string | null>(null);
+    const [savedPosts, setSavedPosts] = useState<CommunityPost[]>([]);
+    const [likedPosts, setLikedPosts] = useState<number[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
+    const currentUserId = localStorage.getItem("userId") ?? undefined;
 
     useEffect(() => {
         let cancelled = false;
 
         async function loadSavedPosts() {
             try {
-                const saved =
-                    await getSavedPosts();
+                setLoading(true);
+                setError(null);
 
-                if (cancelled) {
-                    return;
+                const [saved, feed] = await Promise.all([
+                    getSavedPosts(),
+                    getCommunityFeed(),
+                ]);
+
+                if (cancelled) return;
+
+                const savedIds = new Set(saved.map((item) => item.postId));
+                const filteredPosts = feed.filter((post) => savedIds.has(post.id));
+
+                setSavedPosts(filteredPosts);
+
+                const likeResults = await Promise.all(
+                    filteredPosts.map(async (post) => {
+                        try {
+                            return (await getLikeStatus(post.id)) ? post.id : null;
+                        } catch {
+                            return null;
+                        }
+                    })
+                );
+
+                if (!cancelled) {
+                    setLikedPosts(likeResults.filter((id): id is number => id !== null));
                 }
-
-                if (saved.length === 0) {
-                    setPosts([]);
-                    setLoading(false);
-                    return;
-                }
-
-                const results =
-                    await Promise.all(
-                        saved.map((item) =>
-                            getCommunityPost(
-                                item.postId
-                            ).catch(() => null)
-                        )
-                    );
-
-                if (cancelled) {
-                    return;
-                }
-
-                const validPosts =
-                    results.filter(
-                        (
-                            post
-                        ): post is CommunityPost =>
-                            post !== null
-                    );
-
-                setPosts(validPosts);
             } catch (err: unknown) {
                 if (!cancelled) {
-                    setError(
-                        err instanceof Error
-                            ? err.message
-                            : "Unable to load saved posts."
-                    );
+                    setError(err instanceof Error ? err.message : "Unable to load saved posts.");
                 }
             } finally {
-                if (!cancelled) {
-                    setLoading(false);
-                }
+                if (!cancelled) setLoading(false);
             }
         }
 
@@ -88,25 +72,82 @@ export default function SavedPostsPage() {
         };
     }, []);
 
-    async function handleUnsave(
-        postId: number
+    async function handleLike(postId: number) {
+        const liked = likedPosts.includes(postId);
+
+        try {
+            setError(null);
+
+            if (liked) {
+                await unlikePost(postId);
+                setLikedPosts((current) => current.filter((id) => id !== postId));
+                setSavedPosts((current) =>
+                    current.map((post) => post.id === postId ? { ...post, likeCount: Math.max(0, post.likeCount - 1) } : post)
+                );
+            } else {
+                await likePost(postId);
+                setLikedPosts((current) => [...current, postId]);
+                setSavedPosts((current) => current.map((post) => post.id === postId ? { ...post, likeCount: post.likeCount + 1 } : post));
+            }
+        } catch (err: unknown) {
+            setError(err instanceof Error ? err.message : "Unable to update like.");
+        }
+    }
+
+    async function handleSave(postId: number) {
+        const saved = savedPosts.some((post) => post.id === postId);
+
+        try {
+            setError(null);
+
+            if (saved) {
+                await unsavePost(postId);
+                setSavedPosts((current) => current.filter((post) => post.id !== postId));
+            } else {
+                await savePost(postId);
+            }
+        } catch (err: unknown) {
+            setError(err instanceof Error ? err.message : "Unable to update saved post.");
+        }
+    }
+
+    async function handleEdit(
+        postId: number,
+        technologyId: number | null,
+        title: string,
+        content: string
     ) {
         try {
-            await unsavePost(postId);
+            setError(null);
 
-            setPosts((current) =>
-                current.filter(
-                    (post) =>
-                        post.id !== postId
-                )
+            const updated = await updatePost(postId, {
+                technologyId,
+                title,
+                content,
+            });
+
+            setSavedPosts((current) =>
+                current.map((post) => (post.id === postId ? updated : post))
             );
         } catch (err: unknown) {
-            setError(
-                err instanceof Error
-                    ? err.message
-                    : "Unable to remove saved post."
-            );
+            setError(err instanceof Error ? err.message : "Unable to update post.");
+            throw err;
         }
+    }
+
+    async function handleDelete(postId: number) {
+        try {
+            setError(null);
+            await deletePost(postId);
+            setSavedPosts((current) => current.filter((post) => post.id !== postId));
+        } catch (err: unknown) {
+            setError(err instanceof Error ? err.message : "Unable to delete post.");
+            throw err;
+        }
+    }
+
+    function handleOpen(postId: number) {
+        navigate(`/learner/community/post/${postId}`);
     }
 
     if (loading) {
@@ -114,44 +155,9 @@ export default function SavedPostsPage() {
             <div className="min-h-full bg-[#081423]">
                 <div className="mx-auto max-w-4xl px-5 py-8">
                     <div className="animate-pulse space-y-4">
-                        <div className="h-5 w-32 rounded bg-[#14253d]" />
-
-                        <div className="h-8 w-52 rounded bg-[#14253d]" />
-
-                        <div className="h-4 w-80 max-w-full rounded bg-[#14253d]" />
-
+                        <div className="h-8 w-40 rounded bg-[#14253d]" />
                         <div className="h-48 rounded-2xl bg-[#0f1e35]" />
-
                         <div className="h-48 rounded-2xl bg-[#0f1e35]" />
-                    </div>
-                </div>
-            </div>
-        );
-    }
-
-    if (error && posts.length === 0) {
-        return (
-            <div className="min-h-full bg-[#081423]">
-                <div className="mx-auto max-w-4xl px-5 py-8">
-                    <button
-                        type="button"
-                        onClick={() =>
-                            navigate("/community")
-                        }
-                        className="inline-flex items-center gap-2 text-sm text-[#7189a8] transition hover:text-white"
-                    >
-                        <ArrowLeft size={16} />
-                        Back to community
-                    </button>
-
-                    <div className="mt-6 rounded-2xl border border-[#5c3038] bg-[#24151b] p-6">
-                        <p className="text-sm font-semibold text-[#ef8b8b]">
-                            Unable to load saved posts
-                        </p>
-
-                        <p className="mt-2 text-xs text-[#a96d76]">
-                            {error}
-                        </p>
                     </div>
                 </div>
             </div>
@@ -161,105 +167,71 @@ export default function SavedPostsPage() {
     return (
         <div className="min-h-full bg-[#081423]">
             <div className="mx-auto max-w-4xl px-5 py-8">
-                {/* Header */}
-                <div className="flex items-start justify-between gap-4">
-                    <div>
+                <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
                         <button
                             type="button"
-                            onClick={() =>
-                                navigate("/community")
-                            }
-                            className="inline-flex items-center gap-2 text-sm text-[#7189a8] transition hover:text-white"
+                            onClick={() => navigate(-1)}
+                            className="rounded-lg p-2 text-[#526d8e] transition hover:bg-[#0f1e35] hover:text-white"
+                            aria-label="Go back"
                         >
-                            <ArrowLeft size={16} />
-                            Back to community
+                            <ArrowLeft size={17} />
                         </button>
 
-                        <div className="mt-6 flex items-center gap-3">
-                            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#12324a] text-[#17D4C3]">
-                                <Bookmark
-                                    size={19}
-                                    fill="currentColor"
-                                />
-                            </div>
-
-                            <div>
-                                <p className="text-xs font-semibold uppercase tracking-[1px] text-[#17D4C3]">
-                                    Community
-                                </p>
-
-                                <h1 className="mt-1 text-2xl font-semibold text-white">
-                                    Saved posts
-                                </h1>
-                            </div>
+                        <div>
+                            <p className="text-xs font-semibold uppercase tracking-[1px] text-[#17D4C3]">
+                                Community
+                            </p>
+                            <h1 className="mt-1 text-2xl font-semibold text-white">
+                                Saved posts
+                            </h1>
                         </div>
-
-                        <p className="mt-3 text-sm text-[#7189a8]">
-                            Posts you've saved for later.
-                        </p>
                     </div>
 
-                    <button
-                        type="button"
-                        onClick={() =>
-                            navigate("/community")
-                        }
-                        className="rounded-xl border border-[#29466d] px-4 py-2.5 text-xs font-medium text-[#8fa6c2] transition hover:bg-[#10283e] hover:text-white"
-                    >
-                        Community
-                    </button>
+                    <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#0b2736]">
+                        <Bookmark size={16} className="text-[#17D4C3]" />
+                    </div>
                 </div>
 
-                {/* Inline error */}
+                <p className="mt-3 max-w-2xl text-sm text-[#7189a8]">
+                    Posts you saved for later. Open a post or comments to continue the discussion.
+                </p>
+
                 {error && (
-                    <div className="mt-5 rounded-xl border border-[#5c3038] bg-[#24151b] px-4 py-3">
-                        <p className="text-xs text-[#ef8b8b]">
-                            {error}
+                    <div className="mt-5 rounded-xl border border-[#5c3038] bg-[#24151b] px-4 py-3 text-xs text-[#ef8b8b]">
+                        {error}
+                    </div>
+                )}
+
+                {!error && savedPosts.length === 0 && (
+                    <div className="mt-8 rounded-2xl border border-dashed border-[#1e3254] bg-[#0f1e35] px-6 py-14 text-center">
+                        <Bookmark size={28} className="mx-auto text-[#526d8e]" />
+
+                        <h2 className="mt-4 text-sm font-semibold text-white">
+                            No saved posts
+                        </h2>
+
+                        <p className="mx-auto mt-2 max-w-sm text-xs leading-5 text-[#526d8e]">
+                            Save discussions from the community and they will appear here.
                         </p>
                     </div>
                 )}
 
-                {/* Empty */}
-                {posts.length === 0 ? (
-                    <div className="mt-8 rounded-2xl border border-dashed border-[#1e3254] bg-[#0f1e35] p-12 text-center">
-                        <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-xl bg-[#10283e] text-[#17D4C3]">
-                            <Bookmark size={21} />
-                        </div>
-
-                        <p className="mt-4 text-sm font-medium text-white">
-                            No saved posts
-                        </p>
-
-                        <p className="mt-2 text-xs text-[#7189a8]">
-                            Save useful community discussions and they'll appear here.
-                        </p>
-
-                        <button
-                            type="button"
-                            onClick={() =>
-                                navigate("/community")
-                            }
-                            className="mt-5 rounded-lg border border-[#24506a] px-4 py-2 text-xs font-medium text-[#17D4C3] transition hover:bg-[#10283e]"
-                        >
-                            Explore community
-                        </button>
-                    </div>
-                ) : (
-                    <div className="mt-8 space-y-4">
-                        {posts.map((post) => (
-                            <div
+                {savedPosts.length > 0 && (
+                    <div className="mt-7 space-y-6">
+                        {savedPosts.map((post) => (
+                            <CommunityPostCard
                                 key={post.id}
-                                className="relative"
-                            >
-                                <CommunityPostCard
-                                    post={post}
-                                    liked={false}
-                                    saved={true}
-                                    onLike={() => undefined}
-                                    onSave={ handleUnsave }
-                                    onOpen={(id) => navigate(`/learner/community/posts/${id}`)
-                                    }/>
-                            </div>
+                                post={post}
+                                liked={likedPosts.includes(post.id)}
+                                saved={true}
+                                currentUserId={currentUserId}
+                                onLike={handleLike}
+                                onSave={handleSave}
+                                onOpen={handleOpen}
+                                onEdit={handleEdit}
+                                onDelete={handleDelete}
+                            />
                         ))}
                     </div>
                 )}

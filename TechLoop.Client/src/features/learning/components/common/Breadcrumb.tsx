@@ -17,10 +17,7 @@ export default function Breadcrumb({ items, showHome = true }: BreadcrumbProps) 
         <nav aria-label="Breadcrumb" className="flex items-center gap-1.5 text-sm">
             {showHome && (
                 <>
-                    <Link
-                        to="/"
-                        className="flex items-center gap-1 text-[#8CA3BF] transition-colors duration-150 hover:text-[#00E8C2]"
-                    >
+                    <Link to="/" className="flex items-center gap-1 text-[#8CA3BF] transition-colors duration-150 hover:text-[#00E8C2]">
                         <Home className="h-3.5 w-3.5" />
                     </Link>
                     {items.length > 0 && (
@@ -35,17 +32,11 @@ export default function Breadcrumb({ items, showHome = true }: BreadcrumbProps) 
                 return (
                     <Fragment key={`${item.label}-${index}`}>
                         {item.href && !isLast ? (
-                            <Link
-                                to={item.href}
-                                className="text-[#8CA3BF] transition-colors duration-150 hover:text-[#00E8C2]"
-                            >
+                            <Link to={item.href} className="text-[#8CA3BF] transition-colors duration-150 hover:text-[#00E8C2]">
                                 {item.label}
                             </Link>
                         ) : (
-                            <span
-                                className={isLast ? "font-medium text-white" : "text-[#8CA3BF]"}
-                                aria-current={isLast ? "page" : undefined}
-                            >
+                            <span className={isLast ? "font-medium text-white" : "text-[#8CA3BF]"} aria-current={isLast ? "page" : undefined}>
                                 {item.label}
                             </span>
                         )}

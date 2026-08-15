@@ -1,84 +1,32 @@
-import { useEffect, useState } from "react";
-import type { FormEvent } from "react";
-import { useNavigate } from "react-router-dom";
-import { createPost } from "../../../api/community.api";
-import { getTechnologies } from "../../../api/technology.api";
-import type { LearnerTechnology } from "../../../types/technology.types";
+import { Send, X } from "lucide-react";
+import { useState, type FormEvent } from "react";
 
-type ToastType = "success" | "error";
-
-interface Toast {
-    type: ToastType;
-    message: string;
+interface TechnologyOption {
+    id: number;
+    name: string;
 }
 
-export default function CreatePostForm() {
-    const navigate = useNavigate();
+interface CreatePostFormProps {
+    technologies: TechnologyOption[];
+    loadingTechnologies?: boolean;
+    submitting?: boolean;
+    onSubmit: (technologyId: number | null, title: string, content: string) => Promise<void>;
+    onClose: () => void;
+}
 
-    const [technologies, setTechnologies] = useState<LearnerTechnology[]>([]);
-    const [technologyId, setTechnologyId] = useState<number | "">("");
-
+export default function CreatePostForm({
+                                           technologies,
+                                           loadingTechnologies = false,
+                                           submitting = false,
+                                           onSubmit,
+                                           onClose,
+                                       }: CreatePostFormProps) {
+    const [technologyId, setTechnologyId] = useState("");
     const [title, setTitle] = useState("");
     const [content, setContent] = useState("");
-
-    const [loadingTechnologies, setLoadingTechnologies] = useState(true);
-    const [submitting, setSubmitting] = useState(false);
-
     const [error, setError] = useState<string | null>(null);
-    const [toast, setToast] = useState<Toast | null>(null);
 
-    useEffect(() => {
-        let cancelled = false;
-
-        async function loadTechnologies() {
-            try {
-                setLoadingTechnologies(true);
-                setError(null);
-
-                const result = await getTechnologies();
-
-                if (!cancelled) {
-                    setTechnologies(result);
-                }
-            } catch (err: unknown) {
-                if (!cancelled) {
-                    setError(
-                        err instanceof Error
-                            ? err.message
-                            : "Unable to load technologies."
-                    );
-                }
-            } finally {
-                if (!cancelled) {
-                    setLoadingTechnologies(false);
-                }
-            }
-        }
-
-        void loadTechnologies();
-
-        return () => {
-            cancelled = true;
-        };
-    }, []);
-
-    function showToast(
-        type: ToastType,
-        message: string
-    ) {
-        setToast({
-            type,
-            message,
-        });
-
-        window.setTimeout(() => {
-            setToast(null);
-        }, 3000);
-    }
-
-    async function handleSubmit(
-        event: FormEvent<HTMLFormElement>
-    ) {
+    async function handleSubmit(event: FormEvent) {
         event.preventDefault();
 
         const trimmedTitle = title.trim();
@@ -90,223 +38,116 @@ export default function CreatePostForm() {
         }
 
         if (!trimmedTitle) {
-            setError("Please enter a title.");
+            setError("Discussion title is required.");
             return;
         }
 
         if (!trimmedContent) {
-            setError("Please enter your post content.");
+            setError("Discussion content is required.");
             return;
         }
 
         try {
-            setSubmitting(true);
             setError(null);
-
-            const post = await createPost({
-                technologyId: Number(technologyId),
-                title: trimmedTitle,
-                content: trimmedContent,
-            });
-
-            showToast(
-                "success",
-                "Post published successfully."
-            );
-
-            window.setTimeout(() => {
-                navigate(
-                    `/learner/community/posts/${post.id}`
-                );
-            }, 700);
+            await onSubmit(Number(technologyId), trimmedTitle, trimmedContent);
         } catch (err: unknown) {
-            const message =
-                err instanceof Error
-                    ? err.message
-                    : "Unable to create post.";
-
-            setError(message);
-
-            showToast(
-                "error",
-                message
-            );
-        } finally {
-            setSubmitting(false);
+            setError(err instanceof Error ? err.message : "Unable to create discussion.");
         }
     }
 
     return (
-        <>
-            {toast && (
-                <div
-                    className={`fixed right-5 top-5 z-[100] flex min-w-[280px] items-center gap-3 rounded-xl border px-4 py-3 shadow-2xl ${
-                        toast.type === "success"
-                            ? "border-[#17615f] bg-[#102b32] text-[#17D4C3]"
-                            : "border-[#5c3038] bg-[#24151b] text-[#ef8b8b]"
-                    }`}
-                    role="status"
-                    aria-live="polite"
-                >
-                    <span className="text-sm font-medium">
-                        {toast.type === "success" ? "✓" : "✕"}
-                    </span>
-
-                    <span className="text-sm">
-                        {toast.message}
-                    </span>
-                </div>
-            )}
-
-            <form
-                onSubmit={handleSubmit}
-                className="rounded-2xl border border-[#1e3254] bg-[#0f1e35] p-5 sm:p-6"
-            >
-                <div>
-                    <p className="text-xs font-semibold uppercase tracking-[1px] text-[#17D4C3]">
-                        Community
-                    </p>
-
-                    <h1 className="mt-2 text-xl font-semibold text-white">
-                        Create a post
-                    </h1>
-
-                    <p className="mt-2 text-sm leading-6 text-[#7189a8]">
-                        Share something you learned, ask a question, or start a technical discussion.
-                    </p>
-                </div>
-
-                {error && (
-                    <div className="mt-5 rounded-xl border border-[#5c3038] bg-[#24151b] px-4 py-3">
-                        <p className="text-sm text-[#ef8b8b]">
-                            {error}
-                        </p>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 px-4 backdrop-blur-sm">
+            <div className="w-full max-w-2xl rounded-2xl border border-[#1e3254] bg-[#0f1e35] shadow-2xl">
+                <div className="flex items-center justify-between border-b border-[#1e3254] px-5 py-4">
+                    <div>
+                        <h2 className="text-base font-semibold text-white">Start a discussion</h2>
+                        <p className="mt-1 text-xs text-[#7189a8]">Share something with the developer community.</p>
                     </div>
-                )}
 
-                {/* Technology */}
-                <div className="mt-6">
-                    <label
-                        htmlFor="post-technology"
-                        className="text-xs font-medium text-[#a8bad0]"
-                    >
-                        Technology
-                    </label>
-
-                    <select
-                        id="post-technology"
-                        value={technologyId}
-                        onChange={(event) =>
-                            setTechnologyId(
-                                event.target.value
-                                    ? Number(event.target.value)
-                                    : ""
-                            )
-                        }
-                        disabled={
-                            submitting ||
-                            loadingTechnologies
-                        }
-                        className="mt-2 w-full rounded-xl border border-[#29466d] bg-[#081423] px-4 py-3 text-sm text-white outline-none focus:border-[#17D4C3] disabled:cursor-not-allowed disabled:opacity-60"
-                    >
-                        <option value="">
-                            {loadingTechnologies
-                                ? "Loading technologies..."
-                                : "Select technology"}
-                        </option>
-
-                        {technologies.map(
-                            (technology) => (
-                                <option
-                                    key={technology.id}
-                                    value={technology.id}
-                                >
-                                    {technology.name}
-                                </option>
-                            )
-                        )}
-                    </select>
-                </div>
-
-                {/* Title */}
-                <div className="mt-5">
-                    <label
-                        htmlFor="post-title"
-                        className="text-xs font-medium text-[#a8bad0]"
-                    >
-                        Title
-                    </label>
-
-                    <input
-                        id="post-title"
-                        type="text"
-                        value={title}
-                        onChange={(event) =>
-                            setTitle(event.target.value)
-                        }
-                        maxLength={200}
-                        placeholder="What do you want to discuss?"
-                        className="mt-2 w-full rounded-xl border border-[#29466d] bg-[#081423] px-4 py-3 text-sm text-white outline-none placeholder:text-[#526d8e] focus:border-[#17D4C3]"
-                        disabled={submitting}
-                    />
-
-                    <div className="mt-1 text-right text-[10px] text-[#526d8e]">
-                        {title.length}/200
-                    </div>
-                </div>
-
-                {/* Content */}
-                <div className="mt-5">
-                    <label
-                        htmlFor="post-content"
-                        className="text-xs font-medium text-[#a8bad0]"
-                    >
-                        Content
-                    </label>
-
-                    <textarea
-                        id="post-content"
-                        value={content}
-                        onChange={(event) =>
-                            setContent(event.target.value)
-                        }
-                        rows={9}
-                        placeholder="Write your question, explanation, experience, or idea..."
-                        className="mt-2 w-full resize-y rounded-xl border border-[#29466d] bg-[#081423] px-4 py-3 text-sm leading-6 text-white outline-none placeholder:text-[#526d8e] focus:border-[#17D4C3]"
-                        disabled={submitting}
-                    />
-                </div>
-
-                {/* Actions */}
-                <div className="mt-6 flex items-center justify-end gap-3">
                     <button
                         type="button"
-                        onClick={() =>
-                            navigate("/learner/community")
-                        }
+                        onClick={onClose}
                         disabled={submitting}
-                        className="rounded-xl border border-[#29466d] px-4 py-2.5 text-sm font-medium text-[#8fa6c2] transition hover:bg-[#10283e] hover:text-white disabled:cursor-not-allowed disabled:opacity-50"
+                        className="rounded-lg p-2 text-[#526d8e] transition hover:bg-[#10283e] hover:text-white disabled:opacity-50"
+                        aria-label="Close"
                     >
-                        Cancel
-                    </button>
-
-                    <button
-                        type="submit"
-                        disabled={
-                            submitting ||
-                            loadingTechnologies ||
-                            !technologyId ||
-                            !title.trim() ||
-                            !content.trim()
-                        }
-                        className="rounded-xl bg-[#17D4C3] px-5 py-2.5 text-sm font-semibold text-[#06141f] transition hover:bg-[#35e2d3] disabled:cursor-not-allowed disabled:opacity-50"
-                    >
-                        {submitting
-                            ? "Publishing..."
-                            : "Publish post"}
+                        <X size={17} />
                     </button>
                 </div>
-            </form>
-        </>
+
+                <form onSubmit={handleSubmit} className="p-5">
+                    <label className="block">
+                        <span className="text-xs font-medium text-[#a8bad0]">Technology</span>
+
+                        <select
+                            value={technologyId}
+                            onChange={(event) => setTechnologyId(event.target.value)}
+                            disabled={submitting || loadingTechnologies}
+                            className="mt-2 h-11 w-full rounded-xl border border-[#1e3254] bg-[#081423] px-3 text-sm text-white outline-none transition focus:border-[#17D4C3]"
+                        >
+                            <option value="" className="bg-[#081423]">
+                                {loadingTechnologies ? "Loading technologies..." : "Select technology"}
+                            </option>
+
+                            {technologies.map((technology) => (
+                                <option key={technology.id} value={technology.id} className="bg-[#081423]">
+                                    {technology.name}
+                                </option>
+                            ))}
+                        </select>
+                    </label>
+
+                    <label className="mt-4 block">
+                        <span className="text-xs font-medium text-[#a8bad0]">Title</span>
+
+                        <input type="text" value={title}
+                            onChange={(event) => setTitle(event.target.value)}
+                            maxLength={150} disabled={submitting}
+                            placeholder="What do you want to discuss?"
+                            className="mt-2 h-11 w-full rounded-xl border border-[#1e3254] bg-[#081423] px-3 text-sm text-white outline-none transition placeholder:text-[#526d8e] focus:border-[#17D4C3]"
+                        />
+
+                        <div className="mt-1 text-right text-[10px] text-[#526d8e]">{title.length}/150</div>
+                    </label>
+
+                    <label className="mt-4 block">
+                        <span className="text-xs font-medium text-[#a8bad0]">Discussion</span>
+
+                        <textarea value={content}
+                            onChange={(event) => setContent(event.target.value)}
+                            rows={7} maxLength={5000} disabled={submitting}
+                            placeholder="Explain your question, idea, problem, or experience..."
+                            className="mt-2 w-full resize-none rounded-xl border border-[#1e3254] bg-[#081423] px-3 py-3 text-sm leading-6 text-white outline-none transition placeholder:text-[#526d8e] focus:border-[#17D4C3]"
+                        />
+
+                        <div className="mt-1 text-right text-[10px] text-[#526d8e]">{content.length}/5000</div>
+                    </label>
+
+                    {error && (
+                        <div className="mt-4 rounded-xl border border-[#5c3038] bg-[#24151b] px-3 py-2 text-xs text-[#ef8b8b]">
+                            {error}
+                        </div>
+                    )}
+
+                    <div className="mt-5 flex justify-end gap-2">
+                        <button
+                            type="button"
+                            onClick={onClose}
+                            disabled={submitting}
+                            className="rounded-xl px-4 py-2.5 text-xs font-medium text-[#7189a8] transition hover:bg-[#10283e] hover:text-white"
+                        >
+                            Cancel
+                        </button>
+
+                        <button type="submit" disabled={submitting || loadingTechnologies}
+                            className="inline-flex items-center gap-2 rounded-xl bg-[#17D4C3] px-4 py-2.5 text-xs font-semibold text-[#06141f] transition hover:bg-[#35e2d3] disabled:cursor-not-allowed disabled:opacity-50"
+                        >
+                            <Send size={14} />
+                            {submitting ? "Posting..." : "Post Discussion"}
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
     );
 }

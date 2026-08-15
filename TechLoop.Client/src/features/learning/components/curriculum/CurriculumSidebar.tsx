@@ -1,9 +1,34 @@
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useTechnology } from "../../../../hooks/useTechnology.ts";
 import { useCurriculum } from "../../../../hooks/useCurriculum.ts";
 import LessonProgress from "./LessonProgress";
 import TopicAccordion from "./TopicAccordion";
+
+export interface CurriculumSubTopicNode {
+    id: number;
+    title: string;
+    slug: string;
+    position?: number;
+    subTopics?: CurriculumSubTopicNode[];
+}
+
+function countSubTopics(
+    subTopics: CurriculumSubTopicNode[]
+): number {
+    return subTopics.reduce(
+        (total, subTopic) => {
+            return (
+                total +
+                1 +
+                countSubTopics(
+                    subTopic.subTopics ?? []
+                )
+            );
+        },
+        0
+    );
+}
 
 export default function CurriculumSidebar() {
     const navigate = useNavigate();
@@ -18,9 +43,12 @@ export default function CurriculumSidebar() {
         data: technology,
         isLoading: technologyLoading,
         isError: technologyError,
-    } = useTechnology(technologySlug ?? "");
+    } = useTechnology(
+        technologySlug ?? ""
+    );
 
-    const technologyId = technology?.id ?? 0;
+    const technologyId =
+        technology?.id ?? 0;
 
     const {
         data: curriculum,
@@ -28,10 +56,6 @@ export default function CurriculumSidebar() {
         isError: curriculumError,
     } = useCurriculum(technologyId);
 
-    /*
-     * When a technology is opened without a topic/subtopic,
-     * automatically open the first subtopic of the first topic.
-     */
     useEffect(() => {
         if (
             !technologySlug ||
@@ -42,13 +66,15 @@ export default function CurriculumSidebar() {
             return;
         }
 
-        const firstTopic = curriculum.topics[0];
+        const firstTopic =
+            curriculum.topics?.[0];
 
         if (!firstTopic) {
             return;
         }
 
-        const firstSubTopic = firstTopic.subTopics[0];
+        const firstSubTopic =
+            firstTopic.subTopics?.[0];
 
         if (!firstSubTopic) {
             return;
@@ -67,22 +93,45 @@ export default function CurriculumSidebar() {
         curriculum,
         navigate,
     ]);
+    const totalLessons = useMemo(() => {
+        if (!curriculum?.topics) {
+            return 0;
+        }
+
+        return curriculum.topics.reduce(
+            (total, topic) => {
+                return (
+                    total +
+                    countSubTopics(
+                        (topic.subTopics ??
+                            []) as CurriculumSubTopicNode[]
+                    )
+                );
+            },
+            0
+        );
+    }, [curriculum]);
+
 
     if (!technologySlug) {
         return (
-            <aside className="flex h-full items-center justify-center text-slate-500">
+            <aside className="flex h-full min-h-0 items-center justify-center text-slate-500">
                 Select a technology.
             </aside>
         );
     }
 
-    if (technologyLoading || curriculumLoading) {
+    if (
+        technologyLoading ||
+        curriculumLoading
+    ) {
         return (
-            <aside className="flex h-full items-center justify-center text-slate-400">
+            <aside className="flex h-full min-h-0 items-center justify-center text-slate-400">
                 Loading curriculum...
             </aside>
         );
     }
+
 
     if (
         technologyError ||
@@ -91,22 +140,29 @@ export default function CurriculumSidebar() {
         !curriculum
     ) {
         return (
-            <aside className="flex h-full items-center justify-center text-red-400">
+            <aside className="flex h-full min-h-0 items-center justify-center text-red-400">
                 Unable to load curriculum.
             </aside>
         );
     }
 
-    const totalLessons = curriculum.topics.reduce(
-        (sum, topic) => sum + topic.subTopics.length,
-        0
-    );
-
     return (
-        <aside className="flex h-full flex-col">
+        <aside
+            className="
+                flex
+                h-full
+                min-h-0
+                flex-col
+                overflow-hidden
+            ">
 
-            {/* Header */}
-            <div className="border-b border-white/5 p-6">
+            <div
+                className="
+                    shrink-0
+                    border-b
+                    border-white/5
+                    p-6
+                ">
                 <h2 className="text-xl font-semibold text-white">
                     {technology.name}
                 </h2>
@@ -116,23 +172,36 @@ export default function CurriculumSidebar() {
                 </p>
             </div>
 
-            {/* Progress */}
-            <LessonProgress
-                completed={0}
-                total={totalLessons}
-            />
-
-            {/* Topics */}
-            <div className="flex-1 overflow-y-auto">
-                {curriculum.topics.map((topic) => (
-                    <TopicAccordion
-                        key={topic.id}
-                        technologySlug={technology.slug}
-                        topic={topic}
-                    />
-                ))}
+            <div className="shrink-0">
+                <LessonProgress
+                    completed={0}
+                    total={totalLessons}
+                />
             </div>
 
+            <div
+                className="
+                    min-h-0
+                    flex-1
+                    overflow-y-auto
+                    overflow-x-hidden
+                    scrollbar-thin
+                    scrollbar-thumb-slate-700
+                    scrollbar-track-transparent
+                "
+            >
+                {curriculum.topics.map(
+                    (topic) => (
+                        <TopicAccordion
+                            key={topic.id}
+                            technologySlug={
+                                technology.slug
+                            }
+                            topic={topic}
+                        />
+                    )
+                )}
+            </div>
         </aside>
     );
 }

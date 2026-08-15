@@ -1,6 +1,6 @@
 import React from "react";
 import { ArrowLeft, BookOpen, Layers } from "lucide-react";
-import type { TechnologyCategory } from "../types/technologyCategory.ts";
+import type { TechnologyCategory } from "../../../technology-category/types/technologyCategory.ts";
 
 interface LearningHeaderProps {
     category: TechnologyCategory | null;
@@ -29,8 +29,8 @@ export const LearningHeader: React.FC<LearningHeaderProps> = ({
             )}
 
             <div className="flex items-start gap-5">
-                <span className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl border border-[#223A59] bg-[#12233B] text-3xl">
-                    {category.icon ?? <BookOpen className="h-7 w-7 text-[#00E8C2]" />}
+                <span className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl border border-[#223A59] bg-[#12233B]">
+                    <BookOpen className="h-7 w-7 text-[#00E8C2]" />
                 </span>
 
                 <div className="min-w-0">

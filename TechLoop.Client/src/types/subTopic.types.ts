@@ -1,4 +1,3 @@
-
 import { ExampleType } from "./enums/example-type.ts";
 
 export interface LearnerSubTopic {
@@ -6,10 +5,11 @@ export interface LearnerSubTopic {
     topicId: number;
     title: string;
     slug: string;
-    description: string;
+    description: string | null;
     imageUrl: string | null;
     example: string | null;
     exampleType: ExampleType | null;
+    exampleLanguage?: string | null;
     position: number;
     createdAt: string;
     updatedAt: string | null;

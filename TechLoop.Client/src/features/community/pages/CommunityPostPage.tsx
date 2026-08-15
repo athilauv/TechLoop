@@ -1,66 +1,45 @@
-import { useEffect, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
-import { ArrowLeft, Send } from "lucide-react";
-import { toast } from "react-toastify";
-import CommentList from "../components/CommentList";
-import PostActions from "../components/PostActions";
 import {
-    createComment,
-    deleteComment,
+    ArrowLeft,
+    Bookmark,
+    Heart,
+    MessageCircle,
+    MoreVertical,
+    Pencil,
+    Trash2,
+} from "lucide-react";
+import {useEffect, useRef, useState} from "react";
+import {useNavigate, useParams} from "react-router-dom";
+import {
+    deletePost,
     getCommunityPost,
     getLikeStatus,
-    getPostComments,
-    getSavedPosts,
     likePost,
     savePost,
     unlikePost,
     unsavePost,
+    updatePost,
 } from "../../../api/community.api";
-import type { CommunityPost, PostComment } from "../../../types/community.types";
+import type {CommunityPost} from "../../../types/community.types";
+import PostCommentsSection from "../components/PostCommentsSection";
+import {formatRelativeTime} from "../../../utils/formatRelativeTime";
 
 export default function CommunityPostPage() {
-    const { postId } = useParams<{ postId: string }>();
     const navigate = useNavigate();
-
-    const [post, setPost] =
-        useState<CommunityPost | null>(null);
-
-    const [comments, setComments] =
-        useState<PostComment[]>([]);
-
-    const [liked, setLiked] =
-        useState(false);
-
-    const [saved, setSaved] =
-        useState(false);
-
-    const [commentText, setCommentText] =
-        useState("");
-
-    const [loading, setLoading] =
-        useState(true);
-
-    const [submittingComment, setSubmittingComment] =
-        useState(false);
-
-    const [actionLoading, setActionLoading] =
-        useState(false);
-
-    const [error, setError] =
-        useState<string | null>(null);
+    const { postId } = useParams<{ postId: string }>();
+    const numericPostId = Number(postId);
+    const isInvalidPostId = !postId || Number.isNaN(numericPostId) || numericPostId <= 0;
+    const [post, setPost] = useState<CommunityPost | null>(null);
+    const [liked, setLiked] = useState(false);
+    const [saved, setSaved] = useState(false);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
+    const [menuOpen, setMenuOpen] = useState(false);
+    const menuRef = useRef<HTMLDivElement | null>(null);
+    const currentUserId = localStorage.getItem("userId") ?? undefined;
+    const isOwner = !!post && !!currentUserId && post.userId.toLowerCase() === currentUserId.toLowerCase();
 
     useEffect(() => {
-        if (!postId) {
-            setError("Post ID is missing.");
-            setLoading(false);
-            return;
-        }
-
-        const id = Number(postId);
-
-        if (!Number.isInteger(id) || id <= 0) {
-            setError("Invalid post ID.");
-            setLoading(false);
+        if (isInvalidPostId) {
             return;
         }
 
@@ -71,39 +50,16 @@ export default function CommunityPostPage() {
                 setLoading(true);
                 setError(null);
 
-                const [
-                    postResult,
-                    commentsResult,
-                    likedResult,
-                    savedResult,
-                ] = await Promise.all([
-                    getCommunityPost(id),
-                    getPostComments(id),
-                    getLikeStatus(id),
-                    getSavedPosts(),
-                ]);
-
+                const [postResult, likeResult,] = await Promise.all([getCommunityPost(numericPostId), getLikeStatus(numericPostId),]);
                 if (cancelled) {
                     return;
                 }
 
                 setPost(postResult);
-                setComments(commentsResult);
-                setLiked(likedResult);
-
-                setSaved(
-                    savedResult.some(
-                        (item) =>
-                            item.postId === id
-                    )
-                );
+                setLiked(likeResult);
             } catch (err: unknown) {
                 if (!cancelled) {
-                    setError(
-                        err instanceof Error
-                            ? err.message
-                            : "Unable to load post."
-                    );
+                    setError(err instanceof Error ? err.message : "Unable to load discussion.");
                 }
             } finally {
                 if (!cancelled) {
@@ -113,202 +69,155 @@ export default function CommunityPostPage() {
         }
 
         void loadPost();
+        return () => {cancelled = true;};
+    }, [isInvalidPostId, numericPostId,]);
+
+    useEffect(() => {
+        if (!menuOpen) {
+            return;
+        }
+
+        function handleOutsideClick(
+            event: MouseEvent
+        ) {
+            if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+                setMenuOpen(false);
+            }
+        }
+
+        document.addEventListener("mousedown", handleOutsideClick);
 
         return () => {
-            cancelled = true;
+            document.removeEventListener("mousedown", handleOutsideClick);
         };
-    }, [postId]);
+    }, [menuOpen]);
 
-
+    function handleBack() {
+        navigate(-1);
+    }
 
     async function handleLike() {
-        if (!post || actionLoading) {
-            return;
-        }
-
-        try {
-            setActionLoading(true);
-
-            if (liked) {
-                await unlikePost(post.id);
-
-                setLiked(false);
-
-                setPost((current) =>
-                    current
-                        ? {
-                            ...current,
-                            likeCount: Math.max(
-                                0,
-                                current.likeCount - 1
-                            ),
-                        }
-                        : current
-                );
-
-                toast.success(
-                    "Post unliked successfully."
-                );
-            } else {
-                await likePost(post.id);
-
-                setLiked(true);
-
-                setPost((current) =>
-                    current
-                        ? {
-                            ...current,
-                            likeCount:
-                                current.likeCount + 1,
-                        }
-                        : current
-                );
-
-                toast.success(
-                    "Post liked successfully."
-                );
-            }
-        } catch (err: unknown) {
-            toast.error(
-                err instanceof Error
-                    ? err.message
-                    : "Unable to update like."
-            );
-        } finally {
-            setActionLoading(false);
-        }
-    }
-
-    async function handleSave() {
-        if (!post || actionLoading) {
-            return;
-        }
-
-        try {
-            setActionLoading(true);
-
-            if (saved) {
-                await unsavePost(post.id);
-
-                setSaved(false);
-
-                toast.success(
-                    "Post removed from saved posts."
-                );
-            } else {
-                await savePost(post.id);
-
-                setSaved(true);
-
-                toast.success(
-                    "Post saved successfully."
-                );
-            }
-        } catch (err: unknown) {
-            toast.error(
-                err instanceof Error
-                    ? err.message
-                    : "Unable to update saved post."
-            );
-        } finally {
-            setActionLoading(false);
-        }
-    }
-
-    async function handleCommentSubmit(
-        event: React.FormEvent<HTMLFormElement>
-    ) {
-        event.preventDefault();
-
         if (!post) {
             return;
         }
 
-        const content = commentText.trim();
+        try {
+            setError(null);
 
-        if (!content) {
-            toast.error("Please enter a comment.");
+            if (liked) {
+                await unlikePost(post.id);
+                setLiked(false);
+                setPost((current) => current ? {...current, likeCount: Math.max(0, current.likeCount - 1),} : current);
+            } else {
+                await likePost(post.id);
+                setLiked(true);
+                setPost((current) => current ? {...current, likeCount: current.likeCount + 1} : current);
+            }
+        } catch (err: unknown) {
+            setError(err instanceof Error ? err.message : "Unable to update like.");
+        }
+    }
+
+    async function handleSave() {
+        if (!post) {
             return;
         }
 
         try {
-            setSubmittingComment(true);
+            setError(null);
 
-            const newComment =
-                await createComment(
-                    post.id,
-                    {
-                        content,
-                        parentCommentId: null,
-                    }
-                );
-
-            setComments((current) => [
-                ...current,
-                newComment,
-            ]);
-
-            setPost((current) =>
-                current
-                    ? {
-                        ...current,
-                        commentCount:
-                            current.commentCount + 1,
-                    }
-                    : current
-            );
-
-            setCommentText("");
-
-            toast.success(
-                "Comment added successfully."
-            );
+            if (saved) {
+                await unsavePost(post.id);
+                setSaved(false);
+            } else {
+                await savePost(post.id);
+                setSaved(true);
+            }
         } catch (err: unknown) {
-            toast.error(
-                err instanceof Error
-                    ? err.message
-                    : "Unable to add comment."
-            );
-        } finally {
-            setSubmittingComment(false);
+            setError(err instanceof Error ? err.message : "Unable to update saved post.");
         }
     }
 
-    async function handleDeleteComment(
-        commentId: number
-    ) {
-        try {
-            await deleteComment(commentId);
-
-            setComments((current) =>
-                current.filter(
-                    (comment) =>
-                        comment.id !== commentId
-                )
-            );
-
-            setPost((current) =>
-                current
-                    ? {
-                        ...current,
-                        commentCount: Math.max(
-                            0,
-                            current.commentCount - 1
-                        ),
-                    }
-                    : current
-            );
-
-            toast.success(
-                "Comment deleted successfully."
-            );
-        } catch (err: unknown) {
-            toast.error(
-                err instanceof Error
-                    ? err.message
-                    : "Unable to delete comment."
-            );
+    async function handleEdit() {
+        if (!post) {
+            return;
         }
+
+        const title = window.prompt("Edit discussion title:", post.title);
+        if (title === null) {
+            return;
+        }
+
+        const content = window.prompt("Edit discussion content:", post.content);
+        if (content === null) {
+            return;
+        }
+
+        if (!title.trim() || !content.trim()) {
+            setError("Title and content are required.");
+            return;
+        }
+
+        try {
+            setError(null);
+            const updated = await updatePost(post.id,
+                    {
+                        technologyId:
+                        post.technologyId,
+                        title: title.trim(),
+                        content: content.trim(),
+                    }
+                );
+
+            setPost(updated);
+            setMenuOpen(false);
+        } catch (err: unknown) {
+            setError(err instanceof Error ? err.message : "Unable to update discussion.");
+        }
+    }
+
+    async function handleDelete() {
+        if (!post) {
+            return;
+        }
+
+        const confirmed = window.confirm("Are you sure you want to delete this discussion?");
+        if (!confirmed) {
+            return;
+        }
+
+        try {
+            setError(null);
+            await deletePost(post.id);
+            navigate("/community");
+        } catch (err: unknown) {
+            setError(err instanceof Error ? err.message : "Unable to delete discussion.");
+        }
+    }
+
+    if (isInvalidPostId) {
+        return (
+            <div className="min-h-full bg-[#081423]">
+                <div className="mx-auto max-w-4xl px-5 py-8">
+                    <button type="button" onClick={handleBack}
+                        className="mb-5 inline-flex items-center gap-2 text-xs text-[#7189a8] transition hover:text-white"
+                    >
+                        <ArrowLeft size={15} />
+                        Back to Community
+                    </button>
+
+                    <div className="rounded-2xl border border-[#5c3038] bg-[#24151b] p-6">
+                        <p className="text-sm font-semibold text-[#ef8b8b]">
+                            Unable to load discussion
+                        </p>
+
+                        <p className="mt-2 text-xs text-[#a96d76]">
+                            Invalid community post.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        );
     }
 
     if (loading) {
@@ -316,47 +225,41 @@ export default function CommunityPostPage() {
             <div className="min-h-full bg-[#081423]">
                 <div className="mx-auto max-w-4xl px-5 py-8">
                     <div className="animate-pulse space-y-4">
-                        <div className="h-5 w-32 rounded bg-[#14253d]" />
-
-                        <div className="h-52 rounded-2xl bg-[#0f1e35]" />
-
-                        <div className="h-40 rounded-2xl bg-[#0f1e35]" />
+                        <div className="h-8 w-24 rounded bg-[#14253d]" />
+                        <div className="h-64 rounded-2xl bg-[#0f1e35]" />
+                        <div className="h-48 rounded-2xl bg-[#0f1e35]" />
                     </div>
                 </div>
             </div>
         );
     }
 
-    if (error || !post) {
+    if (error && !post) {
         return (
             <div className="min-h-full bg-[#081423]">
                 <div className="mx-auto max-w-4xl px-5 py-8">
-                    <button
-                        type="button"
-                        onClick={() =>
-                            navigate(
-                                "/learner/community"
-                            )
-                        }
-                        className="mb-6 inline-flex items-center gap-2 text-sm text-[#7189a8] transition hover:text-white"
-                    >
-                        <ArrowLeft size={16} />
-                        Back to community
+                    <button type="button" onClick={handleBack}
+                        className="mb-5 inline-flex items-center gap-2 text-xs text-[#7189a8] transition hover:text-white">
+                        <ArrowLeft size={15}/>
+                        Back to Community
                     </button>
 
                     <div className="rounded-2xl border border-[#5c3038] bg-[#24151b] p-6">
                         <p className="text-sm font-semibold text-[#ef8b8b]">
-                            Unable to load post
+                            Unable to load discussion
                         </p>
 
                         <p className="mt-2 text-xs text-[#a96d76]">
-                            {error ??
-                                "Post not found."}
+                            {error}
                         </p>
                     </div>
                 </div>
             </div>
         );
+    }
+
+    if (!post) {
+        return null;
     }
 
     return (
@@ -364,163 +267,123 @@ export default function CommunityPostPage() {
             <div className="mx-auto max-w-4xl px-5 py-8">
 
                 {/* BACK */}
-                <button
-                    type="button"
-                    onClick={() =>
-                        navigate(
-                            "/learner/community"
-                        )
-                    }
-                    className="inline-flex items-center gap-2 text-sm text-[#7189a8] transition hover:text-white"
-                >
-                    <ArrowLeft size={16} />
-                    Back to community
+                <button type="button" onClick={handleBack}
+                    className="mb-5 inline-flex items-center gap-2 text-xs text-[#7189a8] transition hover:text-white">
+                    <ArrowLeft size={15}/>
+                    Back to Community
                 </button>
 
                 {/* POST */}
-                <article className="mt-6 rounded-2xl border border-[#1e3254] bg-[#0f1e35] p-6">
+                <article className="rounded-2xl border border-[#1e3254] bg-[#0f1e35] p-5">
 
-                    {/* AUTHOR */}
-                    <div className="flex items-center gap-3">
-                        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#17D4C3] text-sm font-semibold text-[#06141f]">
-                            {post.userName
-                                .charAt(0)
-                                .toUpperCase()}
+                    {/* HEADER */}
+                    <div className="flex items-start justify-between gap-4">
+                        <div className="flex min-w-0 items-center gap-3">
+                            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#17D4C3] text-sm font-bold text-[#06141f]">
+                                {post.userName.charAt(0).toUpperCase()}
+                            </div>
+
+                            <div className="min-w-0">
+                                <p className="truncate text-sm font-semibold text-white">
+                                    {post.userName}
+                                </p>
+
+                                <p className="mt-0.5 text-[10px] text-[#526d8e]">
+                                    {formatRelativeTime(post.createdAt)}
+                                </p>
+                            </div>
                         </div>
 
-                        <div>
-                            <p className="text-sm font-medium text-white">
-                                {post.userName}
-                            </p>
+                        {/* OWNER MENU */}
+                        {isOwner && (
+                            <div ref={menuRef} className="relative">
+                                <button type="button" onClick={() => setMenuOpen((current) => !current)}
+                                    className="rounded-lg p-1.5 text-[#526d8e] transition hover:bg-[#10283e] hover:text-white"
+                                    aria-label="Post options"
+                                    aria-expanded={menuOpen}>
+                                    <MoreVertical size={17}/>
+                                </button>
 
-                            <p className="text-xs text-[#7189a8]">
-                                {new Date(
-                                    post.createdAt
-                                ).toLocaleString()}
-                            </p>
-                        </div>
+                                {menuOpen && (
+                                    <div className="absolute right-0 top-full z-30 mt-1 w-32 rounded-xl border border-[#1e3254] bg-[#0f1e35] p-1 shadow-xl">
+                                        <button type="button" onClick={handleEdit}
+                                            className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-xs text-[#a8bad0] transition hover:bg-[#10283e] hover:text-white">
+                                            <Pencil size={13}/>
+                                            Edit
+                                        </button>
+
+                                        <button type="button" onClick={handleDelete}
+                                            className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-xs text-[#a8bad0] transition hover:bg-[#24151b] hover:text-[#ef8b8b]">
+                                            <Trash2 size={13}/>
+
+                                            Delete
+                                        </button>
+
+                                    </div>
+                                )}
+                            </div>
+                        )}
+
                     </div>
+
+                    {/* ERROR */}
+
+                    {error && (
+                        <div className="mt-4 rounded-xl border border-[#5c3038] bg-[#24151b] px-3 py-2 text-xs text-[#ef8b8b]">
+                            {error}
+                        </div>
+                    )}
 
                     {/* TECHNOLOGY */}
                     {post.technologyName && (
-                        <div className="mt-5 inline-flex rounded-full border border-[#24506a] bg-[#10283e] px-3 py-1 text-xs font-medium text-[#17D4C3]">
-                            {post.technologyName}
+                        <div className="mt-5">
+                            <span className="inline-flex rounded-full border border-[#24506a] bg-[#0a2638] px-2.5 py-1 text-[10px] font-medium text-[#17D4C3]">
+                                {post.technologyName}
+                            </span>
                         </div>
                     )}
 
                     {/* TITLE */}
-                    <h1 className="mt-4 text-2xl font-semibold text-white">
+
+                    <h1 className="mt-4 text-xl font-semibold text-white">
                         {post.title}
                     </h1>
 
                     {/* CONTENT */}
-                    <div className="mt-4 whitespace-pre-wrap text-sm leading-7 text-[#a8bad0]">
+                    <p className="mt-3 whitespace-pre-wrap text-sm leading-7 text-[#a8bad0]">
                         {post.content}
-                    </div>
+                    </p>
 
                     {/* ACTIONS */}
-                    <div className="mt-6">
-                        <PostActions
-                            liked={liked}
-                            saved={saved}
-                            likeCount={
-                                post.likeCount
-                            }
-                            commentCount={
-                                post.commentCount
-                            }
-                            onLike={handleLike}
-                            onSave={handleSave}
-                            onComment={() =>
-                                document
-                                    .getElementById(
-                                        "comment-input"
-                                    )
-                                    ?.focus()
-                            }
-                            disabled={
-                                actionLoading
-                            }
-                        />
+                    <div className="mt-6 flex items-center gap-5 border-t border-[#1e3254] pt-4">
+
+                        {/* LIKE */}
+                        <button type="button" onClick={handleLike}
+                            className={`inline-flex items-center gap-1.5 text-xs transition ${
+                                liked ? "text-[#17D4C3]" : "text-[#7189a8] hover:text-[#17D4C3]"}`}>
+                            <Heart size={16} fill={liked ? "currentColor" : "none"}/>
+                            {post.likeCount}
+                        </button>
+
+                        {/* COMMENTS */}
+                        <span className="inline-flex items-center gap-1.5 text-xs text-[#7189a8]">
+                            <MessageCircle size={16}/>
+                            {post.commentCount}
+                        </span>
+
+                        {/* SAVE */}
+                        <button type="button" onClick={handleSave}
+                            className={`ml-auto rounded-lg p-2 transition ${saved ? "text-[#17D4C3]" : "text-[#7189a8] hover:bg-[#10283e] hover:text-white"}`}
+                            aria-label={saved ? "Unsave post" : "Save post"}>
+                            <Bookmark size={16} fill={saved ? "currentColor" : "none"}/>
+                        </button>
                     </div>
                 </article>
 
                 {/* COMMENTS */}
-                <section className="mt-6 rounded-2xl border border-[#1e3254] bg-[#0f1e35] p-6">
-
-                    {/* HEADER */}
-                    <div className="flex items-center justify-between">
-                        <div>
-                            <h2 className="text-lg font-semibold text-white">
-                                Comments
-                            </h2>
-
-                            <p className="mt-1 text-xs text-[#7189a8]">
-                                Join the discussion.
-                            </p>
-                        </div>
-
-                        <span className="text-xs text-[#526d8e]">
-                            {post.commentCount}
-                        </span>
-                    </div>
-
-                    {/* ADD COMMENT */}
-                    <form
-                        onSubmit={
-                            handleCommentSubmit
-                        }
-                        className="mt-5"
-                    >
-                        <textarea
-                            id="comment-input"
-                            value={commentText}
-                            onChange={(event) =>
-                                setCommentText(
-                                    event.target.value
-                                )
-                            }
-                            rows={4}
-                            maxLength={1000}
-                            disabled={
-                                submittingComment
-                            }
-                            placeholder="Write a comment..."
-                            className="w-full resize-none rounded-xl border border-[#29466d] bg-[#081423] px-4 py-3 text-sm leading-6 text-white outline-none placeholder:text-[#526d8e] focus:border-[#17D4C3] disabled:opacity-50"
-                        />
-
-                        <div className="mt-3 flex items-center justify-between">
-                            <span className="text-[10px] text-[#526d8e]">
-                                {commentText.length}/1000
-                            </span>
-
-                            <button
-                                type="submit"
-                                disabled={
-                                    submittingComment ||
-                                    !commentText.trim()
-                                }
-                                className="inline-flex items-center gap-2 rounded-xl bg-[#17D4C3] px-4 py-2.5 text-xs font-semibold text-[#06141f] transition hover:bg-[#35e2d3] disabled:cursor-not-allowed disabled:opacity-50"
-                            >
-                                <Send size={14} />
-
-                                {submittingComment
-                                    ? "Posting..."
-                                    : "Comment"}
-                            </button>
-                        </div>
-                    </form>
-
-                    {/* COMMENT LIST */}
-                    <div className="mt-6">
-                        <CommentList
-                            comments={comments}
-                            onDelete={
-                                handleDeleteComment
-                            }
-                        />
-                    </div>
-                </section>
+                <div className="mt-5 rounded-2xl border border-[#1e3254] bg-[#0f1e35] p-5">
+                    <PostCommentsSection postId={post.id} currentUserId={currentUserId ?? ""}/>
+                </div>
             </div>
         </div>
     );

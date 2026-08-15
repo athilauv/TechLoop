@@ -1,12 +1,11 @@
 interface ContentHeaderProps {
-    subTopic: {
-        title: string;
-        description?: string | null;
-    };
+    title: string;
+    description?: string | null;
 }
 
 export default function ContentHeader({
-                                          subTopic,
+                                          title,
+                                          description,
                                       }: ContentHeaderProps) {
     return (
         <header className="border-b border-[#223A59] pb-7">
@@ -15,12 +14,12 @@ export default function ContentHeader({
             </p>
 
             <h1 className="mt-2 text-4xl font-bold tracking-tight text-white">
-                {subTopic.title}
+                {title}
             </h1>
 
-            {subTopic.description && (
+            {description && (
                 <p className="mt-4 max-w-3xl text-base leading-7 text-[#8CA3BF]">
-                    {subTopic.description}
+                    {description}
                 </p>
             )}
         </header>

@@ -67,16 +67,17 @@ export default function LearnerLayout() {
         const loadUser = async () => {
             try {
                 const profile = await getLearnerProfile();
+
                 setUser(profile);
+                if (profile.username) {
+                    localStorage.setItem("username", profile.username);
+                }
             } catch (error) {
-                console.error(
-                    "Unable to load current learner profile:",
-                    error
-                );
+                console.error("Unable to load current learner profile:", error);
             }
         };
 
-        loadUser();
+        void loadUser();
     }, []);
 
     useEffect(() => {

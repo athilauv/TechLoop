@@ -1,23 +1,12 @@
-import type { PostComment } from "../../../types/community.types";
+import type {PostComment,} from "../../../types/community.types";
 import CommentItem from "./CommentItem";
 
 interface CommentListProps {
     comments: PostComment[];
     currentUserId?: string;
-
-    onReply?: (
-        comment: PostComment,
-        content: string
-    ) => Promise<void>;
-
-    onEdit?: (
-        commentId: number,
-        content: string
-    ) => Promise<void>;
-
-    onDelete?: (
-        commentId: number
-    ) => Promise<void>;
+    onReply?: (comment: PostComment, content: string) => Promise<void>;
+    onEdit?: (comment: PostComment, content: string) => Promise<void>;
+    onDelete?: (commentId: number) => Promise<void>;
 }
 
 export default function CommentList({
@@ -29,82 +18,50 @@ export default function CommentList({
                                     }: CommentListProps) {
     if (comments.length === 0) {
         return (
-            <div className="rounded-xl border border-dashed border-[#1e3254] bg-[#081423] p-8 text-center">
-                <p className="text-sm text-[#7189a8]">
+            <div className="rounded-xl border border-dashed border-[#1e3254] bg-[#081423] px-5 py-7 text-center">
+                <p className="text-xs font-medium text-white">
                     No comments yet.
                 </p>
 
-                <p className="mt-1 text-xs text-[#526d8e]">
+                <p className="mt-1 text-[10px] text-[#526d8e]">
                     Be the first to join the discussion.
                 </p>
             </div>
         );
     }
 
-    /*
-     * Only top-level comments are rendered here.
-     * Replies are rendered underneath their parent.
-     */
-    const topLevelComments = comments.filter(
-        (comment) => comment.parentCommentId === null
-    );
+    const childrenMap = new Map<number | null, PostComment[]>();
+    for (const comment of comments) {
+        const parentId = comment.parentCommentId;
+        const existing = childrenMap.get(parentId) ?? [];
+        existing.push(comment);
+        childrenMap.set(parentId, existing);
+    }
 
-    const replies = comments.filter(
-        (comment) => comment.parentCommentId !== null
-    );
+    function renderComments(parentId: number | null,
+        depth: number
+    ): React.ReactNode {
+        const children = childrenMap.get(parentId) ?? [];
+
+        return children.map(
+            (comment) => (
+                <div key={comment.id} className="space-y-2">
+                    <CommentItem comment={comment}
+                        currentUserId={currentUserId}
+                        depth={depth}
+                        onReply={onReply}
+                        onEdit={onEdit}
+                        onDelete={onDelete}/>
+
+                    {renderComments(comment.id, depth + 1)}
+                </div>
+            )
+        );
+    }
 
     return (
-        <div className="space-y-3">
-            {topLevelComments.map((comment) => {
-                const childReplies = replies.filter(
-                    (reply) =>
-                        reply.parentCommentId ===
-                        comment.id
-                );
-
-                return (
-                    <div key={comment.id}>
-                        <CommentItem
-                            comment={comment}
-                            currentUserId={currentUserId}
-                            onReply={onReply}
-                            onEdit={
-                                onEdit
-                                    ? (comment, content) => onEdit(comment.id, content)
-                                    : undefined
-                            }
-                            onDelete={onDelete}
-                        />
-
-                        {childReplies.length > 0 && (
-                            <div className="ml-6 mt-2 space-y-2 border-l border-[#173a55] pl-3">
-                                {childReplies.map(
-                                    (reply) => (
-                                        <CommentItem
-                                            key={reply.id}
-                                            comment={reply}
-                                            currentUserId={
-                                                currentUserId
-                                            }
-                                            onReply={
-                                                onReply
-                                            }
-                                            onEdit={
-                                                onEdit
-                                                    ? (comment, content) => onEdit(comment.id, content)
-                                                    : undefined
-                                            }
-                                            onDelete={
-                                                onDelete
-                                            }
-                                        />
-                                    )
-                                )}
-                            </div>
-                        )}
-                    </div>
-                );
-            })}
+        <div className="space-y-2">
+            {renderComments(null, 0)}
         </div>
     );
 }

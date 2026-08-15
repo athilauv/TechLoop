@@ -15,7 +15,7 @@ export default function CodeBlock({ language, code }: CodeBlockProps) {
             setCopied(true);
             window.setTimeout(() => setCopied(false), 1600);
         } catch {
-            // Clipboard access denied — fail silently, button stays as-is.
+            // Clipboard access denied
         }
     };
 
@@ -34,11 +34,8 @@ export default function CodeBlock({ language, code }: CodeBlockProps) {
                     </span>
                 </div>
 
-                <button
-                    type="button"
-                    onClick={handleCopy}
-                    className="flex items-center gap-1.5 rounded-lg border border-[#223A59] bg-[#101C30] px-2.5 py-1 text-xs text-[#8CA3BF] transition-colors duration-150 hover:border-[#00E8C2]/40 hover:text-white"
-                >
+                <button type="button" onClick={handleCopy}
+                    className="flex items-center gap-1.5 rounded-lg border border-[#223A59] bg-[#101C30] px-2.5 py-1 text-xs text-[#8CA3BF] transition-colors duration-150 hover:border-[#00E8C2]/40 hover:text-white">
                     {copied ? (
                         <>
                             <Check className="h-3.5 w-3.5 text-[#00E8C2]" />
