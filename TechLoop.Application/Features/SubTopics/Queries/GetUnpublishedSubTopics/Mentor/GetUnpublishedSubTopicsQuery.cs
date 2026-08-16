@@ -1,7 +1,6 @@
 ﻿using MediatR;
-using TechLoop.Application.Features.SubTopics.DTOs;
+using TechLoop.Application.Features.Topics.DTOs;
 
-namespace TechLoop.Application.Features.SubTopics.Queries.Mentor.GetUnpublishedSubTopics;
+namespace TechLoop.Application.Features.Topics.Queries.Mentor.GetUnpublishedTopics;
 
-public sealed record GetUnpublishedSubTopicsQuery(Guid MentorId)
-    : IRequest<IEnumerable<MentorSubTopicResponse>>;
+public sealed record GetUnpublishedTopicsQuery(Guid MentorId ) : IRequest<IEnumerable<MentorTopicResponse>>;

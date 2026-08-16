@@ -1,18 +1,21 @@
 ﻿import { Routes, Route } from "react-router-dom";
 import ProtectedRoute from "./ProtectedRoute";
 import LearnerLayout from "../layouts/learner/Pages/LearnerLayout";
-import TechnologyCategoryPage from "../features/technology-category/pages/TechnologyCategoryPage";
-import LearningPage from "../features/learning/pages/LearningPage";
-import CodingQuestionsPage from "../features/coding-question/pages/CodingQuestionsPage.tsx";
-import CodingQuestionPage from "../features/coding-question/pages/CodingQuestionPage.tsx";
-import ProfilePage from "../features/profile/pages/ProfilePage.tsx";
-import DashboardPage from "../features/dashboard/pages/DashboardPage.tsx";
-import AnalyticsPage from "../features/analytics/pages/AnalyticsPage";
-import CommunityPage from "../features/community/pages/CommunityPage.tsx";
-import CommunityPostPage from "../features/community/pages/CommunityPostPage.tsx";
-import SavedPostsPage from "../features/community/pages/SavedPostsPage.tsx";
-import LandingPage from "../features/landing/pages/LandingPage.tsx";
-import QuestionDiscussionsPage from "../features/coding-question/pages/QuestionDiscussionsPage.tsx";
+import TechnologyCategoryPage from "../features/learner/technology-category/pages/TechnologyCategoryPage.tsx";
+import LearningPage from "../features/learner/learning/pages/LearningPage";
+import CodingQuestionsPage from "../features/learner/coding-question/pages/CodingQuestionsPage.tsx";
+import CodingQuestionPage from "../features/learner/coding-question/pages/CodingQuestionPage.tsx";
+import ProfilePage from "../features/learner/profile/pages/ProfilePage.tsx";
+import DashboardPage from "../features/learner/dashboard/pages/DashboardPage.tsx";
+import AnalyticsPage from "../features/learner/analytics/pages/AnalyticsPage";
+import CommunityPage from "../features/learner/community/pages/CommunityPage.tsx";
+import CommunityPostPage from "../features/learner/community/pages/CommunityPostPage.tsx";
+import SavedPostsPage from "../features/learner/community/pages/SavedPostsPage.tsx";
+import LandingPage from "../features/learner/landing/pages/LandingPage.tsx";
+import QuestionDiscussionsPage from "../features/learner/coding-question/pages/QuestionDiscussionsPage.tsx";
+import CreateTopicContributionPage from "../features/learner/topic-contribution/pages/CreateTopicContributionPage.tsx";
+import TopicContributionPage from "../features/learner/topic-contribution/pages/TopicContributionPage.tsx";
+import TopicContributionDetailsPage from "../features/learner/topic-contribution/pages/TopicContributionDetailsPage.tsx";
 
 export default function LearnerRoutes() {
     return (
@@ -37,6 +40,9 @@ export default function LearnerRoutes() {
                     <Route path="community/posts/:postId" element={<CommunityPostPage />}/>
                     <Route path="community/saved-posts" element={<SavedPostsPage />}/>
                     <Route path="coding-questions/:questionId/discussions" element={<QuestionDiscussionsPage />}/>
+                    <Route path="topic-contributions" element={<TopicContributionPage />}/>
+                    <Route path="topic-contributions/create" element={<CreateTopicContributionPage />}/>
+                    <Route path="topic-contributions/:contributionId" element={<TopicContributionDetailsPage />}/>
                 </Route>
             </Route>
         </Routes>

@@ -1,11 +1,11 @@
 ﻿import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-import LoginPage from "../features/auth/LoginPage.tsx";
-import RegisterPage from "../features/auth/RegisterPage.tsx";
+import LoginPage from "../features/learner/auth/LoginPage.tsx";
+import RegisterPage from "../features/learner/auth/RegisterPage.tsx";
 import LearnerRoutes from "./LearnerRoutes.tsx";
-import ForgotPasswordPage from "../features/auth/ForgotPasswordPage.tsx";
-import ResetPasswordPage from "../features/auth/ResetPasswordPage.tsx";
-import ChangePasswordPage from "../features/auth/ChangePasswordPage.tsx";
-import MentorSetupPage from "../features/auth/MentorSetupPage.tsx";
+import ForgotPasswordPage from "../features/learner/auth/ForgotPasswordPage.tsx";
+import ResetPasswordPage from "../features/learner/auth/ResetPasswordPage.tsx";
+import ChangePasswordPage from "../features/learner/auth/ChangePasswordPage.tsx";
+import MentorSetupPage from "../features/learner/auth/MentorSetupPage.tsx";
 
 export default function AppRoutes() {
     return (

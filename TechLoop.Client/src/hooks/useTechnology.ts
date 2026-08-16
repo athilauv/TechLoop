@@ -1,10 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-
-import {
-    getTechnologies,
-    getTechnologyBySlug,
-    getTechnologyCategories,
-} from "../api/technology.api.ts";
+import {getTechnologies, getTechnologyBySlug, getTechnologyCategories,} from "../api/technology.api.ts";
 
 export const useTechnologyCategories = () => {
     return useQuery({
