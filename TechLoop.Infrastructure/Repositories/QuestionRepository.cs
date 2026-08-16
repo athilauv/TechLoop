@@ -244,23 +244,10 @@ public sealed class QuestionRepository : IQuestionRepository
         string? sort,
         CancellationToken cancellationToken)
     {
-        const string sql = """
-                           SELECT *
-                           FROM fn_get_coding_questions(
-                               @Page,
-                               @PageSize,
-                               @TechnologyId,
-                               @Difficulty,
-                               @SubTopicId,
-                               @Search,
-                               @Sort
-                           );
-                           """;
+        const string sql = @"SELECT * FROM fn_get_coding_questions( @Page, @PageSize, @TechnologyId, @Difficulty, @SubTopicId, @Search, @Sort);";
 
         using var connection = _context.CreateConnection();
-
-        return await connection.QueryAsync<LearnerCodingQuestionDto>(
-            new CommandDefinition(
+        return await connection.QueryAsync<LearnerCodingQuestionDto>(new CommandDefinition(
                 sql,
                 new
                 {
@@ -271,6 +258,19 @@ public sealed class QuestionRepository : IQuestionRepository
                     SubTopicId = subTopicId,
                     Search = search,
                     Sort = sort
+                },
+                cancellationToken: cancellationToken));
+    }
+    
+    public async Task<Question?> GetPublishedMcqQuestionBySubTopicAsync( int subTopicId, CancellationToken cancellationToken)
+    {
+        const string sql = @"SELECT * FROM fn_get_published_mcq_question_by_subtopic(@SubTopicId);";
+        using var connection = _context.CreateConnection();
+        return await connection.QuerySingleOrDefaultAsync<Question>(new CommandDefinition(
+                sql,
+                new
+                {
+                    SubTopicId = subTopicId
                 },
                 cancellationToken: cancellationToken));
     }

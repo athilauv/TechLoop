@@ -17,6 +17,7 @@ public sealed class DeleteDiscussionCommandHandler : IRequestHandler<DeleteDiscu
 
     public async Task<bool> Handle(DeleteDiscussionCommand request, CancellationToken cancellationToken)
     {
+        
         if (_currentUser.UserId == Guid.Empty)
         {
             throw new UnauthorizedAccessException("User is not authenticated.");

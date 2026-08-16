@@ -1,9 +1,8 @@
 ﻿using Dapper;
+using TechLoop.Application.Features.Topics.DTOs;
 using TechLoop.Application.Interfaces.Repositories;
 using TechLoop.Application.Interfaces.Infrastructure;
 using TechLoop.Domain.Entities;
-
-//using TechLoop.Infrastructure.Persistence.Context;
 
 namespace TechLoop.Infrastructure.Repositories;
 
@@ -236,6 +235,14 @@ public sealed class TopicRepository : ITopicsRepository
                     UserId = userId
                 },
                 cancellationToken: cancellationToken));
+    }
+    
+    public async Task<IEnumerable<MentorTopicResponse>>
+        GetAllUnpublishedTopicsAsync(CancellationToken cancellationToken)
+    {
+        const string sql = @"SELECT * FROM fn_get_all_unpublished_topics();";
+        using var connection = _context.CreateConnection();
+        return await connection.QueryAsync<MentorTopicResponse>(new CommandDefinition(sql, cancellationToken: cancellationToken));
     }
 }
     

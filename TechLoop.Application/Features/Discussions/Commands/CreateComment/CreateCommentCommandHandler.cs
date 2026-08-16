@@ -7,8 +7,7 @@ using TechLoop.Domain.Entities;
 
 namespace TechLoop.Application.Features.DiscussionComments.Commands.CreateComment;
 
-public sealed class CreateCommentCommandHandler
-    : IRequestHandler<CreateCommentCommand, DiscussionCommentDto>
+public sealed class CreateCommentCommandHandler : IRequestHandler<CreateCommentCommand, DiscussionCommentDto>
 {
     private readonly IDiscussionCommentRepository _commentRepository;
     private readonly IDiscussionRepository _discussionRepository;
@@ -24,32 +23,32 @@ public sealed class CreateCommentCommandHandler
         _currentUser = currentUser;
     }
 
-    public async Task<DiscussionCommentDto> Handle(
-        CreateCommentCommand request,
-        CancellationToken cancellationToken)
+    public async Task<DiscussionCommentDto> Handle(CreateCommentCommand request, CancellationToken cancellationToken)
     {
         if (_currentUser.UserId == Guid.Empty)
-        {
             throw new UnauthorizedAccessException("User is not authenticated.");
-        }
 
-        var discussion =
-            await _discussionRepository.GetEntityByIdAsync(request.DiscussionId);
+        if (request.DiscussionId <= 0)
+            throw new ArgumentException("Invalid discussion id.");
 
+        if (string.IsNullOrWhiteSpace(request.Content))
+            throw new ArgumentException("Comment content is required.");
+
+        var discussion = await _discussionRepository.GetEntityByIdAsync(request.DiscussionId);
         if (discussion is null)
-        {
             throw new NotFoundException("Discussion not found.");
-        }
+
+        if (discussion.IsLocked)
+            throw new InvalidOperationException("This discussion is locked.");
 
         if (request.ParentCommentId.HasValue)
         {
-            var parent =
-                await _commentRepository.GetEntityByIdAsync(request.ParentCommentId.Value);
-
-            if (parent is null)
-            {
+            var parentComment = await _commentRepository.GetEntityByIdAsync(request.ParentCommentId.Value);
+            if (parentComment is null)
                 throw new NotFoundException("Parent comment not found.");
-            }
+
+            if (parentComment.DiscussionId != request.DiscussionId)
+                throw new InvalidOperationException("Parent comment does not belong to this discussion.");
         }
 
         var comment = new DiscussionComment
@@ -61,19 +60,13 @@ public sealed class CreateCommentCommandHandler
             CreatedBy = _currentUser.UserId
         };
 
-        var id = await _commentRepository.CreateAsync(comment);
+        var commentId = await _commentRepository.CreateAsync(comment);
+        if (commentId <= 0)
+            throw new InvalidOperationException("Failed to create comment.");
 
-        if (id <= 0)
-        {
-            throw new Exception("Failed to create comment.");
-        }
-
-        var createdComment = await _commentRepository.GetByIdAsync(id);
-
+        var createdComment = await _commentRepository.GetByIdAsync(commentId);
         if (createdComment is null)
-        {
             throw new NotFoundException("Comment not found.");
-        }
 
         return createdComment;
     }

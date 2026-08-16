@@ -112,21 +112,11 @@ public sealed class DiscussionsController : ControllerBase
 
     //create comment
     [HttpPost("{discussionId:int}/comments")]
-    public async Task<IActionResult> CreateComment(
-        int discussionId,
-        [FromBody] CreateCommentRequest request)
+    public async Task<IActionResult> CreateComment(int discussionId, [FromBody] CreateCommentRequest request)
     {
-        var command = new CreateCommentCommand(
-            discussionId,
-            request.ParentCommentId,
-            request.Content);
-
+        var command = new CreateCommentCommand(discussionId, request.ParentCommentId, request.Content);
         var result = await _mediator.Send(command);
-
-        return CreatedAtAction(
-            nameof(GetCommentById),
-            new { id = result.Id },
-            result);
+        return CreatedAtAction(nameof(GetCommentById), new { id = result.Id }, result);
     }
 
     // Returns a comment by id.

@@ -1,4 +1,5 @@
-﻿using TechLoop.Domain.Entities;
+﻿using TechLoop.Application.Features.SubTopics.DTOs;
+using TechLoop.Domain.Entities;
 
 namespace TechLoop.Application.Interfaces.Repositories;
 
@@ -20,4 +21,5 @@ public interface ISubTopicsRepository
     Task<int?> GetTechnologyIdAsync(int subTopicId, CancellationToken cancellationToken);
     Task<int?> GetMentorTechnologyIdAsync(Guid userId, CancellationToken cancellationToken);
     Task<int> GetTopicIdAsync(int subTopicId, CancellationToken cancellationToken);
+    Task<IEnumerable<MentorSubTopicResponse>> GetUnpublishedSubTopicsForMentorAsync(Guid mentorId, CancellationToken cancellationToken);
 }

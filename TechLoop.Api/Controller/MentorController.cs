@@ -57,9 +57,12 @@ using TechLoop.Application.Features.Mentor.DTOs;
 using TechLoop.Application.Features.Mentor.Queries.Mentor.GetMyProfile;
 using TechLoop.Application.Features.Submissions.Commands.UpdateSubmissionResult;
 using TechLoop.Application.Features.Submissions.DTOs;
+using TechLoop.Application.Features.SubTopics.Queries.Mentor.GetUnpublishedSubTopics;
 using TechLoop.Application.Features.TopicContributions.Commands.ReviewTopicContribution;
 using TechLoop.Application.Features.TopicContributions.DTOs;
+using TechLoop.Application.Features.TopicContributions.Queries.GetPendingTopicContributions;
 using TechLoop.Application.Features.TopicContributions.Queries.GetTechnologyTopicContributions;
+using TechLoop.Application.Features.Topics.Queries.GetUnpublishedTopics;
 
 namespace TechLoop.Api.Controllers;
 
@@ -549,6 +552,43 @@ public sealed class MentorController : ControllerBase
     public async Task<IActionResult> UnpinDiscussion(int id)
     {
         var result = await _mediator.Send(new UnpinDiscussionCommand(id));
+        return Ok(result);
+    }
+    
+    //get pending contribution
+    [HttpGet("pending-contribution")]
+    public async Task<IActionResult> GetPendingContributions(CancellationToken cancellationToken)
+    {
+        var mentorIdValue = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (!Guid.TryParse(mentorIdValue, out var mentorId))
+        {
+            return Unauthorized();
+        }
+
+        var result = await _mediator.Send(new GetPendingTopicContributionsQuery(mentorId), cancellationToken);
+        return Ok(result);
+    }
+    
+    //get unpublished topics
+    [HttpGet("unpublished-topics")]
+    public async Task<IActionResult> GetUnpublishedTopics(CancellationToken cancellationToken)
+    {
+        var mentorIdValue = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (!Guid.TryParse(mentorIdValue, out var mentorId))
+            return Unauthorized();
+
+        var result = await _mediator.Send( new GetUnpublishedTopicsQuery(mentorId), cancellationToken);
+        return Ok(result);
+    }
+    
+    //get unpublished subtopics
+    [HttpGet("unpublished-subtopics")]
+    public async Task<IActionResult> GetUnpublishedSubTopics(CancellationToken cancellationToken)
+    {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (!Guid.TryParse(userId, out var mentorId))
+            return Unauthorized();
+        var result = await _mediator.Send(new GetUnpublishedSubTopicsQuery(mentorId), cancellationToken);
         return Ok(result);
     }
     

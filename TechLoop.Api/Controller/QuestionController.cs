@@ -7,9 +7,9 @@ using TechLoop.Application.Features.Questions.DTOs;
 using TechLoop.Application.Features.Questions.Queries.GetAllQuestions.Learner;
 using TechLoop.Application.Features.Questions.Queries.GetCodingQuestions;
 using TechLoop.Application.Features.Questions.Queries.GetLearnerQuestionById;
+using TechLoop.Application.Features.Questions.Queries.GetMcqQuestionBySubTopic;
 using TechLoop.Application.Features.Questions.Queries.GetQuestionDetailsById;
 
-//using TechLoop.Application.Features.Questions.Queries.GetQuestionById.Learner;
 
 namespace TechLoop.Api.Controllers;
 
@@ -104,6 +104,13 @@ public sealed class QuestionController : ControllerBase
     public async Task<ActionResult<QuestionDetailsResponse>> GetQuestionDetails(int id, CancellationToken cancellationToken)
     {
         var result = await _mediator.Send(new GetQuestionDetailsByIdQuery(id), cancellationToken);
+        return Ok(result);
+    }
+    
+    [HttpGet("sub-topic/{subTopicId:int}/mcq")]
+    public async Task<IActionResult> GetMcqQuestionBySubTopic(int subTopicId, CancellationToken cancellationToken)
+    {
+        var result = await _mediator.Send(new GetMcqQuestionBySubTopicQuery(subTopicId), cancellationToken);
         return Ok(result);
     }
 }

@@ -1,4 +1,5 @@
-﻿using TechLoop.Domain;
+﻿using TechLoop.Application.Features.Topics.DTOs;
+using TechLoop.Domain;
 using TechLoop.Domain.Entities;
 
 namespace TechLoop.Application.Interfaces.Repositories;
@@ -19,4 +20,5 @@ public interface ITopicsRepository
     Task<Topic?> GetPublishedBySlugAsync(string slug, CancellationToken cancellationToken);
     Task<int?> GetTechnologyIdAsync(int topicId, CancellationToken cancellationToken);
     Task<int?> GetMentorTechnologyIdAsync(Guid userId, CancellationToken cancellationToken);
+    Task<IEnumerable<MentorTopicResponse>> GetAllUnpublishedTopicsAsync(CancellationToken cancellationToken);
 }

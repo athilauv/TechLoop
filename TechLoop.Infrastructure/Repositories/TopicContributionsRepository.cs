@@ -125,13 +125,25 @@ public sealed class TopicContributionRepository : ITopicContributionRepository
     {
         const string sql = @"SELECT * FROM fn_get_my_topic_contribution_by_id(@LearnerId, @ContributionId);";
         using var connection = _context.CreateConnection();
-        return await connection.QuerySingleOrDefaultAsync<TopicContributionResponse>(
-            new CommandDefinition(
+        return await connection.QuerySingleOrDefaultAsync<TopicContributionResponse>(new CommandDefinition(
                 sql,
                 new
                 {
                     LearnerId = learnerId,
                     ContributionId = contributionId
+                },
+                cancellationToken: cancellationToken));
+    }
+    
+    public async Task<IEnumerable<TopicContributionPendingResponse>>
+        GetPendingContributionsAsync(Guid mentorId, CancellationToken cancellationToken)
+    {
+        const string sql = @"SELECT * FROM fn_get_pending_topic_contributions(@MentorId); " ;
+        using var connection = _context.CreateConnection();
+        return await connection.QueryAsync<TopicContributionPendingResponse>(new CommandDefinition(sql,
+                new
+                {
+                    MentorId = mentorId
                 },
                 cancellationToken: cancellationToken));
     }

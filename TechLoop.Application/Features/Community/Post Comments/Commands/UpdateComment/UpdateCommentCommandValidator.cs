@@ -6,11 +6,8 @@ public sealed class UpdateCommentValidator : AbstractValidator<UpdateCommentComm
 {
     public UpdateCommentValidator()
     {
-        RuleFor(x => x.Id)
-            .GreaterThan(0);
-
         RuleFor(x => x.Content)
             .NotEmpty()
-            .MaximumLength(1000);
+            .MaximumLength(10000);
     }
 }

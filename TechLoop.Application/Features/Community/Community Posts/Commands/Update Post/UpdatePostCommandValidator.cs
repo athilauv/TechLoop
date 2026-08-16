@@ -6,18 +6,17 @@ public sealed class UpdatePostCommandValidator : AbstractValidator<UpdatePostCom
 {
     public UpdatePostCommandValidator()
     {
-        RuleFor(x => x.Id)
-            .GreaterThan(0);
-
         RuleFor(x => x.Title)
             .NotEmpty()
             .MaximumLength(200);
 
         RuleFor(x => x.Content)
-            .NotEmpty();
+            .NotEmpty()
+            .WithMessage("Content cannot be empty");
 
         RuleFor(x => x.TechnologyId)
             .GreaterThan(0)
-            .When(x => x.TechnologyId.HasValue);
+            .When(x => x.TechnologyId.HasValue)
+            .WithMessage("Technology ID must be greater than 0");
     }
 }

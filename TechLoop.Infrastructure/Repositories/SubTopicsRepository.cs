@@ -1,4 +1,5 @@
 ﻿using Dapper;
+using TechLoop.Application.Features.SubTopics.DTOs;
 using TechLoop.Application.Interfaces.Infrastructure;
 using TechLoop.Application.Interfaces.Repositories;
 using TechLoop.Domain.Entities;
@@ -222,6 +223,19 @@ public class SubTopicsRepository : ISubTopicsRepository
                 new
                 {
                     SubTopicId = subTopicId
+                },
+                cancellationToken: cancellationToken));
+    }
+    
+    public async Task<IEnumerable<MentorSubTopicResponse>>
+        GetUnpublishedSubTopicsForMentorAsync(Guid mentorId, CancellationToken cancellationToken)
+    {
+        const string sql = @"SELECT * FROM fn_get_mentor_unpublished_subtopics(@MentorId);";
+        using var connection = _context.CreateConnection();
+        return await connection.QueryAsync<MentorSubTopicResponse>(new CommandDefinition(sql,
+                new
+                {
+                    MentorId = mentorId
                 },
                 cancellationToken: cancellationToken));
     }

@@ -9,7 +9,7 @@ public sealed class Discussion
     public string Content { get; set; } = string.Empty;
     public bool IsPinned { get; set; }
     public bool IsLocked { get; set; }
-    public DateTime DeletedAt { get; set; }
+    public DateTime? DeletedAt { get; set; }
     public Guid CreatedBy { get; set; }
     public Guid? UpdatedBy { get; set; }
     public DateTime CreatedAt { get; set; }
