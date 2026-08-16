@@ -663,10 +663,6 @@ export default function CommentItem({
                         </div>
                     </div>
 
-                    {/* =================================================
-                        THREE DOT MENU
-                    ================================================= */}
-
                     {isOwner && (
                         <div
                             ref={menuRef}
@@ -674,18 +670,10 @@ export default function CommentItem({
                         >
                             <button
                                 type="button"
-                                onClick={() =>
-                                    setMenuOpen(
-                                        (
-                                            current
-                                        ) =>
-                                            !current
-                                    )
+                                onClick={() => setMenuOpen(
+                                        (current) => !current)
                                 }
-                                disabled={
-                                    deleting ||
-                                    savingEdit
-                                }
+                                disabled={deleting || savingEdit}
                                 className="
                                     flex
                                     h-8
@@ -702,13 +690,8 @@ export default function CommentItem({
                                 "
                                 aria-label="Comment options"
                                 aria-haspopup="menu"
-                                aria-expanded={
-                                    menuOpen
-                                }
-                            >
-                                <MoreVertical
-                                    size={17}
-                                />
+                                aria-expanded={menuOpen}>
+                                <MoreVertical size={17}/>
                             </button>
 
                             {menuOpen && (
@@ -728,28 +711,15 @@ export default function CommentItem({
                                         p-1
                                         shadow-2xl
                                     "
-                                    role="menu"
-                                >
+                                    role="menu">
                                     {/* EDIT */}
 
-                                    <button
-                                        type="button"
+                                    <button type="button"
                                         onClick={() => {
-                                            setEditText(
-                                                comment.content
-                                            );
-
-                                            setError(
-                                                null
-                                            );
-
-                                            setIsEditing(
-                                                true
-                                            );
-
-                                            setMenuOpen(
-                                                false
-                                            );
+                                            setEditText(comment.content);
+                                            setError(null);
+                                            setIsEditing(true);
+                                            setMenuOpen(false);
                                         }}
                                         className="
                                             flex
@@ -766,25 +736,16 @@ export default function CommentItem({
                                             hover:bg-[#10283e]
                                             hover:text-white
                                         "
-                                        role="menuitem"
-                                    >
-                                        <Pencil
-                                            size={13}
-                                        />
+                                        role="menuitem">
+                                        <Pencil size={13}/>
 
                                         Edit
                                     </button>
 
                                     {/* DELETE */}
 
-                                    <button
-                                        type="button"
-                                        onClick={() =>
-                                            void handleDelete()
-                                        }
-                                        disabled={
-                                            deleting
-                                        }
+                                    <button type="button" onClick={() => void handleDelete()}
+                                        disabled={deleting}
                                         className="
                                             flex
                                             w-full
@@ -799,17 +760,11 @@ export default function CommentItem({
                                             transition
                                             hover:bg-[#24151b]
                                             disabled:cursor-not-allowed
-                                            disabled:opacity-50
-                                        "
-                                        role="menuitem"
-                                    >
-                                        <Trash2
-                                            size={13}
-                                        />
+                                            disabled:opacity-50"
+                                        role="menuitem">
+                                        <Trash2 size={13}/>
 
-                                        {deleting
-                                            ? "Deleting..."
-                                            : "Delete"}
+                                        {deleting ? "Deleting..." : "Delete"}
                                     </button>
                                 </div>
                             )}
@@ -817,27 +772,16 @@ export default function CommentItem({
                     )}
                 </div>
 
-                {/* =================================================
-                    COMMENT CONTENT
-                ================================================= */}
 
-                <p
-                    className="
+                <p className="
                         mt-3
                         whitespace-pre-wrap
                         text-xs
                         leading-5
                         text-[#a8bad0]
-                    "
-                >
-                    {
-                        comment.content
-                    }
+                    ">
+                    {comment.content}
                 </p>
-
-                {/* =================================================
-                    ERROR
-                ================================================= */}
 
                 {error && (
                     <p className="mt-2 text-[10px] text-[#ef8b8b]">
@@ -845,24 +789,12 @@ export default function CommentItem({
                     </p>
                 )}
 
-                {/* =================================================
-                    COMMENT ACTIONS
-                ================================================= */}
-
                 <div className="mt-3 flex items-center gap-4">
 
                     {/* REPLY */}
 
                     {onReply && (
-                        <button
-                            type="button"
-                            onClick={() =>
-                                setShowReplyBox(
-                                    (
-                                        current
-                                    ) =>
-                                        !current
-                                )
+                        <button type="button" onClick={() => setShowReplyBox((current) => !current)
                             }
                             className="
                                 inline-flex
@@ -871,12 +803,8 @@ export default function CommentItem({
                                 text-[10px]
                                 text-[#7189a8]
                                 transition
-                                hover:text-[#17D4C3]
-                            "
-                        >
-                            <MessageCircle
-                                size={12}
-                            />
+                                hover:text-[#17D4C3]">
+                            <MessageCircle size={12}/>
 
                             Reply
                         </button>
@@ -884,32 +812,18 @@ export default function CommentItem({
 
                 </div>
 
-                {/* =================================================
-                    REPLY BOX
-                ================================================= */}
-
-                {showReplyBox &&
-                    onReply && (
+                {showReplyBox && onReply && (
                         <div className="mt-3">
 
                             <textarea
-                                value={
-                                    replyText
-                                }
-                                onChange={(
-                                    event
-                                ) =>
-                                    setReplyText(
-                                        event
+                                value={replyText}
+                                onChange={(event) =>
+                                    setReplyText(event
                                             .target
                                             .value
                                     )
                                 }
-                                rows={3}
-                                maxLength={1000}
-                                disabled={
-                                    submittingReply
-                                }
+                                rows={3} maxLength={1000} disabled={submittingReply}
                                 placeholder="Write a reply..."
                                 className="
                                     w-full
@@ -927,20 +841,12 @@ export default function CommentItem({
                                     placeholder:text-[#526d8e]
                                     focus:border-[#17D4C3]
                                     disabled:opacity-60
-                                "
-                            />
+                                "/>
 
                             <div className="mt-2 flex justify-end">
 
-                                <button
-                                    type="button"
-                                    onClick={() =>
-                                        void handleReply()
-                                    }
-                                    disabled={
-                                        submittingReply ||
-                                        !replyText.trim()
-                                    }
+                                <button type="button" onClick={() => void handleReply()}
+                                    disabled={submittingReply || !replyText.trim()}
                                     className="
                                         inline-flex
                                         items-center
@@ -956,15 +862,10 @@ export default function CommentItem({
                                         hover:bg-[#35e2d3]
                                         disabled:cursor-not-allowed
                                         disabled:opacity-50
-                                    "
-                                >
-                                    <Send
-                                        size={11}
-                                    />
+                                    ">
+                                    <Send size={11}/>
 
-                                    {submittingReply
-                                        ? "Sending..."
-                                        : "Reply"}
+                                    {submittingReply ? "Sending..." : "Reply"}
                                 </button>
 
                             </div>

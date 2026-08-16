@@ -12,6 +12,7 @@ import CommunityPage from "../features/community/pages/CommunityPage.tsx";
 import CommunityPostPage from "../features/community/pages/CommunityPostPage.tsx";
 import SavedPostsPage from "../features/community/pages/SavedPostsPage.tsx";
 import LandingPage from "../features/landing/pages/LandingPage.tsx";
+import QuestionDiscussionsPage from "../features/coding-question/pages/QuestionDiscussionsPage.tsx";
 
 export default function LearnerRoutes() {
     return (
@@ -35,7 +36,7 @@ export default function LearnerRoutes() {
                     <Route path="community" element={<CommunityPage />}/>
                     <Route path="community/posts/:postId" element={<CommunityPostPage />}/>
                     <Route path="community/saved-posts" element={<SavedPostsPage />}/>
-
+                    <Route path="coding-questions/:questionId/discussions" element={<QuestionDiscussionsPage />}/>
                 </Route>
             </Route>
         </Routes>

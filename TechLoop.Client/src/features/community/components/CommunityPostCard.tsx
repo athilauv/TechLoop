@@ -146,7 +146,6 @@ export default function CommunityPostCard({
         };
     }, [menuOpen]);
 
-       //EDIT
     function openEdit() {
         setEditTitle(post.title);
         setEditContent(post.content);
@@ -200,7 +199,6 @@ export default function CommunityPostCard({
         }
     }
 
-       //DELETE
     async function handleDelete() {
         if (!onDelete || deleting) {
             return;
@@ -299,14 +297,12 @@ export default function CommunityPostCard({
                 )}
             </div>
 
-                //ERROR
             {error && (
                 <div className=" mt-4 rounded-xl border border-[#5c3038] bg-[#24151b] px-3 py-2 text-xs text-[#ef8b8b]">
                     {error}
                 </div>
             )}
 
-             //   EDIT MODE
             {editing ? (
                 <div className="mt-5">
 
@@ -348,7 +344,6 @@ export default function CommunityPostCard({
                 </div>
             ) : (
                 <>
-                       // TECHNOLOGY
                     {post.technologyName && (
                         <div className="mt-4">
                             <span className=" inline-flex rounded-full border border-[#24506a] bg-[#0a2638] px-2.5 py-1 text-[10px] font-medium text-[#17D4C3] ">
@@ -357,17 +352,14 @@ export default function CommunityPostCard({
                         </div>
                     )}
 
-                     // TITLE
                     <h2 className="mt-4 text-base font-semibold text-white">
                         {post.title}
                     </h2>
 
-                       // CONTENT
                     <p className=" mt-2 whitespace-pre-wrap text-sm leading-6 text-[#a8bad0] ">
                         {post.content}
                     </p>
 
-                       // POST ACTIONS
                     <div
                         className=" mt-5 flex items-center justify-between border-t border-[#1e3254] pt-4">
                         <div className="flex items-center gap-5">
