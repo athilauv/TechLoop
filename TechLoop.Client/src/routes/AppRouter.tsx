@@ -6,6 +6,7 @@ import ForgotPasswordPage from "../features/learner/auth/ForgotPasswordPage.tsx"
 import ResetPasswordPage from "../features/learner/auth/ResetPasswordPage.tsx";
 import ChangePasswordPage from "../features/learner/auth/ChangePasswordPage.tsx";
 import MentorSetupPage from "../features/learner/auth/MentorSetupPage.tsx";
+import MentorRoutes from "./MentorRoutes.tsx";
 
 export default function AppRoutes() {
     return (
@@ -19,6 +20,7 @@ export default function AppRoutes() {
                 <Route path="/learner/*" element={<LearnerRoutes />} />
                 <Route path="/change-password" element={<ChangePasswordPage />}/>
                 <Route path="/mentor/setup" element={<MentorSetupPage />} />
+                <Route path="/mentor/*" element={<MentorRoutes />}/>
             </Routes>
         </BrowserRouter>
     );

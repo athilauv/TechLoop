@@ -3,6 +3,7 @@
 public enum ContributionStatus : short
 {
     Pending = 1,
-    Published = 2,
-    Rejected = 3
+    Approved = 2,
+    Rejected = 3,
+    Published = 4
 }

@@ -1,7 +1,7 @@
 ﻿import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { register } from "../../../api/auth.api.ts";
-import { showToast } from "../../../utils/toast.ts";
+import { showToast } from "../../../utils/toast.tsx";
 import authImage from "../../../assets/AuthImage.jpg";
 
 interface FieldProps {

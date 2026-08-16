@@ -8,14 +8,40 @@ public sealed class ReviewTopicContributionCommandValidator : AbstractValidator<
     {
         RuleFor(x => x.Request.Id)
             .GreaterThan(0)
-            .WithMessage("Invalid contribution.");
+            .WithMessage("Contribution ID must be greater than zero.");
 
         RuleFor(x => x.Request.Status)
-            .InclusiveBetween((short)1, (short)4)
-            .WithMessage("Invalid contribution status.");
+            .Must(status => status == 2 || status == 3)
+            .WithMessage("Status must be Approved or Rejected.");
+
+        When(
+            x => x.Request.Status == 2,
+            () =>
+            {
+                RuleFor(x => x.Request.Position)
+                    .NotNull()
+                    .GreaterThan(0)
+                    .WithMessage(
+                        "Position is required when approving a contribution.");
+            });
+
+        When(
+            x => x.Request.Status == 3,
+            () =>
+            {
+                RuleFor(x => x.Request.Position)
+                    .Null()
+                    .WithMessage(
+                        "Position should not be provided when rejecting a contribution.");
+
+                RuleFor(x => x.Request.ParentSubTopicId)
+                    .Null()
+                    .WithMessage(
+                        "ParentSubTopicId should not be provided when rejecting a contribution.");
+            });
 
         RuleFor(x => x.Request.ReviewNotes)
-            .MaximumLength(1000)
-            .When(x => !string.IsNullOrWhiteSpace(x.Request.ReviewNotes));
+            .MaximumLength(2000)
+            .When(x => x.Request.ReviewNotes is not null);
     }
 }

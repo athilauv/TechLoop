@@ -14,7 +14,6 @@
     <Folder Include="Features\SubTopics\Queries\GetSubTopicBySlug\" />
     <Folder Include="Features\Technologies\Queries\GetTechnologyBySlug\" />
     <Folder Include="Features\TechnologyCategories\Queries\GetTechnologyCategoryById\" />
-    <Folder Include="Features\TopicContributions\Queries\Admin-Mentor\" />
     <Folder Include="Features\Topics\Queries\GetTopicBySlug\" />
     <Folder Include="Features\UserStatistics\Commands\" />
     <Folder Include="Features\UserTopicProgress\Commands\" />

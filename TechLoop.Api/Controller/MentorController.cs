@@ -62,6 +62,7 @@ using TechLoop.Application.Features.TopicContributions.Commands.ReviewTopicContr
 using TechLoop.Application.Features.TopicContributions.DTOs;
 using TechLoop.Application.Features.TopicContributions.Queries.GetPendingTopicContributions;
 using TechLoop.Application.Features.TopicContributions.Queries.GetTechnologyTopicContributions;
+using TechLoop.Application.Features.TopicContributions.Queries.Mentor.GetMentorTopicContributionById;
 using TechLoop.Application.Features.Topics.Queries.GetUnpublishedTopics;
 
 namespace TechLoop.Api.Controllers;
@@ -504,13 +505,24 @@ public sealed class MentorController : ControllerBase
     }
 
     // Review a contribution (Approve / Reject / Publish)
-    [Authorize(Roles = "Mentor")]
-    [HttpPut("review")]
-    public async Task<IActionResult> Review([FromBody] ReviewTopicContributionRequest request, CancellationToken cancellationToken)
+    [HttpPut("topic-contribution/{id:int}/review")]
+    public async Task<IActionResult> ReviewContribution(int id, [FromBody] ReviewTopicContributionRequest request, CancellationToken cancellationToken)
     {
-        var reviewerId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
-        var success = await _mediator.Send(new ReviewTopicContributionCommand(reviewerId, request), cancellationToken);
-        return success ? NoContent() : BadRequest();
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (!Guid.TryParse(userId, out var mentorId))
+        {
+            return Unauthorized();
+        }
+
+        request.Id = id;
+
+        var result = await _mediator.Send(new ReviewTopicContributionCommand(mentorId, request), cancellationToken);
+        if (!result)
+        {
+            return NotFound();
+        }
+
+        return NoContent();
     }
     
     //Get profile
@@ -568,6 +580,25 @@ public sealed class MentorController : ControllerBase
         var result = await _mediator.Send(new GetPendingTopicContributionsQuery(mentorId), cancellationToken);
         return Ok(result);
     }
+    
+    [HttpGet("mentor/topic-contributions/{id:int}")]
+    public async Task<IActionResult> GetContributionById(int id, CancellationToken cancellationToken)
+    {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (!Guid.TryParse(userId, out var mentorId))
+        {
+            return Unauthorized();
+        }
+
+        var result = await _mediator.Send(new GetMentorTopicContributionByIdQuery(mentorId, id), cancellationToken);
+        if (result is null)
+        {
+            return NotFound();
+        }
+
+        return Ok(result);
+    }
+    
     
     //get unpublished topics
     [HttpGet("unpublished-topics")]

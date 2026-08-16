@@ -238,11 +238,16 @@ public sealed class TopicRepository : ITopicsRepository
     }
     
     public async Task<IEnumerable<MentorTopicResponse>>
-        GetAllUnpublishedTopicsAsync(CancellationToken cancellationToken)
+        GetUnpublishedTopicsForMentorAsync(Guid mentorId, CancellationToken cancellationToken)
     {
-        const string sql = @"SELECT * FROM fn_get_all_unpublished_topics();";
+        const string sql = @"SELECT * FROM fn_get_mentor_unpublished_topics(@MentorId);";
         using var connection = _context.CreateConnection();
-        return await connection.QueryAsync<MentorTopicResponse>(new CommandDefinition(sql, cancellationToken: cancellationToken));
+        return await connection.QueryAsync<MentorTopicResponse>(new CommandDefinition(sql,
+                new
+                {
+                    MentorId = mentorId
+                },
+                cancellationToken: cancellationToken));
     }
 }
     

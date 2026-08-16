@@ -249,9 +249,7 @@ export default function ReviewContributionModal({
                                 />
                             )}
 
-                            {action === "approve"
-                                ? "Approve Contribution"
-                                : "Reject Contribution"}
+                            {action === "approve" ? "Approve Contribution" : "Reject Contribution"}
                         </button>
 
                     </div>

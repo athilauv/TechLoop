@@ -14,29 +14,14 @@ export default function MentorContributionDetails({
                                                       onBack,
                                                       onReview,
                                                   }: MentorContributionDetailsProps) {
-    const createdDate = formatRelativeTime(
-        contribution.createdAt
-    );
-
-    const reviewedDate = contribution.reviewedAt
-        ? formatRelativeTime(
-            contribution.reviewedAt
-        )
-        : null;
-
-    const updatedDate = contribution.updatedAt
-        ? formatRelativeTime(
-            contribution.updatedAt
-        )
-        : null;
+    const createdDate = formatRelativeTime(contribution.createdAt);
+    const reviewedDate = contribution.reviewedAt ? formatRelativeTime(contribution.reviewedAt) : null;
+    const updatedDate = contribution.updatedAt ? formatRelativeTime(contribution.updatedAt) : null;
 
     return (
         <div className="space-y-6">
-            <button
-                type="button"
-                onClick={onBack}
-                className="inline-flex items-center gap-2 text-sm font-medium text-slate-600 hover:text-slate-900"
-            >
+            <button type="button" onClick={onBack}
+                className="inline-flex items-center gap-2 text-sm font-medium text-slate-600 hover:text-slate-900">
                 <ArrowLeft size={16} />
                 Back to pending contributions
             </button>
@@ -57,26 +42,20 @@ export default function MentorContributionDetails({
                             {contribution.topicTitle && (
                                 <span>
                                     Topic:{" "}
-                                    {
-                                        contribution.topicTitle
-                                    }
+                                    {contribution.topicTitle}
                                 </span>
                             )}
 
                             {contribution.subTopicTitle && (
                                 <span>
                                     SubTopic:{" "}
-                                    {
-                                        contribution.subTopicTitle
-                                    }
+                                    {contribution.subTopicTitle}
                                 </span>
                             )}
                         </div>
                     </div>
 
-                    <ContributionStatusBadge
-                        status={contribution.status}
-                    />
+                    <ContributionStatusBadge status={contribution.status}/>
                 </div>
 
                 <div className="mt-6 space-y-6">
@@ -111,9 +90,7 @@ export default function MentorContributionDetails({
 
                             <pre className="mt-2 overflow-x-auto rounded-lg bg-slate-950 p-4 text-sm leading-6 text-slate-100">
                                 <code>
-                                    {
-                                        contribution.example
-                                    }
+                                    {contribution.example}
                                 </code>
                             </pre>
                         </section>
@@ -126,18 +103,10 @@ export default function MentorContributionDetails({
                                 Reference
                             </h2>
 
-                            <a
-                                href={
-                                    contribution.referenceUrl
-                                }
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="mt-2 inline-flex items-center gap-2 text-sm font-medium text-blue-600 hover:underline"
-                            >
+                            <a href={contribution.referenceUrl} target="_blank" rel="noopener noreferrer"
+                                className="mt-2 inline-flex items-center gap-2 text-sm font-medium text-blue-600 hover:underline">
                                 Open reference
-                                <ExternalLink
-                                    size={15}
-                                />
+                                <ExternalLink size={15}/>
                             </a>
                         </section>
                     )}
@@ -161,9 +130,7 @@ export default function MentorContributionDetails({
                                 </p>
 
                                 <p className="mt-1 text-sm text-slate-700">
-                                    {
-                                        contribution.reviewerName
-                                    }
+                                    {contribution.reviewerName}
                                 </p>
                             </div>
                         )}
@@ -196,11 +163,8 @@ export default function MentorContributionDetails({
                     {/* Review */}
                     {contribution.status === 1 && (
                         <div className="flex justify-end border-t border-slate-100 pt-5">
-                            <button
-                                type="button"
-                                onClick={onReview}
-                                className="rounded-lg bg-slate-900 px-5 py-2.5 text-sm font-medium text-white hover:bg-slate-800"
-                            >
+                            <button type="button" onClick={onReview}
+                                className="rounded-lg bg-slate-900 px-5 py-2.5 text-sm font-medium text-white hover:bg-slate-800">
                                 Review Contribution
                             </button>
                         </div>
@@ -214,9 +178,7 @@ export default function MentorContributionDetails({
                             </h2>
 
                             <p className="mt-2 whitespace-pre-wrap text-sm leading-6 text-amber-900">
-                                {
-                                    contribution.reviewNotes
-                                }
+                                {contribution.reviewNotes}
                             </p>
                         </section>
                     )}

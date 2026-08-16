@@ -63,14 +63,14 @@ const CodingQuestionFilters = ({
         sortBy !== "default";
 
     return (
-        <div className="mb-6 rounded-xl border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-900">
+        <div className="mb-6 rounded-2xl border border-[#223A59] bg-[#14243C] p-4">
             <div className="flex flex-col gap-4">
 
                 {/* Search */}
                 <div className="relative">
                     <Search
                         size={18}
-                        className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
+                        className="absolute left-3 top-1/2 -translate-y-1/2 text-[#5C7394]"
                     />
 
                     <input
@@ -80,14 +80,14 @@ const CodingQuestionFilters = ({
                             onSearchChange(event.target.value)
                         }
                         placeholder="Search coding problems..."
-                        className="w-full rounded-lg border border-slate-200 bg-white py-2.5 pl-10 pr-10 text-sm text-slate-900 outline-none transition focus:border-[#17D4C3] focus:ring-2 focus:ring-[#17D4C3]/10 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+                        className="w-full rounded-lg border border-[#223A59] bg-[#101C30] py-2.5 pl-10 pr-10 text-sm text-white placeholder:text-[#5C7394] outline-none transition focus:border-[#00E8C2] focus:ring-2 focus:ring-[#00E8C2]/25"
                     />
 
                     {currentSearch && (
                         <button
                             type="button"
                             onClick={() => onSearchChange("")}
-                            className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 transition hover:text-slate-700 dark:hover:text-white"
+                            className="absolute right-3 top-1/2 -translate-y-1/2 text-[#5C7394] transition hover:text-white"
                         >
                             <X size={16} />
                         </button>
@@ -113,7 +113,7 @@ const CodingQuestionFilters = ({
                                     : Number(value)
                             );
                         }}
-                        className="rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-700 outline-none transition focus:border-[#17D4C3] dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300"
+                        className="rounded-lg border border-[#223A59] bg-[#101C30] px-3 py-2.5 text-sm text-[#B9C8DC] outline-none transition focus:border-[#00E8C2] focus:ring-2 focus:ring-[#00E8C2]/25"
                     >
                         <option value="all">
                             All Programming Languages
@@ -149,7 +149,7 @@ const CodingQuestionFilters = ({
                                     ) as DifficultyLevel)
                             );
                         }}
-                        className="rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-700 outline-none transition focus:border-[#17D4C3] dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300"
+                        className="rounded-lg border border-[#223A59] bg-[#101C30] px-3 py-2.5 text-sm text-[#B9C8DC] outline-none transition focus:border-[#00E8C2] focus:ring-2 focus:ring-[#00E8C2]/25"
                     >
                         <option value="all">
                             All Difficulties
@@ -178,7 +178,7 @@ const CodingQuestionFilters = ({
                                     .value as SortOption
                             )
                         }
-                        className="rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-700 outline-none transition focus:border-[#17D4C3] dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300"
+                        className="rounded-lg border border-[#223A59] bg-[#101C30] px-3 py-2.5 text-sm text-[#B9C8DC] outline-none transition focus:border-[#00E8C2] focus:ring-2 focus:ring-[#00E8C2]/25"
                     >
                         <option value="default">
                             Default Order
@@ -198,7 +198,7 @@ const CodingQuestionFilters = ({
                         <button
                             type="button"
                             onClick={onClear}
-                            className="inline-flex items-center justify-center gap-2 rounded-lg border border-slate-200 px-4 py-2.5 text-sm font-medium text-slate-600 transition hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
+                            className="inline-flex items-center justify-center gap-2 rounded-lg border border-[#223A59] px-4 py-2.5 text-sm font-medium text-[#B9C8DC] transition hover:bg-[#101C30] hover:text-white"
                         >
                             <X size={15} />
                             Clear filters

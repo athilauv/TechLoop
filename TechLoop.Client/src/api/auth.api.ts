@@ -1,3 +1,5 @@
+import type {CurrentUser} from "../types/auth.types.ts";
+
 const API_URL = `${import.meta.env.VITE_API_URL}/Auth`;
 
 // LOGIN
@@ -213,4 +215,19 @@ export async function setupMentorProfile(
     }
 
     return result;
+}
+
+export async function getCurrentUser(): Promise<CurrentUser> {
+    const response = await fetch(`${API_URL}/me`, {
+        method: "GET",
+        credentials: "include",
+    });
+
+    if (!response.ok) {
+        throw new Error(
+            `Unable to get current user (${response.status})`
+        );
+    }
+
+    return await response.json();
 }

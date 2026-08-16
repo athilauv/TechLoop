@@ -4,12 +4,10 @@ using TechLoop.Application.Features.TopicContributions.Queries.GetPendingTopicCo
 using TechLoop.Application.Interfaces.Repositories;
 
 namespace TechLoop.Application.Features.TopicContributions.Queries.Mentor.GetPendingTopicContributions;
-
-public sealed class GetPendingTopicContributionsQueryHandler : IRequestHandlerGetPendingTopicContributionsQuery,
-        IEnumerable<TopicContributionPendingResponse>>
+public sealed class GetPendingTopicContributionsQueryHandler : IRequestHandler< GetPendingTopicContributionsQuery, IEnumerable<TopicContributionPendingResponse>>
 {
     private readonly ITopicContributionRepository _repository;
-    public GetPendingTopicContributionsQueryHandler(ITopicContributionRepository repository)
+    public GetPendingTopicContributionsQueryHandler( ITopicContributionRepository repository)
     {
         _repository = repository;
     }

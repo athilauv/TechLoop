@@ -7,7 +7,7 @@ interface TestCaseListProps {
 const TestCaseList = ({ testCases }: TestCaseListProps) => {
     if (testCases.length === 0) {
         return (
-            <div className="rounded-lg border border-slate-200 p-4 text-sm text-slate-500 dark:border-slate-800 dark:text-slate-400">
+            <div className="rounded-xl border border-[#223A59] bg-[#101C30] p-4 text-sm text-[#8CA3BF]">
                 No sample test cases available.
             </div>
         );
@@ -18,29 +18,29 @@ const TestCaseList = ({ testCases }: TestCaseListProps) => {
             {testCases.map((testCase, index) => (
                 <div
                     key={testCase.id}
-                    className="rounded-lg border border-slate-200 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-900"
+                    className="rounded-xl border border-[#223A59] bg-[#101C30] p-4"
                 >
-                    <div className="mb-3 text-xs font-medium text-slate-500 dark:text-slate-400">
+                    <div className="mb-3 inline-flex items-center rounded-md bg-[#14243C] px-2 py-1 text-xs font-medium text-[#8CA3BF]">
                         Example {index + 1}
                     </div>
 
                     <div className="space-y-3">
                         <div>
-                            <div className="mb-1 text-xs font-medium text-slate-500 dark:text-slate-400">
+                            <div className="mb-1 text-xs font-medium text-[#5C7394]">
                                 Input
                             </div>
 
-                            <pre className="overflow-x-auto rounded-md bg-slate-900 p-3 text-xs text-slate-200">
+                            <pre className="overflow-x-auto rounded-lg border border-[#223A59] bg-[#0E192A] p-3 text-xs text-[#D7E1EE]">
                                 {testCase.input}
                             </pre>
                         </div>
 
                         <div>
-                            <div className="mb-1 text-xs font-medium text-slate-500 dark:text-slate-400">
+                            <div className="mb-1 text-xs font-medium text-[#5C7394]">
                                 Expected Output
                             </div>
 
-                            <pre className="overflow-x-auto rounded-md bg-slate-900 p-3 text-xs text-slate-200">
+                            <pre className="overflow-x-auto rounded-lg border border-[#223A59] bg-[#0E192A] p-3 text-xs text-[#D7E1EE]">
                                 {testCase.expectedOutput}
                             </pre>
                         </div>

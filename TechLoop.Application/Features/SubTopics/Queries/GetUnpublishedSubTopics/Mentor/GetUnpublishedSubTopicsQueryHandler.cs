@@ -1,20 +1,20 @@
 ﻿using MediatR;
-using TechLoop.Application.Features.Topics.DTOs;
-using TechLoop.Application.Features.Topics.Queries.GetUnpublishedTopics;
+using TechLoop.Application.Features.SubTopics.DTOs;
 using TechLoop.Application.Interfaces.Repositories;
 
-namespace TechLoop.Application.Features.Topics.Queries.Mentor.GetUnpublishedTopics;
+namespace TechLoop.Application.Features.SubTopics.Queries.Mentor.GetUnpublishedSubTopics;
 
-public sealed class GetUnpublishedTopicsQueryHandler : IRequestHandler<GetUnpublishedTopicsQuery, IEnumerable<MentorTopicResponse>>
+public sealed class GetUnpublishedSubTopicsQueryHandler : IRequestHandler<GetUnpublishedSubTopicsQuery, IEnumerable<MentorSubTopicResponse>>
 {
-    private readonly ITopicsRepository _repository;
-    public GetUnpublishedTopicsQueryHandler(ITopicsRepository repository)
+    private readonly ISubTopicsRepository _repository;
+
+    public GetUnpublishedSubTopicsQueryHandler(ISubTopicsRepository repository)
     {
         _repository = repository;
     }
 
-    public async Task<IEnumerable<MentorTopicResponse>> Handle(GetUnpublishedTopicsQuery request, CancellationToken cancellationToken)
+    public async Task<IEnumerable<MentorSubTopicResponse>> Handle(GetUnpublishedSubTopicsQuery request, CancellationToken cancellationToken)
     {
-        return await _repository.GetUnpublishedTopicsForMentorAsync(request.MentorId, cancellationToken);
+        return await _repository.GetUnpublishedSubTopicsForMentorAsync(request.MentorId, cancellationToken);
     }
 }

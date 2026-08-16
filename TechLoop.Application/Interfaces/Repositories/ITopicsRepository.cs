@@ -20,5 +20,5 @@ public interface ITopicsRepository
     Task<Topic?> GetPublishedBySlugAsync(string slug, CancellationToken cancellationToken);
     Task<int?> GetTechnologyIdAsync(int topicId, CancellationToken cancellationToken);
     Task<int?> GetMentorTechnologyIdAsync(Guid userId, CancellationToken cancellationToken);
-    Task<IEnumerable<MentorTopicResponse>> GetAllUnpublishedTopicsAsync(CancellationToken cancellationToken);
+    Task<IEnumerable<MentorTopicResponse>> GetUnpublishedTopicsForMentorAsync(Guid mentorId, CancellationToken cancellationToken);
 }

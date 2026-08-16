@@ -1,7 +1,7 @@
 ﻿import { useState } from "react";
-import { login } from "../../../api/auth.api.ts";
+import {getCurrentUser, login} from "../../../api/auth.api.ts";
 import { Link,useNavigate  } from "react-router-dom";
-import { showToast} from "../../../utils/toast.ts";
+import { showToast} from "../../../utils/toast.tsx";
 import authImage from "../../../assets/AuthImage.jpg";
 
 
@@ -99,9 +99,27 @@ export default function LoginPage() {
                 password,
             });
 
+            const currentUser = await getCurrentUser();
+
             showToast.success("Login successful");
 
-            navigate("/learner"); 
+            switch (currentUser.role) {
+                case "Learner":
+                    navigate("/learner");
+                    break;
+
+                case "Mentor":
+                    navigate("/mentor");
+                    break;
+
+                case "Admin":
+                    navigate("/admin");
+                    break;
+
+                default:
+                    showToast.error("Invalid user role");
+                    break;
+            }
         }  catch (err: unknown) {
             const message = err instanceof Error ? err.message : "Login failed";
             showToast.error(message);

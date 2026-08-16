@@ -1,10 +1,11 @@
-﻿import { Outlet, useLocation } from "react-router-dom";
+﻿import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import { useEffect, useRef, useState, type CSSProperties } from "react";
 import Navbar from "../Navbar";
 import Sidebar from "../Sidebar";
 import Footer from "../Footer";
 import { getLearnerProfile } from "../../../api/profile.api.ts";
-import type { UserProfile} from "../../../types/profile.types.ts";
+import { logout } from "../../../api/auth.api.ts";
+import type { UserProfile } from "../../../types/profile.types.ts";
 
 const SIDEBAR_EXPANDED = "256px";
 const SIDEBAR_COLLAPSED = "72px";
@@ -50,6 +51,7 @@ function useAutoHideNavbar(
 
 export default function LearnerLayout() {
     const location = useLocation();
+    const navigate = useNavigate();
 
     const scrollRef = useRef<HTMLDivElement>(null);
 
@@ -69,11 +71,15 @@ export default function LearnerLayout() {
                 const profile = await getLearnerProfile();
 
                 setUser(profile);
+
                 if (profile.username) {
                     localStorage.setItem("username", profile.username);
                 }
             } catch (error) {
-                console.error("Unable to load current learner profile:", error);
+                console.error(
+                    "Unable to load current learner profile:",
+                    error
+                );
             }
         };
 
@@ -94,6 +100,21 @@ export default function LearnerLayout() {
         return () =>
             mq.removeEventListener("change", onChange);
     }, []);
+
+    const handleLogout = async () => {
+        try {
+            await logout();
+
+            localStorage.removeItem("username");
+
+            setUser(null);
+            setMobileOpen(false);
+
+            navigate("/login", { replace: true });
+        } catch (error) {
+            console.error("Logout failed:", error);
+        }
+    };
 
     const cssVars = {
         "--sidebar-width": collapsed
@@ -127,6 +148,7 @@ export default function LearnerLayout() {
                 userName={user?.username}
                 userRole={user?.role}
                 userInitials={userInitial}
+                onLogout={handleLogout}
             />
 
             <div
@@ -136,26 +158,37 @@ export default function LearnerLayout() {
                     transition-all
                     duration-300
                     md:ml-[var(--sidebar-width)]
-                ">
-                <Navbar hidden={navHidden} onMenuClick={() =>
-                        setMobileOpen(true)}
+                "
+            >
+                <Navbar
+                    hidden={navHidden}
+                    onMenuClick={() =>
+                        setMobileOpen(true)
+                    }
                     username={user?.username}
-                    role={user?.role} initial={userInitial}/>
+                    role={user?.role}
+                    initial={userInitial}
+                />
 
-                <main ref={scrollRef} className=" h-full overflow-y-auto bg-[#081423]"
-                    style={{paddingTop: NAVBAR_HEIGHT,}}>
+                <main
+                    ref={scrollRef}
+                    className="h-full overflow-y-auto bg-[#081423]"
+                    style={{
+                        paddingTop: NAVBAR_HEIGHT,
+                    }}
+                >
                     {isLearningPage ? (
-                        <div className=" min-h-[calc(100vh-64px)] bg-[#081423]">
+                        <div className="min-h-[calc(100vh-64px)] bg-[#081423]">
                             <Outlet />
                         </div>
                     ) : (
-                        <>
-                            <div className=" px-4 py-4 md:px-6 lg:px-8">
+                        <div className="flex min-h-full flex-col">
+                            <div className="flex-1 px-4 py-4 md:px-6 lg:px-8">
                                 <Outlet />
                             </div>
 
                             <Footer />
-                        </>
+                        </div>
                     )}
                 </main>
             </div>

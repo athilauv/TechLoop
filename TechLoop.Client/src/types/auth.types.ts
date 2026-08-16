@@ -24,3 +24,9 @@ export interface ResetPasswordRequest {
     newPassword: string;
     confirmPassword: string;
 }
+
+export interface CurrentUser {
+    userId: string;
+    roleId: number;
+    role: string;
+}

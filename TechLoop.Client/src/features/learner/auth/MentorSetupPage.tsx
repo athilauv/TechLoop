@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { setupMentorProfile } from "../../../api/auth.api.ts";
-import { showToast } from "../../../utils/toast.ts";
+import { showToast } from "../../../utils/toast.tsx";
 import authImage from "../../../assets/AuthImage.jpg";
 
 interface PasswordFieldProps {

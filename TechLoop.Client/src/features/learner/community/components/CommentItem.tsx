@@ -12,7 +12,7 @@ import {
     useEffect, useRef, useState} from "react";
 import type {PostComment,} from "../../../../types/community.types";
 import {formatRelativeTime,} from "../../../../utils/formatRelativeTime";
-import {showToast} from "../../../../utils/toast.ts";
+import {showToast} from "../../../../utils/toast.tsx";
 
 interface CommentItemProps {
     comment: PostComment;

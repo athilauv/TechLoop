@@ -11,7 +11,7 @@ import {
 import {useEffect, useRef, useState,} from "react";
 import type {CommunityPost,} from "../../../../types/community.types";
 import {formatRelativeTime,} from "../../../../utils/formatRelativeTime";
-import {showToast,} from "../../../../utils/toast.ts";
+import {showToast,} from "../../../../utils/toast.tsx";
 import PostCommentsSection from "../components/PostCommentsSection";
 
 interface CommunityPostCardProps {

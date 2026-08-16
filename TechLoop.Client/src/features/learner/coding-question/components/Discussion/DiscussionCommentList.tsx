@@ -1,7 +1,7 @@
 import { useState } from "react";
-import {Check, MoreVertical, Pencil, Reply, Trash2, X} from "lucide-react";
-import type { DiscussionComment} from "../../../../../types/discussion.types.ts";
-import { formatRelativeTime} from "../../../../../utils/formatRelativeTime.ts";
+import { Check, MoreVertical, Pencil, Reply, Trash2, X } from "lucide-react";
+import type { DiscussionComment } from "../../../../../types/discussion.types.ts";
+import { formatRelativeTime } from "../../../../../utils/formatRelativeTime.ts";
 
 interface DiscussionCommentListProps {
     comments: DiscussionComment[];
@@ -119,14 +119,14 @@ function CommentItem({
     return (
         <div
             className={
-                level > 0 ? "ml-8 border-l border-[#1e3254] pl-4" : ""
+                level > 0 ? "ml-8 border-l border-[#223A59] pl-4" : ""
             }>
-            <div className="rounded-xl border border-[#1e3254] bg-[#0B1728] p-3">
+            <div className="rounded-xl border border-[#223A59] bg-[#101C30] p-3">
 
                 <div className="flex items-start justify-between gap-3">
 
                     <div className="flex min-w-0 items-center gap-2.5">
-                        <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[#17D4C3]/20 text-[10px] font-semibold text-[#17D4C3]">
+                        <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[#00E8C2]/15 text-[10px] font-semibold text-[#00E8C2]">
                             {comment.userName?.charAt(0).toUpperCase() || "U"}
                         </div>
 
@@ -135,7 +135,7 @@ function CommentItem({
                                 {comment.userName}
                             </p>
 
-                            <p className="text-[9px] text-[#526d8e]">
+                            <p className="text-[9px] text-[#5C7394]">
                                 {formatRelativeTime(comment.createdAt)}
                             </p>
                         </div>
@@ -147,13 +147,13 @@ function CommentItem({
                             <button
                                 type="button"
                                 onClick={() => setMenuOpen(current => !current)}
-                                className="rounded-md p-1.5 text-[#526d8e] transition hover:bg-[#10283e] hover:text-white"
+                                className="rounded-md p-1.5 text-[#5C7394] transition hover:bg-[#14243C] hover:text-white"
                                 aria-label="Comment options">
                                 <MoreVertical size={15} />
                             </button>
 
                             {menuOpen && (
-                                <div className="absolute right-0 top-8 z-30 w-28 overflow-hidden rounded-lg border border-[#1e3254] bg-[#081423] shadow-xl">
+                                <div className="absolute right-0 top-8 z-30 w-28 overflow-hidden rounded-lg border border-[#223A59] bg-[#0E192A] shadow-xl shadow-black/40">
 
                                     <button
                                         type="button"
@@ -161,14 +161,14 @@ function CommentItem({
                                             setMenuOpen(false);
                                             setEditing(true);
                                         }}
-                                        className="flex w-full items-center gap-2 px-3 py-2 text-left text-[10px] text-slate-300 transition hover:bg-white/5 hover:text-white">
+                                        className="flex w-full items-center gap-2 px-3 py-2 text-left text-[10px] text-[#B9C8DC] transition hover:bg-white/5 hover:text-white">
                                         <Pencil size={12} />
                                         Edit
                                     </button>
 
                                     <button type="button"
-                                        onClick={() => void handleDelete()}
-                                        className="flex w-full items-center gap-2 px-3 py-2 text-left text-[10px] text-red-400 transition hover:bg-red-500/10">
+                                            onClick={() => void handleDelete()}
+                                            className="flex w-full items-center gap-2 px-3 py-2 text-left text-[10px] text-red-400 transition hover:bg-red-500/10">
                                         <Trash2 size={12} />
                                         Delete
                                     </button>
@@ -189,22 +189,23 @@ function CommentItem({
                             onChange={event => setEditContent(event.target.value)}
                             rows={3}
                             maxLength={1000}
-                            className="w-full resize-none rounded-lg border border-[#1e3254] bg-[#06111f] px-3 py-2 text-xs leading-5 text-white outline-none focus:border-[#17D4C3]"
+                            className="w-full resize-none rounded-lg border border-[#223A59] bg-[#0E192A] px-3 py-2 text-xs leading-5 text-white outline-none focus:border-[#00E8C2] focus:ring-2 focus:ring-[#00E8C2]/25"
                         />
 
                         <div className="mt-2 flex justify-end gap-2">
 
-                            <button type="button" onClick={() => {setEditContent(comment.content);
-                                    setEditing(false);
-                                }}
-                                disabled={saving}
-                                className="inline-flex items-center gap-1 rounded-md border border-[#1e3254] px-2.5 py-1.5 text-[10px] text-slate-400 hover:text-white disabled:opacity-50">
+                            <button type="button" onClick={() => {
+                                setEditContent(comment.content);
+                                setEditing(false);
+                            }}
+                                    disabled={saving}
+                                    className="inline-flex items-center gap-1 rounded-md border border-[#223A59] px-2.5 py-1.5 text-[10px] text-[#8CA3BF] hover:text-white disabled:opacity-50">
                                 <X size={11} />
                                 Cancel
                             </button>
 
                             <button type="button" onClick={() => void handleEdit()} disabled={saving || !editContent.trim()}
-                                className="inline-flex items-center gap-1 rounded-md bg-[#17D4C3] px-2.5 py-1.5 text-[10px] font-semibold text-[#06141f] disabled:opacity-50">
+                                    className="inline-flex items-center gap-1 rounded-md bg-[#00E8C2] px-2.5 py-1.5 text-[10px] font-semibold text-[#081423] disabled:opacity-50">
                                 <Check size={11} />
                                 {saving ? "Saving..." : "Save"}
                             </button>
@@ -212,7 +213,7 @@ function CommentItem({
                         </div>
                     </div>
                 ) : (
-                    <p className="mt-3 whitespace-pre-wrap text-xs leading-5 text-slate-300">
+                    <p className="mt-3 whitespace-pre-wrap text-xs leading-5 text-[#B9C8DC]">
                         {comment.content}
                     </p>
                 )}
@@ -221,7 +222,7 @@ function CommentItem({
                     <div className="mt-3">
 
                         <button type="button" onClick={() => setReplying(current => !current)}
-                            className="inline-flex items-center gap-1 text-[10px] text-[#7189a8] transition hover:text-[#17D4C3]">
+                                className="inline-flex items-center gap-1 text-[10px] text-[#5C7394] transition hover:text-[#00E8C2]">
                             <Reply size={12} />
                             Reply
                         </button>
@@ -230,27 +231,27 @@ function CommentItem({
                             <div className="mt-2">
 
                                 <textarea value={replyContent}
-                                    onChange={event => setReplyContent(event.target.value)}
-                                    rows={2}
-                                    maxLength={1000}
-                                    placeholder="Write a reply..."
-                                    className="w-full resize-none rounded-lg border border-[#1e3254] bg-[#06111f] px-3 py-2 text-xs text-white outline-none placeholder:text-[#526d8e] focus:border-[#17D4C3]"
+                                          onChange={event => setReplyContent(event.target.value)}
+                                          rows={2}
+                                          maxLength={1000}
+                                          placeholder="Write a reply..."
+                                          className="w-full resize-none rounded-lg border border-[#223A59] bg-[#0E192A] px-3 py-2 text-xs text-white outline-none placeholder:text-[#5C7394] focus:border-[#00E8C2] focus:ring-2 focus:ring-[#00E8C2]/25"
                                 />
 
                                 <div className="mt-2 flex justify-end gap-2">
 
                                     <button type="button" onClick={() => {
-                                            setReplyContent("");
-                                            setReplying(false);
-                                        }}
-                                        className="rounded-md border border-[#1e3254] px-2.5 py-1.5 text-[10px] text-slate-400 hover:text-white"
+                                        setReplyContent("");
+                                        setReplying(false);
+                                    }}
+                                            className="rounded-md border border-[#223A59] px-2.5 py-1.5 text-[10px] text-[#8CA3BF] hover:text-white"
                                     >
                                         Cancel
                                     </button>
 
                                     <button type="button" onClick={() => void handleReply()}
-                                        disabled={replyingSaving || !replyContent.trim()}
-                                        className="rounded-md bg-[#17D4C3] px-2.5 py-1.5 text-[10px] font-semibold text-[#06141f] disabled:opacity-50">
+                                            disabled={replyingSaving || !replyContent.trim()}
+                                            className="rounded-md bg-[#00E8C2] px-2.5 py-1.5 text-[10px] font-semibold text-[#081423] disabled:opacity-50">
                                         {replyingSaving ? "Replying..." : "Reply"}
                                     </button>
 
@@ -267,12 +268,12 @@ function CommentItem({
                 <div className="mt-2 space-y-2">
                     {replies.map(reply => (
                         <CommentItem key={reply.id} comment={reply}
-                            replies={commentsForReply(replies, reply.id)}
-                            currentUserId={currentUserId}
-                            onReply={onReply}
-                            onEdit={onEdit}
-                            onDelete={onDelete}
-                            level={level + 1}
+                                     replies={commentsForReply(replies, reply.id)}
+                                     currentUserId={currentUserId}
+                                     onReply={onReply}
+                                     onEdit={onEdit}
+                                     onDelete={onDelete}
+                                     level={level + 1}
                         />
                     ))}
                 </div>

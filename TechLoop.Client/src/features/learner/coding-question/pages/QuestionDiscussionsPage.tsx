@@ -3,7 +3,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { ArrowLeft, MessageCircle, Plus } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { toast } from "react-toastify";
-import {createDiscussion, deleteDiscussion, getQuestionDiscussions,} from "../../../../api/discussion.api";
+import { createDiscussion, deleteDiscussion, getQuestionDiscussions } from "../../../../api/discussion.api";
 import { getCurrentUserId } from "../../../../utils/auth.ts";
 import DiscussionCard from "../components/Discussion/DiscussionCard";
 
@@ -94,7 +94,7 @@ export default function QuestionDiscussionsPage() {
 
     if (!id || id <= 0) {
         return (
-            <div className="rounded-xl border border-red-500/20 bg-red-500/10 p-5 text-sm text-red-400">
+            <div className="rounded-2xl border border-red-500/20 bg-red-500/10 p-5 text-sm text-red-300">
                 Invalid question.
             </div>
         );
@@ -107,7 +107,7 @@ export default function QuestionDiscussionsPage() {
                 <button
                     type="button"
                     onClick={() => navigate(`/learner/coding-questions/${id}`)}
-                    className="inline-flex items-center gap-2 text-sm text-slate-400 transition hover:text-white"
+                    className="inline-flex items-center gap-2 text-sm text-[#8CA3BF] transition hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-[#00E8C2]/40 rounded"
                 >
                     <ArrowLeft size={17} />
                     Back to Question
@@ -116,7 +116,7 @@ export default function QuestionDiscussionsPage() {
                 <button
                     type="button"
                     onClick={() => setCreateOpen(true)}
-                    className="flex h-9 w-9 items-center justify-center rounded-lg bg-[#17D4C3] text-[#06131f] transition hover:bg-[#20e5d3]"
+                    className="flex h-9 w-9 items-center justify-center rounded-lg bg-[#00E8C2] text-[#081423] transition hover:bg-[#00DDB9] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#00E8C2]/50 focus-visible:ring-offset-2 focus-visible:ring-offset-[#0E192A]"
                     aria-label="Create discussion"
                 >
                     <Plus size={19} />
@@ -128,13 +128,13 @@ export default function QuestionDiscussionsPage() {
                     Discussions
                 </h1>
 
-                <p className="mt-1 text-sm text-slate-400">
+                <p className="mt-1 text-sm text-[#8CA3BF]">
                     Discuss this coding question with other learners.
                 </p>
             </div>
 
             {createOpen && (
-                <div className="rounded-xl border border-[#1e3254] bg-[#0E1B2E] p-5">
+                <div className="rounded-2xl border border-[#223A59] bg-[#14243C] p-5">
                     <div className="flex items-center justify-between">
                         <h2 className="text-base font-semibold text-white">
                             Create Discussion
@@ -147,7 +147,7 @@ export default function QuestionDiscussionsPage() {
                                 setTitle("");
                                 setContent("");
                             }}
-                            className="text-xs text-slate-500 transition hover:text-white"
+                            className="text-xs text-[#5C7394] transition hover:text-white"
                         >
                             Cancel
                         </button>
@@ -158,7 +158,7 @@ export default function QuestionDiscussionsPage() {
                         onChange={event => setTitle(event.target.value)}
                         maxLength={200}
                         placeholder="Discussion title..."
-                        className="mt-4 w-full rounded-lg border border-[#1e3254] bg-[#06111f] px-3 py-2.5 text-sm text-white outline-none placeholder:text-[#526d8e] focus:border-[#17D4C3]"
+                        className="mt-4 w-full rounded-lg border border-[#223A59] bg-[#0E192A] px-3 py-2.5 text-sm text-white outline-none placeholder:text-[#5C7394] focus:border-[#00E8C2] focus:ring-2 focus:ring-[#00E8C2]/25"
                     />
 
                     <textarea
@@ -167,7 +167,7 @@ export default function QuestionDiscussionsPage() {
                         rows={5}
                         maxLength={5000}
                         placeholder="Write your discussion..."
-                        className="mt-3 w-full resize-none rounded-lg border border-[#1e3254] bg-[#06111f] px-3 py-2.5 text-sm leading-6 text-white outline-none placeholder:text-[#526d8e] focus:border-[#17D4C3]"
+                        className="mt-3 w-full resize-none rounded-lg border border-[#223A59] bg-[#0E192A] px-3 py-2.5 text-sm leading-6 text-white outline-none placeholder:text-[#5C7394] focus:border-[#00E8C2] focus:ring-2 focus:ring-[#00E8C2]/25"
                     />
 
                     <div className="mt-3 flex justify-end">
@@ -179,7 +179,7 @@ export default function QuestionDiscussionsPage() {
                                 !title.trim() ||
                                 !content.trim()
                             }
-                            className="rounded-lg bg-[#17D4C3] px-4 py-2 text-sm font-medium text-[#06131f] transition hover:bg-[#20e5d3] disabled:cursor-not-allowed disabled:opacity-50"
+                            className="rounded-lg bg-[#00E8C2] px-4 py-2 text-sm font-medium text-[#081423] transition hover:bg-[#00DDB9] disabled:cursor-not-allowed disabled:opacity-50"
                         >
                             {creating ? "Creating..." : "Create Discussion"}
                         </button>
@@ -192,21 +192,21 @@ export default function QuestionDiscussionsPage() {
                     {[1, 2, 3].map(item => (
                         <div
                             key={item}
-                            className="h-36 animate-pulse rounded-xl border border-white/5 bg-[#0E1B2E]"
+                            className="h-36 animate-pulse rounded-2xl border border-[#223A59] bg-[#14243C]"
                         />
                     ))}
                 </div>
             )}
 
             {isError && !isLoading && (
-                <div className="rounded-xl border border-red-500/20 bg-red-500/10 p-5 text-sm text-red-400">
+                <div className="rounded-2xl border border-red-500/20 bg-red-500/10 p-5 text-sm text-red-300">
                     Unable to load discussions.
                 </div>
             )}
 
             {!isLoading && !isError && discussions.length === 0 && (
-                <div className="flex flex-col items-center justify-center rounded-xl border border-white/10 bg-[#0E1B2E] px-6 py-14 text-center">
-                    <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-[#17D4C3]/10 text-[#17D4C3]">
+                <div className="flex flex-col items-center justify-center rounded-2xl border border-[#223A59] bg-[#14243C] px-6 py-14 text-center">
+                    <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-[#00E8C2]/10 text-[#00E8C2]">
                         <MessageCircle size={22} />
                     </div>
 
@@ -214,14 +214,14 @@ export default function QuestionDiscussionsPage() {
                         No discussions yet
                     </h2>
 
-                    <p className="mt-1 max-w-sm text-sm text-slate-400">
+                    <p className="mt-1 max-w-sm text-sm text-[#8CA3BF]">
                         Be the first learner to start a discussion about this question.
                     </p>
 
                     <button
                         type="button"
                         onClick={() => setCreateOpen(true)}
-                        className="mt-5 inline-flex items-center gap-2 rounded-lg bg-[#17D4C3] px-4 py-2 text-sm font-medium text-[#06131f] transition hover:bg-[#20e5d3]"
+                        className="mt-5 inline-flex items-center gap-2 rounded-lg bg-[#00E8C2] px-4 py-2 text-sm font-medium text-[#081423] transition hover:bg-[#00DDB9]"
                     >
                         <Plus size={16} />
                         Start Discussion

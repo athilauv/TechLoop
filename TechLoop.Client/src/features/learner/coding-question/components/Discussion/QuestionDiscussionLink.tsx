@@ -13,9 +13,13 @@ export default function QuestionDiscussionLink({
     const navigate = useNavigate();
 
     return (
-        <button type="button" onClick={() =>
-                navigate(`/learner/coding/questions/${questionId}/discussions`)}
-            className="inline-flex items-center gap-2 text-sm text-slate-500 transition hover:text-[#17D4C3] dark:text-slate-400">
+        <button
+            type="button"
+            onClick={() =>
+                navigate(`/learner/coding/questions/${questionId}/discussions`)
+            }
+            className="inline-flex items-center gap-2 text-sm text-[#8CA3BF] transition hover:text-[#00E8C2] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#00E8C2]/40 rounded"
+        >
             <MessageCircle size={16} />
             <span>
                 {count} {count === 1 ? "Discussion" : "Discussions"}

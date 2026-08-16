@@ -1,11 +1,11 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Authorization;
-using TechLoop.Application.DTOs.Auth;
-using TechLoop.Application.Interfaces.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
+using TechLoop.Application.DTOs.Auth;
 using TechLoop.Application.Features.Mentor.Commands.UpdateProfile;
 using TechLoop.Application.Features.Mentor.DTOs;
+using TechLoop.Application.Interfaces.Services;
 
 namespace TechLoop.Api.Controllers;
 
@@ -13,15 +13,18 @@ namespace TechLoop.Api.Controllers;
 [Route("[controller]")]
 public class AuthController : ControllerBase
 {
+    private readonly ICurrentUserService _currentUserService;
     private readonly IAuthService _authService;
     private readonly IMediator _mediator;
 
-    public AuthController(IAuthService authService, IMediator mediator)
+    public AuthController(IAuthService authService, IMediator mediator, ICurrentUserService currentUserService)
     {
         _authService = authService;
         _mediator = mediator;
+        _currentUserService = currentUserService;
     }
 
+   // LOGIN
     [EnableRateLimiting("login")]
     [HttpPost("login")]
     public async Task<IActionResult> Login(LoginRequest request)
@@ -34,6 +37,7 @@ public class AuthController : ControllerBase
         });
     }
 
+    // REGISTER
     [HttpPost("register")]
     public async Task<IActionResult> Register(RegisterRequest request)
     {
@@ -41,49 +45,69 @@ public class AuthController : ControllerBase
         return Created("", response);
     }
 
+  // REFRESH TOKEN
     [HttpPost("refresh")]
     public async Task<IActionResult> Refresh()
     {
-        var response = await _authService.RefreshTokenAsync(Request.Cookies["refreshToken"]);
+        var refreshToken = Request.Cookies["refreshToken"];
+        var response = await _authService.RefreshTokenAsync(refreshToken);
         SetAuthCookies(response);
-
         return Ok(new
         {
             response.Message
         });
     }
 
+   // LOGOUT
     [HttpPost("logout")]
     public async Task<IActionResult> Logout()
     {
         var refreshToken = Request.Cookies["refreshToken"];
         await _authService.LogoutAsync(refreshToken);
         DeleteAuthCookies();
+
         return Ok(new
         {
             Message = "Logged out successfully."
         });
     }
 
+   // CURRENT USER
+    [Authorize]
+    [HttpGet("me")]
+    public IActionResult GetCurrentUser()
+    {
+        return Ok(new
+        {
+            UserId = _currentUserService.UserId,
+            RoleId = (int)_currentUserService.Role,
+            Role = _currentUserService.Role.ToString()
+        });
+    }
+
+   // AUTH COOKIES
     private void SetAuthCookies(AuthResponse response)
     {
         Console.WriteLine($"Access Token Empty: {string.IsNullOrWhiteSpace(response.AccessToken)}");
         Console.WriteLine($"Refresh Token Empty: {string.IsNullOrWhiteSpace(response.RefreshToken)}");
-        Response.Cookies.Append("accessToken", response.AccessToken, new CookieOptions
-        {
-            HttpOnly = true,
-            Secure = false,
-            SameSite = SameSiteMode.Lax,
-            Expires = DateTimeOffset.UtcNow.AddMinutes(15)
-        });
 
-        Response.Cookies.Append("refreshToken", response.RefreshToken, new CookieOptions
-        {
-            HttpOnly = true,
-            Secure = false,
-            SameSite = SameSiteMode.Lax,
-            Expires = DateTimeOffset.UtcNow.AddDays(8)
-        });
+        Response.Cookies.Append("accessToken", response.AccessToken,
+            new CookieOptions
+            {
+                HttpOnly = true,
+                Secure = false,
+                SameSite = SameSiteMode.Lax,
+                Expires = DateTimeOffset.UtcNow.AddMinutes(15)
+            });
+
+        Response.Cookies.Append("refreshToken", response.RefreshToken,
+            new CookieOptions
+            {
+                HttpOnly = true,
+                Secure = false,
+                SameSite = SameSiteMode.Lax,
+                Expires = DateTimeOffset.UtcNow.AddDays(8)
+            });
     }
 
     private void DeleteAuthCookies()
@@ -99,10 +123,9 @@ public class AuthController : ControllerBase
         Response.Cookies.Delete("refreshToken", options);
     }
 
-    // Update mentor profile
+    // MENTOR PROFILE SETUP
     [HttpPut("update-profile/{email}")]
-    public async Task<IActionResult> UpdateProfile(string email,
-        [FromBody] UpdateMentorProfileRequest request)
+    public async Task<IActionResult> UpdateProfile(string email, [FromBody] UpdateMentorProfileRequest request)
     {
         var command = new UpdateProfileCommand(
             email,
@@ -118,7 +141,7 @@ public class AuthController : ControllerBase
         return Ok(result);
     }
 
-    // Change password - authenticated users only
+   // CHANGE PASSWORD
     [Authorize]
     [HttpPut("change-password")]
     public async Task<IActionResult> ChangePassword(ChangePasswordRequest request)
@@ -131,19 +154,18 @@ public class AuthController : ControllerBase
         });
     }
 
-    // Forgot password - public
+      // FORGOT PASSWORD
     [HttpPost("forgot-password")]
     public async Task<IActionResult> ForgotPassword(ForgotPasswordRequest request)
     {
         await _authService.ForgotPasswordAsync(request);
         return Ok(new
         {
-            Message =
-                "If an account exists with this email, a password reset link has been sent."
+            Message = "If an account exists with this email, a password reset link has been sent."
         });
     }
 
-    // Reset password - public, reset token required
+    // RESET PASSWORD\
     [HttpPut("reset-password")]
     public async Task<IActionResult> ResetPassword(ResetPasswordRequest request)
     {

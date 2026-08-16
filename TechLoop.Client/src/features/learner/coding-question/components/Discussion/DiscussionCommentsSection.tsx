@@ -1,8 +1,8 @@
-import {MessageCircle, Send,} from "lucide-react";
+import { MessageCircle, Send } from "lucide-react";
 import { useState } from "react";
-import {useQuery, useQueryClient,} from "@tanstack/react-query";
-import {createDiscussionComment, deleteDiscussionComment, getDiscussionComments, updateDiscussionComment} from "../../../../../api/discussion.api.ts";
-import type {DiscussionComment,} from "../../../../../types/discussion.types.ts";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { createDiscussionComment, deleteDiscussionComment, getDiscussionComments, updateDiscussionComment } from "../../../../../api/discussion.api.ts";
+import type { DiscussionComment } from "../../../../../types/discussion.types.ts";
 import DiscussionCommentList from "./DiscussionCommentList";
 
 interface DiscussionCommentsSectionProps {
@@ -24,7 +24,7 @@ export default function DiscussionCommentsSection({
         isLoading: loading,
         isError,
     } = useQuery<DiscussionComment[]>({
-        queryKey: ["discussion-comments", discussionId,],
+        queryKey: ["discussion-comments", discussionId],
         queryFn: () => getDiscussionComments(discussionId),
         enabled: discussionId > 0,
     });
@@ -34,7 +34,7 @@ export default function DiscussionCommentsSection({
     const displayError = error || queryError;
     async function refreshComments() {
         await queryClient.invalidateQueries({
-            queryKey: ["discussion-comments", discussionId,],
+            queryKey: ["discussion-comments", discussionId],
         });
     }
 
@@ -141,31 +141,31 @@ export default function DiscussionCommentsSection({
     const commentCount = comments.length;
 
     return (
-        <div className="mt-5 border-t border-[#1e3254] pt-4">
+        <div className="mt-5 border-t border-[#223A59] pt-4">
 
             {/* Comments Header */}
             <div className="flex items-center gap-2">
-                <MessageCircle size={15} className="text-[#17D4C3]"/>
+                <MessageCircle size={15} className="text-[#00E8C2]" />
 
                 <h3 className="text-xs font-semibold text-white">
                     Comments
                 </h3>
 
                 {!loading && (
-                    <span className="text-[10px] text-[#526d8e]">
+                    <span className="text-[10px] text-[#5C7394]">
                         {commentCount}
                     </span>
                 )}
             </div>
 
-            <p className="mt-1 text-[10px] text-[#7189a8]">
+            <p className="mt-1 text-[10px] text-[#8CA3BF]">
                 Join the discussion.
             </p>
 
             {/* Error */}
             {displayError && (
-                <div className="mt-3 rounded-lg border border-[#5c3038] bg-[#24151b] px-3 py-2">
-                    <p className="text-[10px] text-[#ef8b8b]">
+                <div className="mt-3 rounded-lg border border-red-500/20 bg-red-500/10 px-3 py-2">
+                    <p className="text-[10px] text-red-300">
                         {displayError}
                     </p>
                 </div>
@@ -177,18 +177,18 @@ export default function DiscussionCommentsSection({
                 <textarea
                     value={content} onChange={(event) => setContent(event.target.value)}
                     rows={3} maxLength={1000} disabled={submitting} placeholder="Write a comment..."
-                    className="w-full resize-none rounded-xl border border-[#1e3254] bg-[#06111f] px-3 py-2.5 text-xs leading-5 text-white outline-none placeholder:text-[#526d8e] focus:border-[#17D4C3]"
+                    className="w-full resize-none rounded-xl border border-[#223A59] bg-[#0E192A] px-3 py-2.5 text-xs leading-5 text-white outline-none placeholder:text-[#5C7394] focus:border-[#00E8C2] focus:ring-2 focus:ring-[#00E8C2]/25 disabled:opacity-50"
                 />
 
                 <div className="mt-1.5 flex items-center justify-between">
 
-                    <span className="text-[9px] text-[#526d8e]">
+                    <span className="text-[9px] text-[#5C7394]">
                         {content.length}/1000
                     </span>
 
                     <button type="button" onClick={() => void handleCreateComment()}
-                        disabled={submitting || !content.trim()}
-                        className="inline-flex items-center gap-1.5 rounded-lg bg-[#17D4C3] px-3 py-2 text-[10px] font-semibold text-[#06141f] transition hover:bg-[#35e2d3] disabled:cursor-not-allowed disabled:opacity-50">
+                            disabled={submitting || !content.trim()}
+                            className="inline-flex items-center gap-1.5 rounded-lg bg-[#00E8C2] px-3 py-2 text-[10px] font-semibold text-[#081423] transition hover:bg-[#00DDB9] disabled:cursor-not-allowed disabled:opacity-50">
                         <Send size={12} />
 
                         {submitting ? "Commenting..." : "Comment"}
@@ -202,8 +202,8 @@ export default function DiscussionCommentsSection({
 
                 {loading ? (
                     <div className="space-y-2">
-                        <div className="h-20 animate-pulse rounded-xl bg-[#0f1e35]" />
-                        <div className="h-16 animate-pulse rounded-xl bg-[#0f1e35]" />
+                        <div className="h-20 animate-pulse rounded-xl bg-[#101C30]" />
+                        <div className="h-16 animate-pulse rounded-xl bg-[#101C30]" />
                     </div>
                 ) : (
                     <DiscussionCommentList
@@ -211,7 +211,7 @@ export default function DiscussionCommentsSection({
                         currentUserId={currentUserId}
                         onReply={handleReply}
                         onEdit={handleEdit}
-                        onDelete={handleDelete}/>
+                        onDelete={handleDelete} />
                 )}
 
             </div>

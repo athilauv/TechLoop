@@ -25,7 +25,7 @@ export default function LearnerRoutes() {
             <Route index element={<LandingPage />}/>
 
             {/* Protected Learner Area */}
-            <Route element={<ProtectedRoute />}>
+            <Route element={<ProtectedRoute allowedRoles={["Learner"]} />}>
                 <Route element={<LearnerLayout />}>
                     <Route path="learning" element={<TechnologyCategoryPage />}/>
                     <Route path="learning/:technologySlug" element={<LearningPage />}/>

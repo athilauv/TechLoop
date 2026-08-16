@@ -53,20 +53,22 @@ public sealed class TopicContributionRepository : ITopicContributionRepository
     }
 
     // Reviews a contribution
-    public async Task<bool> ReviewAsync(int contributionId, short status, string? reviewNotes, Guid reviewedBy, CancellationToken cancellationToken)
+    public async Task<bool> ReviewAsync(int contributionId, short status, string? reviewNotes, int? position, int? parentSubTopicId, Guid reviewedBy, CancellationToken cancellationToken)
     {
-        const string sql = @"CALL sp_review_topic_contribution(@ContributionId,    @Status, @ReviewNotes, @ReviewedBy,@ReviewedAt);";
+        const string sql = @"CALL sp_review_topic_contribution( @ContributionId, @Status, @ReviewNotes, @Position, @ParentSubTopicId, @ReviewedBy, @ReviewedAt);";
         using var connection = _context.CreateConnection();
-        var rows = await connection.ExecuteAsync(new CommandDefinition(
-                sql,
+        var rows = await connection.ExecuteAsync(
+            new CommandDefinition(sql,
                 new
                 {
                     ContributionId = contributionId,
                     Status = status,
                     ReviewNotes = reviewNotes,
+                    Position = position,
+                    ParentSubTopicId = parentSubTopicId,
                     ReviewedBy = reviewedBy,
                     ReviewedAt = DateTime.UtcNow
-                },
+                }, 
                 cancellationToken: cancellationToken));
 
         return rows > 0;
@@ -144,6 +146,20 @@ public sealed class TopicContributionRepository : ITopicContributionRepository
                 new
                 {
                     MentorId = mentorId
+                },
+                cancellationToken: cancellationToken));
+    }
+    
+    public async Task<TopicContributionResponse?>
+        GetMentorContributionByIdAsync(Guid mentorId, int contributionId, CancellationToken cancellationToken)
+    {
+        const string sql = @"SELECT * FROM fn_get_mentor_topic_contribution_by_id( @MentorId, @ContributionId);";
+        using var connection = _context.CreateConnection();
+        return await connection.QuerySingleOrDefaultAsync<TopicContributionResponse>(new CommandDefinition(sql,
+                new
+                {
+                    MentorId = mentorId,
+                    ContributionId = contributionId
                 },
                 cancellationToken: cancellationToken));
     }

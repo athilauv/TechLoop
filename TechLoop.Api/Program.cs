@@ -126,27 +126,26 @@ builder.Services
                     $"User: {context.Principal?.Identity?.Name}"
                 );
 
-                Console.WriteLine($"NameIdentifier: {context.Principal?.FindFirst(ClaimTypes.NameIdentifier)?.Value}");
+                Console.WriteLine(
+                    $"NameIdentifier: {context.Principal?.FindFirst(ClaimTypes.NameIdentifier)?.Value}"
+                );
+
+                Console.WriteLine(
+                    $"Role: {context.Principal?.FindFirst(ClaimTypes.Role)?.Value}"
+                );
 
                 return Task.CompletedTask;
             },
 
             OnChallenge = context =>
             {
-                Console.WriteLine($"JWT Challenge: {context.Error}");
-                Console.WriteLine($"JWT Error Description: {context.ErrorDescription}");
-                return Task.CompletedTask;
-            }
-        };
+                Console.WriteLine(
+                    $"JWT Challenge: {context.Error}"
+                );
 
-        options.Events = new JwtBearerEvents
-        {
-            OnMessageReceived = context =>
-            {
-                if (string.IsNullOrEmpty(context.Token))
-                {
-                    context.Token = context.Request.Cookies["accessToken"];
-                }
+                Console.WriteLine(
+                    $"JWT Error Description: {context.ErrorDescription}"
+                );
 
                 return Task.CompletedTask;
             }

@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { MessageCircle } from "lucide-react";
+import { MessageCircle, Play, Loader2, ChevronRight } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { toast } from "react-toastify";
 import axios from "axios";
@@ -104,7 +104,7 @@ const CodingQuestionPage = () => {
     if (!id || id <= 0) {
         return (
             <div className="p-6">
-                <div className="rounded-xl border border-red-200 bg-red-50 p-5 text-sm text-red-600 dark:border-red-900/50 dark:bg-red-950/20 dark:text-red-400">
+                <div className="rounded-2xl border border-red-500/20 bg-red-500/10 p-5 text-sm text-red-300">
                     Invalid coding question.
                 </div>
             </div>
@@ -114,11 +114,11 @@ const CodingQuestionPage = () => {
     if (isLoading) {
         return (
             <div className="space-y-4">
-                <div className="h-24 animate-pulse rounded-xl bg-slate-100 dark:bg-slate-800" />
+                <div className="h-24 animate-pulse rounded-2xl bg-[#14243C]" />
 
                 <div className="grid gap-5 lg:grid-cols-2">
-                    <div className="h-[500px] animate-pulse rounded-xl bg-slate-100 dark:bg-slate-800" />
-                    <div className="h-[500px] animate-pulse rounded-xl bg-slate-100 dark:bg-slate-800" />
+                    <div className="h-[500px] animate-pulse rounded-2xl bg-[#14243C]" />
+                    <div className="h-[500px] animate-pulse rounded-2xl bg-[#14243C]" />
                 </div>
             </div>
         );
@@ -126,7 +126,7 @@ const CodingQuestionPage = () => {
 
     if (questionError || !question) {
         return (
-            <div className="rounded-xl border border-red-200 bg-red-50 p-5 text-sm text-red-600 dark:border-red-900/50 dark:bg-red-950/20 dark:text-red-400">
+            <div className="rounded-2xl border border-red-500/20 bg-red-500/10 p-5 text-sm text-red-300">
                 Unable to load this coding question.
             </div>
         );
@@ -136,25 +136,14 @@ const CodingQuestionPage = () => {
         <div className="space-y-5">
             <CodingQuestionHeader question={question} />
 
-            <div className="flex items-center justify-between rounded-xl border border-slate-200 bg-white px-4 py-3 dark:border-slate-800 dark:bg-slate-900">
-                <button type="button" onClick={openDiscussions}
-                    className="inline-flex items-center gap-2 text-sm text-slate-500 transition hover:text-[#17D4C3] dark:text-slate-400">
-                    <MessageCircle size={16} />
-
-                    <span>
-                        {discussionsLoading ? "Discussions" : `${discussionCount} ${discussionCount === 1 ? "Discussion" : "Discussions"}`}
-                    </span>
-                </button>
-            </div>
-
             <div className="grid gap-5 xl:grid-cols-2">
                 <div className="min-w-0 space-y-5">
-                    <div className="rounded-xl border border-slate-200 bg-white p-5 dark:border-slate-800 dark:bg-slate-900">
+                    <div className="rounded-2xl border border-[#223A59] bg-[#14243C] p-5">
                         <ProblemDescription question={question} />
                     </div>
 
-                    <div className="rounded-xl border border-slate-200 bg-white p-5 dark:border-slate-800 dark:bg-slate-900">
-                        <h2 className="mb-4 text-base font-semibold text-slate-900 dark:text-white">
+                    <div className="rounded-2xl border border-[#223A59] bg-[#14243C] p-5">
+                        <h2 className="mb-4 text-base font-semibold text-white">
                             Examples
                         </h2>
 
@@ -162,12 +151,12 @@ const CodingQuestionPage = () => {
                     </div>
 
                     {question.explanation && (
-                        <div className="rounded-xl border border-slate-200 bg-white p-5 dark:border-slate-800 dark:bg-slate-900">
-                            <h2 className="mb-3 text-base font-semibold text-slate-900 dark:text-white">
+                        <div className="rounded-2xl border border-[#223A59] bg-[#14243C] p-5">
+                            <h2 className="mb-3 text-base font-semibold text-white">
                                 Explanation
                             </h2>
 
-                            <div className="whitespace-pre-wrap text-sm leading-7 text-slate-600 dark:text-slate-300">
+                            <div className="whitespace-pre-wrap text-sm leading-7 text-[#B9C8DC]">
                                 {question.explanation}
                             </div>
                         </div>
@@ -177,20 +166,37 @@ const CodingQuestionPage = () => {
                 <div className="min-w-0">
                     <CodingEditor starterCode={starterCode} onCodeChange={setCode}/>
 
-                    <div className="mt-3 flex items-center justify-between">
-                        <span className="truncate text-xs text-slate-500 dark:text-slate-400">
+                    {/* Action bar — grouped console-style control strip */}
+                    <div className="mt-3 flex items-center justify-between gap-3 rounded-xl border border-[#223A59] bg-[#101C30] px-4 py-3">
+                        <span className="min-w-0 truncate text-xs text-[#5C7394]">
                             {code.length > 0 ? `${code.length} characters` : "Start writing your solution"}
                         </span>
 
-                        <div className="flex gap-2">
-                            <button type="button" onClick={handleRunCode} disabled={isSubmitting}
-                                className="rounded-lg border border-slate-200 px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800">
-                                Run Code
+                        <div className="flex shrink-0 items-center gap-2">
+                            <button
+                                type="button"
+                                onClick={handleRunCode}
+                                disabled={isSubmitting}
+                                className="inline-flex items-center gap-1.5 rounded-lg border border-[#223A59] bg-transparent px-3.5 py-2 text-sm font-medium text-[#B9C8DC] transition hover:border-[#00E8C2]/30 hover:bg-[#14243C] hover:text-white active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:border-[#223A59] disabled:hover:bg-transparent"
+                            >
+                                <Play size={14} />
+                                Run
                             </button>
 
-                            <button type="button" onClick={handleSubmit} disabled={!code.trim() || isSubmitting}
-                                className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50">
-                                {isSubmitting ? "Submitting..." : "Submit"}
+                            <button
+                                type="button"
+                                onClick={() => void handleSubmit()}
+                                disabled={!code.trim() || isSubmitting}
+                                className="inline-flex min-w-[104px] items-center justify-center gap-1.5 rounded-lg bg-[#00E8C2] px-4 py-2 text-sm font-semibold text-[#081423] shadow-[0_1px_0_0_rgba(255,255,255,0.15)_inset] transition hover:bg-[#00DDB9] active:scale-[0.98] disabled:cursor-not-allowed disabled:bg-[#00E8C2]/30 disabled:text-[#081423]/50 disabled:shadow-none"
+                            >
+                                {isSubmitting ? (
+                                    <>
+                                        <Loader2 size={14} className="animate-spin" />
+                                        Submitting
+                                    </>
+                                ) : (
+                                    "Submit"
+                                )}
                             </button>
                         </div>
                     </div>
@@ -198,6 +204,25 @@ const CodingQuestionPage = () => {
             </div>
 
             <SubmissionResult submission={null} />
+
+            {/* Discussion — secondary, bottom-of-page action */}
+            <button
+                type="button"
+                onClick={openDiscussions}
+                className="group flex w-full items-center justify-between rounded-xl border border-[#223A59] bg-[#101C30] px-4 py-3 text-left transition hover:border-[#00E8C2]/25 hover:bg-[#14243C] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#00E8C2]/40"
+            >
+                <span className="inline-flex items-center gap-2 text-sm text-[#8CA3BF] transition group-hover:text-white">
+                    <MessageCircle size={16} />
+                    {discussionsLoading
+                        ? "Discussions"
+                        : `${discussionCount} ${discussionCount === 1 ? "Discussion" : "Discussions"}`}
+                </span>
+
+                <ChevronRight
+                    size={16}
+                    className="text-[#5C7394] transition group-hover:translate-x-0.5 group-hover:text-[#00E8C2]"
+                />
+            </button>
         </div>
     );
 };
