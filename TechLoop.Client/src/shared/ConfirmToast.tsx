@@ -1,10 +1,14 @@
-import { LogOut, X } from "lucide-react";
+import {
+    CircleAlert,
+    X,
+} from "lucide-react";
 
 interface ConfirmToastProps {
     title: string;
     message: string;
     onConfirm: () => void;
     onCancel: () => void;
+    confirmLabel?: string;
 }
 
 export default function ConfirmToast({
@@ -12,13 +16,18 @@ export default function ConfirmToast({
                                          message,
                                          onConfirm,
                                          onCancel,
+                                         confirmLabel = "Confirm",
                                      }: ConfirmToastProps) {
+
     return (
         <div className="w-[340px] rounded-xl border border-white/10 bg-[#0E192A] p-4 shadow-2xl">
+
             <div className="flex items-start gap-3">
 
-                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-red-500/10 text-red-400">
-                    <LogOut size={18} />
+                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[#17D4C3]/10 text-[#17D4C3]">
+
+                    <CircleAlert size={18} />
+
                 </div>
 
                 <div className="min-w-0 flex-1">
@@ -26,6 +35,7 @@ export default function ConfirmToast({
                     <div className="flex items-start justify-between gap-3">
 
                         <div>
+
                             <p className="text-sm font-semibold text-white">
                                 {title}
                             </p>
@@ -33,12 +43,21 @@ export default function ConfirmToast({
                             <p className="mt-1 text-xs leading-5 text-slate-400">
                                 {message}
                             </p>
+
                         </div>
 
                         <button
                             type="button"
                             onClick={onCancel}
-                            className="shrink-0 rounded-md p-1 text-slate-500 transition hover:bg-white/5 hover:text-white"
+                            className="
+                                shrink-0
+                                rounded-md
+                                p-1
+                                text-slate-500
+                                transition
+                                hover:bg-white/5
+                                hover:text-white
+                            "
                         >
                             <X size={15} />
                         </button>
@@ -50,7 +69,19 @@ export default function ConfirmToast({
                         <button
                             type="button"
                             onClick={onCancel}
-                            className="rounded-lg border border-white/10 px-3 py-1.5 text-xs font-medium text-slate-400 transition hover:bg-white/5 hover:text-white"
+                            className="
+                                rounded-lg
+                                border
+                                border-white/10
+                                px-3
+                                py-1.5
+                                text-xs
+                                font-medium
+                                text-slate-400
+                                transition
+                                hover:bg-white/5
+                                hover:text-white
+                            "
                         >
                             Cancel
                         </button>
@@ -58,9 +89,19 @@ export default function ConfirmToast({
                         <button
                             type="button"
                             onClick={onConfirm}
-                            className="rounded-lg bg-red-500 px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-red-400"
+                            className="
+                                rounded-lg
+                                bg-[#17D4C3]
+                                px-3
+                                py-1.5
+                                text-xs
+                                font-semibold
+                                text-[#06131F]
+                                transition
+                                hover:bg-[#20E2D0]
+                            "
                         >
-                            Log out
+                            {confirmLabel}
                         </button>
 
                     </div>
@@ -68,6 +109,7 @@ export default function ConfirmToast({
                 </div>
 
             </div>
+
         </div>
     );
 }

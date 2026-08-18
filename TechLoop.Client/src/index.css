@@ -49,6 +49,83 @@
   background: rgba(23,212,195,.65);
   background-clip: content-box;
 }
+
+/* ==========================================================================
+   Content Studio — Theme Tokens
+   Scoped under .content-studio-theme so this never leaks into other areas
+   of the app. Values sourced directly from the Color Theme specification.
+   ========================================================================== */
+
+.content-studio-theme {
+  /* Backgrounds */
+  --cs-bg-primary: #0e192a;
+  --cs-bg-primary-deep: #081423;
+  --cs-bg-surface: #12233b;
+  --cs-bg-card: #14243c;
+  --cs-bg-input: #101c30;
+
+  /* Brand / Accent */
+  --cs-accent: #00e8c2;
+  --cs-accent-hover: #00ddb9;
+  --cs-accent-subtle: rgba(0, 232, 194, 0.1);
+  --cs-accent-border: rgba(0, 232, 194, 0.35);
+  --cs-accent-on: #081423; /* text color placed on top of accent surfaces */
+
+  /* Typography */
+  --cs-text-primary: #ffffff;
+  --cs-text-secondary: #8ca3bf;
+  --cs-text-muted: #5c7394;
+
+  /* Borders */
+  --cs-border: #223a59;
+
+  /* Status: danger (delete / errors) */
+  --cs-danger: #f87171;
+  --cs-danger-subtle: rgba(248, 113, 113, 0.1);
+  --cs-danger-border: rgba(248, 113, 113, 0.35);
+
+  /* Status: warning (draft / pending) */
+  --cs-warning: #fbbf24;
+  --cs-warning-subtle: rgba(251, 191, 36, 0.1);
+  --cs-warning-border: rgba(251, 191, 36, 0.35);
+
+  /* Radii */
+  --cs-radius-card: 18px;
+  --cs-radius-control: 10px;
+
+  /* Motion */
+  --cs-transition-fast: 150ms ease;
+
+  background-color: var(--cs-bg-primary);
+  color: var(--cs-text-primary);
+}
+
+.content-studio-theme ::selection {
+  background-color: var(--cs-accent-subtle);
+  color: var(--cs-text-primary);
+}
+
+/* Thin scrollbars for the nested tree / panels, consistent with the
+   "subtle contrast, no heavy shadows" direction of the spec. */
+.content-studio-theme .cs-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: var(--cs-border) transparent;
+}
+
+.content-studio-theme .cs-scroll::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.content-studio-theme .cs-scroll::-webkit-scrollbar-thumb {
+  background-color: var(--cs-border);
+  border-radius: 8px;
+}
+
+.content-studio-theme .cs-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+
 @theme {
   --color-background: #0a0e17;
   --color-surface: #131925;

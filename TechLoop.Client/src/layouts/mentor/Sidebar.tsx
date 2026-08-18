@@ -5,7 +5,6 @@ import {
     MessagesSquare,
     Cpu,
     BookOpen,
-    Layers3,
     GraduationCap,
     Code2,
     Bell,
@@ -43,14 +42,9 @@ const contentItems = [
         icon: Cpu,
     },
     {
-        label: "Topics",
-        path: "/mentor/topics",
+        label: "Content",
+        path: "/mentor/content",
         icon: BookOpen,
-    },
-    {
-        label: "SubTopics",
-        path: "/mentor/subtopics",
-        icon: Layers3,
     },
     {
         label: "Curriculum",
@@ -97,12 +91,8 @@ function SidebarItem({
             className={({ isActive }) =>
                 [
                     "group flex items-center rounded-lg px-3 py-2.5 text-sm font-medium transition",
-                    collapsed
-                        ? "justify-center"
-                        : "gap-3",
-                    isActive
-                        ? "bg-white/10 text-white"
-                        : "text-slate-400 hover:bg-white/5 hover:text-white",
+                    collapsed ? "justify-center" : "gap-3",
+                    isActive ? "bg-white/10 text-white" : "text-slate-400 hover:bg-white/5 hover:text-white",
                 ].join(" ")
             }
             title={collapsed ? label : undefined}
