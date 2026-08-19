@@ -1,122 +1,254 @@
-import { useState } from "react";
+import { ArrowLeft, CheckCircle2, ClipboardCheck } from "lucide-react";
+import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { useQuery } from "@tanstack/react-query";
-
+import Breadcrumb from "../../../../shared/Breadcrumb.tsx";
+import Button from "../../../../shared/Button.tsx";
+import EmptyState from "../../../../shared/EmptyState.tsx";
+import LoadingSpinner from "../../../../shared/LoadingSpinner.tsx";
 import {
     getMentorTopicContributionById,
-} from "../../../../api/topicContribution.api.ts";
-
+    reviewTopicContribution,
+} from "../../../../api/mentorTopicContribution.api.ts";
 import MentorContributionDetails from "../components/MentorContributionDetails.tsx";
-
 import ReviewContributionModal from "../components/ReviewContributionModal.tsx";
+import type {
+    ReviewTopicContributionRequest,
+    TopicContributionResponse,
+} from "../../../../types/topicContribution.types.ts";
 
 export default function MentorTopicContributionDetailsPage() {
-    const { id } = useParams();
+    const { id } = useParams<{ id: string }>();
     const navigate = useNavigate();
 
-    const [showReviewModal, setShowReviewModal] =
-        useState(false);
-
     const contributionId = Number(id);
+    const isValidId =
+        !!id &&
+        Number.isInteger(contributionId) &&
+        contributionId > 0;
 
-    const {
-        data: contribution,
-        isLoading,
-        isError,
-    } = useQuery({
-        queryKey: [
-            "mentor-topic-contribution",
-            contributionId,
-        ],
-        queryFn: () =>
-            getMentorTopicContributionById(
-                contributionId
-            ),
-        enabled:
-            Number.isInteger(contributionId) &&
-            contributionId > 0,
-    });
+    const [contribution, setContribution] =
+        useState<TopicContributionResponse | null>(null);
 
-    if (
-        !Number.isInteger(contributionId) ||
-        contributionId <= 0
-    ) {
-        return (
-            <div className="rounded-xl border border-red-200 bg-red-50 p-6">
-                Invalid contribution ID.
-            </div>
-        );
-    }
+    const [loading, setLoading] = useState(isValidId);
+    const [reviewing, setReviewing] = useState(false);
+    const [modalOpen, setModalOpen] = useState(false);
+    const [error, setError] = useState<string | null>(
+        isValidId ? null : "Invalid contribution ID."
+    );
+    const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
-    if (isLoading) {
-        return (
-            <div className="flex min-h-[400px] items-center justify-center">
-                <div className="h-8 w-8 animate-spin rounded-full border-2 border-slate-300 border-t-slate-900" />
-            </div>
-        );
-    }
+    useEffect(() => {
+        if (!isValidId) {
+            return;
+        }
 
-    if (isError || !contribution) {
-        return (
-            <div className="rounded-xl border border-slate-200 bg-white p-8 text-center">
-                <h2 className="text-lg font-semibold text-slate-900">
-                    Contribution not found
-                </h2>
+        let cancelled = false;
 
-                <p className="mt-2 text-sm text-slate-500">
-                    This contribution may no longer be available for review.
-                </p>
+        const loadContribution = async () => {
+            try {
+                const data =
+                    await getMentorTopicContributionById(contributionId);
 
-                <button
-                    type="button"
-                    onClick={() =>
-                        navigate(
-                            "/mentor/topic-contributions"
-                        )
-                    }
-                    className="mt-5 rounded-lg bg-slate-900 px-4 py-2 text-sm font-medium text-white"
-                >
-                    Back to Pending Contributions
-                </button>
-            </div>
-        );
-    }
+                if (!cancelled) {
+                    setContribution(data);
+                    setError(null);
+                }
+            } catch {
+                if (!cancelled) {
+                    setError("Unable to load the contribution.");
+                }
+            } finally {
+                if (!cancelled) {
+                    setLoading(false);
+                }
+            }
+        };
 
-    const handleReviewSuccess = () => {
-        setShowReviewModal(false);
+        void loadContribution();
 
-        navigate("/mentor/topic-contributions", {
-            replace: true,
-        });
+        return () => {
+            cancelled = true;
+        };
+    }, [contributionId, isValidId]);
+
+    const handleReview = async (
+        request: ReviewTopicContributionRequest
+    ) => {
+        if (!isValidId) {
+            return;
+        }
+
+        try {
+            setReviewing(true);
+            setError(null);
+            setSuccessMessage(null);
+
+            await reviewTopicContribution(contributionId, request);
+
+            const updated =
+                await getMentorTopicContributionById(contributionId);
+
+            setContribution(updated);
+            setModalOpen(false);
+
+            setSuccessMessage(
+                request.status === 2
+                    ? "Contribution approved successfully."
+                    : "Contribution rejected."
+            );
+        } catch {
+            setError("Unable to review the contribution.");
+        } finally {
+            setReviewing(false);
+        }
     };
 
-    return (
-        <section className="mx-auto w-full max-w-5xl">
-            <MentorContributionDetails
-                contribution={contribution}
-                onBack={() =>
-                    navigate(
-                        "/mentor/topic-contributions"
-                    )
-                }
-                onReview={() =>
-                    setShowReviewModal(true)
+    if (!isValidId) {
+        return (
+            <EmptyState
+                icon={<ClipboardCheck size={24} />}
+                title="Invalid contribution ID"
+                description="The requested contribution ID is invalid."
+                action={
+                    <Button
+                        variant="secondary"
+                        icon={<ArrowLeft size={15} />}
+                        onClick={() =>
+                            navigate("/mentor/topic-contributions")
+                        }
+                    >
+                        Back to Contributions
+                    </Button>
                 }
             />
+        );
+    }
 
-            {showReviewModal && (
-                <ReviewContributionModal
-                    contributionId={
-                        contribution.id
-                    }
-                    onClose={() =>
-                        setShowReviewModal(false)
-                    }
-                    onSuccess={
-                        handleReviewSuccess
-                    }
+    if (loading) {
+        return (
+            <LoadingSpinner
+                size="lg"
+                label="Loading contribution..."
+                fullHeight
+            />
+        );
+    }
+
+    if (error || !contribution) {
+        return (
+            <EmptyState
+                icon={<ClipboardCheck size={24} />}
+                title="Contribution not found"
+                description={
+                    error ??
+                    "The requested contribution could not be loaded."
+                }
+                action={
+                    <Button
+                        variant="secondary"
+                        icon={<ArrowLeft size={15} />}
+                        onClick={() =>
+                            navigate("/mentor/topic-contributions")
+                        }
+                    >
+                        Back to Contributions
+                    </Button>
+                }
+            />
+        );
+    }
+
+    const canReview = contribution.status === 1;
+
+    return (
+        <div className="content-studio-theme flex h-full min-h-0 flex-col">
+            <div className="shrink-0 border-b border-[var(--cs-border)] px-7 py-5">
+                <Breadcrumb
+                    items={[
+                        { label: "Mentor" },
+                        {
+                            label: "Topic Contributions",
+                            onClick: () =>
+                                navigate(
+                                    "/mentor/topic-contributions"
+                                ),
+                        },
+                        {
+                            label: contribution.title,
+                        },
+                    ]}
                 />
-            )}
-        </section>
+
+                <div className="mt-4 flex flex-wrap items-center justify-between gap-4">
+                    <div>
+                        <h1 className="text-2xl font-semibold text-[var(--cs-text-primary)]">
+                            Contribution Review
+                        </h1>
+
+                        <p className="mt-1 text-sm text-[var(--cs-text-secondary)]">
+                            Review the learner-submitted content before it
+                            moves into the content management workflow.
+                        </p>
+                    </div>
+
+                    <div className="flex items-center gap-3">
+                        <Button
+                            variant="secondary"
+                            size="sm"
+                            icon={<ArrowLeft size={14} />}
+                            onClick={() =>
+                                navigate(
+                                    "/mentor/topic-contributions"
+                                )
+                            }
+                        >
+                            Back
+                        </Button>
+
+                        {canReview && (
+                            <Button
+                                size="sm"
+                                icon={<ClipboardCheck size={14} />}
+                                onClick={() => setModalOpen(true)}
+                            >
+                                Review Contribution
+                            </Button>
+                        )}
+                    </div>
+                </div>
+
+                {successMessage && (
+                    <div
+                        className="
+                            mt-4 flex items-center gap-2
+                            rounded-[var(--cs-radius-control)]
+                            border border-[var(--cs-accent-border)]
+                            bg-[var(--cs-accent-subtle)]
+                            px-4 py-2.5
+                            text-sm text-[var(--cs-accent)]
+                        "
+                    >
+                        <CheckCircle2 size={15} />
+                        {successMessage}
+                    </div>
+                )}
+            </div>
+
+            <div className="min-h-0 flex-1 overflow-y-auto p-7">
+                <div className="mx-auto max-w-5xl">
+                    <MentorContributionDetails
+                        contribution={contribution}
+                    />
+                </div>
+            </div>
+
+            <ReviewContributionModal
+                key={modalOpen ? "open" : "closed"}
+                open={modalOpen}
+                loading={reviewing}
+                onClose={() => setModalOpen(false)}
+                onSubmit={handleReview}
+            />
+        </div>
     );
 }

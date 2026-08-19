@@ -1,5 +1,4 @@
-﻿using TechLoop.Application.Features.Technologies.Commands.CreateTechnology;
-using TechLoop.Application.Features.Technologies.DTOs;
+﻿using TechLoop.Application.Features.Technologies.DTOs;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -8,7 +7,6 @@ using TechLoop.Application.Features.SubTopics.Commands.CreateSubTopic;
 using TechLoop.Application.Features.SubTopics.Commands.DeleteSubTopic;
 using TechLoop.Application.Features.SubTopics.Commands.UpdateSubTopic;
 using TechLoop.Application.Features.SubTopics.DTOs;
-using TechLoop.Application.Features.Technologies.Commands.DeleteTechnology;
 using TechLoop.Application.Features.Technologies.Commands.UpdateTechnology;
 using TechLoop.Application.Features.Topics.Commands.CreateTopic;
 using TechLoop.Application.Features.Topics.Commands.DeleteTopic;
@@ -21,15 +19,10 @@ using TechLoop.Application.Features.Questions.Commands.DeleteQuestion;
 using TechLoop.Application.Features.Questions.Commands.PublishQuestion;
 using TechLoop.Application.Features.Questions.DTOs;
 using TechLoop.Application.Features.Questions.Queries.GetAllQuestions.Mentor;
-using TechLoop.Application.Features.Questions.Queries.GetAllQuestions.Mentor;
 using TechLoop.Application.Features.Questions.Queries.GetQuestionById.Mentor;
 using TechLoop.Application.Features.SubTopics.Commands.PublishSubTopic;
 using TechLoop.Application.Features.Technologies.Commands.PublishTechnology;
 using TechLoop.Application.Features.Topics.Commands.PublishTopic;
-using TechLoop.Application.Features.Technologies.DTOs;
-using TechLoop.Application.Features.Technologies.Queries.GetAllTechnologies.Mentor;
-using TechLoop.Application.Features.Technologies.Queries.GetTechnologyById.Mentor;
-using TechLoop.Application.Features.Topics.DTOs;
 using TechLoop.Application.Features.Topics.Queries.GetAllTopics.Mentor;
 using TechLoop.Application.Features.Topics.Queries.GetTopicById.Mentor;
 using TechLoop.Application.Features.MCQ.Commands.CreateMcqOption;
@@ -52,11 +45,11 @@ using TechLoop.Application.Features.Discussions.Commands.UnpinDiscussion;
 using TechLoop.Application.Features.Discussions.Queries.GetDiscussionById;
 using TechLoop.Application.Features.Discussions.Queries.GetDiscussions;
 using TechLoop.Application.Features.MCQ.Queries.GetMcqOptionsByQuestionQuery.Mentor;
-using TechLoop.Application.Features.Mentor.Commands.UpdateProfile;
-using TechLoop.Application.Features.Mentor.DTOs;
+using TechLoop.Application.Features.Mentor.Commands.UpdateMentorProfile;
 using TechLoop.Application.Features.Mentor.Queries.Mentor.GetMyProfile;
 using TechLoop.Application.Features.Submissions.Commands.UpdateSubmissionResult;
 using TechLoop.Application.Features.Submissions.DTOs;
+using TechLoop.Application.Features.SubTopics.Queries.GetSubTopicById.Mentor;
 using TechLoop.Application.Features.SubTopics.Queries.Mentor.GetUnpublishedSubTopics;
 using TechLoop.Application.Features.TopicContributions.Commands.ReviewTopicContribution;
 using TechLoop.Application.Features.TopicContributions.DTOs;
@@ -141,7 +134,8 @@ public sealed class MentorController : ControllerBase
             request.Example,
             request.ExampleType,
             request.Slug,
-            request.Position);
+            request.Position,
+            request.ShiftPositions);
 
         var result = await _mediator.Send(command, cancellationToken);
 
@@ -187,7 +181,8 @@ public sealed class MentorController : ControllerBase
             request.Slug,
             request.Example,
             request.ExampleType,
-            request.Position);
+            request.Position,
+            request.ShiftPositions);
 
         var result = await _mediator.Send(command, cancellationToken);
         return Ok(result);
@@ -203,11 +198,13 @@ public sealed class MentorController : ControllerBase
 
     // Update Subtopic
     [HttpPut("subtopics/{id:int}")]
-    public async Task<ActionResult<UpdateSubTopicResponse>> UpdateSubTopic(int id,
-        [FromBody] UpdateSubTopicRequest request, CancellationToken cancellationToken)
+    public async Task<ActionResult<UpdateSubTopicResponse>> UpdateSubTopic(
+        int id,
+        [FromBody] UpdateSubTopicRequest request,
+        CancellationToken cancellationToken)
     {
         var command = new UpdateSubTopicCommand(
-            id = id,
+            id,
             request.TopicId,
             request.ParentSubTopicId,
             request.Title,
@@ -216,9 +213,11 @@ public sealed class MentorController : ControllerBase
             request.Slug,
             request.Example,
             request.ExampleType,
-            request.Position);
+            request.Position,
+            request.ShiftPositions);
 
         var result = await _mediator.Send(command, cancellationToken);
+
         return Ok(result);
     }
 
@@ -228,6 +227,14 @@ public sealed class MentorController : ControllerBase
     {
         var command = new DeleteSubTopicCommand(id);
         var result = await _mediator.Send(command, cancellationToken);
+        return Ok(result);
+    }
+    
+    // Get SubTopic By Id
+    [HttpGet("subtopics/{id:int}")]
+    public async Task<ActionResult<MentorSubTopicResponse>> GetSubTopicById(int id, CancellationToken cancellationToken)
+    {
+        var result = await _mediator.Send(new GetMentorSubTopicByIdQuery(id), cancellationToken);
         return Ok(result);
     }
     
@@ -268,8 +275,7 @@ public sealed class MentorController : ControllerBase
 
     // update publish
     [HttpPatch("questions/{id:int}/publish")]
-    public async Task<ActionResult<PublishQuestionResponse>> PublishQuestion(int id,
-        CancellationToken cancellationToken)
+    public async Task<ActionResult<PublishQuestionResponse>> PublishQuestion(int id, CancellationToken cancellationToken)
     {
         var result = await _mediator.Send(new PublishQuestionCommand(id), cancellationToken);
         return Ok(result);
@@ -491,7 +497,7 @@ public sealed class MentorController : ControllerBase
     }
     
     // Get all contributions of a technology (Admin / Mentor)
-    [HttpGet("technology/{technologyId:int}")]
+    [HttpGet("topic-contributions/technology/{technologyId:int}")]
     public async Task<IActionResult> GetTechnologyContributions(int technologyId, CancellationToken cancellationToken)
     {
         var result = await _mediator.Send(new GetTechnologyTopicContributionsQuery(
@@ -505,7 +511,7 @@ public sealed class MentorController : ControllerBase
     }
 
     // Review a contribution (Approve / Reject / Publish)
-    [HttpPut("topic-contribution/{id:int}/review")]
+    [HttpPut("topic-contributions/{id:int}/review")]
     public async Task<IActionResult> ReviewContribution(int id, [FromBody] ReviewTopicContributionRequest request, CancellationToken cancellationToken)
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
@@ -529,12 +535,21 @@ public sealed class MentorController : ControllerBase
     [HttpGet("profile")]
     public async Task<IActionResult> GetMyProfile()
     {
-        var result = await _mediator.Send( new GetMyProfileQuery());
+        var result = await _mediator.Send(new GetMyProfileQuery());
         if (result is null)
             return NotFound();
 
         return Ok(result);
     }
+    
+    // Update profile
+    [HttpPut("profile")]
+    public async Task<IActionResult> UpdateMyProfile( [FromBody] UpdateMentorProfileCommand command, CancellationToken cancellationToken)
+    {
+        var result = await _mediator.Send(command, cancellationToken);
+        return Ok(result);
+    }
+    
     
     // Returns all discussions.
     [HttpGet("discussions")]
@@ -568,7 +583,7 @@ public sealed class MentorController : ControllerBase
     }
     
     //get pending contribution
-    [HttpGet("pending-contribution")]
+    [HttpGet("topic-contributions/pending")]
     public async Task<IActionResult> GetPendingContributions(CancellationToken cancellationToken)
     {
         var mentorIdValue = User.FindFirstValue(ClaimTypes.NameIdentifier);
@@ -581,7 +596,7 @@ public sealed class MentorController : ControllerBase
         return Ok(result);
     }
     
-    [HttpGet("mentor/topic-contributions/{id:int}")]
+    [HttpGet("topic-contributions/{id:int}")]
     public async Task<IActionResult> GetContributionById(int id, CancellationToken cancellationToken)
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);

@@ -14,5 +14,6 @@ public sealed record UpdateSubTopicCommand(
     string Slug,
     string? Example,
     ExampleType? ExampleType,
-    int Position
+    int Position,
+    bool ShiftPositions
 ) : IRequest<UpdateSubTopicResponse>;

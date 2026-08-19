@@ -13,5 +13,6 @@ public sealed record CreateSubTopicCommand(
     string Slug,
     string? Example,
     ExampleType? ExampleType,
-    int Position
+    int Position,
+    bool ShiftPositions
 ) : IRequest<CreateSubTopicResponse>;

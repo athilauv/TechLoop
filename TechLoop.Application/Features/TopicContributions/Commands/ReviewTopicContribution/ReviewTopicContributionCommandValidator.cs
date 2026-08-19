@@ -19,10 +19,14 @@ public sealed class ReviewTopicContributionCommandValidator : AbstractValidator<
             () =>
             {
                 RuleFor(x => x.Request.Position)
-                    .NotNull()
                     .GreaterThan(0)
-                    .WithMessage(
-                        "Position is required when approving a contribution.");
+                    .When(x => x.Request.Position.HasValue)
+                    .WithMessage("Position must be greater than zero.");
+
+                RuleFor(x => x.Request.ParentSubTopicId)
+                    .GreaterThan(0)
+                    .When(x => x.Request.ParentSubTopicId.HasValue)
+                    .WithMessage("ParentSubTopicId must be greater than zero.");
             });
 
         When(

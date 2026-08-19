@@ -61,7 +61,7 @@ public sealed class UpdateTopicCommandHandler : IRequestHandler<UpdatedTopicComm
         topic.UpdatedBy = _currentUser.UserId;
         topic.UpdatedAt = DateTime.UtcNow;
 
-        await _repository.UpdateAsync(topic, cancellationToken);
+        await _repository.UpdateAsync(topic, request.ShiftPositions, cancellationToken);
 
         return new UpdateTopicResponse
         {

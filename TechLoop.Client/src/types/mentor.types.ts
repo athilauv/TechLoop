@@ -24,3 +24,23 @@ export interface MentorCurriculum {
     technologyName: string;
     topics: MentorCurriculumTopic[];
 }
+
+export interface MentorProfileData {
+    username: string;
+    email: string;
+    technologyId: number;
+    technologyName: string;
+    phoneNumber: string | null;
+    bio: string | null;
+    linkedInUrl: string | null;
+    githubUrl: string | null;
+    profileImageUrl: string | null;
+}
+
+export interface UpdateMentorProfileRequest {
+    phoneNumber: string;
+    bio: string;
+    linkedInUrl: string;
+    githubUrl: string;
+    profileImageUrl: string;
+}

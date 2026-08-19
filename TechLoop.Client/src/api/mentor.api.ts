@@ -1,5 +1,6 @@
 import api from "./axios.ts";
-import type {MentorCurriculum} from "../types/mentor.types.ts";
+import type {MentorCurriculum, UpdateMentorProfileRequest} from "../types/mentor.types.ts";
+import type {OperationResponse} from "../types/common.types.ts";
 
 export const getMentorCurriculum = async (): Promise<MentorCurriculum> => {
     const { data } = await api.get<MentorCurriculum>("/mentor/curriculum");
@@ -53,5 +54,10 @@ export const getTechnologyContributions = async (technologyId: number) => {
 
 export const getMentorContributionById = async (id: number) => {
     const { data } = await api.get(`/mentor/mentor/topic-contributions/${id}`);
+    return data;
+};
+
+export const updateMentorProfile = async (request: UpdateMentorProfileRequest): Promise<OperationResponse> => {
+    const { data } = await api.put<OperationResponse>("/mentor/profile", request);
     return data;
 };

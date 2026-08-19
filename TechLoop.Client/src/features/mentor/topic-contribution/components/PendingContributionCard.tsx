@@ -1,75 +1,102 @@
-import {ArrowRight, CalendarDays, FileText} from "lucide-react";
-import type {TopicContributionPendingResponse,} from "../../../../types/topicContribution.types.ts";
-import { formatRelativeTime} from "../../../../utils/formatRelativeTime.ts";
-import ContributionStatusBadge from "../../../learner/topic-contribution/components/ContributionStatusBadge.tsx";
+import { ChevronRight, Clock3 } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+
+import Card from "../../../../shared/Card.tsx";
+import Button from "../../../../shared/Button.tsx";
+import ContributionTypeBadge from "../../../../shared/ContributionTypeBadge.tsx";
+import type {
+    TopicContributionPendingResponse,
+} from "../../../../types/topicContribution.types.ts";
 
 interface PendingContributionCardProps {
     contribution: TopicContributionPendingResponse;
-    onView: (id: number) => void;
 }
 
 export default function PendingContributionCard({
                                                     contribution,
-                                                    onView,
                                                 }: PendingContributionCardProps) {
-    const createdDate = formatRelativeTime(contribution.createdAt);
-    const contributionType = contribution.contributionType || "Contribution";
+    const navigate = useNavigate();
 
     return (
-        <article className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm transition hover:shadow-md">
-            <div className="flex items-start justify-between gap-4">
-                <div className="min-w-0">
-                    <div className="mb-2 flex items-center gap-2">
-                        <FileText size={16} className="text-slate-500"/>
+        <Card
+            className="
+                transition duration-150
+                hover:border-[var(--cs-accent-border)]
+                hover:shadow-[0_8px_24px_-8px_rgba(0,232,194,0.15)]
+            "
+        >
+            <div className="p-6">
+                {/* Header */}
+                <div className="flex items-start justify-between gap-5">
+                    <div className="min-w-0 flex-1">
+                        <div className="mb-3">
+                            <ContributionTypeBadge
+                                type={contribution.contributionType}
+                            />
+                        </div>
 
-                        <span className="text-xs font-medium uppercase tracking-wide text-slate-500">
-                            {contributionType}
-                        </span>
+                        <h2 className="truncate text-base font-semibold text-[var(--cs-text-primary)]">
+                            {contribution.title}
+                        </h2>
+
+                        <p className="mt-2 line-clamp-2 text-sm leading-6 text-[var(--cs-text-secondary)]">
+                            {contribution.description}
+                        </p>
                     </div>
 
-                    <h3 className="text-lg font-semibold text-slate-900">
-                        {contribution.title}
-                    </h3>
+                    {/* Pending Badge */}
+                    <span
+                        className="
+                            inline-flex shrink-0 items-center gap-1.5
+                            rounded-full
+                            border border-[var(--cs-warning-border)]
+                            bg-[var(--cs-warning-subtle)]
+                            px-3 py-1.5
+                            text-xs font-medium
+                            text-[var(--cs-warning)]
+                        "
+                    >
+                        <Clock3 size={13} />
+                        Pending
+                    </span>
                 </div>
 
-                <ContributionStatusBadge status={contribution.status}/>
+                {/* Metadata */}
+                <div
+                    className="
+                        mt-5 flex flex-wrap items-center gap-x-5 gap-y-2
+                        border-t border-[var(--cs-border)]
+                        pt-4
+                        text-xs text-[var(--cs-text-muted)]
+                    "
+                >
+                    <span>Contribution #{contribution.id}</span>
+
+                    <span>
+                        {new Date(contribution.createdAt).toLocaleDateString()}
+                    </span>
+
+                    {contribution.referenceUrl && (
+                        <span className="truncate">Reference attached</span>
+                    )}
+                </div>
+
+                {/* Action */}
+                <div className="mt-5 flex justify-end">
+                    <Button
+                        variant="accent-outline"
+                        size="sm"
+                        icon={<ChevronRight size={14} />}
+                        onClick={() =>
+                            navigate(
+                                `/mentor/topic-contributions/${contribution.id}`
+                            )
+                        }
+                    >
+                        Review
+                    </Button>
+                </div>
             </div>
-
-            <p className="mt-3 line-clamp-3 text-sm leading-6 text-slate-600">
-                {contribution.description}
-            </p>
-
-            <div className="mt-4 space-y-2 text-xs text-slate-500">
-                {contribution.topicId && (
-                    <p>
-                        Topic ID:{" "}
-                        <span className="font-medium text-slate-700">
-                            {contribution.topicId}
-                        </span>
-                    </p>
-                )}
-
-                {contribution.subTopicId && (
-                    <p>
-                        SubTopic ID:{" "}
-                        <span className="font-medium text-slate-700">
-                            {contribution.subTopicId}
-                        </span>
-                    </p>
-                )}
-
-                <p className="flex items-center gap-2">
-                    <CalendarDays size={14} />
-                    Submitted {createdDate}
-                </p>
-            </div>
-
-            <button type="button"
-                onClick={() => onView(contribution.id)}
-                className="mt-5 inline-flex items-center gap-2 text-sm font-medium text-slate-800 transition hover:text-slate-500">
-                Review contribution
-                <ArrowRight size={16} />
-            </button>
-        </article>
+        </Card>
     );
 }

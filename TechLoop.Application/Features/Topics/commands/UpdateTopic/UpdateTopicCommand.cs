@@ -13,6 +13,7 @@ public sealed record UpdatedTopicCommand(
     string? Example,
     ExampleType? ExampleType,
     string Slug,
-    int Position
+    int Position,
+    bool ShiftPositions
     ):IRequest<UpdateTopicResponse>;
 

@@ -60,7 +60,7 @@ public sealed class CreateTopicCommandHandler : IRequestHandler<CreateTopicComma
             CreatedBy = _currentUser.UserId
         };
 
-        var id = await _repository.CreateAsync(topic, cancellationToken);
+        var id = await _repository.CreateAsync(topic, request.ShiftPositions, cancellationToken);
         var createdTopic = await _repository.GetByIdAsync(id, cancellationToken);
         if (createdTopic is null)
         {

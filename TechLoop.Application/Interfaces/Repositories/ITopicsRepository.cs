@@ -10,8 +10,8 @@ public interface ITopicsRepository
     Task<bool> SlugExistsAsync(string slug, CancellationToken cancellationToken);
     Task<bool> PositionExistsAsync(int technologyId, int position, CancellationToken cancellationToken);
     Task<bool> TechnologyExistsAsync(int technologyId, CancellationToken cancellationToken);
-    Task<int> CreateAsync(Topic topic, CancellationToken cancellationToken);
-    Task<int> UpdateAsync(Topic topic, CancellationToken cancellationToken);
+    Task<int> CreateAsync(Topic topic, bool shiftPositions, CancellationToken cancellationToken);
+    Task<int> UpdateAsync(Topic topic, bool shiftPositions, CancellationToken cancellationToken);
     Task<int> SoftDeleteAsync(int id, Guid deletedBy, CancellationToken cancellationToken);
     Task<int> PublishAsync(Topic topic, CancellationToken cancellationToken);
     Task<IEnumerable<Topic>> GetAllAsync(CancellationToken cancellationToken);

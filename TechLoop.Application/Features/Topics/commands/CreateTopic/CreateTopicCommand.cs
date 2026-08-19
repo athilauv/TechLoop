@@ -12,5 +12,6 @@ public sealed record CreateTopicCommand(
     string? Example,
     ExampleType? ExampleType,
     string Slug,
-    int Position
+    int Position,
+    bool ShiftPositions
 ) : IRequest<CreateTopicResponse>;

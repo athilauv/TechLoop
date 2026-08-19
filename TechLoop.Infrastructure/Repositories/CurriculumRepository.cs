@@ -21,10 +21,9 @@ public sealed class CurriculumRepository : ICurriculumRepository
         using var connection = _context.CreateConnection();
 
         var rows = (await connection.QueryAsync<CurriculumRowResponse>(
-            """
-            SELECT *
-            FROM fn_get_mentor_curriculum(@UserId);
-            """,
+            @"
+            SELECT * FROM fn_get_mentor_curriculum(@UserId);"
+            ,
             new
             {
                 UserId = userId

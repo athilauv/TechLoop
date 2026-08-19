@@ -4,17 +4,20 @@ using TechLoop.Application.Features.SubTopics.DTOs;
 using TechLoop.Application.Interfaces.Repositories;
 using TechLoop.Application.Interfaces.Services;
 using TechLoop.Domain.Entities;
-using TechLoop.Domain.Enums;
 
 namespace TechLoop.Application.Features.SubTopics.Commands.CreateSubTopic;
 
-public sealed class CreateSubTopicCommandHandler : IRequestHandler<CreateSubTopicCommand, CreateSubTopicResponse>
+public sealed class CreateSubTopicCommandHandler
+    : IRequestHandler<CreateSubTopicCommand, CreateSubTopicResponse>
 {
     private readonly ISubTopicsRepository _subTopicsRepository;
     private readonly ITopicsRepository _topicsRepository;
     private readonly ICurrentUserService _currentUserService;
 
-    public CreateSubTopicCommandHandler(ISubTopicsRepository subTopicsRepository, ITopicsRepository topicsRepository, ICurrentUserService currentUserService)
+    public CreateSubTopicCommandHandler(
+        ISubTopicsRepository subTopicsRepository,
+        ITopicsRepository topicsRepository,
+        ICurrentUserService currentUserService)
     {
         _subTopicsRepository = subTopicsRepository;
         _topicsRepository = topicsRepository;
@@ -23,6 +26,7 @@ public sealed class CreateSubTopicCommandHandler : IRequestHandler<CreateSubTopi
 
     public async Task<CreateSubTopicResponse> Handle(CreateSubTopicCommand request, CancellationToken cancellationToken)
     {
+
         var topic = await _topicsRepository.GetByIdAsync(request.TopicId, cancellationToken);
         if (topic is null)
         {
@@ -31,62 +35,62 @@ public sealed class CreateSubTopicCommandHandler : IRequestHandler<CreateSubTopi
 
         if (request.ParentSubTopicId.HasValue)
         {
-            var parentExists = await _subTopicsRepository.SubTopicIdExistsAsync(
-                request.ParentSubTopicId.Value,
-                cancellationToken);
-
+            var parentExists = await _subTopicsRepository.SubTopicIdExistsAsync(request.ParentSubTopicId.Value, cancellationToken);
             if (!parentExists)
             {
                 throw new InvalidOperationException("Parent sub topic not found.");
             }
         }
-            
-        var slugExists = await _topicsRepository.SlugExistsAsync(request.Slug, cancellationToken);
+
+        var title = request.Title.Trim();
+        var slug = GenerateSlug(request.Slug);
+        var description = request.Description?.Trim() ?? string.Empty;
+        var imageUrl = request.ImageUrl?.Trim() ?? string.Empty;
+        var example = request.Example?.Trim() ?? string.Empty;
+
+        var slugExists = await _subTopicsRepository.SlugExistsAsync(slug, cancellationToken);
         if (slugExists)
         {
-            throw new ValidationException($"Technology slug '{request.Slug}' already exists.");
+            throw new ValidationException($"Sub topic slug '{slug}' already exists.");
         }
-        var positionExists = await _topicsRepository.PositionExistsAsync(request.TopicId, request.Position, cancellationToken);
-        if (positionExists)
+
+        var positionExists = await _subTopicsRepository.PositionExistsAsync(request.TopicId, request.Position, cancellationToken);
+        if (positionExists && !request.ShiftPositions)
         {
-            throw new ValidationException($"Technology position '{request.Position}' already exists in the topic.");
+            throw new ValidationException(
+                $"Sub topic position '{request.Position}' is already occupied. " +
+                $"Do you want to shift the existing subtopics?");
         }
-        var exists = await _subTopicsRepository.ExistsAsync(request.TopicId, request.Slug, cancellationToken);
-        if (exists)
+
+        var titleExists = await _subTopicsRepository.ExistsAsync(request.TopicId, title, cancellationToken);
+        if (titleExists)
         {
-            throw new InvalidOperationException($"Sub topic with slug '{request.Slug}' already exists in the topic.");
+            throw new ValidationException($"Sub topic '{title}' already exists in the topic.");
         }
 
         var subTopic = new SubTopic
         {
             TopicId = request.TopicId,
             ParentSubTopicId = request.ParentSubTopicId,
-            Title = request.Title.Trim(),
-            Slug = request.Slug.Trim().ToLowerInvariant(),
-            Description = request.Description ?? string.Empty,
-            ImageUrl = request.ImageUrl ?? string.Empty,
-            Example = request.Example ?? string.Empty,
-            ExampleType =  request.ExampleType,
+            Title = title,
+            Slug = slug,
+            Description = description,
+            ImageUrl = imageUrl,
+            Example = example,
+            ExampleType = request.ExampleType,
             Position = request.Position,
             CreatedBy = _currentUserService.UserId,
-            CreatedAt = DateTime.UtcNow,
-
+            CreatedAt = DateTime.UtcNow
         };
 
-        var id = await _subTopicsRepository.CreateAsync(subTopic, cancellationToken);
-        var createdSubTopic = await _subTopicsRepository.GetByIdAsync(id, cancellationToken);
-        if (createdSubTopic is null)
-        {
-            throw new Exception("Failed to create sub topic.");
-        }
-
+        await _subTopicsRepository.CreateAsync(subTopic,request.ShiftPositions, cancellationToken);
         return new CreateSubTopicResponse
         {
             Success = true,
             Message = "Sub topic created successfully."
         };
     }
-
+    
     private static string GenerateSlug(string value)
     {
         return value

@@ -13,4 +13,5 @@ public sealed class UpdateSubTopicRequest
     public string? Example { get; set; }
     public ExampleType? ExampleType { get; set; }
     public int Position { get; set; }
+    public bool ShiftPositions { get; set; }
 }

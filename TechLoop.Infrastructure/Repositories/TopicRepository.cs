@@ -73,27 +73,38 @@ public sealed class TopicRepository : ITopicsRepository
     }
 
     // Create a new topic.
-    public async Task<int> CreateAsync(Topic topic, CancellationToken cancellationToken)
+    public async Task<int> CreateAsync(Topic topic, bool shiftPositions, CancellationToken cancellationToken)
     {
         using var connection = _context.CreateConnection();
-        return await connection.ExecuteScalarAsync<int>(
-            new CommandDefinition(
-                """
-                SELECT fn_create_topic
-                (
+        return await connection.ExecuteScalarAsync<int>(new CommandDefinition(
+                @"
+                SELECT fn_create_topic(
                     @TechnologyId,
                     @Title,
                     @Slug,
                     @Description,
                     @ImageUrl,
                     @Example,
-                    @ExampleType,                    
+                    @ExampleType,
                     @Position,
                     @CreatedBy,
-                    @CreatedAt
-                );
-                """,
-                topic,
+                    @CreatedAt,
+                    @ShiftPositions
+                );",
+                new
+                {
+                    topic.TechnologyId,
+                    topic.Title,
+                    topic.Slug,
+                    topic.Description,
+                    topic.ImageUrl,
+                    topic.Example,
+                    topic.ExampleType,
+                    topic.Position,
+                    topic.CreatedBy,
+                    topic.CreatedAt,
+                    ShiftPositions = shiftPositions
+                },
                 cancellationToken: cancellationToken));
     }
     
@@ -114,15 +125,17 @@ public sealed class TopicRepository : ITopicsRepository
 
     
     // Update an existing topic.
-    public async Task<int> UpdateAsync(Topic topic, CancellationToken cancellationToken)
+    public async Task<int> UpdateAsync(
+        Topic topic,
+        bool shiftPositions,
+        CancellationToken cancellationToken)
     {
         using var connection = _context.CreateConnection();
 
         return await connection.ExecuteAsync(
             new CommandDefinition(
-                """
-                CALL sp_update_topic
-                (
+                @"
+                CALL sp_update_topic(
                     @Id,
                     @TechnologyId,
                     @Title,
@@ -133,10 +146,24 @@ public sealed class TopicRepository : ITopicsRepository
                     @ExampleType,
                     @Position,
                     @UpdatedBy,
-                    @UpdatedAt
-                );
-                """,
-                topic,
+                    @UpdatedAt,
+                    @ShiftPositions
+                );",
+                new
+                {
+                    topic.Id,
+                    topic.TechnologyId,
+                    topic.Title,
+                    topic.Slug,
+                    topic.Description,
+                    topic.ImageUrl,
+                    topic.Example,
+                    topic.ExampleType,
+                    topic.Position,
+                    topic.UpdatedBy,
+                    topic.UpdatedAt,
+                    ShiftPositions = shiftPositions
+                },
                 cancellationToken: cancellationToken));
     }
     
@@ -147,14 +174,7 @@ public sealed class TopicRepository : ITopicsRepository
         using var connection = _context.CreateConnection();
         return await connection.ExecuteAsync(
             new CommandDefinition(
-                """
-                CALL sp_soft_delete_topic
-                (
-                    @Id,
-                    @DeletedBy,
-                    @DeletedAt
-                );
-                """,
+                @"CALL sp_soft_delete_topic(@Id, @DeletedBy, @DeletedAt);",
                 new
                 {
                     Id = id,

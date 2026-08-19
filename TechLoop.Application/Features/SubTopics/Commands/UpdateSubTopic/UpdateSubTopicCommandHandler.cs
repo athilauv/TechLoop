@@ -53,9 +53,11 @@ public sealed class UpdateSubTopicCommandHandler : IRequestHandler<UpdateSubTopi
         }
 
         var positionExists = await _subtopicrepository.PositionExistsAsync(request.TopicId, request.Position, cancellationToken);
-        if (positionExists && subTopic.Position != request.Position)
+        if (positionExists && subTopic.Position != request.Position && !request.ShiftPositions)
         {
-            throw new ValidationException($"Sub topic position '{request.Position}' already exists in the topic.");
+            throw new ValidationException(
+                $"Sub topic position '{request.Position}' is already occupied. " +
+                $"Do you want to shift the existing subtopics?");
         }
 
         var exists = await _subtopicrepository.ExistsAsync(request.TopicId, request.Title, cancellationToken);
@@ -76,7 +78,7 @@ public sealed class UpdateSubTopicCommandHandler : IRequestHandler<UpdateSubTopi
         subTopic.UpdatedBy = _currentUserService.UserId;
         subTopic.UpdatedAt = DateTime.UtcNow;
 
-        var rowsAffected = await _subtopicrepository.UpdateAsync(subTopic, cancellationToken);
+        var rowsAffected = await _subtopicrepository.UpdateAsync(subTopic,request.ShiftPositions, cancellationToken);
         if (rowsAffected <= 0)
         {
             throw new Exception("Failed to update sub topic.");

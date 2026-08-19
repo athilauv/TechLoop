@@ -7,7 +7,7 @@ export default function MentorLayout() {
     const [collapsed, setCollapsed] = useState(false);
 
     return (
-        <div className="min-h-screen bg-slate-50">
+        <div className="content-studio-theme min-h-screen">
             <MentorSidebar
                 collapsed={collapsed}
                 onToggle={() => setCollapsed((value) => !value)}

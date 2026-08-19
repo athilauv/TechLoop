@@ -1,189 +1,212 @@
-import {ArrowLeft, ExternalLink} from "lucide-react";
-import type {TopicContributionResponse} from "../../../../types/topicContribution.types.ts";
-import { formatRelativeTime} from "../../../../utils/formatRelativeTime.ts";
-import ContributionStatusBadge from "../../../learner/topic-contribution/components/ContributionStatusBadge.tsx";
+import { ExternalLink, FileText, User } from "lucide-react";
+
+import Card, { CardSection } from "../../../../shared/Card.tsx";
+import ContributionStatusBadge from "../../../../shared/ContributionStatusBadge.tsx";
+import ContributionTypeBadge from "../../../../shared/ContributionTypeBadge.tsx";
+import type {
+    TopicContributionResponse,
+} from "../../../../types/topicContribution.types.ts";
 
 interface MentorContributionDetailsProps {
     contribution: TopicContributionResponse;
-    onBack: () => void;
-    onReview: () => void;
 }
 
 export default function MentorContributionDetails({
                                                       contribution,
-                                                      onBack,
-                                                      onReview,
                                                   }: MentorContributionDetailsProps) {
-    const createdDate = formatRelativeTime(contribution.createdAt);
-    const reviewedDate = contribution.reviewedAt ? formatRelativeTime(contribution.reviewedAt) : null;
-    const updatedDate = contribution.updatedAt ? formatRelativeTime(contribution.updatedAt) : null;
+    // The detail response has no explicit `contributionType` field (unlike
+    // the pending-list response), so it's derived from topicId nullability:
+    // no topicId -> proposing a new Topic under the technology;
+    // topicId present -> proposing a new SubTopic under that topic.
+    const derivedType = contribution.topicId === null ? "Topic" : "SubTopic";
+    const isReviewed = contribution.status !== 1;
 
     return (
-        <div className="space-y-6">
-            <button type="button" onClick={onBack}
-                className="inline-flex items-center gap-2 text-sm font-medium text-slate-600 hover:text-slate-900">
-                <ArrowLeft size={16} />
-                Back to pending contributions
-            </button>
-
-            <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
-                {/* Header */}
-                <div className="flex flex-col gap-4 border-b border-slate-100 pb-5 sm:flex-row sm:items-start sm:justify-between">
-                    <div className="min-w-0">
-                        <p className="text-sm text-slate-500">
-                            {contribution.technologyName}
-                        </p>
-
-                        <h1 className="mt-1 text-2xl font-semibold text-slate-900">
-                            {contribution.title}
-                        </h1>
-
-                        <div className="mt-2 flex flex-wrap gap-x-5 gap-y-1 text-sm text-slate-500">
-                            {contribution.topicTitle && (
-                                <span>
-                                    Topic:{" "}
-                                    {contribution.topicTitle}
+        <div className="space-y-5">
+            {/* =====================================================
+                Contribution Overview
+            ===================================================== */}
+            <Card>
+                <CardSection>
+                    <div className="flex flex-wrap items-start justify-between gap-4">
+                        <div className="min-w-0">
+                            <div className="flex items-center gap-2">
+                                <span
+                                    className="
+                                        flex h-9 w-9 items-center justify-center
+                                        rounded-lg
+                                        border border-[var(--cs-border)]
+                                        bg-[var(--cs-bg-input)]
+                                        text-[var(--cs-accent)]
+                                    "
+                                >
+                                    <FileText size={17} />
                                 </span>
-                            )}
 
-                            {contribution.subTopicTitle && (
-                                <span>
-                                    SubTopic:{" "}
-                                    {contribution.subTopicTitle}
-                                </span>
-                            )}
+                                <ContributionTypeBadge type={derivedType} />
+                            </div>
+
+                            <h1 className="mt-4 text-2xl font-semibold text-[var(--cs-text-primary)]">
+                                {contribution.title}
+                            </h1>
+                        </div>
+
+                        <ContributionStatusBadge status={contribution.status} />
+                    </div>
+                </CardSection>
+
+                {/* Metadata */}
+                <CardSection divider="top">
+                    <div className="grid gap-5 sm:grid-cols-2">
+                        <div>
+                            <p className="text-xs font-medium uppercase tracking-wide text-[var(--cs-text-muted)]">
+                                Technology
+                            </p>
+                            <p className="mt-1 text-sm text-[var(--cs-text-secondary)]">
+                                {contribution.technologyName}
+                            </p>
+                        </div>
+
+                        <div>
+                            <p className="text-xs font-medium uppercase tracking-wide text-[var(--cs-text-muted)]">
+                                Topic
+                            </p>
+                            <p className="mt-1 text-sm text-[var(--cs-text-secondary)]">
+                                {contribution.topicTitle ?? "New topic (this submission)"}
+                            </p>
+                        </div>
+
+                        <div>
+                            <p className="text-xs font-medium uppercase tracking-wide text-[var(--cs-text-muted)]">
+                                Sub Topic
+                            </p>
+                            <p className="mt-1 text-sm text-[var(--cs-text-secondary)]">
+                                {contribution.subTopicTitle ?? "Not specified"}
+                            </p>
+                        </div>
+
+                        <div>
+                            <p className="text-xs font-medium uppercase tracking-wide text-[var(--cs-text-muted)]">
+                                Submitted By
+                            </p>
+                            <div className="mt-1 flex items-center gap-2 text-sm text-[var(--cs-text-secondary)]">
+                                <User size={14} className="text-[var(--cs-text-muted)]" />
+                                {contribution.learnerName}
+                            </div>
+                        </div>
+                    </div>
+                </CardSection>
+            </Card>
+
+            {/* =====================================================
+                Content
+            ===================================================== */}
+            <Card>
+                <CardSection>
+                    <h2 className="text-base font-semibold text-[var(--cs-text-primary)]">
+                        Description
+                    </h2>
+                    <p className="mt-3 whitespace-pre-wrap text-sm leading-7 text-[var(--cs-text-secondary)]">
+                        {contribution.description}
+                    </p>
+                </CardSection>
+
+                {contribution.example && (
+                    <CardSection divider="top">
+                        <h2 className="text-base font-semibold text-[var(--cs-text-primary)]">
+                            Example
+                        </h2>
+                        <pre
+                            className="
+                                mt-3 overflow-x-auto rounded-lg
+                                border border-[var(--cs-border)]
+                                bg-[var(--cs-bg-input)]
+                                p-4
+                                text-sm leading-6
+                                text-[var(--cs-text-primary)]
+                            "
+                        >
+                            <code>{contribution.example}</code>
+                        </pre>
+                    </CardSection>
+                )}
+
+                {contribution.referenceUrl && (
+                    <CardSection divider="top">
+                        <h2 className="text-base font-semibold text-[var(--cs-text-primary)]">
+                            Reference
+                        </h2>
+
+                     <a   href={contribution.referenceUrl}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="
+                        mt-3 inline-flex items-center gap-2
+                        text-sm font-medium
+                        text-[var(--cs-accent)]
+                        transition
+                        hover:text-[var(--cs-accent-hover)]
+                        hover:underline
+                        ">
+                        Open reference
+                        <ExternalLink size={14} />
+                    </a>
+                    </CardSection>
+                    )}
+            </Card>
+
+            {isReviewed && (
+            <Card>
+                <CardSection>
+                    <h2 className="text-base font-semibold text-[var(--cs-text-primary)]">
+                        Review Outcome
+                    </h2>
+
+                    <div className="mt-3 grid gap-4 sm:grid-cols-2">
+                        <div>
+                            <p className="text-xs font-medium uppercase tracking-wide text-[var(--cs-text-muted)]">
+                                Reviewed By
+                            </p>
+                            <p className="mt-1 text-sm text-[var(--cs-text-secondary)]">
+                                {contribution.reviewerName ?? "—"}
+                            </p>
+                        </div>
+
+                        <div>
+                            <p className="text-xs font-medium uppercase tracking-wide text-[var(--cs-text-muted)]">
+                                Reviewed On
+                            </p>
+                            <p className="mt-1 text-sm text-[var(--cs-text-secondary)]">
+                                {contribution.reviewedAt
+                                    ? new Date(
+                                        contribution.reviewedAt
+                                    ).toLocaleString()
+                                    : "—"}
+                            </p>
                         </div>
                     </div>
 
-                    <ContributionStatusBadge status={contribution.status}/>
-                </div>
-
-                <div className="mt-6 space-y-6">
-                    {/* Contributor */}
-                    <section>
-                        <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-500">
-                            Contributor
-                        </h2>
-
-                        <p className="mt-2 text-sm text-slate-700">
-                            {contribution.learnerName}
-                        </p>
-                    </section>
-
-                    {/* Description */}
-                    <section>
-                        <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-500">
-                            Description
-                        </h2>
-
-                        <p className="mt-2 whitespace-pre-wrap text-sm leading-7 text-slate-700">
-                            {contribution.description}
-                        </p>
-                    </section>
-
-                    {/* Example */}
-                    {contribution.example && (
-                        <section>
-                            <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-500">
-                                Example
-                            </h2>
-
-                            <pre className="mt-2 overflow-x-auto rounded-lg bg-slate-950 p-4 text-sm leading-6 text-slate-100">
-                                <code>
-                                    {contribution.example}
-                                </code>
-                            </pre>
-                        </section>
-                    )}
-
-                    {/* Reference */}
-                    {contribution.referenceUrl && (
-                        <section>
-                            <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-500">
-                                Reference
-                            </h2>
-
-                            <a href={contribution.referenceUrl} target="_blank" rel="noopener noreferrer"
-                                className="mt-2 inline-flex items-center gap-2 text-sm font-medium text-blue-600 hover:underline">
-                                Open reference
-                                <ExternalLink size={15}/>
-                            </a>
-                        </section>
-                    )}
-
-                    {/* Metadata */}
-                    <section className="grid gap-4 border-t border-slate-100 pt-5 sm:grid-cols-2 lg:grid-cols-3">
-                        <div>
-                            <p className="text-xs font-medium uppercase tracking-wide text-slate-400">
-                                Submitted
-                            </p>
-
-                            <p className="mt-1 text-sm text-slate-700">
-                                {createdDate}
-                            </p>
-                        </div>
-
-                        {contribution.reviewerName && (
-                            <div>
-                                <p className="text-xs font-medium uppercase tracking-wide text-slate-400">
-                                    Reviewed By
-                                </p>
-
-                                <p className="mt-1 text-sm text-slate-700">
-                                    {contribution.reviewerName}
-                                </p>
-                            </div>
-                        )}
-
-                        {reviewedDate && (
-                            <div>
-                                <p className="text-xs font-medium uppercase tracking-wide text-slate-400">
-                                    Reviewed At
-                                </p>
-
-                                <p className="mt-1 text-sm text-slate-700">
-                                    {reviewedDate}
-                                </p>
-                            </div>
-                        )}
-
-                        {updatedDate && (
-                            <div>
-                                <p className="text-xs font-medium uppercase tracking-wide text-slate-400">
-                                    Updated
-                                </p>
-
-                                <p className="mt-1 text-sm text-slate-700">
-                                    {updatedDate}
-                                </p>
-                            </div>
-                        )}
-                    </section>
-
-                    {/* Review */}
-                    {contribution.status === 1 && (
-                        <div className="flex justify-end border-t border-slate-100 pt-5">
-                            <button type="button" onClick={onReview}
-                                className="rounded-lg bg-slate-900 px-5 py-2.5 text-sm font-medium text-white hover:bg-slate-800">
-                                Review Contribution
-                            </button>
-                        </div>
-                    )}
-
-                    {/* Existing review notes */}
                     {contribution.reviewNotes && (
-                        <section className="rounded-lg border border-amber-200 bg-amber-50 p-4">
-                            <h2 className="text-sm font-semibold text-amber-800">
+                        <div className="mt-4">
+                            <p className="text-xs font-medium uppercase tracking-wide text-[var(--cs-text-muted)]">
                                 Review Notes
-                            </h2>
-
-                            <p className="mt-2 whitespace-pre-wrap text-sm leading-6 text-amber-900">
+                            </p>
+                            <p className="mt-1 whitespace-pre-wrap text-sm leading-7 text-[var(--cs-text-secondary)]">
                                 {contribution.reviewNotes}
                             </p>
-                        </section>
+                        </div>
                     )}
-                </div>
-            </div>
+
+                    {contribution.status === 2 && (
+                        <p className="mt-4 text-xs leading-5 text-[var(--cs-text-muted)]">
+                            This contribution was approved and moved into the
+                            relevant management area as a draft. It has not
+                            been published to learners yet.
+                        </p>
+                    )}
+                </CardSection>
+            </Card>
+            )}
         </div>
     );
 }
