@@ -7,6 +7,7 @@ import MentorContentPage from "../features/mentor/content/pages/MentorContentPag
 import MentorProfile from "../features/mentor/profile/pages/MentorProfile.tsx";
 import MentorTopicContributionsPage from "../features/mentor/topic-contribution/pages/MentorTopicContributionsPage.tsx";
 import MentorTopicContributionDetailsPage from "../features/mentor/topic-contribution/pages/MentorTopicContributionDetailsPage.tsx";
+import MentorCommunityPage from "../features/mentor/community/pages/MentorCommunityPage.tsx";
 
 export default function MentorRoutes() {
     return (
@@ -22,6 +23,7 @@ export default function MentorRoutes() {
                     <Route path="profile" element={<MentorProfile />}/>
                     <Route path="contributions" element={<MentorTopicContributionsPage />}/>
                     <Route path="topic-contributions/:id" element={<MentorTopicContributionDetailsPage />}/>
+                    <Route path="community" element={<MentorCommunityPage />}/>
                 </Route>
             </Route>
         </Routes>
