@@ -146,9 +146,9 @@ export default function MentorCommunityPostCard({
                                 {post.userName}
                             </span>
 
-                            <span className="rounded-full border border-[#17D4C3]/20 bg-[#17D4C3]/10 px-2 py-0.5 text-[9px] font-semibold uppercase tracking-wide text-[#17D4C3]">
-                                Mentor
-                            </span>
+                            {post.userRoleId === 2 && (
+                                <span className="rounded-full border border-[#00E5C0]/30 bg-[#00E5C0]/10 px-2 py-0.5 text-[9px] font-semibold uppercase tracking-wide text-[#00E5C0]">Mentor</span>
+                            )}
                         </div>
 
                         <div className="mt-1 flex items-center gap-1.5 text-[10px] text-[#526d8e]">
@@ -207,11 +207,6 @@ export default function MentorCommunityPostCard({
                 onClick={handleOpen}
                 className="block w-full px-5 pt-5 text-left"
             >
-                {post.technologyName && (
-                    <span className="inline-flex rounded-md bg-[#17D4C3]/10 px-2.5 py-1 text-[10px] font-medium text-[#17D4C3]">
-                        {post.technologyName}
-                    </span>
-                )}
 
                 <h2 className="mt-3 text-base font-semibold leading-6 text-white transition hover:text-[#17D4C3]">
                     {post.title}

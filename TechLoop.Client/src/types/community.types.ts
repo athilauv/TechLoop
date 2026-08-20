@@ -2,6 +2,7 @@ export interface CommunityPost {
     id: number;
     userId: string;
     userName: string;
+    userRoleId: number;
     technologyId: number | null;
     technologyName: string | null;
     title: string;
@@ -29,10 +30,11 @@ export interface PostComment {
     postId: number;
     userId: string;
     userName: string;
-    parentCommentId: number | null;
+    userRoleId: number;
     content: string;
-    replyCount: number;
+    parentCommentId: number | null;
     createdAt: string;
+    updatedAt?: string | null;
 }
 
 export interface CreateCommentRequest {

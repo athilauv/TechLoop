@@ -1,6 +1,7 @@
 import { DifficultyLevel } from "./enums/difficulty-level.ts";
 import { QuestionType } from "./enums/question-type.ts";
 
+// LEARNER
 export interface LearnerQuestion {
     id: number;
     subTopicId: number;
@@ -77,3 +78,111 @@ export interface SubmitMcqAnswerResponse {
     score: number;
     message: string;
 }
+
+// MENTOR - QUESTION
+export interface MentorQuestion {
+    id: number;
+    subTopicId: number;
+    questionType: QuestionType;
+    slug: string;
+    title: string;
+    description: string;
+    imageUrl?: string | null;
+    mark: number;
+    hint: string;
+    explanation: string;
+    timeLimitSeconds?: number | null;
+    memoryLimitMb?: number | null;
+    difficulty: DifficultyLevel;
+    position: number;
+    publishedAt?: string | null;
+    publishedBy?: string | null;
+    createdAt: string;
+    createdBy?: string | null;
+    updatedAt?: string | null;
+    updatedBy?: string | null;
+}
+
+export interface CreateQuestionRequest {
+    subTopicId: number;
+    questionType: QuestionType;
+    title: string;
+    slug: string;
+    description: string;
+    imageUrl?: string;
+    mark: number;
+    hint: string;
+    explanation: string;
+    timeLimitSeconds?: number | null;
+    memoryLimitMb?: number | null;
+    difficulty: DifficultyLevel;
+    position: number;
+}
+
+export type UpdateQuestionRequest = CreateQuestionRequest;
+
+// MENTOR - MCQ OPTIONS
+export interface MentorMcqOption {
+    id: number;
+    questionId: number;
+    optionText: string;
+    isCorrect: boolean;
+    position: number;
+    createdBy: string;
+    createdAt: string;
+    updatedBy?: string | null;
+    updatedAt?: string | null;
+}
+
+export interface CreateMcqOptionRequest {
+    optionText: string;
+    isCorrect: boolean;
+    position: number;
+}
+
+export type UpdateMcqOptionRequest = CreateMcqOptionRequest;
+
+// MENTOR - CODING TEMPLATES
+export interface MentorCodingTemplate {
+    id: number;
+    questionId: number;
+    technologyId: number;
+    starterCode: string;
+    solutionCode?: string | null;
+    createdBy: string;
+    createdAt: string;
+    updatedBy?: string | null;
+    updatedAt?: string | null;
+}
+
+export interface CreateCodingTemplateRequest {
+    technologyId: number;
+    starterCode: string;
+    solutionCode?: string | null;
+}
+
+export type UpdateCodingTemplateRequest =
+    CreateCodingTemplateRequest;
+
+// MENTOR - TEST CASES
+export interface MentorTestCase {
+    id: number;
+    questionId: number;
+    input: string;
+    expectedOutput: string;
+    isHidden: boolean;
+    position: number;
+    createdBy?: string | null;
+    createdAt: string;
+    updatedBy?: string | null;
+    updatedAt?: string | null;
+}
+
+export interface CreateTestCaseRequest {
+    input: string;
+    expectedOutput: string;
+    isHidden: boolean;
+    position: number;
+}
+
+export type UpdateTestCaseRequest = CreateTestCaseRequest;

@@ -8,6 +8,11 @@ import MentorProfile from "../features/mentor/profile/pages/MentorProfile.tsx";
 import MentorTopicContributionsPage from "../features/mentor/topic-contribution/pages/MentorTopicContributionsPage.tsx";
 import MentorTopicContributionDetailsPage from "../features/mentor/topic-contribution/pages/MentorTopicContributionDetailsPage.tsx";
 import MentorCommunityPage from "../features/mentor/community/pages/MentorCommunityPage.tsx";
+import MentorMcqDetailsPage from "../features/mentor/questions/pages/mcq/MentorMcqDetailsPage.tsx";
+import MentorMcqCreatePage from "../features/mentor/questions/pages/mcq/MentorMcqCreatePage.tsx";
+import MentorMcqQuestionsPage from "../features/mentor/questions/pages/mcq/MentorMcqQuestionsPage.tsx";
+import MentorMcqEditPage from "../features/mentor/questions/pages/mcq/MentorMcqEditPage.tsx";
+import MentorQuestionsPage from "../features/mentor/questions/pages/MentorQuestionsPage.tsx";
 
 export default function MentorRoutes() {
     return (
@@ -24,6 +29,11 @@ export default function MentorRoutes() {
                     <Route path="contributions" element={<MentorTopicContributionsPage />}/>
                     <Route path="topic-contributions/:id" element={<MentorTopicContributionDetailsPage />}/>
                     <Route path="community" element={<MentorCommunityPage />}/>
+                    <Route path="questions/mcq/create" element={<MentorMcqCreatePage />}/>
+                    <Route path="questions/mcq/:id" element={<MentorMcqDetailsPage />}/>
+                    <Route path="questions/mcq" element={<MentorMcqQuestionsPage />}/>
+                    <Route path="questions/mcq/:id/edit" element={<MentorMcqEditPage />}/>
+                    <Route path="questions" element={<MentorQuestionsPage />}/>
                 </Route>
             </Route>
         </Routes>
