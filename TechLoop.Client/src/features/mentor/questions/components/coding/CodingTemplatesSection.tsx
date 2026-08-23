@@ -1,210 +1,155 @@
-import { Edit3, Plus, Trash2 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { Plus } from "lucide-react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useState } from "react";
+
 import EmptyState from "../../../../../shared/EmptyState";
 import LoadingSpinner from "../../../../../shared/LoadingSpinner";
+import Button from "../../../../../shared/Button.tsx";
+
 import {
     createCodingTemplate,
     deleteCodingTemplate,
     getCodingTemplatesByQuestion,
     updateCodingTemplate,
 } from "../../../../../api/mentorCoding.api.ts";
+
+import { getMentorCurriculum } from "../../../../../api/mentor.api.ts";
 import { getErrorMessage } from "../../../../../utils/error.utils.ts";
 import { showToast } from "../../../../../utils/toast.tsx";
+
 import type {
     CreateCodingTemplateRequest,
     MentorCodingTemplate,
     UpdateCodingTemplateRequest,
 } from "../../../../../types/question.types.ts";
+
+import TemplateTable from "./TemplateTable";
 import CodingTemplateForm from "./CodingTemplateForm";
 
 interface CodingTemplatesSectionProps {
     questionId: number;
 }
 
-const CodingTemplatesSection = ({
-                                    questionId,
-                                }: CodingTemplatesSectionProps) => {
-    const [templates, setTemplates] = useState<
-        MentorCodingTemplate[]
-    >([]);
+const CodingTemplatesSection = ({ questionId }: CodingTemplatesSectionProps) => {
+    const queryClient = useQueryClient();
 
-    const [loading, setLoading] = useState(true);
-    const [formOpen, setFormOpen] = useState(false);
-    const [editingTemplate, setEditingTemplate] =
-        useState<MentorCodingTemplate | null>(null);
+    const [drawerOpen, setDrawerOpen] = useState(false);
+    const [editingTemplate, setEditingTemplate] = useState<MentorCodingTemplate | null>(null);
     const [submitting, setSubmitting] = useState(false);
 
-    useEffect(() => {
-        let cancelled = false;
+    const validQuestionId = Number.isInteger(questionId) && questionId > 0;
 
-        const load = async () => {
-            try {
-                setLoading(true);
+    const {
+        data: templates = [],
+        isLoading: templatesLoading,
+        isError: templatesError,
+    } = useQuery<MentorCodingTemplate[]>({
+        queryKey: ["mentor-coding-templates", questionId],
+        queryFn: () => getCodingTemplatesByQuestion(questionId),
+        enabled: validQuestionId,
+    });
 
-                const result =
-                    await getCodingTemplatesByQuestion(
-                        questionId,
-                    );
+    const {
+        data: curriculum,
+        isLoading: curriculumLoading,
+        isError: curriculumError,
+    } = useQuery({
+        queryKey: ["mentor-curriculum"],
+        queryFn: getMentorCurriculum,
+    });
 
-                if (!cancelled) {
-                    setTemplates(result);
-                }
-            } catch (error) {
-                if (!cancelled) {
-                    setTemplates([]);
+    const technologyId = curriculum?.technologyId ?? 0;
+    const technologyName = curriculum?.technologyName ?? "";
 
-                    showToast.error(
-                        getErrorMessage(
-                            error,
-                            "Failed to load coding templates.",
-                        ),
-                    );
-                }
-            } finally {
-                if (!cancelled) {
-                    setLoading(false);
-                }
-            }
-        };
-
-        void load();
-
-        return () => {
-            cancelled = true;
-        };
-    }, [questionId]);
-
-    const loadTemplates = async () => {
-        try {
-            const result =
-                await getCodingTemplatesByQuestion(questionId);
-
-            setTemplates(result);
-        } catch {
-            setTemplates([]);
-        }
+    const closeDrawer = () => {
+        setDrawerOpen(false);
+        setEditingTemplate(null);
     };
 
-    useEffect(() => {
-        let cancelled = false;
+    const openCreate = () => {
+        if (submitting) return;
 
-        const fetchTemplates = async () => {
-            try {
-                const result =
-                    await getCodingTemplatesByQuestion(questionId);
-
-                if (!cancelled) {
-                    setTemplates(result);
-                }
-            } catch {
-                if (!cancelled) {
-                    setTemplates([]);
-                }
-            } finally {
-                if (!cancelled) {
-                    setLoading(false);
-                }
-            }
-        };
-
-        void fetchTemplates();
-
-        return () => {
-            cancelled = true;
-        };
-    }, [questionId]);
-
-    const handleCreate = async (
-        request: CreateCodingTemplateRequest,
-    ) => {
-        try {
-            setSubmitting(true);
-
-            await createCodingTemplate(
-                questionId,
-                request,
-            );
-
-            setFormOpen(false);
-            setEditingTemplate(null);
-
-            await loadTemplates();
-
-            showToast.success(
-                "Coding template created successfully.",
-            );
-        } catch (error) {
-            showToast.error(
-                getErrorMessage(
-                    error,
-                    "Failed to create coding template.",
-                ),
-            );
-
-            throw error;
-        } finally {
-            setSubmitting(false);
-        }
-    };
-
-    const handleUpdate = async (
-        request: UpdateCodingTemplateRequest,
-    ) => {
-        if (!editingTemplate) {
+        if (technologyId <= 0) {
+            showToast.error("Your technology could not be determined.");
             return;
         }
 
+        setEditingTemplate(null);
+        setDrawerOpen(true);
+    };
+
+    const openEdit = (template: MentorCodingTemplate) => {
+        if (submitting) return;
+
+        setEditingTemplate(template);
+        setDrawerOpen(true);
+    };
+
+    const invalidateTemplates = async () => {
         try {
-            setSubmitting(true);
-
-            await updateCodingTemplate(
-                editingTemplate.id,
-                request,
-            );
-
-            setFormOpen(false);
-            setEditingTemplate(null);
-
-            await loadTemplates();
-
-            showToast.success(
-                "Coding template updated successfully.",
-            );
+            await queryClient.invalidateQueries({
+                queryKey: ["mentor-coding-templates", questionId],
+            });
         } catch (error) {
-            showToast.error(
-                getErrorMessage(
-                    error,
-                    "Failed to update coding template.",
-                ),
-            );
+            console.error("Failed to refresh coding templates:", error);
+        }
+    };
 
-            throw error;
+    const handleSubmit = async (
+        request: CreateCodingTemplateRequest | UpdateCodingTemplateRequest,
+    ) => {
+        if (submitting) return;
+
+        if (technologyId <= 0) {
+            showToast.error("Technology could not be determined.");
+            return;
+        }
+
+        const requestWithTechnology = { ...request, technologyId };
+
+        setSubmitting(true);
+
+        try {
+            if (editingTemplate) {
+                await updateCodingTemplate(editingTemplate.id, requestWithTechnology);
+                showToast.success("Coding template updated successfully.");
+            } else {
+                await createCodingTemplate(questionId, requestWithTechnology);
+                showToast.success("Coding template created successfully.");
+            }
+
+            closeDrawer();
+            await invalidateTemplates();
+        } catch (error) {
+            showToast.error(getErrorMessage(error, "Failed to save coding template."));
         } finally {
             setSubmitting(false);
         }
     };
 
-    const handleDelete = (id: number) => {
+    const handleDelete = (template: MentorCodingTemplate) => {
         showToast.confirm(
             "Delete Coding Template",
             "Are you sure you want to delete this coding template? This action cannot be undone.",
             () => {
                 void (async () => {
+                    setSubmitting(true);
+
                     try {
-                        await deleteCodingTemplate(id);
+                        await deleteCodingTemplate(template.id);
+                        showToast.success("Coding template deleted successfully.");
 
-                        await loadTemplates();
+                        if (editingTemplate?.id === template.id) {
+                            closeDrawer();
+                        }
 
-                        showToast.success(
-                            "Coding template deleted successfully.",
-                        );
+                        await invalidateTemplates();
                     } catch (error) {
                         showToast.error(
-                            getErrorMessage(
-                                error,
-                                "Failed to delete coding template.",
-                            ),
+                            getErrorMessage(error, "Failed to delete coding template."),
                         );
+                    } finally {
+                        setSubmitting(false);
                     }
                 })();
             },
@@ -213,162 +158,117 @@ const CodingTemplatesSection = ({
         );
     };
 
-    const openCreate = () => {
-        setEditingTemplate(null);
-        setFormOpen(true);
-    };
+    if (!validQuestionId) {
+        return null;
+    }
 
-    const openEdit = (
-        template: MentorCodingTemplate,
-    ) => {
-        setEditingTemplate(template);
-        setFormOpen(true);
-    };
+    if (templatesLoading || curriculumLoading) {
+        return (
+            <div className="flex justify-center py-10">
+                <LoadingSpinner />
+            </div>
+        );
+    }
+
+    if (templatesError || curriculumError) {
+        return (
+            <EmptyState
+                icon={<span className="font-mono text-lg">{"</>"}</span>}
+                title="Unable to load coding templates"
+                description="Something went wrong while loading the coding template data."
+            />
+        );
+    }
+
+    if (technologyId <= 0 || !technologyName) {
+        return (
+            <EmptyState
+                icon={<span className="font-mono text-lg">{"</>"}</span>}
+                title="Technology unavailable"
+                description="Your mentor technology could not be determined. Please check your mentor curriculum."
+            />
+        );
+    }
 
     return (
-        <section className="rounded-xl border border-[var(--cs-border)] bg-[var(--cs-surface)] p-6">
-            <div className="flex items-start justify-between gap-4">
-                <div>
-                    <h2 className="text-base font-semibold text-[var(--cs-text)]">
-                        Coding Templates
-                    </h2>
+        <div className="py-6">
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                <p className="text-sm text-[var(--cs-text-muted)]">
+                    Starter and solution code for{" "}
+                    <span className="font-medium text-[var(--cs-text-secondary)]">
+                        {technologyName}
+                    </span>
+                    .
+                </p>
 
-                    <p className="mt-1 text-sm text-[var(--cs-text-muted)]">
-                        Starter and solution code for supported
-                        technologies.
-                    </p>
-                </div>
-
-                {!formOpen && (
-                    <button
-                        type="button"
-                        onClick={openCreate}
-                        className="inline-flex items-center gap-2 rounded-lg border border-[var(--cs-border)] px-3 py-2 text-sm font-medium text-[var(--cs-text)] transition hover:bg-[var(--cs-surface-muted)]"
-                    >
-                        <Plus size={16} />
-                        Add Template
-                    </button>
-                )}
+                <Button type="button" onClick={openCreate} disabled={submitting}>
+                    <Plus size={16} className="mr-1.5 inline" />
+                    Add Template
+                </Button>
             </div>
 
-            {formOpen && (
-                <div className="mt-5">
-                    <CodingTemplateForm
-                        key={
-                            editingTemplate?.id ??
-                            "new"
-                        }
-                        template={
-                            editingTemplate ??
-                            undefined
-                        }
-                        submitting={submitting}
-                        onSubmit={
-                            editingTemplate
-                                ? handleUpdate
-                                : handleCreate
-                        }
-                        onCancel={() => {
-                            setFormOpen(false);
-                            setEditingTemplate(null);
-                        }}
-                    />
+            <div
+                className={
+                    drawerOpen
+                        ? "mt-5 grid grid-cols-1 items-start gap-5 lg:grid-cols-[minmax(0,1.35fr)_minmax(360px,0.85fr)]"
+                        : "mt-5"
+                }
+            >
+                <div className="min-w-0">
+                    {templates.length === 0 ? (
+                        <EmptyState
+                            icon={<span className="font-mono text-lg">{"</>"}</span>}
+                            title="No coding templates"
+                            description={`Add a coding template for ${technologyName}.`}
+                        />
+                    ) : (
+                        <TemplateTable
+                            templates={templates}
+                            technologyName={technologyName}
+                            onEdit={openEdit}
+                            onDelete={handleDelete}
+                            disabled={submitting}
+                        />
+                    )}
                 </div>
-            )}
 
-            {loading ? (
-                <div className="flex justify-center py-10">
-                    <LoadingSpinner />
-                </div>
-            ) : templates.length === 0 ? (
-                <div className="py-8">
-                    <EmptyState
-                        icon={
-                            <span className="text-lg font-bold">
-                                {"</>"}
-                            </span>
-                        }
-                        title="No coding templates"
-                        description="Add at least one coding template before publishing this question."
-                    />
-                </div>
-            ) : (
-                <div className="mt-5 space-y-4">
-                    {templates.map((template) => (
-                        <div
-                            key={template.id}
-                            className="rounded-lg border border-[var(--cs-border)] p-5"
-                        >
-                            <div className="flex items-start justify-between gap-4">
-                                <div>
-                                    <p className="text-sm font-semibold text-[var(--cs-text)]">
-                                        Technology #
-                                        {template.technologyId}
-                                    </p>
-                                </div>
-
-                                <div className="flex items-center gap-1">
-                                    <button
-                                        type="button"
-                                        onClick={() =>
-                                            openEdit(
-                                                template,
-                                            )
-                                        }
-                                        className="rounded-lg p-2 text-[var(--cs-text-muted)] transition hover:bg-[var(--cs-surface-muted)] hover:text-[var(--cs-text)]"
-                                        aria-label="Edit coding template"
-                                    >
-                                        <Edit3 size={16} />
-                                    </button>
-
-                                    <button
-                                        type="button"
-                                        onClick={() =>
-                                            handleDelete(
-                                                template.id,
-                                            )
-                                        }
-                                        className="rounded-lg p-2 text-[var(--cs-text-muted)] transition hover:bg-[var(--cs-danger-subtle)] hover:text-[var(--cs-danger)]"
-                                        aria-label="Delete coding template"
-                                    >
-                                        <Trash2 size={16} />
-                                    </button>
-                                </div>
+                {drawerOpen && (
+                    <aside className="min-w-0 overflow-hidden rounded-xl border border-[var(--cs-border)]/70 bg-[var(--cs-surface)]/50 backdrop-blur-sm">
+                        <div className="flex items-start justify-between gap-4 border-b border-[var(--cs-border)]/60 px-5 py-4">
+                            <div className="min-w-0">
+                                <h3 className="text-sm font-semibold text-[var(--cs-text)]">
+                                    {editingTemplate ? "Edit Coding Template" : "Add Coding Template"}
+                                </h3>
+                                <p className="mt-1 text-xs leading-5 text-[var(--cs-text-muted)]">
+                                    Configure the starter and solution code for this coding question.
+                                </p>
                             </div>
-
-                            <div className="mt-4 grid gap-4 lg:grid-cols-2">
-                                <div>
-                                    <p className="mb-2 text-xs font-medium uppercase tracking-wide text-[var(--cs-text-muted)]">
-                                        Starter Code
-                                    </p>
-
-                                    <pre className="max-h-80 overflow-auto whitespace-pre-wrap rounded-lg bg-[var(--cs-surface-muted)] p-4 text-xs text-[var(--cs-text)]">
-                                        <code>
-                                            {
-                                                template.starterCode
-                                            }
-                                        </code>
-                                    </pre>
-                                </div>
-
-                                <div>
-                                    <p className="mb-2 text-xs font-medium uppercase tracking-wide text-[var(--cs-text-muted)]">
-                                        Solution Code
-                                    </p>
-
-                                    <pre className="max-h-80 overflow-auto whitespace-pre-wrap rounded-lg bg-[var(--cs-surface-muted)] p-4 text-xs text-[var(--cs-text)]">
-                                        <code>
-                                            {template.solutionCode ||
-                                                "No solution code provided."}
-                                        </code>
-                                    </pre>
-                                </div>
-                            </div>
+                            <button
+                                type="button"
+                                onClick={closeDrawer}
+                                disabled={submitting}
+                                aria-label="Close coding template form"
+                                className="shrink-0 rounded-lg p-2 text-[var(--cs-text-muted)] transition-colors hover:bg-[var(--cs-surface-muted)]/60 hover:text-[var(--cs-text)] disabled:cursor-not-allowed disabled:opacity-50"
+                            >
+                                <span aria-hidden="true" className="text-lg leading-none">×</span>
+                            </button>
                         </div>
-                    ))}
-                </div>
-            )}
-        </section>
+
+                        <div className="p-5">
+                            <CodingTemplateForm
+                                key={editingTemplate?.id ?? "new-template"}
+                                template={editingTemplate ?? undefined}
+                                technologyId={technologyId}
+                                technologyName={technologyName}
+                                submitting={submitting}
+                                onSubmit={handleSubmit}
+                                onCancel={closeDrawer}
+                            />
+                        </div>
+                    </aside>
+                )}
+            </div>
+        </div>
     );
 };
 

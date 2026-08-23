@@ -1,4 +1,5 @@
 import { BookOpen, Clock3, ArrowRight } from "lucide-react";
+import { Link } from "react-router-dom";
 import type { DashboardTopic } from "../../../../types/dashboard.types.ts";
 
 interface ContinueLearningProps {
@@ -23,7 +24,7 @@ export default function ContinueLearning({
         .slice(0, 3);
 
     return (
-        <section className="rounded-xl border border-[#1e3254] bg-[#0f1e35]">
+        <section className="rounded-2xl border border-[#1e3254] bg-[#0f1e35]">
             <div className="flex items-center justify-between border-b border-[#1e3254] px-5 py-4">
                 <div>
                     <h2 className="text-sm font-semibold text-[#e8f0fe]">
@@ -35,7 +36,7 @@ export default function ContinueLearning({
                     </p>
                 </div>
 
-                <BookOpen size={18} className="text-[#00e5c0]" />
+                <BookOpen size={18} className="text-[#17D4C3]" />
             </div>
 
             {recentTopics.length === 0 ? (
@@ -52,13 +53,22 @@ export default function ContinueLearning({
                     <p className="mt-1 text-xs text-[#4a6380]">
                         Start learning a topic to see it here.
                     </p>
+
+                    <Link
+                        to="/learner/learning"
+                        className="mt-4 inline-flex items-center gap-1.5 text-xs font-semibold text-[#17D4C3] hover:underline"
+                    >
+                        Browse technologies
+                        <ArrowRight size={13} />
+                    </Link>
                 </div>
             ) : (
                 <div className="divide-y divide-[#1e3254]">
                     {recentTopics.map((topic) => (
-                        <div
+                        <Link
                             key={topic.topicId}
-                            className="flex items-center justify-between px-5 py-4"
+                            to="/learner/learning"
+                            className="group flex items-center justify-between px-5 py-4 no-underline transition-colors hover:bg-[#12243b]"
                         >
                             <div className="min-w-0">
                                 <p className="truncate text-sm font-medium text-[#dce8f8]">
@@ -89,9 +99,9 @@ export default function ContinueLearning({
 
                             <ArrowRight
                                 size={16}
-                                className="ml-4 flex-shrink-0 text-[#496582]"
+                                className="ml-4 flex-shrink-0 text-[#496582] transition-transform group-hover:translate-x-1 group-hover:text-[#17D4C3]"
                             />
-                        </div>
+                        </Link>
                     ))}
                 </div>
             )}

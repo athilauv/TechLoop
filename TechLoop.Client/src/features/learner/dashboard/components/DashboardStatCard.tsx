@@ -32,7 +32,7 @@ export default function DashboardStatCard({
                     )}
                 </div>
 
-                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-[#102f32] text-[#00e5c0]">
+                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-[#17D4C3]/15 text-[#17D4C3]">
                     {icon}
                 </div>
             </div>

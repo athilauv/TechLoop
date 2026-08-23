@@ -1,16 +1,13 @@
 import { ChevronRight, Clock3 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
-import Card from "../../../../shared/Card.tsx";
-import Button from "../../../../shared/Button.tsx";
 import ContributionTypeBadge from "../../../../shared/ContributionTypeBadge.tsx";
-import type {
-    TopicContributionPendingResponse,
-} from "../../../../types/topicContribution.types.ts";
+import type { TopicContributionPendingResponse } from "../../../../types/topicContribution.types.ts";
 
 interface PendingContributionCardProps {
     contribution: TopicContributionPendingResponse;
 }
+
 
 export default function PendingContributionCard({
                                                     contribution,
@@ -18,85 +15,55 @@ export default function PendingContributionCard({
     const navigate = useNavigate();
 
     return (
-        <Card
+        <button
+            type="button"
+            onClick={() => navigate(`/mentor/topic-contributions/${contribution.id}`)}
             className="
-                transition duration-150
-                hover:border-[var(--cs-accent-border)]
-                hover:shadow-[0_8px_24px_-8px_rgba(0,232,194,0.15)]
+                group flex w-full items-center gap-5
+                rounded-[var(--cs-radius-card)]
+                border border-[var(--cs-border)]
+                bg-[var(--cs-bg-card)]
+                px-5 py-4
+                text-left transition
+                hover:border-[var(--cs-accent-border)] hover:bg-[var(--cs-bg-card-raised)]
+                focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--cs-accent)]/30
             "
         >
-            <div className="p-6">
-                {/* Header */}
-                <div className="flex items-start justify-between gap-5">
-                    <div className="min-w-0 flex-1">
-                        <div className="mb-3">
-                            <ContributionTypeBadge
-                                type={contribution.contributionType}
-                            />
-                        </div>
+            {/* Waiting indicator */}
+            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-[var(--cs-warning-border)] bg-[var(--cs-warning-subtle)] text-[var(--cs-warning)]">
+                <Clock3 size={15} />
+            </span>
 
-                        <h2 className="truncate text-base font-semibold text-[var(--cs-text-primary)]">
-                            {contribution.title}
-                        </h2>
-
-                        <p className="mt-2 line-clamp-2 text-sm leading-6 text-[var(--cs-text-secondary)]">
-                            {contribution.description}
-                        </p>
-                    </div>
-
-                    {/* Pending Badge */}
-                    <span
-                        className="
-                            inline-flex shrink-0 items-center gap-1.5
-                            rounded-full
-                            border border-[var(--cs-warning-border)]
-                            bg-[var(--cs-warning-subtle)]
-                            px-3 py-1.5
-                            text-xs font-medium
-                            text-[var(--cs-warning)]
-                        "
-                    >
-                        <Clock3 size={13} />
-                        Pending
+            <div className="min-w-0 flex-1">
+                <div className="flex flex-wrap items-center gap-2">
+                    <span className="font-[var(--cs-font-mono)] text-[11px] text-[var(--cs-text-muted)]">
+                        #{String(contribution.id).padStart(4, "0")}
                     </span>
+                    <ContributionTypeBadge type={contribution.contributionType} />
                 </div>
 
-                {/* Metadata */}
-                <div
-                    className="
-                        mt-5 flex flex-wrap items-center gap-x-5 gap-y-2
-                        border-t border-[var(--cs-border)]
-                        pt-4
-                        text-xs text-[var(--cs-text-muted)]
-                    "
-                >
-                    <span>Contribution #{contribution.id}</span>
+                <h2 className="mt-1.5 truncate text-sm font-semibold text-[var(--cs-text-primary)] group-hover:text-white">
+                    {contribution.title}
+                </h2>
 
-                    <span>
-                        {new Date(contribution.createdAt).toLocaleDateString()}
-                    </span>
-
-                    {contribution.referenceUrl && (
-                        <span className="truncate">Reference attached</span>
-                    )}
-                </div>
-
-                {/* Action */}
-                <div className="mt-5 flex justify-end">
-                    <Button
-                        variant="accent-outline"
-                        size="sm"
-                        icon={<ChevronRight size={14} />}
-                        onClick={() =>
-                            navigate(
-                                `/mentor/topic-contributions/${contribution.id}`
-                            )
-                        }
-                    >
-                        Review
-                    </Button>
-                </div>
+                <p className="mt-1 line-clamp-1 text-xs leading-5 text-[var(--cs-text-secondary)]">
+                    {contribution.description}
+                </p>
             </div>
-        </Card>
+
+            <div className="hidden shrink-0 flex-col items-end gap-1 sm:flex">
+                <span className="text-xs text-[var(--cs-text-muted)]">
+                    {new Date(contribution.createdAt).toLocaleDateString()}
+                </span>
+                {contribution.referenceUrl && (
+                    <span className="text-[10px] text-[var(--cs-text-muted)]">has reference</span>
+                )}
+            </div>
+
+            <ChevronRight
+                size={18}
+                className="shrink-0 text-[var(--cs-text-muted)] transition group-hover:translate-x-0.5 group-hover:text-[var(--cs-accent)]"
+            />
+        </button>
     );
 }

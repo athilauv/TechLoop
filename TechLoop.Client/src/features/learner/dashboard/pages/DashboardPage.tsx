@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
     Award,
     Code2,
@@ -11,6 +11,11 @@ import DashboardStatCard from "../components/DashboardStatCard";
 import ContinueLearning from "../components/ContinueLearning";
 import RecentActivity from "../components/RecentActivity";
 import QuickActions from "../components/QuickActions";
+import TechnologiesPreview from "../components/TechnologiesPreview";
+import RecommendedPractice from "../components/RecommendedPractice";
+import CommunityPreview from "../components/CommunityPreview";
+import AssistancePanel from "../components/AssistancePanel";
+import ContributionCta from "../components/ContributionCta";
 import type { DashboardResponse } from "../../../../types/dashboard.types";
 import { getDashboard } from "../../../../api/dashboard.api.ts";
 
@@ -46,16 +51,30 @@ export default function DashboardPage() {
         void loadDashboard();
     }, []);
 
+    const currentTopic = useMemo(() => {
+        if (!dashboard?.topicAnalytics?.length) return null;
+
+        return [...dashboard.topicAnalytics].sort((a, b) => {
+            const dateA = a.lastPracticedAt
+                ? new Date(a.lastPracticedAt).getTime()
+                : 0;
+
+            const dateB = b.lastPracticedAt
+                ? new Date(b.lastPracticedAt).getTime()
+                : 0;
+
+            return dateB - dateA;
+        })[0];
+    }, [dashboard]);
+
     if (loading) {
         return (
             <div className="min-h-full bg-[#081423]">
                 <div className="mx-auto max-w-7xl px-5 py-7 sm:px-6 lg:px-8">
 
-                    <div className="h-5 w-32 animate-pulse rounded bg-[#14253d]" />
+                    <div className="h-40 animate-pulse rounded-2xl bg-[#0f1e35]" />
 
-                    <div className="mt-3 h-8 w-56 animate-pulse rounded bg-[#14253d]" />
-
-                    <div className="mt-8 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+                    <div className="mt-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
                         {[1, 2, 3, 4].map((item) => (
                             <div
                                 key={item}
@@ -91,28 +110,22 @@ export default function DashboardPage() {
         );
     }
 
-    if (!dashboard) {
-        return (
-            <div className="min-h-full bg-[#081423]">
-                <div className="mx-auto max-w-7xl px-5 py-7 sm:px-6 lg:px-8">
-                    <DashboardHeader hasData={false} />
-                </div>
-            </div>
-        );
-    }
-
-    const overview = dashboard.overview;
+    const overview = dashboard?.overview ?? null;
+    const hasData = Boolean(overview);
 
     return (
         <div className="min-h-full bg-[#081423]">
-            <div className="mx-auto max-w-7xl px-5 py-7 sm:px-6 lg:px-8">
+            <div className="mx-auto max-w-7xl space-y-6 px-5 py-7 sm:px-6 lg:px-8">
 
-                {/* HEADER */}
-                <DashboardHeader hasData={Boolean(overview)} />
+                {/* HERO */}
+                <DashboardHeader
+                    hasData={hasData}
+                    currentTopic={currentTopic}
+                />
 
                 {/* STATS */}
                 {overview ? (
-                    <div className="mt-8 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+                    <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
 
                         <DashboardStatCard
                             title="Questions Solved"
@@ -144,7 +157,7 @@ export default function DashboardPage() {
 
                     </div>
                 ) : (
-                    <div className="mt-8 rounded-xl border border-[#1e3254] bg-[#0f1e35] p-8 text-center">
+                    <div className="rounded-xl border border-[#1e3254] bg-[#0f1e35] p-8 text-center">
                         <p className="text-sm text-[#7a99bb]">
                             No statistics available yet.
                         </p>
@@ -155,23 +168,34 @@ export default function DashboardPage() {
                     </div>
                 )}
 
-                {/* MAIN CONTENT */}
-                <div className="mt-6 grid gap-6 xl:grid-cols-[1.35fr_1fr]">
-
+                {/* CONTINUE LEARNING + QUICK ACTIONS */}
+                <div className="grid gap-6 xl:grid-cols-[1.35fr_1fr]">
                     <ContinueLearning
-                        topics={dashboard.topicAnalytics}
+                        topics={dashboard?.topicAnalytics ?? []}
                     />
 
-                    <RecentActivity
-                        activities={dashboard.practiceActivity}
-                    />
-
-                </div>
-
-                {/* QUICK ACTIONS */}
-                <div className="mt-6">
                     <QuickActions />
                 </div>
+
+                {/* TECHNOLOGIES */}
+                <TechnologiesPreview />
+
+                {/* PRACTICE + COMMUNITY */}
+                <div className="grid gap-6 lg:grid-cols-2">
+                    <RecommendedPractice />
+                    <CommunityPreview />
+                </div>
+
+                {/* ASSISTANCE + CONTRIBUTION */}
+                <div className="grid gap-6 lg:grid-cols-2">
+                    <AssistancePanel />
+                    <ContributionCta />
+                </div>
+
+                {/* RECENT ACTIVITY */}
+                <RecentActivity
+                    activities={dashboard?.practiceActivity ?? []}
+                />
 
             </div>
         </div>

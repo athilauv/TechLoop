@@ -1,163 +1,117 @@
 import api from "./axios.ts";
-
 import type {
     CommunityPost,
+    CommunityRole,
     CreateCommentRequest,
     CreatePostRequest,
-    PostComment, SavedPost,
+    PostComment,
+    SavedPost,
     UpdateCommentRequest,
     UpdatePostRequest,
-} from "../types/community.types.ts";
+} from "../types/community.types";
 
-// POSTS
+const ROLE_BASE_PATHS: Record<CommunityRole, string> = {
+    learner: "/api/learner/community",
+    mentor: "/mentor/community",
+};
 
-export const getMentorCommunityFeed = async (): Promise<CommunityPost[]> => {
-    const { data } = await api.get<CommunityPost[]>(
-        "/mentor/community/posts"
-    );
+function basePath(role: CommunityRole): string {
+    return ROLE_BASE_PATHS[role];
+}
 
+//POSTS
+export const getCommunityFeed = async (role: CommunityRole): Promise<CommunityPost[]> => {
+    const { data } = await api.get<CommunityPost[]>(`${basePath(role)}/posts`);
     return data;
 };
 
-export const getMentorCommunityPost = async (
+export const getCommunityPost = async (
+    role: CommunityRole,
     postId: number
 ): Promise<CommunityPost> => {
-    const { data } = await api.get<CommunityPost>(
-        `/mentor/community/posts/${postId}`
-    );
-
+    const { data } = await api.get<CommunityPost>(`${basePath(role)}/posts/${postId}`);
     return data;
 };
 
-export const createMentorPost = async (
+export const createCommunityPost = async (
+    role: CommunityRole,
     request: CreatePostRequest
 ): Promise<CommunityPost> => {
-    const { data } = await api.post<CommunityPost>(
-        "/mentor/community/posts",
-        request
-    );
-
+    const { data } = await api.post<CommunityPost>(`${basePath(role)}/posts`, request);
     return data;
 };
 
-export const updateMentorPost = async (
+export const updateCommunityPost = async (
+    role: CommunityRole,
     postId: number,
     request: UpdatePostRequest
 ): Promise<CommunityPost> => {
-    const { data } = await api.put<CommunityPost>(
-        `/mentor/community/posts/${postId}`,
-        request
-    );
-
+    const { data } = await api.put<CommunityPost>(`${basePath(role)}/posts/${postId}`, request);
     return data;
 };
 
-export const deleteMentorPost = async (
-    postId: number
-): Promise<void> => {
-    await api.delete(
-        `/mentor/community/posts/${postId}`
-    );
+export const deleteCommunityPost = async (role: CommunityRole, postId: number): Promise<void> => {
+    await api.delete(`${basePath(role)}/posts/${postId}`);
 };
 
-// COMMENTS
-
-export const getMentorPostComments = async (
+//COMMENTS
+export const getPostComments = async (
+    role: CommunityRole,
     postId: number
 ): Promise<PostComment[]> => {
-    const { data } = await api.get<PostComment[]>(
-        `/mentor/community/posts/${postId}/comments`
-    );
-
+    const { data } = await api.get<PostComment[]>(`${basePath(role)}/posts/${postId}/comments`);
     return data;
 };
 
-export const createMentorComment = async (
+export const createPostComment = async (
+    role: CommunityRole,
     postId: number,
     request: CreateCommentRequest
 ): Promise<PostComment> => {
     const { data } = await api.post<PostComment>(
-        `/mentor/community/posts/${postId}/comments`,
-        request
-    );
-
+        `${basePath(role)}/posts/${postId}/comments`, request);
     return data;
 };
 
-export const updateMentorComment = async (
+export const updatePostComment = async (
+    role: CommunityRole,
     commentId: number,
     request: UpdateCommentRequest
 ): Promise<PostComment> => {
-    const { data } = await api.put<PostComment>(
-        `/mentor/community/comments/${commentId}`,
-        request
-    );
-
+    const { data } = await api.put<PostComment>(`${basePath(role)}/comments/${commentId}`, request);
     return data;
 };
 
-export const deleteMentorComment = async (
-    commentId: number
-): Promise<void> => {
-    await api.delete(
-        `/mentor/community/comments/${commentId}`
-    );
+export const deletePostComment = async (role: CommunityRole, commentId: number): Promise<void> => {
+    await api.delete(`${basePath(role)}/comments/${commentId}`);
 };
 
-// LIKES
-
-export const likeMentorPost = async (
-    postId: number
-): Promise<number> => {
-    const { data } = await api.post<number>(
-        `/mentor/community/posts/${postId}/likes`
-    );
-
+//LIKES
+export const likeCommunityPost = async (role: CommunityRole, postId: number): Promise<number> => {
+    const { data } = await api.post<number>(`${basePath(role)}/posts/${postId}/likes`);
     return data;
 };
 
-export const unlikeMentorPost = async (
-    postId: number
-): Promise<void> => {
-    await api.delete(
-        `/mentor/community/posts/${postId}/likes`
-    );
+export const unlikeCommunityPost = async (role: CommunityRole, postId: number): Promise<void> => {
+    await api.delete(`${basePath(role)}/posts/${postId}/likes`);
 };
 
-export const getMentorLikeStatus = async (
-    postId: number
-): Promise<boolean> => {
-    const { data } = await api.get<boolean>(
-        `/mentor/community/posts/${postId}/likes/me`
-    );
-
+export const getPostLikeStatus = async (role: CommunityRole, postId: number): Promise<boolean> => {
+    const { data } = await api.get<boolean>(`${basePath(role)}/posts/${postId}/likes/me`);
     return data;
 };
 
-// SAVED POSTS
-
-export const saveMentorPost = async (
-    postId: number
-): Promise<number> => {
-    const { data } = await api.post<number>(
-        `/mentor/community/posts/${postId}/save`
-    );
-
+//SAVED POSTS
+export const saveCommunityPost = async (role: CommunityRole, postId: number): Promise<number> => {
+    const { data } = await api.post<number>(`${basePath(role)}/posts/${postId}/save`);
     return data;
 };
 
-export const unsaveMentorPost = async (
-    postId: number
-): Promise<void> => {
-    await api.delete(
-        `/mentor/community/posts/${postId}/save`
-    );
+export const unsaveCommunityPost = async (role: CommunityRole, postId: number): Promise<void> => {
+    await api.delete(`${basePath(role)}/posts/${postId}/save`);
 };
 
-export const getMentorSavedPosts = async (): Promise<SavedPost[]> => {
-    const { data } = await api.get<SavedPost[]>(
-        "/mentor/community/saved-posts"
-    );
-
+export const getSavedCommunityPosts = async (role: CommunityRole): Promise<SavedPost[]> => {
+    const { data } = await api.get<SavedPost[]>(`${basePath(role)}/saved-posts`);
     return data;
 };

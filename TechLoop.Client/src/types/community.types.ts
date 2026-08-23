@@ -55,3 +55,8 @@ export interface SavedPost {
 export interface PostLikeStatus {
     isLiked: boolean;
 }
+
+export type CommunityRole = "learner" | "mentor";
+
+
+export type { LearnerTechnology as CommunityTechnology } from "./technology.types";

@@ -1,78 +1,174 @@
-﻿import React from "react";
+import { useRef } from "react";
+import type { MouseEvent as ReactMouseEvent } from "react";
+import { Link } from "react-router-dom";
+import { ArrowRight } from "lucide-react";
+import {
+    motion,
+    useMotionValue,
+    useSpring,
+    useTransform,
+    useReducedMotion,
+} from "framer-motion";
+import EcosystemGraph from "./EcosystemGraph";
 
-const Hero: React.FC = () => {
+export default function Hero() {
+    const prefersReducedMotion = useReducedMotion();
+    const containerRef = useRef<HTMLDivElement>(null);
+
+    const mouseX = useMotionValue(0);
+    const mouseY = useMotionValue(0);
+
+    const springConfig = { stiffness: 120, damping: 20, mass: 0.6 };
+    const rotateX = useSpring(
+        useTransform(mouseY, [-0.5, 0.5], [6, -6]),
+        springConfig
+    );
+    const rotateY = useSpring(
+        useTransform(mouseX, [-0.5, 0.5], [-6, 6]),
+        springConfig
+    );
+
+    const handleMouseMove = (e: ReactMouseEvent<HTMLDivElement>) => {
+        if (prefersReducedMotion || !containerRef.current) return;
+
+        const rect = containerRef.current.getBoundingClientRect();
+        mouseX.set((e.clientX - rect.left) / rect.width - 0.5);
+        mouseY.set((e.clientY - rect.top) / rect.height - 0.5);
+    };
+
+    const handleMouseLeave = () => {
+        mouseX.set(0);
+        mouseY.set(0);
+    };
+
     return (
-        <section className="px-6 sm:px-10 lg:px-16 py-16 md:py-20 lg:py-24">
-            <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center">
+        <section
+            ref={containerRef}
+            onMouseMove={handleMouseMove}
+            onMouseLeave={handleMouseLeave}
+            className="relative overflow-hidden px-6 pb-20 pt-24 sm:px-10 sm:pt-28 lg:px-16 lg:pt-32"
+        >
+            {/* ambient background glow */}
+            <div
+                aria-hidden
+                className="pointer-events-none absolute left-1/2 top-0 h-[520px] w-[520px] -translate-x-1/2 rounded-full bg-[#17D4C3]/10 blur-[120px]"
+            />
+
+            <div className="relative mx-auto grid max-w-7xl grid-cols-1 items-center gap-16 lg:grid-cols-2">
                 <div>
-                    <span className="inline-flex items-center gap-2 text-[11px] font-mono tracking-widest text-accent border border-accent/30 rounded-md px-3 py-1.5 mb-6">
+                    <motion.span
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.5 }}
+                        className="inline-flex items-center gap-2 rounded-full border border-[#17D4C3]/30 px-3 py-1.5 text-[11px] font-mono tracking-widest text-[#17D4C3]"
+                    >
                         <span className="relative flex h-1.5 w-1.5">
-                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-accent opacity-75" />
-                            <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-accent" />
+                            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[#17D4C3] opacity-75" />
+                            <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-[#17D4C3]" />
                         </span>
-                        PRODUCTION GRADE ENVIRONMENT
-                    </span>
+                        THE DEVELOPER ECOSYSTEM
+                    </motion.span>
 
-                    <h1 className="text-[34px] sm:text-[40px] lg:text-[46px] leading-[1.12] tracking-tight font-extrabold text-white mb-5">
-                        Accelerate Your
+                    <motion.h1
+                        initial={{ opacity: 0, y: 16 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.6, delay: 0.05 }}
+                        className="mt-6 text-[36px] font-extrabold leading-[1.1] tracking-tight text-[#e8f0fe] sm:text-[46px] lg:text-[52px]"
+                    >
+                        One place to build your
                         <br />
-                        Engineering Career
-                    </h1>
+                        entire developer journey.
+                    </motion.h1>
 
-                    <p className="text-[15px] sm:text-[16px] text-secondary leading-relaxed max-w-md mb-8">
-                        Master production-level SQL, distributed systems security, and
-                        high-performance infrastructure through peer-validated engineering
-                        challenges.
-                    </p>
+                    <motion.p
+                        initial={{ opacity: 0, y: 16 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.6, delay: 0.1 }}
+                        className="mt-6 max-w-md text-[15px] leading-relaxed text-[#8ca3bf] sm:text-base"
+                    >
+                        Learn technologies, practice with real questions, solve coding
+                        challenges, and get unstuck with AI, mentors, and a community —
+                        without leaving TechLoop.
+                    </motion.p>
 
-                    <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 mb-8">
-                        <button className="w-full sm:w-auto bg-white text-bg text-[14px] font-semibold px-6 py-3 rounded-xl hover:opacity-90 active:opacity-80 transition-opacity focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-bg">
-                            Get Started
-                        </button>
+                    <motion.div
+                        initial={{ opacity: 0, y: 16 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.6, delay: 0.15 }}
+                        className="mt-9 flex flex-col gap-3 sm:flex-row sm:items-center"
+                    >
+                        <MagneticLink
+                            to="/learner/dashboard"
+                            className="group inline-flex items-center justify-center gap-2 rounded-xl bg-[#17D4C3] px-6 py-3.5 text-sm font-semibold text-[#081423] transition hover:brightness-105"
+                        >
+                            Enter TechLoop
+                            <ArrowRight
+                                size={16}
+                                className="transition-transform group-hover:translate-x-1"
+                            />
+                        </MagneticLink>
 
-                        <button className="w-full sm:w-auto border border-accent text-accent text-[14px] font-semibold px-6 py-3 rounded-xl hover:bg-accent/10 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-bg">
-                            View Roadmap
-                        </button>
-                    </div>
-
-                    <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-[11px] font-mono tracking-wider text-muted border-t border-border pt-5">
-                        <span>500K+ ENGINEERS TRAINED</span>
-                        <span className="hidden sm:inline text-border">|</span>
-                        <span>SOC2 COMPLIANT</span>
-                        <span className="hidden sm:inline text-border">|</span>
-                        <span>99.99% UPTIME</span>
-                    </div>
+                        <a
+                            href="#ecosystem"
+                            className="inline-flex items-center justify-center gap-2 rounded-xl border border-[#203B5C] px-6 py-3.5 text-sm font-semibold text-[#e8f0fe] transition hover:border-[#17D4C3]/40 hover:text-[#17D4C3]"
+                        >
+                            See how it works
+                        </a>
+                    </motion.div>
                 </div>
 
-                <div className="relative rounded-2xl border border-border bg-card p-8 sm:p-10 flex items-center justify-center overflow-hidden min-h-[280px]">
-                    <div className="absolute w-64 h-64 rounded-full bg-accent/10 blur-3xl" />
-
-                    <svg viewBox="0 0 200 140" className="relative w-full max-w-sm">
-                        <rect x="10" y="10" width="180" height="110" rx="8" fill="#081423" stroke="#203B5C" strokeWidth="1.5"/>
-
-                        <circle cx="100" cy="65" r="26" fill="none" stroke="#17D4C3" strokeWidth="2" opacity="0.6"/>
-
-                        <path d="M85 68 q0 -14 14 -14 q3 -8 12 -8 q11 0 12 11 q9 1 9 10 q0 9 -9 9 h-30 q-8 0 -8 -8z" fill="#0F3A38" stroke="#17D4C3" strokeWidth="1.6"/>
-
-                        {[
-                            [35, 30],
-                            [165, 30],
-                            [30, 100],
-                            [170, 100],
-                            [100, 20],
-                        ].map(([x, y], i) => (
-                            <g key={i}>
-                                <circle cx={x} cy={y} r="6" fill="#10233E" stroke="#17D4C3" strokeWidth="1.2"/>
-                                <line x1={x} y1={y} x2={100} y2={65} stroke="#203B5C" strokeWidth="1" strokeDasharray="2 2"/>
-                            </g>
-                        ))}
-
-                        <rect x="20" y="122" width="160" height="8" rx="2" fill="#10233E" stroke="#203B5C"/>
-                    </svg>
-                </div>
+                <motion.div
+                    style={
+                        prefersReducedMotion
+                            ? undefined
+                            : { rotateX, rotateY, transformPerspective: 900 }
+                    }
+                    className="mx-auto flex items-center justify-center"
+                >
+                    <EcosystemGraph size={380} />
+                </motion.div>
             </div>
         </section>
     );
-};
+}
 
-export default Hero;
+function MagneticLink({
+                          to,
+                          children,
+                          className,
+                      }: {
+    to: string;
+    children: React.ReactNode;
+    className?: string;
+}) {
+    const prefersReducedMotion = useReducedMotion();
+    const ref = useRef<HTMLAnchorElement>(null);
+    const x = useSpring(0, { stiffness: 200, damping: 18 });
+    const y = useSpring(0, { stiffness: 200, damping: 18 });
+
+    const handleMove = (e: ReactMouseEvent<HTMLAnchorElement>) => {
+        if (prefersReducedMotion || !ref.current) return;
+        const rect = ref.current.getBoundingClientRect();
+        x.set((e.clientX - rect.left - rect.width / 2) * 0.25);
+        y.set((e.clientY - rect.top - rect.height / 2) * 0.25);
+    };
+
+    const handleLeave = () => {
+        x.set(0);
+        y.set(0);
+    };
+
+    return (
+        <motion.div style={{ x, y }} className="inline-block">
+            <Link
+                ref={ref}
+                to={to}
+                onMouseMove={handleMove}
+                onMouseLeave={handleLeave}
+                className={className}
+            >
+                {children}
+            </Link>
+        </motion.div>
+    );
+}

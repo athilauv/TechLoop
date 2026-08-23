@@ -1,172 +1,96 @@
-import { CheckCircle2, Edit3, Plus, Trash2 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { CheckCircle2, Plus } from "lucide-react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useState } from "react";
+
 import EmptyState from "../../../../../shared/EmptyState";
 import LoadingSpinner from "../../../../../shared/LoadingSpinner";
+import Button from "../../../../../shared/Button.tsx";
+
 import {
     createMcqOption,
     deleteMcqOption,
     getMcqOptionsByQuestion,
     updateMcqOption,
 } from "../../../../../api/mentorQuestion.api.ts";
+
 import { getErrorMessage } from "../../../../../utils/error.utils.ts";
 import { showToast } from "../../../../../utils/toast.tsx";
+
 import type {
     CreateMcqOptionRequest,
     MentorMcqOption,
     UpdateMcqOptionRequest,
 } from "../../../../../types/question.types.ts";
+
+import Drawer from "../shared/Drawer";
+import McqOptionTable from "./McqOptionTable";
 import McqOptionForm from "./McqOptionForm";
 
 interface McqOptionsSectionProps {
     questionId: number;
 }
 
-const McqOptionsSection = ({
-                               questionId,
-                           }: McqOptionsSectionProps) => {
-    const [options, setOptions] = useState<MentorMcqOption[]>(
-        [],
-    );
-    const [loading, setLoading] = useState(true);
-    const [formOpen, setFormOpen] = useState(false);
-    const [editingOption, setEditingOption] =
-        useState<MentorMcqOption | null>(null);
+const MAX_OPTIONS = 4;
+
+const McqOptionsSection = ({ questionId }: McqOptionsSectionProps) => {
+    const queryClient = useQueryClient();
+
+    const [drawerOpen, setDrawerOpen] = useState(false);
+    const [editingOption, setEditingOption] = useState<MentorMcqOption | null>(null);
     const [submitting, setSubmitting] = useState(false);
 
-    useEffect(() => {
-        let cancelled = false;
+    const {
+        data: options = [],
+        isLoading,
+        isError,
+    } = useQuery<MentorMcqOption[]>({
+        queryKey: ["mentor-mcq-options", questionId],
+        queryFn: async () => {
+            const result = await getMcqOptionsByQuestion(questionId);
+            return [...result].sort((a, b) => a.position - b.position);
+        },
+    });
 
-        const load = async () => {
-            try {
-                setLoading(true);
+    const nextPosition =
+        options.length > 0 ? Math.max(...options.map((option) => option.position)) + 1 : 1;
 
-                const result =
-                    await getMcqOptionsByQuestion(questionId);
+    const closeDrawer = () => {
+        setDrawerOpen(false);
+        setEditingOption(null);
+    };
 
-                if (!cancelled) {
-                    setOptions(
-                        [...result].sort(
-                            (a, b) =>
-                                a.position - b.position,
-                        ),
-                    );
-                }
-            } catch (error) {
-                if (!cancelled) {
-                    setOptions([]);
+    const openCreate = () => {
+        setEditingOption(null);
+        setDrawerOpen(true);
+    };
 
-                    showToast.error(
-                        getErrorMessage(
-                            error,
-                            "Failed to load answer options.",
-                        ),
-                    );
-                }
-            } finally {
-                if (!cancelled) {
-                    setLoading(false);
-                }
+    const openEdit = (option: MentorMcqOption) => {
+        setEditingOption(option);
+        setDrawerOpen(true);
+    };
+
+    const invalidateOptions = async () => {
+        await queryClient.invalidateQueries({
+            queryKey: ["mentor-mcq-options", questionId],
+        });
+    };
+
+    const handleSubmit = async (request: CreateMcqOptionRequest | UpdateMcqOptionRequest) => {
+        setSubmitting(true);
+
+        try {
+            if (editingOption) {
+                await updateMcqOption(editingOption.id, request);
+                showToast.success("Answer option updated successfully.");
+            } else {
+                await createMcqOption(questionId, request);
+                showToast.success("Answer option created successfully.");
             }
-        };
 
-        void load();
-
-        return () => {
-            cancelled = true;
-        };
-    }, [questionId]);
-
-    const loadOptions = async () => {
-        try {
-            setLoading(true);
-
-            const result =
-                await getMcqOptionsByQuestion(questionId);
-
-            setOptions(
-                [...result].sort(
-                    (a, b) =>
-                        a.position - b.position,
-                ),
-            );
+            closeDrawer();
+            await invalidateOptions();
         } catch (error) {
-            setOptions([]);
-
-            showToast.error(
-                getErrorMessage(
-                    error,
-                    "Failed to load answer options.",
-                ),
-            );
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    const handleCreate = async (
-        request: CreateMcqOptionRequest,
-    ) => {
-        try {
-            setSubmitting(true);
-
-            await createMcqOption(
-                questionId,
-                request,
-            );
-
-            setFormOpen(false);
-            setEditingOption(null);
-
-            await loadOptions();
-
-            showToast.success(
-                "Answer option created successfully.",
-            );
-        } catch (error) {
-            showToast.error(
-                getErrorMessage(
-                    error,
-                    "Failed to create answer option.",
-                ),
-            );
-
-            throw error;
-        } finally {
-            setSubmitting(false);
-        }
-    };
-
-    const handleUpdate = async (
-        request: UpdateMcqOptionRequest,
-    ) => {
-        if (!editingOption) {
-            return;
-        }
-
-        try {
-            setSubmitting(true);
-
-            await updateMcqOption(
-                editingOption.id,
-                request,
-            );
-
-            setFormOpen(false);
-            setEditingOption(null);
-
-            await loadOptions();
-
-            showToast.success(
-                "Answer option updated successfully.",
-            );
-        } catch (error) {
-            showToast.error(
-                getErrorMessage(
-                    error,
-                    "Failed to update answer option.",
-                ),
-            );
-
+            showToast.error(getErrorMessage(error, "Failed to save answer option."));
             throw error;
         } finally {
             setSubmitting(false);
@@ -179,21 +103,23 @@ const McqOptionsSection = ({
             "Are you sure you want to delete this answer option? This action cannot be undone.",
             () => {
                 void (async () => {
+                    setSubmitting(true);
+
                     try {
                         await deleteMcqOption(optionId);
+                        showToast.success("Answer option deleted successfully.");
 
-                        await loadOptions();
+                        if (editingOption?.id === optionId) {
+                            closeDrawer();
+                        }
 
-                        showToast.success(
-                            "Answer option deleted successfully.",
-                        );
+                        await invalidateOptions();
                     } catch (error) {
                         showToast.error(
-                            getErrorMessage(
-                                error,
-                                "Failed to delete answer option.",
-                            ),
+                            getErrorMessage(error, "Failed to delete answer option."),
                         );
+                    } finally {
+                        setSubmitting(false);
                     }
                 })();
             },
@@ -202,157 +128,69 @@ const McqOptionsSection = ({
         );
     };
 
-    const openCreate = () => {
-        setEditingOption(null);
-        setFormOpen(true);
-    };
-
-    const openEdit = (
-        option: MentorMcqOption,
-    ) => {
-        setEditingOption(option);
-        setFormOpen(true);
-    };
-
-    const nextPosition =
-        options.length > 0
-            ? Math.max(
-            ...options.map(
-                (option) => option.position,
-            ),
-        ) + 1
-            : 1;
-
     return (
-        <section className="rounded-xl border border-[var(--cs-border)] bg-[var(--cs-surface)] p-6">
+        <div className="py-6">
             <div className="flex items-start justify-between gap-4">
-                <div>
-                    <h2 className="text-base font-semibold text-[var(--cs-text)]">
-                        Answer Options
-                    </h2>
+                <p className="text-sm text-[var(--cs-text-muted)]">
+                    {options.length}/{MAX_OPTIONS} options added
+                </p>
 
-                    <p className="mt-1 text-sm text-[var(--cs-text-muted)]">
-                        {options.length}/4 options added
-                    </p>
-                </div>
-
-                {options.length < 4 && !formOpen && (
-                    <button
-                        type="button"
-                        onClick={openCreate}
-                        className="inline-flex items-center gap-2 rounded-lg border border-[var(--cs-border)] px-3 py-2 text-sm font-medium text-[var(--cs-text)] transition hover:bg-[var(--cs-surface-muted)]"
-                    >
-                        <Plus size={16} />
+                {options.length < MAX_OPTIONS && (
+                    <Button type="button" onClick={openCreate} disabled={submitting}>
+                        <Plus size={16} className="mr-1.5 inline" />
                         Add Option
-                    </button>
+                    </Button>
                 )}
             </div>
 
-            {formOpen && (
-                <div className="mt-5">
-                    <McqOptionForm
-                        key={
-                            editingOption?.id ??
-                            "new"
-                        }
-                        option={
-                            editingOption ??
-                            undefined
-                        }
-                        position={
-                            editingOption?.position ??
-                            nextPosition
-                        }
-                        submitting={submitting}
-                        onSubmit={
-                            editingOption
-                                ? handleUpdate
-                                : handleCreate
-                        }
-                        onCancel={() => {
-                            setFormOpen(false);
-                            setEditingOption(null);
-                        }}
-                    />
-                </div>
-            )}
-
-            {loading ? (
-                <div className="flex justify-center py-10">
-                    <LoadingSpinner />
-                </div>
-            ) : options.length === 0 ? (
-                <div className="py-8">
+            <div className="mt-5">
+                {isLoading ? (
+                    <div className="flex justify-center py-10">
+                        <LoadingSpinner />
+                    </div>
+                ) : isError ? (
                     <EmptyState
-                        icon={
-                            <CheckCircle2 className="h-6 w-6" />
-                        }
+                        icon={<CheckCircle2 className="h-6 w-6" />}
+                        title="Unable to load answer options"
+                        description="Something went wrong while loading the answer options."
+                    />
+                ) : options.length === 0 ? (
+                    <EmptyState
+                        icon={<CheckCircle2 className="h-6 w-6" />}
                         title="No answer options"
                         description="Add answer options for this MCQ question."
                     />
-                </div>
-            ) : (
-                <div className="mt-5 space-y-3">
-                    {options.map((option, index) => (
-                        <div
-                            key={option.id}
-                            className="flex items-center gap-3 rounded-lg border border-[var(--cs-border)] p-4"
-                        >
-                            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[var(--cs-surface-muted)] text-sm font-semibold text-[var(--cs-text)]">
-                                {String.fromCharCode(
-                                    65 + index,
-                                )}
-                            </span>
+                ) : (
+                    <McqOptionTable
+                        options={options}
+                        onEdit={openEdit}
+                        onDelete={handleDelete}
+                        disabled={submitting}
+                    />
+                )}
+            </div>
 
-                            <div className="min-w-0 flex-1">
-                                <p className="text-sm text-[var(--cs-text)]">
-                                    {option.optionText}
-                                </p>
-                            </div>
-
-                            {option.isCorrect && (
-                                <span className="inline-flex items-center gap-1 rounded-full border border-[var(--cs-success-border)] bg-[var(--cs-success-subtle)] px-2.5 py-1 text-xs font-medium text-[var(--cs-success)]">
-                                    <CheckCircle2
-                                        size={13}
-                                    />
-                                    Correct
-                                </span>
-                            )}
-
-                            <button
-                                type="button"
-                                onClick={() =>
-                                    openEdit(option)
-                                }
-                                className="rounded-lg p-2 text-[var(--cs-text-muted)] transition hover:bg-[var(--cs-surface-muted)] hover:text-[var(--cs-text)]"
-                                aria-label="Edit option"
-                            >
-                                <Edit3 size={16} />
-                            </button>
-
-                            <button
-                                type="button"
-                                onClick={() =>
-                                    handleDelete(
-                                        option.id,
-                                    )
-                                }
-                                className="rounded-lg p-2 text-[var(--cs-text-muted)] transition hover:bg-[var(--cs-danger-subtle)] hover:text-[var(--cs-danger)]"
-                                aria-label="Delete option"
-                            >
-                                <Trash2 size={16} />
-                            </button>
-                        </div>
-                    ))}
-                </div>
-            )}
-
-            {options.length === 4 && (
+            {options.length === MAX_OPTIONS && (
                 <div className="mt-5 rounded-lg border border-[var(--cs-success-border)] bg-[var(--cs-success-subtle)] px-4 py-3 text-sm text-[var(--cs-success)]">
-                    All 4 MCQ options have been added.
+                    All {MAX_OPTIONS} MCQ options have been added.
                 </div>
             )}
-        </section>
+
+            <Drawer
+                open={drawerOpen}
+                onClose={closeDrawer}
+                title={editingOption ? "Edit Option" : "Add Option"}
+            >
+                <McqOptionForm
+                    key={editingOption?.id ?? "new-option"}
+                    option={editingOption ?? undefined}
+                    position={editingOption?.position ?? nextPosition}
+                    submitting={submitting}
+                    onSubmit={handleSubmit}
+                    onCancel={closeDrawer}
+                />
+            </Drawer>
+        </div>
     );
 };
 

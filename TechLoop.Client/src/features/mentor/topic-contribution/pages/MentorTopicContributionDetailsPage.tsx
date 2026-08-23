@@ -5,36 +5,23 @@ import Breadcrumb from "../../../../shared/Breadcrumb.tsx";
 import Button from "../../../../shared/Button.tsx";
 import EmptyState from "../../../../shared/EmptyState.tsx";
 import LoadingSpinner from "../../../../shared/LoadingSpinner.tsx";
-import {
-    getMentorTopicContributionById,
-    reviewTopicContribution,
-} from "../../../../api/mentorTopicContribution.api.ts";
+import {getMentorTopicContributionById, reviewTopicContribution,} from "../../../../api/mentorTopicContribution.api.ts";
 import MentorContributionDetails from "../components/MentorContributionDetails.tsx";
 import ReviewContributionModal from "../components/ReviewContributionModal.tsx";
-import type {
-    ReviewTopicContributionRequest,
-    TopicContributionResponse,
-} from "../../../../types/topicContribution.types.ts";
+import type { ReviewTopicContributionRequest, TopicContributionResponse } from "../../../../types/topicContribution.types.ts";
 
 export default function MentorTopicContributionDetailsPage() {
     const { id } = useParams<{ id: string }>();
     const navigate = useNavigate();
 
     const contributionId = Number(id);
-    const isValidId =
-        !!id &&
-        Number.isInteger(contributionId) &&
-        contributionId > 0;
+    const isValidId = !!id && Number.isInteger(contributionId) && contributionId > 0;
 
-    const [contribution, setContribution] =
-        useState<TopicContributionResponse | null>(null);
-
+    const [contribution, setContribution] = useState<TopicContributionResponse | null>(null);
     const [loading, setLoading] = useState(isValidId);
     const [reviewing, setReviewing] = useState(false);
     const [modalOpen, setModalOpen] = useState(false);
-    const [error, setError] = useState<string | null>(
-        isValidId ? null : "Invalid contribution ID."
-    );
+    const [error, setError] = useState<string | null>(isValidId ? null : "Invalid contribution ID.");
     const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
     useEffect(() => {
@@ -46,8 +33,7 @@ export default function MentorTopicContributionDetailsPage() {
 
         const loadContribution = async () => {
             try {
-                const data =
-                    await getMentorTopicContributionById(contributionId);
+                const data = await getMentorTopicContributionById(contributionId);
 
                 if (!cancelled) {
                     setContribution(data);
@@ -71,9 +57,7 @@ export default function MentorTopicContributionDetailsPage() {
         };
     }, [contributionId, isValidId]);
 
-    const handleReview = async (
-        request: ReviewTopicContributionRequest
-    ) => {
+    const handleReview = async (request: ReviewTopicContributionRequest) => {
         if (!isValidId) {
             return;
         }
@@ -85,16 +69,13 @@ export default function MentorTopicContributionDetailsPage() {
 
             await reviewTopicContribution(contributionId, request);
 
-            const updated =
-                await getMentorTopicContributionById(contributionId);
+            const updated = await getMentorTopicContributionById(contributionId);
 
             setContribution(updated);
             setModalOpen(false);
 
             setSuccessMessage(
-                request.status === 2
-                    ? "Contribution approved successfully."
-                    : "Contribution rejected."
+                request.status === 2 ? "Contribution approved successfully." : "Contribution rejected."
             );
         } catch {
             setError("Unable to review the contribution.");
@@ -113,9 +94,7 @@ export default function MentorTopicContributionDetailsPage() {
                     <Button
                         variant="secondary"
                         icon={<ArrowLeft size={15} />}
-                        onClick={() =>
-                            navigate("/mentor/topic-contributions")
-                        }
+                        onClick={() => navigate("/mentor/topic-contributions")}
                     >
                         Back to Contributions
                     </Button>
@@ -125,13 +104,7 @@ export default function MentorTopicContributionDetailsPage() {
     }
 
     if (loading) {
-        return (
-            <LoadingSpinner
-                size="lg"
-                label="Loading contribution..."
-                fullHeight
-            />
-        );
+        return <LoadingSpinner size="lg" label="Loading contribution..." fullHeight />;
     }
 
     if (error || !contribution) {
@@ -139,17 +112,12 @@ export default function MentorTopicContributionDetailsPage() {
             <EmptyState
                 icon={<ClipboardCheck size={24} />}
                 title="Contribution not found"
-                description={
-                    error ??
-                    "The requested contribution could not be loaded."
-                }
+                description={error ?? "The requested contribution could not be loaded."}
                 action={
                     <Button
                         variant="secondary"
                         icon={<ArrowLeft size={15} />}
-                        onClick={() =>
-                            navigate("/mentor/topic-contributions")
-                        }
+                        onClick={() => navigate("/mentor/topic-contributions")}
                     >
                         Back to Contributions
                     </Button>
@@ -167,15 +135,10 @@ export default function MentorTopicContributionDetailsPage() {
                     items={[
                         { label: "Mentor" },
                         {
-                            label: "Topic Contributions",
-                            onClick: () =>
-                                navigate(
-                                    "/mentor/topic-contributions"
-                                ),
+                            label: "Review Queue",
+                            onClick: () => navigate("/mentor/topic-contributions"),
                         },
-                        {
-                            label: contribution.title,
-                        },
+                        { label: contribution.title },
                     ]}
                 />
 
@@ -184,10 +147,9 @@ export default function MentorTopicContributionDetailsPage() {
                         <h1 className="text-2xl font-semibold text-[var(--cs-text-primary)]">
                             Contribution Review
                         </h1>
-
                         <p className="mt-1 text-sm text-[var(--cs-text-secondary)]">
-                            Review the learner-submitted content before it
-                            moves into the content management workflow.
+                            Review the learner-submitted content before it moves into the content
+                            management workflow.
                         </p>
                     </div>
 
@@ -196,11 +158,7 @@ export default function MentorTopicContributionDetailsPage() {
                             variant="secondary"
                             size="sm"
                             icon={<ArrowLeft size={14} />}
-                            onClick={() =>
-                                navigate(
-                                    "/mentor/topic-contributions"
-                                )
-                            }
+                            onClick={() => navigate("/mentor/topic-contributions")}
                         >
                             Back
                         </Button>
@@ -235,10 +193,8 @@ export default function MentorTopicContributionDetailsPage() {
             </div>
 
             <div className="min-h-0 flex-1 overflow-y-auto p-7">
-                <div className="mx-auto max-w-5xl">
-                    <MentorContributionDetails
-                        contribution={contribution}
-                    />
+                <div className="mx-auto max-w-4xl">
+                    <MentorContributionDetails contribution={contribution} />
                 </div>
             </div>
 

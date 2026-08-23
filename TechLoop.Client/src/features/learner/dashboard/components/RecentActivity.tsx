@@ -31,7 +31,7 @@ export default function RecentActivity({
 
                 <Activity
                     size={18}
-                    className="text-[#00e5c0]"
+                    className="text-[#17D4C3]"
                 />
             </div>
 
@@ -58,10 +58,10 @@ export default function RecentActivity({
                             className="flex items-center justify-between px-5 py-4"
                         >
                             <div className="flex items-center gap-3">
-                                <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-[#102438]">
+                                <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-[#17D4C3]/15">
                                     <Activity
                                         size={16}
-                                        className="text-[#00e5c0]"
+                                        className="text-[#17D4C3]"
                                     />
                                 </div>
 

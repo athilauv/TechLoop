@@ -1,16 +1,23 @@
-﻿import React from "react";
-import Hero from "../components/Hero.tsx";
-import Metrics from "../components/Metrics.tsx";
-import Features from "../components/Features.tsx";
+﻿import Hero from "../components/Hero";
+import ProblemSection from "../components/ProblemSection";
+import EcosystemSection from "../components/EcosystemSection";
+import JourneySection from "../components/JourneySection";
+import CommunitySection from "../components/CommunitySection";
+import AIAndMentorSection from "../components/AIAndMentorSection";
+import ContributionSection from "../components/ContributionSection";
+import FinalCTA from "../components/FinalCTA";
 
-const LandingPage: React.FC = () => {
+export default function LandingPage() {
     return (
-        <div className="bg-bg min-h-screen font-sans">
+        <div className="min-h-screen bg-[#081423] font-sans">
             <Hero />
-            <Metrics />
-            <Features />
+            <ProblemSection />
+            <EcosystemSection />
+            <JourneySection />
+            <CommunitySection />
+            <AIAndMentorSection />
+            <ContributionSection />
+            <FinalCTA />
         </div>
     );
-};
-
-export default LandingPage;
+}

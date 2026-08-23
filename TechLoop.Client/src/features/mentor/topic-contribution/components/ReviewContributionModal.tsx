@@ -1,10 +1,8 @@
 import { useState } from "react";
-import { X } from "lucide-react";
+import { CheckCircle2, X, XCircle } from "lucide-react";
 
 import Button from "../../../../shared/Button.tsx";
-import type {
-    ReviewTopicContributionRequest,
-} from "../../../../types/topicContribution.types.ts";
+import type { ReviewTopicContributionRequest } from "../../../../types/topicContribution.types.ts";
 
 interface ReviewContributionModalProps {
     open: boolean;
@@ -12,6 +10,7 @@ interface ReviewContributionModalProps {
     onClose: () => void;
     onSubmit: (request: ReviewTopicContributionRequest) => void;
 }
+
 
 export default function ReviewContributionModal({
                                                     open,
@@ -48,47 +47,64 @@ export default function ReviewContributionModal({
             status,
             reviewNotes: reviewNotes.trim() || null,
             position: position.trim() ? Number(position) : null,
-            parentSubTopicId: parentSubTopicId.trim()
-                ? Number(parentSubTopicId)
-                : null,
+            parentSubTopicId: parentSubTopicId.trim() ? Number(parentSubTopicId) : null,
         });
     };
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4">
+        <div className="fixed inset-0 z-50 flex justify-end">
+            {/* Scrim */}
+            <button
+                type="button"
+                aria-label="Close review panel"
+                onClick={handleClose}
+                className="absolute inset-0 bg-black/60 backdrop-blur-[2px]"
+            />
+
+            {/* Panel */}
             <div
                 role="dialog"
                 aria-modal="true"
                 aria-labelledby="review-contribution-title"
                 className="
-                    w-full max-w-lg overflow-hidden
-                    rounded-[var(--cs-radius-card)]
-                    border border-[var(--cs-border)]
-                    bg-[var(--cs-bg-card)]
+                    relative flex h-full w-full max-w-md flex-col
+                    border-l border-[var(--cs-border)]
+                    bg-[var(--cs-bg-surface)]
                     shadow-2xl
+                    animate-[cs-slide-in_180ms_ease-out]
                 "
+                style={{
+                    animationName: "cs-slide-in",
+                }}
             >
+                <style>{`
+                    @keyframes cs-slide-in {
+                        from { transform: translateX(24px); opacity: 0.6; }
+                        to { transform: translateX(0); opacity: 1; }
+                    }
+                `}</style>
+
                 {/* Header */}
                 <div className="flex items-center justify-between border-b border-[var(--cs-border)] px-6 py-5">
                     <div>
+                        <p className="font-[var(--cs-font-mono)] text-[11px] uppercase tracking-widest text-[var(--cs-text-muted)]">
+                            review
+                        </p>
                         <h2
                             id="review-contribution-title"
-                            className="text-lg font-semibold text-[var(--cs-text-primary)]"
+                            className="mt-1 text-lg font-semibold text-[var(--cs-text-primary)]"
                         >
-                            Review Contribution
+                            Decide this contribution
                         </h2>
-                        <p className="mt-1 text-sm text-[var(--cs-text-secondary)]">
-                            Decide whether this contribution should be accepted.
-                        </p>
                     </div>
 
                     <button
                         type="button"
                         onClick={handleClose}
                         disabled={loading}
-                        aria-label="Close review modal"
+                        aria-label="Close review panel"
                         className="
-                            rounded-lg p-2
+                            rounded-[var(--cs-radius-control)] p-2
                             text-[var(--cs-text-secondary)]
                             transition
                             hover:bg-white/5 hover:text-[var(--cs-text-primary)]
@@ -100,7 +116,7 @@ export default function ReviewContributionModal({
                 </div>
 
                 {/* Form */}
-                <div className="space-y-5 px-6 py-6">
+                <div className="flex-1 space-y-6 overflow-y-auto px-6 py-6">
                     {/* Decision */}
                     <div>
                         <label className="mb-2 block text-sm font-medium text-[var(--cs-text-primary)]">
@@ -113,7 +129,7 @@ export default function ReviewContributionModal({
                                 onClick={() => setStatus(2)}
                                 disabled={loading}
                                 className={`
-                                    rounded-[var(--cs-radius-control)] border px-4 py-3
+                                    flex flex-col items-center gap-1.5 rounded-[var(--cs-radius-control)] border px-4 py-3.5
                                     text-sm font-medium transition
                                     disabled:cursor-not-allowed disabled:opacity-50
                                     ${
@@ -123,6 +139,7 @@ export default function ReviewContributionModal({
                                 }
                                 `}
                             >
+                                <CheckCircle2 size={17} />
                                 Approve
                             </button>
 
@@ -131,7 +148,7 @@ export default function ReviewContributionModal({
                                 onClick={() => setStatus(3)}
                                 disabled={loading}
                                 className={`
-                                    rounded-[var(--cs-radius-control)] border px-4 py-3
+                                    flex flex-col items-center gap-1.5 rounded-[var(--cs-radius-control)] border px-4 py-3.5
                                     text-sm font-medium transition
                                     disabled:cursor-not-allowed disabled:opacity-50
                                     ${
@@ -141,6 +158,7 @@ export default function ReviewContributionModal({
                                 }
                                 `}
                             >
+                                <XCircle size={17} />
                                 Reject
                             </button>
                         </div>
@@ -165,7 +183,7 @@ export default function ReviewContributionModal({
                             id="review-notes"
                             value={reviewNotes}
                             onChange={(event) => setReviewNotes(event.target.value)}
-                            rows={4}
+                            rows={5}
                             placeholder="Add feedback for the learner..."
                             disabled={loading}
                             className="
@@ -185,7 +203,11 @@ export default function ReviewContributionModal({
 
                     {/* Approval-only fields */}
                     {status === 2 && (
-                        <div className="grid gap-4 sm:grid-cols-2">
+                        <div className="space-y-4 rounded-[var(--cs-radius-control)] border border-[var(--cs-accent-border)] bg-[var(--cs-accent-subtle)] p-4">
+                            <p className="font-[var(--cs-font-mono)] text-[11px] uppercase tracking-widest text-[var(--cs-accent)]">
+                                placement
+                            </p>
+
                             <div>
                                 <label
                                     htmlFor="position"
@@ -221,15 +243,16 @@ export default function ReviewContributionModal({
                                     className="mb-2 block text-sm font-medium text-[var(--cs-text-primary)]"
                                 >
                                     Parent Sub Topic ID
+                                    <span className="ml-1 font-normal text-[var(--cs-text-muted)]">
+                                        (Optional)
+                                    </span>
                                 </label>
                                 <input
                                     id="parent-sub-topic-id"
                                     type="number"
                                     min={1}
                                     value={parentSubTopicId}
-                                    onChange={(event) =>
-                                        setParentSubTopicId(event.target.value)
-                                    }
+                                    onChange={(event) => setParentSubTopicId(event.target.value)}
                                     placeholder="Optional"
                                     disabled={loading}
                                     className="
@@ -250,13 +273,8 @@ export default function ReviewContributionModal({
                 </div>
 
                 {/* Footer */}
-                <div className="flex justify-end gap-3 border-t border-[var(--cs-border)] px-6 py-4">
-                    <Button
-                        variant="secondary"
-                        size="sm"
-                        disabled={loading}
-                        onClick={handleClose}
-                    >
+                <div className="flex justify-end gap-3 border-t border-[var(--cs-border)] px-6 py-5">
+                    <Button variant="secondary" size="sm" disabled={loading} onClick={handleClose}>
                         Cancel
                     </Button>
 
