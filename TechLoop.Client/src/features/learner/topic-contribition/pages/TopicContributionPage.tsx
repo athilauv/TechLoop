@@ -69,7 +69,7 @@ export default function TopicContributionPage() {
 
                     <button
                         type="button"
-                        onClick={() => navigate("/learner/topic-contributions/create")}
+                        onClick={() => navigate("/learner/topic-contributions/new")}
                         className="inline-flex items-center gap-2 rounded-[var(--cs-radius-control)] bg-[var(--cs-accent)] px-4 py-2.5 text-sm font-semibold text-[var(--cs-accent-on)] transition hover:bg-[var(--cs-accent-hover)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--cs-accent)]/40 focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--cs-bg-page)]"
                     >
                         <Plus size={16} />
@@ -133,7 +133,7 @@ export default function TopicContributionPage() {
                     </div>
                 ) : contributions.length === 0 ? (
                     <TopicContributionEmptyState
-                        onCreate={() => navigate("/learner/topic-contributions/create")}
+                        onCreate={() => navigate("/learner/topic-contributions/new")}
                     />
                 ) : filteredContributions.length === 0 ? (
                     <div className="flex min-h-[240px] items-center justify-center text-sm text-[var(--cs-text-muted)]">

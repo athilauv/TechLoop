@@ -20,7 +20,7 @@ export default function ContributionCta() {
                     </p>
 
                     <Link
-                        to="/learner/topic-contributions/create"
+                        to="/learner/topic-contributions/new"
                         className="mt-3 inline-flex items-center gap-1.5 text-xs font-semibold text-[#17D4C3] hover:underline"
                     >
                         Suggest Content

@@ -17,4 +17,5 @@ public class UpdateQuestionRequest
     public int? MemoryLimitMb { get; set; }
     public DifficultyLevel Difficulty { get; set; } 
     public int Position { get; set; }
+    public bool ShiftPositions { get; set; }
 }

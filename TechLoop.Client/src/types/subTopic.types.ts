@@ -19,24 +19,19 @@ export interface LearnerSubTopic {
 export interface MentorSubTopic {
     id: number;
     topicId: number;
+    topicTitle: string;
     parentSubTopicId: number | null;
-
     title: string;
     slug: string;
     description: string;
     imageUrl: string | null;
-
     example: string | null;
     exampleType: ExampleType | null;
-
     position: number;
-
     publishedAt: string | null;
     publishedBy: string | null;
-
     createdAt: string;
     createdBy: string | null;
-
     updatedAt: string | null;
     updatedBy: string | null;
 }

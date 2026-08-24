@@ -1,4 +1,4 @@
-﻿using TechLoop.Application.Features.Topics.DTOs;
+using TechLoop.Application.Features.Topics.DTOs;
 using TechLoop.Domain;
 using TechLoop.Domain.Entities;
 
@@ -15,7 +15,9 @@ public interface ITopicsRepository
     Task<int> SoftDeleteAsync(int id, Guid deletedBy, CancellationToken cancellationToken);
     Task<int> PublishAsync(Topic topic, CancellationToken cancellationToken);
     Task<IEnumerable<Topic>> GetAllAsync(CancellationToken cancellationToken);
+    Task<IEnumerable<MentorTopicResponse>> GetAllMentorAsync(CancellationToken cancellationToken);
     Task<Topic?> GetByIdAsync(int id, CancellationToken cancellationToken);
+    Task<MentorTopicResponse?> GetMentorByIdAsync(int id, CancellationToken cancellationToken);
     Task<IEnumerable<Topic>> GetPublishedAsync(CancellationToken cancellationToken);
     Task<Topic?> GetPublishedBySlugAsync(string slug, CancellationToken cancellationToken);
     Task<int?> GetTechnologyIdAsync(int topicId, CancellationToken cancellationToken);

@@ -117,6 +117,7 @@ export interface CreateQuestionRequest {
     memoryLimitMb?: number | null;
     difficulty: DifficultyLevel;
     position: number;
+    shiftPositions?: boolean;
 }
 
 export type UpdateQuestionRequest = CreateQuestionRequest;

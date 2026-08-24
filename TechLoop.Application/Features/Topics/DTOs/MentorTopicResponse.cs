@@ -1,4 +1,4 @@
-﻿using TechLoop.Domain.Enums;
+using TechLoop.Domain.Enums;
 
 namespace TechLoop.Application.Features.Topics.DTOs;
 
@@ -14,10 +14,10 @@ public sealed class MentorTopicResponse
     public ExampleType? ExampleType { get; set; }
     public int Position { get; set; }
     public DateTime? PublishedAt { get; set; }
-    public Guid? PublishedBy { get; set; }
+    public string? PublishedBy { get; set; }
     public DateTime CreatedAt { get; set; }
-    public Guid? CreatedBy { get; set; }
+    public string? CreatedBy { get; set; }
     public DateTime? UpdatedAt { get; set; }
-    public Guid? UpdatedBy { get; set; }
+    public string? UpdatedBy { get; set; }
 
 }

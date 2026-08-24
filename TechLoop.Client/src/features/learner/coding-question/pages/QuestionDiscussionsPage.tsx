@@ -162,10 +162,10 @@ const QuestionDiscussionsPage = () => {
             />
 
             <div className="mx-auto mt-6 max-w-4xl">
-                <div className="flex items-center justify-between">
+                <div className="flex flex-wrap items-start justify-between gap-4">
                     <div>
-                        <h1 className="text-xl font-bold text-[var(--cs-text)]">Discussions</h1>
-                        <p className="mt-1 text-sm text-[var(--cs-text-muted)]">
+                        <h1 className="text-2xl font-bold text-[var(--cs-text)]">Discussions</h1>
+                        <p className="mt-1.5 text-sm text-[var(--cs-text-secondary)]">
                             Ask questions, share approaches, and help each other out.
                         </p>
                     </div>
@@ -174,7 +174,7 @@ const QuestionDiscussionsPage = () => {
                         <button
                             type="button"
                             onClick={() => setCreating(true)}
-                            className="inline-flex items-center gap-2 rounded-lg border border-[var(--cs-primary,#00e5c0)] bg-[var(--cs-primary,#00e5c0)] px-4 py-2.5 text-sm font-semibold text-[var(--cs-primary-contrast,#081423)] transition-colors hover:bg-[var(--cs-primary-hover,#00DDB9)]"
+                            className="inline-flex shrink-0 items-center gap-2 rounded-lg bg-[var(--cs-primary)] px-4 py-2.5 text-sm font-semibold text-[var(--cs-primary-contrast)] transition-colors duration-150 hover:bg-[var(--cs-primary-hover,var(--cs-primary))] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--cs-primary)]/40"
                         >
                             <MessageSquarePlus size={16} />
                             New Discussion
@@ -183,8 +183,8 @@ const QuestionDiscussionsPage = () => {
                 </div>
 
                 {creating && (
-                    <div className="mt-5 rounded-xl border border-[var(--cs-border)]/60 bg-[var(--cs-surface)]/50 p-5 backdrop-blur-sm">
-                        <h2 className="mb-3 text-sm font-semibold text-[var(--cs-text)]">
+                    <div className="mt-6 rounded-xl border border-[var(--cs-border)] bg-[var(--cs-card,var(--cs-surface))] p-5 sm:p-6">
+                        <h2 className="mb-3.5 text-sm font-semibold text-[var(--cs-text)]">
                             Start a new discussion
                         </h2>
                         <DiscussionForm
@@ -196,7 +196,7 @@ const QuestionDiscussionsPage = () => {
                     </div>
                 )}
 
-                <div className="mt-6">
+                <div className="mt-7">
                     {isLoading && discussions.length === 0 ? (
                         <div className="flex justify-center py-16">
                             <LoadingSpinner />

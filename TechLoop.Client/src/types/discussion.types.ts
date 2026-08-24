@@ -2,6 +2,7 @@ export interface Discussion {
     id: number;
     userId: string;
     userName: string;
+    userRoleId: number;
     questionId: number;
     title: string;
     content: string;
@@ -16,6 +17,7 @@ export interface DiscussionComment {
     discussionId: number;
     userId: string;
     userName: string;
+    userRoleId: number;
     parentCommentId: number | null;
     content: string;
     replyCount: number;

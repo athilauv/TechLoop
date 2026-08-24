@@ -29,6 +29,12 @@ public sealed class DeleteDiscussionCommandHandler : IRequestHandler<DeleteDiscu
             throw new KeyNotFoundException("Discussion not found.");
         }
 
+        if (discussion.UserId != _currentUser.UserId)
+        {
+            throw new UnauthorizedAccessException(
+                "You are not authorized to delete this discussion.");
+        }
+
         var deleted = await _discussionRepository.DeleteAsync(request.Id, _currentUser.UserId);
         if (!deleted)
         {

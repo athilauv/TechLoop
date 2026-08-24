@@ -8,22 +8,22 @@ interface QuestionDiscussionLinkProps {
 }
 
 const QuestionDiscussionLink = ({
-                                    questionId,
-                                    count,
-                                    basePath = "/learner/coding/questions",
-                                }: QuestionDiscussionLinkProps) => {
+    questionId,
+    count,
+    basePath = "/learner/coding/questions",
+}: QuestionDiscussionLinkProps) => {
     const navigate = useNavigate();
 
     return (
         <button
             type="button"
             onClick={() => navigate(`${basePath}/${questionId}/discussions`)}
-            className="inline-flex items-center gap-2 rounded text-sm text-[var(--cs-text-muted)] transition-colors hover:text-[var(--cs-primary,#00C9A7)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--cs-primary,#00C9A7)]/40"
+            className="inline-flex items-center gap-1.5 rounded-md text-sm font-medium text-[var(--cs-text-muted)] transition-colors duration-150 hover:text-[var(--cs-primary)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--cs-primary)]/40"
         >
-            <MessageCircle size={16} />
+            <MessageCircle size={15} />
             <span>
-        {count} {count === 1 ? "Discussion" : "Discussions"}
-    </span>
+                {count} {count === 1 ? "Discussion" : "Discussions"}
+            </span>
         </button>
     );
 };

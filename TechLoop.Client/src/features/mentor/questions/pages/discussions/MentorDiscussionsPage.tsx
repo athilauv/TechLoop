@@ -1,9 +1,20 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import Breadcrumb from "../../../../../shared/Breadcrumb.tsx";
 import { showToast } from "../../../../../utils/toast.tsx";
-import { getMentorDiscussions, pinDiscussion, unpinDiscussion } from "../../../../../api/mentorDiscussion.api.ts";
-import { getDiscussionComments } from "../../../../../api/discussion.api.ts";
-import type { Discussion } from "../../../../../types/discussion.types.ts";
+import {
+    createDiscussionComment,
+    deleteDiscussion,
+    deleteDiscussionComment,
+    getDiscussionComments,
+    updateDiscussion,
+    updateDiscussionComment,
+} from "../../../../../api/discussion.api.ts";
+import {
+    getMentorDiscussions,
+    pinDiscussion,
+    unpinDiscussion,
+} from "../../../../../api/mentorDiscussion.api.ts";
+import type { Discussion, DiscussionComment } from "../../../../../types/discussion.types.ts";
 import { useCurrentUserId } from "../../../../../hooks/useCurrentUserId.ts";
 import DiscussionList from "../../../../common/Discussion/components/DiscussionList.tsx";
 import PinToggleButton from "../../components/discussions/PinToggleButton.tsx";
@@ -21,8 +32,11 @@ const MentorDiscussionsPage = () => {
         queryFn: getMentorDiscussions,
     });
 
-    const invalidateDiscussions = () =>
-        queryClient.invalidateQueries({ queryKey: ["mentor-discussions"] });
+    const invalidateDiscussions = async () => {
+        await queryClient.invalidateQueries({
+            queryKey: ["mentor-discussions"],
+        });
+    };
 
     const handleTogglePin = async (discussion: Discussion) => {
         try {
@@ -33,11 +47,115 @@ const MentorDiscussionsPage = () => {
                 await pinDiscussion(discussion.id);
                 showToast.success("Discussion pinned.");
             }
+
             await invalidateDiscussions();
         } catch (error) {
             showToast.error(
                 error instanceof Error ? error.message : "Failed to update pin status.",
             );
+            throw error;
+        }
+    };
+
+    const handleEditDiscussion = async (
+        discussion: Discussion,
+        title: string,
+        content: string,
+    ) => {
+        try {
+            await updateDiscussion({
+                id: discussion.id,
+                title,
+                content,
+            });
+
+            showToast.success("Discussion updated successfully.");
+            await invalidateDiscussions();
+        } catch (error) {
+            showToast.error(
+                error instanceof Error ? error.message : "Failed to update discussion.",
+            );
+            throw error;
+        }
+    };
+
+    const handleDeleteDiscussion = async (discussion: Discussion) => {
+        try {
+            await deleteDiscussion(discussion.id);
+            showToast.success("Discussion deleted successfully.");
+            await invalidateDiscussions();
+        } catch (error) {
+            showToast.error(
+                error instanceof Error ? error.message : "Failed to delete discussion.",
+            );
+            throw error;
+        }
+    };
+
+    const handleCreateComment = async (discussion: Discussion, content: string) => {
+        try {
+            await createDiscussionComment(discussion.id, {
+                content,
+                parentCommentId: null,
+            });
+
+            await invalidateDiscussions();
+        } catch (error) {
+            showToast.error(
+                error instanceof Error ? error.message : "Failed to post comment.",
+            );
+            throw error;
+        }
+    };
+
+    const handleReplyComment = async (
+        discussion: Discussion,
+        comment: DiscussionComment,
+        content: string,
+    ) => {
+        try {
+            await createDiscussionComment(discussion.id, {
+                content,
+                parentCommentId: comment.id,
+            });
+
+            await invalidateDiscussions();
+        } catch (error) {
+            showToast.error(
+                error instanceof Error ? error.message : "Failed to post reply.",
+            );
+            throw error;
+        }
+    };
+
+    const handleEditComment = async (
+        _discussion: Discussion,
+        comment: DiscussionComment,
+        content: string,
+    ) => {
+        try {
+            await updateDiscussionComment(comment.id, { content });
+            await invalidateDiscussions();
+        } catch (error) {
+            showToast.error(
+                error instanceof Error ? error.message : "Failed to update comment.",
+            );
+            throw error;
+        }
+    };
+
+    const handleDeleteComment = async (
+        _discussion: Discussion,
+        comment: DiscussionComment,
+    ) => {
+        try {
+            await deleteDiscussionComment(comment.id);
+            await invalidateDiscussions();
+        } catch (error) {
+            showToast.error(
+                error instanceof Error ? error.message : "Failed to delete comment.",
+            );
+            throw error;
         }
     };
 
@@ -47,22 +165,25 @@ const MentorDiscussionsPage = () => {
 
             <div className="mx-auto mt-6 max-w-4xl">
                 <div>
-                    <h1 className="text-xl font-bold text-[var(--cs-text)]">
-                        All Discussions
-                    </h1>
-                    <p className="mt-1 text-sm text-[var(--cs-text-muted)]">
-                        Browse learner discussions across every question and pin the useful ones.
+                    <h1 className="text-2xl font-bold text-[var(--cs-text)]">All Discussions</h1>
+                    <p className="mt-1.5 text-sm text-[var(--cs-text-secondary)]">
+                        Browse all discussions, participate in conversations, and pin useful ones.
                     </p>
                 </div>
 
-                <div className="mt-6">
+                <div className="mt-7">
                     <DiscussionList
                         discussions={discussions}
                         isLoading={isLoading}
                         isError={isError}
                         currentUserId={currentUserId}
                         fetchComments={getDiscussionComments}
-                        commentsReadOnly
+                        onCreateComment={handleCreateComment}
+                        onReplyComment={handleReplyComment}
+                        onEditComment={handleEditComment}
+                        onDeleteComment={handleDeleteComment}
+                        onEditDiscussion={handleEditDiscussion}
+                        onDeleteDiscussion={handleDeleteDiscussion}
                         renderExtraAction={(discussion) => (
                             <PinToggleButton
                                 isPinned={discussion.isPinned}
@@ -75,7 +196,7 @@ const MentorDiscussionsPage = () => {
                             </span>
                         )}
                         emptyTitle="No discussions"
-                        emptyDescription="There are no learner discussions yet."
+                        emptyDescription="There are no discussions yet."
                     />
                 </div>
             </div>

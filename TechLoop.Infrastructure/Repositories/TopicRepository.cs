@@ -1,4 +1,4 @@
-﻿using Dapper;
+using Dapper;
 using TechLoop.Application.Features.Topics.DTOs;
 using TechLoop.Application.Interfaces.Repositories;
 using TechLoop.Application.Interfaces.Infrastructure;
@@ -123,6 +123,35 @@ public sealed class TopicRepository : ITopicsRepository
                 cancellationToken: cancellationToken));
     }
 
+    public async Task<MentorTopicResponse?> GetMentorByIdAsync(int id, CancellationToken cancellationToken)
+    {
+        const string sql = @"
+            SELECT
+                t.id,
+                t.technology_id,
+                t.title,
+                t.slug,
+                t.description,
+                t.image_url,
+                t.example,
+                t.example_type,
+                t.position,
+                t.published_at,
+                published_user.username AS published_by,
+                created_user.username AS created_by,
+                t.created_at,
+                updated_user.username AS updated_by,
+                t.updated_at
+            FROM fn_get_topic_by_id(@Id) t
+            LEFT JOIN users published_user ON published_user.id = t.published_by
+            LEFT JOIN users created_user ON created_user.id = t.created_by
+            LEFT JOIN users updated_user ON updated_user.id = t.updated_by;";
+
+        using var connection = _context.CreateConnection();
+        return await connection.QuerySingleOrDefaultAsync<MentorTopicResponse>(
+            new CommandDefinition(sql, new { Id = id }, cancellationToken: cancellationToken));
+    }
+
     
     // Update an existing topic.
     public async Task<int> UpdateAsync(
@@ -194,6 +223,36 @@ public sealed class TopicRepository : ITopicsRepository
                 cancellationToken: cancellationToken));
     }
 
+    public async Task<IEnumerable<MentorTopicResponse>> GetAllMentorAsync(CancellationToken cancellationToken)
+    {
+        const string sql = @"
+            SELECT
+                t.id,
+                t.technology_id,
+                t.title,
+                t.slug,
+                t.description,
+                t.image_url,
+                t.example,
+                t.example_type,
+                t.position,
+                t.published_at,
+                published_user.username AS published_by,
+                created_user.username AS created_by,
+                t.created_at,
+                updated_user.username AS updated_by,
+                t.updated_at
+            FROM fn_get_all_topics() t
+            LEFT JOIN users published_user ON published_user.id = t.published_by
+            LEFT JOIN users created_user ON created_user.id = t.created_by
+            LEFT JOIN users updated_user ON updated_user.id = t.updated_by
+            ORDER BY t.position;";
+
+        using var connection = _context.CreateConnection();
+        return await connection.QueryAsync<MentorTopicResponse>(
+            new CommandDefinition(sql, cancellationToken: cancellationToken));
+    }
+
     // Publish a topic.
     public async Task<int> PublishAsync(Topic topic, CancellationToken cancellationToken)
     {
@@ -260,7 +319,26 @@ public sealed class TopicRepository : ITopicsRepository
     public async Task<IEnumerable<MentorTopicResponse>>
         GetUnpublishedTopicsForMentorAsync(Guid mentorId, CancellationToken cancellationToken)
     {
-        const string sql = @"SELECT * FROM fn_get_mentor_unpublished_topics(@MentorId);";
+        const string sql = @"
+            SELECT
+                t.id,
+                t.technology_id,
+                t.title,
+                t.slug,
+                t.description,
+                t.image_url,
+                t.position,
+                t.published_at,
+                published_user.username AS published_by,
+                created_user.username AS created_by,
+                t.created_at,
+                updated_user.username AS updated_by,
+                source_topic.updated_at
+            FROM fn_get_mentor_unpublished_topics(@MentorId) t
+            INNER JOIN topics source_topic ON source_topic.id = t.id AND source_topic.deleted_at IS NULL
+            LEFT JOIN users published_user ON published_user.id = t.published_by
+            LEFT JOIN users created_user ON created_user.id = t.created_by
+            LEFT JOIN users updated_user ON updated_user.id = source_topic.updated_by;";
         using var connection = _context.CreateConnection();
         return await connection.QueryAsync<MentorTopicResponse>(new CommandDefinition(sql,
                 new

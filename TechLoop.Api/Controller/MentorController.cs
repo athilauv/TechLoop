@@ -39,6 +39,23 @@ using TechLoop.Application.Features.Coding.Commands.UpdateTestCase;
 using TechLoop.Application.Features.Coding.DTOs;
 using TechLoop.Application.Features.Coding.Queries.GetCodingTemplatesByQuestion.Mentor;
 using TechLoop.Application.Features.Coding.Queries.GetTestCasesByQuestion.Mentor;
+using TechLoop.Application.Features.Community.CommunityPosts.Commands.CreatePost;
+using TechLoop.Application.Features.Community.CommunityPosts.Commands.DeletePost;
+using TechLoop.Application.Features.Community.CommunityPosts.Commands.UpdatePost;
+using TechLoop.Application.Features.Community.CommunityPosts.Queries.GetFeed;
+using TechLoop.Application.Features.Community.CommunityPosts.Queries.GetPostById;
+using TechLoop.Application.Features.Community.PostComments.Commands.CreateComment;
+using TechLoop.Application.Features.Community.PostComments.Commands.DeleteComment;
+using TechLoop.Application.Features.Community.PostComments.Commands.UpdateComment;
+using TechLoop.Application.Features.Community.PostComments.DTOs;
+using TechLoop.Application.Features.Community.PostComments.Queries.GetCommentById;
+using TechLoop.Application.Features.Community.PostComments.Queries.GetPostComments;
+using TechLoop.Application.Features.Community.PostLikes.Commands.LikePost;
+using TechLoop.Application.Features.Community.PostLikes.Commands.UnlikePost;
+using TechLoop.Application.Features.Community.PostLikes.Queries.GetPostLikeStatus;
+using TechLoop.Application.Features.Community.SavedPosts.Commands.SavePost;
+using TechLoop.Application.Features.Community.SavedPosts.Commands.UnsavePost;
+using TechLoop.Application.Features.Community.SavedPosts.Queries.GetSavedPosts;
 using TechLoop.Application.Features.Curriculum.Queries.Mentor;
 using TechLoop.Application.Features.Discussions.Commands.PinDiscussion;
 using TechLoop.Application.Features.Discussions.Commands.UnpinDiscussion;
@@ -49,6 +66,7 @@ using TechLoop.Application.Features.Mentor.Commands.UpdateMentorProfile;
 using TechLoop.Application.Features.Mentor.Queries.Mentor.GetMyProfile;
 using TechLoop.Application.Features.Submissions.Commands.UpdateSubmissionResult;
 using TechLoop.Application.Features.Submissions.DTOs;
+using TechLoop.Application.Features.SubTopics.Queries.GetAllSubTopics.Mentor;
 using TechLoop.Application.Features.SubTopics.Queries.GetSubTopicById.Mentor;
 using TechLoop.Application.Features.SubTopics.Queries.Mentor.GetUnpublishedSubTopics;
 using TechLoop.Application.Features.TopicContributions.Commands.ReviewTopicContribution;
@@ -267,7 +285,8 @@ public sealed class MentorController : ControllerBase
             request.TimeLimitSeconds,
             request.MemoryLimitMb,
             request.Difficulty,
-            request.Position);
+            request.Position,
+            request.ShiftPositions);
 
         var result = await _mediator.Send(command, cancellationToken);
         return Ok(result);
@@ -301,7 +320,8 @@ public sealed class MentorController : ControllerBase
             request.TimeLimitSeconds,
             request.MemoryLimitMb,
             request.Difficulty,
-            request.Position);
+            request.Position,
+            request.ShiftPositions);
 
         var result = await _mediator.Send(command, cancellationToken);
         return Ok(result);
@@ -318,12 +338,9 @@ public sealed class MentorController : ControllerBase
 
     // Get all questions
     [HttpGet("questions")]
-    public async Task<ActionResult<IEnumerable<MentorQuestionResponse>>> GetAllQuestions(
-        CancellationToken cancellationToken)
+    public async Task<ActionResult<IEnumerable<MentorQuestionResponse>>> GetAllQuestions(CancellationToken cancellationToken)
     {
-        var result = await _mediator.Send(
-            new GetAllMentorQuestionsQuery(),
-            cancellationToken);
+        var result = await _mediator.Send( new GetAllMentorQuestionsQuery(), cancellationToken);
         return Ok(result);
     }
 
@@ -331,10 +348,15 @@ public sealed class MentorController : ControllerBase
     [HttpGet("questions/{id:int}")]
     public async Task<ActionResult<MentorQuestionResponse>> GetQuestionById(int id, CancellationToken cancellationToken)
     {
-        var result = await _mediator.Send(
-            new GetMentorQuestionByIdQuery(id),
-            cancellationToken);
-
+        var result = await _mediator.Send( new GetMentorQuestionByIdQuery(id), cancellationToken);
+        return Ok(result);
+    }
+    
+    // Get all SubTopics
+    [HttpGet("subtopics")]
+    public async Task<ActionResult<IEnumerable<MentorSubTopicResponse>>> GetAllSubTopics([FromQuery] int? topicId, CancellationToken cancellationToken)
+    {
+        var result = await _mediator.Send(new GetAllMentorSubTopicsQuery(topicId), cancellationToken);
         return Ok(result);
     }
 
@@ -635,6 +657,128 @@ public sealed class MentorController : ControllerBase
         if (!Guid.TryParse(userId, out var mentorId))
             return Unauthorized();
         var result = await _mediator.Send(new GetUnpublishedSubTopicsQuery(mentorId), cancellationToken);
+        return Ok(result);
+    }
+    
+    
+    [HttpGet("posts")]
+    public async Task<IActionResult> GetFeed(CancellationToken cancellationToken)
+    {
+        var result = await _mediator.Send(new GetFeedQuery(), cancellationToken);
+        return Ok(result);
+    }
+
+    [HttpGet("posts/{postId:int}")]
+    public async Task<IActionResult> GetPostById(int postId, CancellationToken cancellationToken)
+    {
+        var result = await _mediator.Send(new GetPostByIdQuery(postId), cancellationToken);
+        return Ok(result);
+    }
+
+    [HttpPost("posts")]
+    public async Task<IActionResult> Create([FromBody] CreatePostCommand command, CancellationToken cancellationToken)
+    {
+        var result = await _mediator.Send(command, cancellationToken);
+        return Ok(result);
+    }
+
+    [HttpPut("posts/{postId:int}")]
+    public async Task<IActionResult> Update(int postId, [FromBody] UpdatePostCommand command, CancellationToken cancellationToken)
+    {
+        command.Id = postId;
+        var result = await _mediator.Send(command, cancellationToken);
+        return Ok(result);
+    }
+
+    [HttpDelete("posts/{postId:int}")]
+    public async Task<IActionResult> Delete(int postId, CancellationToken cancellationToken)
+    {
+        await _mediator.Send(new DeletePostCommand(postId), cancellationToken);
+        return NoContent();
+    }
+
+    [HttpPost("posts/{postId:int}/comments")]
+    public async Task<IActionResult> CreateComment(int postId, [FromBody] CreateCommentRequest request, CancellationToken cancellationToken)
+    {
+        var command = new CreateCommentCommand
+        {
+            PostId = postId,
+            ParentCommentId = request.ParentCommentId,
+            Content = request.Content
+        };
+
+        var result = await _mediator.Send(command, cancellationToken);
+        return Ok(result);
+    }
+
+    [HttpGet("posts/{postId:int}/comments")]
+    public async Task<IActionResult> GetPostComments(int postId, CancellationToken cancellationToken)
+    {
+        var result = await _mediator.Send(new GetPostCommentsQuery(postId), cancellationToken);
+        return Ok(result);
+    }
+
+    [HttpGet("comments/{commentId:int}")]
+    public async Task<IActionResult> GetCommentById(int commentId, CancellationToken cancellationToken)
+    {
+        var result = await _mediator.Send(new GetCommentByIdQuery(commentId), cancellationToken);
+        return Ok(result);
+    }
+
+    [HttpPut("comments/{commentId:int}")]
+    public async Task<IActionResult> UpdateComment(int commentId, [FromBody] UpdateCommentCommand command, CancellationToken cancellationToken)
+    {
+        command.Id = commentId;
+        var result = await _mediator.Send(command, cancellationToken);
+        return Ok(result);
+    }
+
+    [HttpDelete("comments/{commentId:int}")]
+    public async Task<IActionResult> DeleteComment(int commentId, CancellationToken cancellationToken)
+    {
+        await _mediator.Send(new DeleteCommentCommand(commentId), cancellationToken);
+        return NoContent();
+    }
+
+    [HttpPost("posts/{postId:int}/likes")]
+    public async Task<IActionResult> LikePost(int postId, CancellationToken cancellationToken)
+    {
+        var result = await _mediator.Send(new LikePostCommand(postId), cancellationToken);
+        return Ok(result);
+    }
+
+    [HttpDelete("posts/{postId:int}/likes")]
+    public async Task<IActionResult> UnlikePost(int postId, CancellationToken cancellationToken)
+    {
+        var result = await _mediator.Send(new UnlikePostCommand(postId), cancellationToken);
+        return Ok(result);
+    }
+
+    [HttpGet("posts/{postId:int}/likes/me")]
+    public async Task<IActionResult> GetLikeStatus(int postId, CancellationToken cancellationToken)
+    {
+        var result = await _mediator.Send(new GetPostLikeStatusQuery(postId), cancellationToken);
+        return Ok(result);
+    }
+
+    [HttpPost("posts/{postId:int}/save")]
+    public async Task<IActionResult> SavePost(int postId, CancellationToken cancellationToken)
+    {
+        var result = await _mediator.Send(new SavePostCommand(postId), cancellationToken);
+        return Ok(result);
+    }
+
+    [HttpDelete("posts/{postId:int}/save")]
+    public async Task<IActionResult> UnsavePost(int postId, CancellationToken cancellationToken)
+    {
+        var result = await _mediator.Send(new UnsavePostCommand(postId), cancellationToken);
+        return Ok(result);
+    }
+
+    [HttpGet("saved-posts")]
+    public async Task<IActionResult> GetSavedPosts(CancellationToken cancellationToken)
+    {
+        var result = await _mediator.Send(new GetSavedPostsQuery(), cancellationToken);
         return Ok(result);
     }
     

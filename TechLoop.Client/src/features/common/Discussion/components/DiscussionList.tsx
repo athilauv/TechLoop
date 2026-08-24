@@ -1,9 +1,7 @@
 import { useMemo, useState, type ReactNode } from "react";
 import { MessageSquare, Search } from "lucide-react";
-
 import EmptyState from "../../../../shared/EmptyState";
 import LoadingSpinner from "../../../../shared/LoadingSpinner";
-
 import type { Discussion, DiscussionComment } from "../../../../types/discussion.types.ts";
 import DiscussionListItem from "./DiscussionListItem";
 import CustomSelect from "../../../../shared/Customselect.tsx";
@@ -42,23 +40,23 @@ interface DiscussionListProps {
 }
 
 const DiscussionList = ({
-                            discussions,
-                            isLoading,
-                            isError,
-                            currentUserId,
-                            fetchComments,
-                            commentsReadOnly = false,
-                            onCreateComment,
-                            onReplyComment,
-                            onEditComment,
-                            onDeleteComment,
-                            onEditDiscussion,
-                            onDeleteDiscussion,
-                            renderExtraAction,
-                            renderContextSlot,
-                            emptyTitle = "No discussions yet",
-                            emptyDescription = "Start the conversation.",
-                        }: DiscussionListProps) => {
+    discussions,
+    isLoading,
+    isError,
+    currentUserId,
+    fetchComments,
+    commentsReadOnly = false,
+    onCreateComment,
+    onReplyComment,
+    onEditComment,
+    onDeleteComment,
+    onEditDiscussion,
+    onDeleteDiscussion,
+    renderExtraAction,
+    renderContextSlot,
+    emptyTitle = "No discussions yet",
+    emptyDescription = "Start the first discussion.",
+}: DiscussionListProps) => {
     const [search, setSearch] = useState("");
     const [sort, setSort] = useState<SortOption>("newest");
     const [expandedIds, setExpandedIds] = useState<Set<number>>(new Set());
@@ -80,11 +78,11 @@ const DiscussionList = ({
 
         const filtered = normalized
             ? discussions.filter(
-                (discussion) =>
-                    discussion.title.toLowerCase().includes(normalized) ||
-                    discussion.content.toLowerCase().includes(normalized) ||
-                    discussion.userName.toLowerCase().includes(normalized),
-            )
+                  (discussion) =>
+                      discussion.title.toLowerCase().includes(normalized) ||
+                      discussion.content.toLowerCase().includes(normalized) ||
+                      discussion.userName.toLowerCase().includes(normalized),
+              )
             : discussions;
 
         const sorted = [...filtered].sort((a, b) => {
@@ -98,25 +96,24 @@ const DiscussionList = ({
         });
 
         // Pinned discussions always float to the top, regardless of sort.
-        return [...sorted].sort(
-            (a, b) => Number(b.isPinned) - Number(a.isPinned),
-        );
+        return [...sorted].sort((a, b) => Number(b.isPinned) - Number(a.isPinned));
     }, [discussions, search, sort]);
 
     return (
         <div>
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                <div className="relative w-full sm:max-w-xs">
+                <div className="relative w-full sm:max-w-sm">
                     <Search
-                        size={15}
-                        className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-[var(--cs-text-muted)]"
+                        size={16}
+                        className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-[var(--cs-text-muted)]"
                     />
                     <input
                         type="text"
                         value={search}
                         onChange={(event) => setSearch(event.target.value)}
                         placeholder="Search discussions..."
-                        className="w-full rounded-lg border border-[var(--cs-border)]/70 bg-[var(--cs-surface-muted)]/60 py-2 pl-9 pr-3 text-sm text-[var(--cs-text)] outline-none placeholder:text-[var(--cs-text-muted)] focus:border-[var(--cs-primary)]"
+                        aria-label="Search discussions"
+                        className="w-full rounded-lg border border-[var(--cs-border)] bg-[var(--cs-input-bg,var(--cs-surface-muted))] py-2.5 pl-10 pr-3.5 text-sm text-[var(--cs-text)] outline-none transition-colors duration-150 placeholder:text-[var(--cs-text-muted)] hover:border-[var(--cs-border)]/80 focus:border-[var(--cs-primary)] focus:ring-2 focus:ring-[var(--cs-primary)]/15"
                     />
                 </div>
 
@@ -128,13 +125,13 @@ const DiscussionList = ({
                         { value: "oldest", label: "Oldest first" },
                         { value: "most-commented", label: "Most commented" },
                     ]}
-                    className="rounded-lg border border-[var(--cs-border)]/70 bg-[var(--cs-surface-muted)]/60 px-3 py-2 text-sm text-[var(--cs-text)] outline-none focus:border-[var(--cs-primary)]"
+                    className="w-full rounded-lg border border-[var(--cs-border)] bg-[var(--cs-input-bg,var(--cs-surface-muted))] px-3.5 py-2.5 text-sm text-[var(--cs-text)] outline-none transition-colors duration-150 hover:border-[var(--cs-border)]/80 focus:border-[var(--cs-primary)] focus:ring-2 focus:ring-[var(--cs-primary)]/15 sm:w-auto"
                 />
             </div>
 
             <div className="mt-5">
                 {isLoading ? (
-                    <div className="flex justify-center py-16">
+                    <div className="flex justify-center py-20">
                         <LoadingSpinner />
                     </div>
                 ) : isError ? (
@@ -150,7 +147,7 @@ const DiscussionList = ({
                         description={search ? "Try a different search term." : emptyDescription}
                     />
                 ) : (
-                    <div className="divide-y divide-[var(--cs-border)]/50">
+                    <div className="space-y-4">
                         {filteredAndSorted.map((discussion) => (
                             <DiscussionListItem
                                 key={discussion.id}
@@ -168,13 +165,13 @@ const DiscussionList = ({
                                 onReplyComment={
                                     onReplyComment
                                         ? (comment, content) =>
-                                            onReplyComment(discussion, comment, content)
+                                              onReplyComment(discussion, comment, content)
                                         : undefined
                                 }
                                 onEditComment={
                                     onEditComment
                                         ? (comment, content) =>
-                                            onEditComment(discussion, comment, content)
+                                              onEditComment(discussion, comment, content)
                                         : undefined
                                 }
                                 onDeleteComment={
@@ -185,7 +182,7 @@ const DiscussionList = ({
                                 onEditDiscussion={
                                     onEditDiscussion
                                         ? (title, content) =>
-                                            onEditDiscussion(discussion, title, content)
+                                              onEditDiscussion(discussion, title, content)
                                         : undefined
                                 }
                                 onDeleteDiscussion={

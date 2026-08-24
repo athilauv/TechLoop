@@ -1,4 +1,4 @@
-﻿using Dapper;
+using Dapper;
 using TechLoop.Application.Features.Questions.DTOs;
 using TechLoop.Application.Interfaces.Infrastructure;
 using TechLoop.Application.Interfaces.Repositories;
@@ -59,11 +59,11 @@ public sealed class QuestionRepository : IQuestionRepository
     }
 
     // Creates a new question and returns the generated ID
-    public async Task<int> CreateAsync(Question question, CancellationToken cancellationToken)
+    public async Task<int> CreateAsync(Question question, bool shiftPositions, CancellationToken cancellationToken)
     {
-        const string sql = @"SELECT fn_create_question(@SubTopicId,@QuestionType,@Slug,@Title,@Description,@ImageUrl,@Mark,@Hint,@Explanation,@TimeLimitSeconds,@MemoryLimitMb,@Difficulty,@Position,@CreatedBy,@CreatedAt);";
+        const string sql = @"SELECT fn_create_question(@SubTopicId,@QuestionType,@Slug,@Title,@Description,@ImageUrl,@Mark,@Hint,@Explanation,@TimeLimitSeconds,@MemoryLimitMb,@Difficulty,@Position,@CreatedBy,@CreatedAt,@ShiftPositions);";
         using var connection = _context.CreateConnection();
-        return await connection.ExecuteScalarAsync<int>(new CommandDefinition(sql, question, cancellationToken: cancellationToken));
+        return await connection.ExecuteScalarAsync<int>(new CommandDefinition(sql, new { question.SubTopicId, question.QuestionType, question.Slug, question.Title, question.Description, question.ImageUrl, question.Mark, question.Hint, question.Explanation, question.TimeLimitSeconds, question.MemoryLimitMb, question.Difficulty, question.Position, question.CreatedBy, question.CreatedAt, ShiftPositions = shiftPositions }, cancellationToken: cancellationToken));
     }
 
     // Retrieves a question by its ID
@@ -80,11 +80,40 @@ public sealed class QuestionRepository : IQuestionRepository
     }
 
     // Updates the specified question
-    public async Task<int> UpdateAsync(Question question, CancellationToken cancellationToken)
+    public async Task<int> UpdateAsync(Question question, bool shiftPositions, CancellationToken cancellationToken)
     {
-        const string sql = @"CALL sp_update_question( @Id, @SubTopicId, @QuestionType, @Slug, @Title, @Description, @ImageUrl, @Mark, @Hint, @Explanation, @TimeLimitSeconds, @MemoryLimitMb, @Difficulty, @Position, @UpdatedBy, @UpdatedAt);";
+        const string sql = @"CALL sp_update_question(@Id, @SubTopicId, @QuestionType, @Slug, @Title, @Description, @ImageUrl, @Mark, @Hint, @Explanation, @TimeLimitSeconds, @MemoryLimitMb, @Difficulty, @Position, @UpdatedBy, @UpdatedAt, @ShiftPositions);";
         using var connection = _context.CreateConnection();
-        return await connection.ExecuteAsync(new CommandDefinition(sql, question, cancellationToken: cancellationToken));
+        await connection.ExecuteAsync(new CommandDefinition(
+            sql,
+            new
+            {
+                question.Id,
+                question.SubTopicId,
+                question.QuestionType,
+                question.Slug,
+                question.Title,
+                question.Description,
+                question.ImageUrl,
+                question.Mark,
+                question.Hint,
+                question.Explanation,
+                question.TimeLimitSeconds,
+                question.MemoryLimitMb,
+                question.Difficulty,
+                question.Position,
+                question.UpdatedBy,
+                question.UpdatedAt,
+                ShiftPositions = shiftPositions
+            },
+            cancellationToken: cancellationToken));
+
+        var updated = await connection.ExecuteScalarAsync<bool>(new CommandDefinition(
+            "SELECT fn_question_exists(@Id);",
+            new { question.Id },
+            cancellationToken: cancellationToken));
+
+        return updated ? 1 : 0;
     }
 
     // Soft deletes the specified question
@@ -92,7 +121,7 @@ public sealed class QuestionRepository : IQuestionRepository
     {
         const string sql = @"CALL sp_soft_delete_question(@Id, @DeletedBy, @DeletedAt);";
         using var connection = _context.CreateConnection();
-        return await connection.ExecuteAsync(
+        await connection.ExecuteAsync(
             new CommandDefinition(sql,
                 new
                 {
@@ -101,6 +130,13 @@ public sealed class QuestionRepository : IQuestionRepository
                     DeletedAt = DateTime.UtcNow
                 },
                 cancellationToken: cancellationToken));
+
+        var stillExists = await connection.ExecuteScalarAsync<bool>(new CommandDefinition(
+            "SELECT fn_question_exists(@Id);",
+            new { Id = id },
+            cancellationToken: cancellationToken));
+
+        return stillExists ? 0 : 1;
     }
 
     // Retrieves all active questions

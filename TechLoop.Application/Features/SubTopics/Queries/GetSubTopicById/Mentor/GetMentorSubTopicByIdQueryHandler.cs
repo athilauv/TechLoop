@@ -1,4 +1,4 @@
-﻿using MediatR;
+using MediatR;
 using TechLoop.Application.Common.Exceptions;
 using TechLoop.Application.Features.SubTopics.DTOs;
 using TechLoop.Application.Interfaces.Repositories;
@@ -15,29 +15,12 @@ public sealed class GetMentorSubTopicByIdQueryHandler : IRequestHandler<GetMento
 
     public async Task<MentorSubTopicResponse> Handle(GetMentorSubTopicByIdQuery request, CancellationToken cancellationToken)
     {
-        var subTopic = await _repository.GetByIdAsync(request.Id, cancellationToken);
+        var subTopic = await _repository.GetMentorByIdAsync(request.Id, cancellationToken);
         if (subTopic is null)
         {
             throw new NotFoundException("Sub topic not found.");
         }
 
-        return new MentorSubTopicResponse
-        {
-            Id = subTopic.Id,
-            TopicId = subTopic.TopicId,
-            Title = subTopic.Title,
-            Slug = subTopic.Slug,
-            Description = subTopic.Description,
-            ImageUrl = subTopic.ImageUrl,
-            Example =  subTopic.Example,
-            ExampleType = subTopic.ExampleType,
-            Position = subTopic.Position,
-            PublishedAt = subTopic.PublishedAt,
-            PublishedBy = subTopic.PublishedBy,
-            CreatedAt = subTopic.CreatedAt,
-            CreatedBy = subTopic.CreatedBy,
-            UpdatedAt = subTopic.UpdatedAt,
-            UpdatedBy = subTopic.UpdatedBy
-        };
+        return subTopic;
     }
 }

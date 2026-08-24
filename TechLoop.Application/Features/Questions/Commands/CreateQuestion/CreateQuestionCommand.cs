@@ -17,5 +17,6 @@ public sealed record CreateQuestionCommand(
     int? TimeLimitSeconds,
     int? MemoryLimitMb,
     DifficultyLevel Difficulty,
-    int Position
+    int Position,
+    bool ShiftPositions
 ) : IRequest<CreateQuestionResponse>;

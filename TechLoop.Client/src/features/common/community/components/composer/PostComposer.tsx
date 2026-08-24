@@ -1,6 +1,7 @@
 import { Check, Send, X } from "lucide-react";
 import { useState, type FormEvent } from "react";
 import type { CommunityTechnology } from "../../../../../types/community.types.ts";
+import CustomSelect from "../../../../../shared/Customselect.tsx";
 
 export interface PostComposerInitialValues {
     technologyId: number | null;
@@ -79,22 +80,21 @@ export default function PostComposer({
             <label className="block">
                 <span className="text-xs font-medium text-[#a8bad0]">Technology</span>
 
-                <select
+                <CustomSelect
                     value={technologyId}
-                    onChange={(event) => setTechnologyId(event.target.value)}
-                    disabled={submitting || loadingTechnologies}
-                    className="mt-2 h-11 w-full rounded-xl border border-[#1e3254] bg-[#081423] px-3 text-sm text-white outline-none transition focus:border-[#17D4C3] disabled:opacity-60"
-                >
-                    <option value="" className="bg-[#081423]">
-                        {loadingTechnologies ? "Loading technologies..." : "Select technology"}
-                    </option>
-
-                    {technologies.map((technology) => (
-                        <option key={technology.id} value={technology.id} className="bg-[#081423]">
-                            {technology.name}
-                        </option>
-                    ))}
-                </select>
+                    onChange={(value: string) => setTechnologyId(value)}
+                    //disabled={submitting || loadingTechnologies}
+                    options={[
+                        {
+                            value: "",
+                            label: loadingTechnologies ? "Loading technologies..." : "Select technology",
+                        },
+                        ...technologies.map((technology) => ({
+                            value: String(technology.id),
+                            label: technology.name,
+                        })),
+                    ]}
+                />
             </label>
 
             <label className="mt-4 block">

@@ -8,6 +8,8 @@ public sealed class DiscussionDto
 
     public string UserName { get; set; } = string.Empty;
 
+    public int UserRoleId { get; set; }
+
     public int QuestionId { get; set; }
 
     public string Title { get; set; } = string.Empty;

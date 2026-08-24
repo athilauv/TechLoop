@@ -18,5 +18,6 @@ public sealed record UpdateQuestionCommand(
     int? TimeLimitSeconds,
     int? MemoryLimitMb,
     DifficultyLevel Difficulty,
-    int Position
+    int Position,
+    bool ShiftPositions
 ) : IRequest<UpdateQuestionResponse>;

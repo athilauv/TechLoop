@@ -1,4 +1,4 @@
-﻿using Dapper;
+using Dapper;
 using TechLoop.Application.Interfaces.Infrastructure;
 using TechLoop.Application.Interfaces.Repositories;
 using TechLoop.Domain.Entities;
@@ -48,7 +48,7 @@ public sealed class TestCaseRepository : ITestCaseRepository
     {
         const string sql = @"CALL sp_soft_delete_test_case(@Id,@DeletedBy,@DeletedAt);";
         using var connection = _context.CreateConnection();
-        return await connection.ExecuteAsync(new CommandDefinition(
+        await connection.ExecuteAsync(new CommandDefinition(
                 sql,
                 new
                 {
@@ -57,6 +57,13 @@ public sealed class TestCaseRepository : ITestCaseRepository
                     DeletedAt = DateTime.UtcNow
                 },
                 cancellationToken: cancellationToken));
+
+        var stillExists = await connection.ExecuteScalarAsync<bool>(new CommandDefinition(
+            "SELECT EXISTS (SELECT 1 FROM test_cases WHERE id = @Id AND deleted_at IS NULL);",
+            new { Id = id },
+            cancellationToken: cancellationToken));
+
+        return stillExists ? 0 : 1;
     }
 
     // Soft Delete By Question

@@ -103,22 +103,14 @@ export default function LoginPage() {
 
             showToast.success("Login successful");
 
-            switch (currentUser.role) {
-                case "Learner":
-                    navigate("/learner");
-                    break;
-
-                case "Mentor":
-                    navigate("/mentor");
-                    break;
-
-                case "Admin":
-                    navigate("/admin");
-                    break;
-
-                default:
-                    showToast.error("Invalid user role");
-                    break;
+            if (currentUser.roleId === 3 || currentUser.role === "Admin") {
+                navigate("/admin");
+            } else if (currentUser.roleId === 2 || currentUser.role === "Mentor") {
+                navigate("/mentor");
+            } else if (currentUser.roleId === 1 || currentUser.role === "Learner") {
+                navigate("/learner");
+            } else {
+                showToast.error("Invalid user role");
             }
         }  catch (err: unknown) {
             const message = err instanceof Error ? err.message : "Login failed";

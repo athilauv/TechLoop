@@ -17,8 +17,8 @@ using TechLoop.Application.Features.Discussions.Queries.GetQuestionDiscussions;
 namespace TechLoop.API.Controllers.Learner;
 
 [ApiController]
-[Authorize(Roles = "Learner")]
-[Route("api/learner/discussions")]
+[Authorize(Roles = "Learner,Mentor")]
+[Route("api/discussions")]
 public sealed class DiscussionsController : ControllerBase
 {
     private readonly IMediator _mediator;

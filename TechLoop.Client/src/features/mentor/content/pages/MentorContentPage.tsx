@@ -30,6 +30,7 @@ import type {
     UpdateSubTopicRequest,
 } from "../../../../types/subTopic.types.ts";
 import { showToast } from "../../../../utils/toast.tsx";
+import { confirmPositionShift, isPositionConflict } from "../../../../utils/position.utils.ts";
 import ContentTree from "../components/sidebar/ContentTree.tsx";
 import MentorContentDetails from "../components/detail/MentorContentDetails.tsx";
 import TopicForm from "../components/forms/TopicForm.tsx";
@@ -46,23 +47,6 @@ type FormType =
     | "subtopic-create"
     | "subtopic-edit"
     | null;
-
-const isPositionConflict = (message: string): boolean =>
-    /position.*(already exists|already occupied|exists)/i.test(message);
-
-const confirmPositionShift = (
-    message: string,
-    noun: string
-): Promise<boolean> =>
-    new Promise((resolve) => {
-        showToast.confirm(
-            "Position already exists",
-            `${message} Shift the existing ${noun} down?`,
-            () => resolve(true),
-            () => resolve(false),
-            "Shift"
-        );
-    });
 
 const confirmTopicDelete = (): Promise<boolean> =>
     new Promise((resolve) => {

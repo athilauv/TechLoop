@@ -1,4 +1,4 @@
-﻿using Dapper;
+using Dapper;
 using TechLoop.Application.Features.SubTopics.DTOs;
 using TechLoop.Application.Interfaces.Infrastructure;
 using TechLoop.Application.Interfaces.Repositories;
@@ -221,6 +221,39 @@ public sealed class SubTopicsRepository : ISubTopicsRepository
                 cancellationToken: cancellationToken));
     }
 
+    public async Task<MentorSubTopicResponse?> GetMentorByIdAsync(
+        int id,
+        CancellationToken cancellationToken)
+    {
+        const string sql = @"
+            SELECT
+                st.id,
+                st.topic_id,
+                topic.title AS topic_title,
+                st.title,
+                st.slug,
+                st.description,
+                st.image_url,
+                st.example,
+                st.example_type,
+                st.position,
+                st.published_at,
+                published_user.username AS published_by,
+                created_user.username AS created_by,
+                st.created_at,
+                updated_user.username AS updated_by,
+                st.updated_at
+            FROM fn_get_subtopic_by_id(@Id) st
+            INNER JOIN topics topic ON topic.id = st.topic_id AND topic.deleted_at IS NULL
+            LEFT JOIN users published_user ON published_user.id = st.published_by
+            LEFT JOIN users created_user ON created_user.id = st.created_by
+            LEFT JOIN users updated_user ON updated_user.id = st.updated_by;";
+
+        using var connection = _context.CreateConnection();
+        return await connection.QuerySingleOrDefaultAsync<MentorSubTopicResponse>(
+            new CommandDefinition(sql, new { Id = id }, cancellationToken: cancellationToken));
+    }
+
     // Get all active subtopics.
     public async Task<IEnumerable<SubTopic>> GetAllAsync(
         CancellationToken cancellationToken)
@@ -231,6 +264,38 @@ public sealed class SubTopicsRepository : ISubTopicsRepository
             new CommandDefinition(
                 "SELECT * FROM fn_get_all_subtopics();",
                 cancellationToken: cancellationToken));
+    }
+
+    public async Task<IEnumerable<MentorSubTopicResponse>> GetAllMentorAsync(CancellationToken cancellationToken)
+    {
+        const string sql = @"
+            SELECT
+                st.id,
+                st.topic_id,
+                topic.title AS topic_title,
+                st.title,
+                st.slug,
+                st.description,
+                st.image_url,
+                st.example,
+                st.example_type,
+                st.position,
+                st.published_at,
+                published_user.username AS published_by,
+                created_user.username AS created_by,
+                st.created_at,
+                updated_user.username AS updated_by,
+                st.updated_at
+            FROM fn_get_all_subtopics() st
+            INNER JOIN topics topic ON topic.id = st.topic_id AND topic.deleted_at IS NULL
+            LEFT JOIN users published_user ON published_user.id = st.published_by
+            LEFT JOIN users created_user ON created_user.id = st.created_by
+            LEFT JOIN users updated_user ON updated_user.id = st.updated_by
+            ORDER BY st.position;";
+
+        using var connection = _context.CreateConnection();
+        return await connection.QueryAsync<MentorSubTopicResponse>(
+            new CommandDefinition(sql, cancellationToken: cancellationToken));
     }
 
     // Get all published subtopics.
@@ -321,9 +386,31 @@ public sealed class SubTopicsRepository : ISubTopicsRepository
     {
         using var connection = _context.CreateConnection();
 
+        const string sql = @"
+            SELECT
+                st.id,
+                st.topic_id,
+                topic.title AS topic_title,
+                st.title,
+                st.slug,
+                st.description,
+                st.image_url,
+                st.position,
+                st.published_at,
+                published_user.username AS published_by,
+                created_user.username AS created_by,
+                st.created_at,
+                updated_user.username AS updated_by,
+                source_subtopic.updated_at
+            FROM fn_get_mentor_unpublished_subtopics(@MentorId) st
+            INNER JOIN topics topic ON topic.id = st.topic_id AND topic.deleted_at IS NULL
+            INNER JOIN sub_topics source_subtopic ON source_subtopic.id = st.id AND source_subtopic.deleted_at IS NULL
+            LEFT JOIN users published_user ON published_user.id = st.published_by
+            LEFT JOIN users created_user ON created_user.id = st.created_by
+            LEFT JOIN users updated_user ON updated_user.id = source_subtopic.updated_by;";
+
         return await connection.QueryAsync<MentorSubTopicResponse>(
-            new CommandDefinition(
-                "SELECT * FROM fn_get_mentor_unpublished_subtopics(@MentorId);",
+            new CommandDefinition(sql,
                 new
                 {
                     MentorId = mentorId

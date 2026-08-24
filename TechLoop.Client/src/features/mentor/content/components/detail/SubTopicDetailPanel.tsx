@@ -89,7 +89,7 @@ export default function SubTopicDetailPanel({
                     />
 
                     <DetailField label="Position" value={String(subTopic.position)} />
-                    <DetailField label="Topic ID" value={String(subTopic.topicId)} />
+                    <DetailField label="Topic" value={subTopic.topicTitle || "Unknown"} />
                     <DetailField label="Created" value={formatDate(subTopic.createdAt)} />
                     <DetailField
                         label="Updated"

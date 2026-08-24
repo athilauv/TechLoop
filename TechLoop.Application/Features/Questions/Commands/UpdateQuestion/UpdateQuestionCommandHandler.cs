@@ -38,7 +38,7 @@ public sealed class UpdateQuestionCommandHandler : IRequestHandler<UpdateQuestio
         }
 
         var positionExists = await _questionRepository.PositionExistsAsync(request.SubTopicId, request.Position, cancellationToken);
-        if (positionExists && question.Position != request.Position)
+        if (positionExists && question.Position != request.Position && !request.ShiftPositions)
         {
             throw new ValidationException($"Question position '{request.Position}' already exists.");
         }
@@ -59,7 +59,7 @@ public sealed class UpdateQuestionCommandHandler : IRequestHandler<UpdateQuestio
         question.UpdatedAt = DateTime.UtcNow;
         question.UpdatedBy = _currentUserService.UserId;
 
-        var rowsAffected = await _questionRepository.UpdateAsync(question, cancellationToken);
+        var rowsAffected = await _questionRepository.UpdateAsync(question, request.ShiftPositions, cancellationToken);
         if (rowsAffected <= 0)
         {
             throw new Exception("Failed to update question.");

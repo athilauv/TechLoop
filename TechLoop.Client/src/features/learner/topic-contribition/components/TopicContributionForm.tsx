@@ -15,6 +15,7 @@ import { toast } from "react-toastify";
 import { useMutation, useQuery } from "@tanstack/react-query";
 
 import { createTopicContribution } from "../../../../api/topicContribution.api.ts";
+import { getErrorMessage } from "../../../../utils/error.utils.ts";
 import { getTechnologies } from "../../../../api/technology.api.ts";
 import { getCurriculum } from "../../../../api/curriculum.api.ts";
 import type { LearnerTechnology } from "../../../../types/technology.types.ts";
@@ -24,6 +25,7 @@ import type {
 } from "../../../../types/curriculum.types.ts";
 import type { CreateTopicContributionRequest } from "../../../../types/topicContribution.types.ts";
 import { ExampleType } from "../../../../types/enums/example-type.ts";
+import CustomSelect from "../../../../shared/Customselect.tsx";
 
 interface FormState {
     technologyId: number | null;
@@ -160,8 +162,10 @@ export default function TopicContributionForm() {
             navigate("/learner/topic-contributions");
         },
 
-        onError: () => {
-            toast.error("Unable to submit contribution.");
+        onError: (error) => {
+            toast.error(
+                getErrorMessage(error, "Unable to submit contribution."),
+            );
         },
     });
 
@@ -370,9 +374,11 @@ export default function TopicContributionForm() {
                 </button>
 
                 {isOpen && !disabled && (
-                    <div className="absolute left-0 right-0 top-full z-30 mt-2 overflow-hidden rounded-xl border border-[var(--cs-border)] bg-[var(--cs-bg-card-raised)] shadow-2xl shadow-black/40">
+                    <div
+                        className="absolute left-0 right-0 top-full z-50 mt-2 overflow-hidden rounded-[var(--cs-radius-control)] border border-[var(--cs-accent-border)] bg-[var(--cs-bg-card-raised)] shadow-xl shadow-black/30"
+                        onClick={(event) => event.stopPropagation()}>
                         {/* Search */}
-                        <div className="border-b border-[var(--cs-border)] p-3">
+                        <div className="sticky top-0 z-10 border-b border-[var(--cs-border)] bg-[var(--cs-bg-card-raised)] p-2.5">
                             <div className="flex items-center gap-2 rounded-[var(--cs-radius-control)] border border-[var(--cs-border)] bg-[var(--cs-bg-input)] px-3 transition focus-within:border-[var(--cs-accent-border)]">
                                 <Search size={16} className="shrink-0 text-[var(--cs-text-muted)]" />
 
@@ -397,7 +403,7 @@ export default function TopicContributionForm() {
                         </div>
 
                         {/* Results */}
-                        <div className="max-h-64 overflow-y-auto p-1.5">
+                        <div className="max-h-56 overflow-y-auto overscroll-contain p-1.5">
                             {type === "technology" && isTechnologiesLoading && (
                                 <div className="flex items-center justify-center gap-2 px-4 py-6 text-sm text-[var(--cs-text-secondary)]">
                                     <Loader2 size={16} className="animate-spin" />
@@ -666,19 +672,20 @@ export default function TopicContributionForm() {
                                     Example Type
                                     <span className="ml-1 font-normal text-[var(--cs-text-muted)]">(Optional)</span>
                                 </label>
-                                <select
+
+                                <CustomSelect
                                     value={form.exampleType}
-                                    onChange={(event) => updateField("exampleType", event.target.value)}
-                                    className="w-full rounded-[var(--cs-radius-control)] border border-[var(--cs-border)] bg-[var(--cs-bg-input)] px-3 py-2.5 text-sm text-[var(--cs-text-primary)] outline-none transition focus:border-[var(--cs-accent)] focus:ring-2 focus:ring-[var(--cs-accent)]/25"
-                                >
-                                    <option value="">Select example type</option>
-                                    <option value={ExampleType.Text}>Text</option>
-                                    <option value={ExampleType.Code}>Code</option>
-                                    <option value={ExampleType.Link}>Link</option>
-                                    <option value={ExampleType.Image}>Image</option>
-                                    <option value={ExampleType.Video}>Video</option>
-                                    <option value={ExampleType.Pdf}>PDF</option>
-                                </select>
+                                    onChange={(value: string) => updateField("exampleType", value)}
+                                    options={[
+                                        { value: "", label: "Select example type" },
+                                        { value: String(ExampleType.Text), label: "Text" },
+                                        { value: String(ExampleType.Code), label: "Code" },
+                                        { value: String(ExampleType.Link), label: "Link" },
+                                        { value: String(ExampleType.Image), label: "Image" },
+                                        { value: String(ExampleType.Video), label: "Video" },
+                                        { value: String(ExampleType.Pdf), label: "PDF" },
+                                    ]}/>
+
                                 {errors.exampleType && (
                                     <p className="mt-1 text-xs text-[var(--cs-danger)]">{errors.exampleType}</p>
                                 )}

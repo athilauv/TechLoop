@@ -32,7 +32,7 @@ public sealed class CreateQuestionCommandHandler : IRequestHandler<CreateQuestio
             throw new ValidationException($"Question slug '{request.Slug}' already exists.");
         }
         var positionExists = await _questionRepository.PositionExistsAsync(request.SubTopicId, request.Position, cancellationToken);
-        if (positionExists)
+        if (positionExists && !request.ShiftPositions)
         {
             throw new ValidationException($"Question position '{request.Position}' already exists.");
         }
@@ -55,7 +55,7 @@ public sealed class CreateQuestionCommandHandler : IRequestHandler<CreateQuestio
             CreatedBy = _currentUserService.UserId
         };
 
-        var id = await _questionRepository.CreateAsync(question, cancellationToken);
+        var id = await _questionRepository.CreateAsync(question, request.ShiftPositions, cancellationToken);
         var createdQuestion = await _questionRepository.GetByIdAsync(id, cancellationToken);
         if (createdQuestion is null)
         {

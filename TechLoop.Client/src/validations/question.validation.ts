@@ -12,6 +12,7 @@ export interface QuestionValidationData {
     memoryLimitMb?: number | null;
     difficulty: DifficultyLevel;
     position: number;
+    shiftPositions: boolean;
 }
 
 export const validateQuestion = (

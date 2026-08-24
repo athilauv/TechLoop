@@ -1,4 +1,4 @@
-﻿using MediatR;
+using MediatR;
 using TechLoop.Application.Features.Topics.DTOs;
 using TechLoop.Application.Interfaces.Repositories;
 
@@ -14,24 +14,6 @@ public sealed class GetAllMentorTopicsQueryHandler : IRequestHandler<GetAllMento
 
     public async Task<IEnumerable<MentorTopicResponse>> Handle(GetAllMentorTopicsQuery request, CancellationToken cancellationToken)
     {
-        var topics = await _repository.GetAllAsync(cancellationToken);
-        return topics.Select(topic => new MentorTopicResponse
-        {
-            Id = topic.Id,
-            TechnologyId = topic.TechnologyId,
-            Title = topic.Title,
-            Slug = topic.Slug,
-            Description = topic.Description,
-            ImageUrl = topic.ImageUrl,
-            Example =  topic.Example,
-            ExampleType = topic.ExampleType,
-            Position = topic.Position,
-            PublishedAt = topic.PublishedAt,
-            PublishedBy = topic.PublishedBy,
-            CreatedAt = topic.CreatedAt,
-            CreatedBy = topic.CreatedBy,
-            UpdatedAt = topic.UpdatedAt,
-            UpdatedBy = topic.UpdatedBy
-        });
+        return await _repository.GetAllMentorAsync(cancellationToken);
     }
 }

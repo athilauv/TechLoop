@@ -5,8 +5,8 @@ namespace TechLoop.Application.Interfaces.Repositories;
 
 public interface IQuestionRepository
 {
-    Task<int> CreateAsync(Question question, CancellationToken cancellationToken);
-    Task<int> UpdateAsync(Question question, CancellationToken cancellationToken);
+    Task<int> CreateAsync(Question question, bool shiftPositions, CancellationToken cancellationToken);
+    Task<int> UpdateAsync(Question question, bool shiftPositions, CancellationToken cancellationToken);
     Task<int> SoftDeleteAsync(int id, Guid deletedBy, CancellationToken cancellationToken);
     Task<IEnumerable<Question>> GetAllAsync(CancellationToken cancellationToken);
     Task<Question?> GetByIdAsync(int id, CancellationToken cancellationToken);

@@ -42,7 +42,11 @@ builder.Services.AddInfrastructure(builder.Configuration);
 
 // Swagger
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(options =>
+{
+    options.CustomSchemaIds(type =>
+        type.FullName?.Replace("+", ".") ?? type.Name);
+});
 
 //Authorization
 builder.Services.AddAuthorization(options =>

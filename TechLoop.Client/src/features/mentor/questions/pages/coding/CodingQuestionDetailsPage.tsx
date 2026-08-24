@@ -59,13 +59,10 @@ import QuestionDetailHeader from "../../components/question-details/QuestionDeta
 import QuestionTabs from "../../components/question-details/QuestionTabs.tsx";
 import OverviewTab from "../../components/question-details/OverviewTab.tsx";
 import DescriptionTab from "../../components/question-details/DescriptionTab.tsx";
-
 import CodingTemplatesSection from "../../components/coding/CodingTemplatesSection.tsx";
 import TestCasesSection from "../../components/coding/TestCasesSection.tsx";
-
 import DiscussionList from "../../../../common/Discussion/components/DiscussionList.tsx";
 import DiscussionForm from "../../../../common/Discussion/components/DiscussionForm.tsx";
-
 import PinToggleButton from "../../components/discussions/PinToggleButton.tsx";
 
 const TABS = [
@@ -275,7 +272,14 @@ const CodingQuestionDetailsPage = () => {
                                 "Discussion deleted successfully.",
                             );
 
-                            await invalidateDiscussions();
+                            try {
+                                await invalidateDiscussions();
+                            } catch (refreshError) {
+                                console.error(
+                                    "Failed to refresh discussions after deletion:",
+                                    refreshError,
+                                );
+                            }
                         } catch (error) {
                             showToast.error(
                                 getErrorMessage(
@@ -405,11 +409,18 @@ const CodingQuestionDetailsPage = () => {
                     comment.id,
                 );
 
-                await invalidateDiscussions();
-
                 showToast.success(
                     "Comment deleted successfully.",
                 );
+
+                try {
+                    await invalidateDiscussions();
+                } catch (refreshError) {
+                    console.error(
+                        "Failed to refresh discussions after comment deletion:",
+                        refreshError,
+                    );
+                }
             } catch (error) {
                 showToast.error(
                     getErrorMessage(
@@ -541,34 +552,31 @@ const CodingQuestionDetailsPage = () => {
             () => {
                 void (async () => {
                     try {
-                        await deleteQuestion(
-                            question.id,
-                        );
+                        await deleteQuestion(question.id);
 
-                        await queryClient.invalidateQueries(
-                            {
-                                queryKey: [
-                                    "mentor-questions",
-                                ],
-                            },
-                        );
-
-                        queryClient.removeQueries(
-                            {
-                                queryKey: [
-                                    "mentor-question",
-                                    question.id,
-                                ],
-                            },
-                        );
-
+                        // The DELETE request itself determines success.
+                        // A later query refresh must not turn a successful
+                        // backend mutation into an error toast.
                         showToast.success(
                             "Coding question deleted successfully.",
                         );
 
-                        navigate(
-                            "/mentor/questions/coding",
-                        );
+                        queryClient.removeQueries({
+                            queryKey: ["mentor-question", question.id],
+                        });
+
+                        try {
+                            await queryClient.invalidateQueries({
+                                queryKey: ["mentor-questions"],
+                            });
+                        } catch (refreshError) {
+                            console.error(
+                                "Failed to refresh mentor questions after deletion:",
+                                refreshError,
+                            );
+                        }
+
+                        navigate("/mentor/questions/coding");
                     } catch (error) {
                         showToast.error(
                             getErrorMessage(

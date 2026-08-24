@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Button from "../../../../../shared/Button.tsx";
 import {
     DifficultyLevel,
@@ -14,6 +14,7 @@ import type { MentorSubTopic } from "../../../../../types/subTopic.types.ts";
 import { validateQuestion } from "../../../../../validations/question.validation.ts";
 import { showToast } from "../../../../../utils/toast.tsx";
 import SubTopicSelect from "../shared/SubTopicSelect";
+import CustomSelect from "../../../../../shared/Customselect.tsx";
 
 interface CodingQuestionFormProps {
     question?: MentorQuestion;
@@ -74,6 +75,12 @@ const CodingQuestionForm = ({
                             }: CodingQuestionFormProps) => {
     const [form, setForm] = useState<FormState>(() => createInitialState(question));
 
+    useEffect(() => {
+        if (question) {
+            setForm(createInitialState(question));
+        }
+    }, [question]);
+
     const updateField = <K extends keyof FormState>(field: K, value: FormState[K]) => {
         setForm((current) => ({ ...current, [field]: value }));
     };
@@ -104,6 +111,7 @@ const CodingQuestionForm = ({
                 memoryLimitMb,
                 difficulty: form.difficulty,
                 position,
+                shiftPositions: false,
             },
             Boolean(question),
         );
@@ -219,23 +227,14 @@ const CodingQuestionForm = ({
                     <label className="mb-2 block text-sm font-medium text-[var(--cs-text)]">
                         Difficulty
                     </label>
-                    <select
-                        value={form.difficulty}
-                        onChange={(event) =>
-                            updateField(
-                                "difficulty",
-                                Number(event.target.value) as DifficultyLevelType,
-                            )
-                        }
-                        disabled={submitting}
-                        className="w-full rounded-lg border border-[var(--cs-border)] bg-[var(--cs-surface-muted)] px-3 py-2.5 text-sm text-[var(--cs-text)] outline-none focus:border-[var(--cs-primary)]"
-                    >
-                        {DIFFICULTY_OPTIONS.map((option) => (
-                            <option key={option.value} value={option.value}>
-                                {option.label}
-                            </option>
-                        ))}
-                    </select>
+                    <CustomSelect
+                        value={String(form.difficulty)}
+                        onChange={(value: string) => updateField("difficulty", Number(value) as DifficultyLevelType,)}
+                        options={DIFFICULTY_OPTIONS.map((option) => ({
+                            value: String(option.value),
+                            label: option.label,
+                        }))}
+                    />
                 </div>
             </div>
 
