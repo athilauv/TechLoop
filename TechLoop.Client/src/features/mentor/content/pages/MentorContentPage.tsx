@@ -4,6 +4,7 @@ import { toast } from "react-toastify";
 import { BookOpen } from "lucide-react";
 import { getErrorMessage } from "../../../../utils/error.utils.ts";
 import { getMentorCurriculum } from "../../../../api/mentor.api.ts";
+import { MENTOR_PENDING_QUERY_KEY } from "../../../../hooks/useMentorPendingQueue.ts";
 import {
     getMentorTopicById,
     createTopic,
@@ -307,6 +308,17 @@ export default function MentorContentPage() {
     };
 
     const handlePublishTopic = async (topicId: number) => {
+        const confirmed = await new Promise<boolean>((resolve) => {
+            showToast.confirm(
+                "Publish topic",
+                "Publishing makes this topic visible in the learner curriculum. Continue?",
+                () => resolve(true),
+                () => resolve(false),
+                "Publish",
+            );
+        });
+        if (!confirmed) return;
+
         try {
             const response = await publishTopic(topicId);
 
@@ -317,6 +329,7 @@ export default function MentorContentPage() {
 
             toast.success(response.message || "Topic published successfully.");
             await refreshCurriculum();
+            await queryClient.invalidateQueries({ queryKey: MENTOR_PENDING_QUERY_KEY });
             await handleSelectTopic(topicId);
         } catch (error: unknown) {
             toast.error(getErrorMessage(error, "Unable to publish topic."));
@@ -500,6 +513,17 @@ export default function MentorContentPage() {
     };
 
     const handlePublishSubTopic = async (subTopicId: number) => {
+        const confirmed = await new Promise<boolean>((resolve) => {
+            showToast.confirm(
+                "Publish subtopic",
+                "Publishing makes this subtopic visible in the learner curriculum. Continue?",
+                () => resolve(true),
+                () => resolve(false),
+                "Publish",
+            );
+        });
+        if (!confirmed) return;
+
         try {
             const response = await publishSubTopic(subTopicId);
 
@@ -511,6 +535,7 @@ export default function MentorContentPage() {
             toast.success(response.message || "SubTopic published successfully.");
 
             await refreshCurriculum();
+            await queryClient.invalidateQueries({ queryKey: MENTOR_PENDING_QUERY_KEY });
             await handleSelectSubTopic(subTopicId);
         } catch (error: unknown) {
             toast.error(getErrorMessage(error, "Unable to publish subtopic."));

@@ -1,5 +1,6 @@
-﻿using FluentValidation;
+﻿// using FluentValidation;
 using MediatR;
+using TechLoop.Application.Common.Exceptions;
 using TechLoop.Application.Features.TechnologyCategories.DTOs;
 using TechLoop.Application.Interfaces.Repositories;
 
@@ -18,7 +19,7 @@ public sealed class PublishTechnologyCategoryCommandHandler : IRequestHandler<Pu
         var category = await _repository.GetByIdForAdminAsync(request.Id, cancellationToken);
         if (category is null)
         {
-            throw new InvalidOperationException("Technology category not found.");
+            throw new NotFoundException("Technology category not found.");
         }
 
         if (category.PublishAt is not null)
@@ -26,9 +27,11 @@ public sealed class PublishTechnologyCategoryCommandHandler : IRequestHandler<Pu
             throw new ValidationException("Technology category is already published.");
         }
         
-        await _repository.PublishAsync(request.Id, cancellationToken); 
+        await _repository.PublishAsync(request.Id, request.PublishedBy, cancellationToken);
+
         return new PublishTechnologyCategoryResponse
         {
+            Success = true,
             Id = request.Id,
             Message = "Technology category published successfully."
         };

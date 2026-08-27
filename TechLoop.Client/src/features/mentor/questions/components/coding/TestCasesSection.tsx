@@ -24,6 +24,7 @@ import type {
 
 import TestCaseTable from "./TestCaseTable";
 import TestCaseForm from "./TestCaseForm";
+import Drawer from "../shared/Drawer";
 
 interface TestCasesSectionProps {
     questionId: number;
@@ -160,75 +161,48 @@ const TestCasesSection = ({ questionId }: TestCasesSectionProps) => {
                 </Button>
             </div>
 
-            <div
-                className={
-                    drawerOpen
-                        ? "mt-5 grid grid-cols-1 items-start gap-5 lg:grid-cols-[minmax(0,1.35fr)_minmax(360px,0.85fr)]"
-                        : "mt-5"
-                }
-            >
-                <div className="min-w-0">
-                    {isLoading ? (
-                        <div className="flex justify-center py-10">
-                            <LoadingSpinner />
-                        </div>
-                    ) : isError ? (
-                        <EmptyState
-                            icon={<TestTube2 size={22} />}
-                            title="Unable to load test cases"
-                            description="Something went wrong while loading the test cases."
-                        />
-                    ) : sortedTestCases.length === 0 ? (
-                        <EmptyState
-                            icon={<TestTube2 size={22} />}
-                            title="No test cases"
-                            description="Add test cases to evaluate learner submissions."
-                        />
-                    ) : (
-                        <TestCaseTable
-                            testCases={sortedTestCases}
-                            onEdit={openEdit}
-                            onDelete={handleDelete}
-                            disabled={submitting}
-                        />
-                    )}
-                </div>
-
-                {drawerOpen && (
-                    <aside className="min-w-0 overflow-hidden rounded-xl border border-[var(--cs-border)]/70 bg-[var(--cs-surface)]/50 backdrop-blur-sm">
-                        <div className="flex items-start justify-between gap-4 border-b border-[var(--cs-border)]/60 px-5 py-4">
-                            <div className="min-w-0">
-                                <h3 className="text-sm font-semibold text-[var(--cs-text)]">
-                                    {editingTestCase ? "Edit Test Case" : "Add Test Case"}
-                                </h3>
-                                <p className="mt-1 text-xs leading-5 text-[var(--cs-text-muted)]">
-                                    Configure the input, expected output, and visibility.
-                                </p>
-                            </div>
-                            <button
-                                type="button"
-                                onClick={closeDrawer}
-                                disabled={submitting}
-                                aria-label="Close test case form"
-                                className="shrink-0 rounded-lg p-2 text-[var(--cs-text-muted)] transition-colors hover:bg-[var(--cs-surface-muted)]/60 hover:text-[var(--cs-text)] disabled:cursor-not-allowed disabled:opacity-50"
-                            >
-                                <span aria-hidden="true" className="text-lg leading-none">×</span>
-                            </button>
-                        </div>
-
-                        <div className="p-5">
-                            <TestCaseForm
-                                key={editingTestCase?.id ?? "new-test-case"}
-                                testCase={editingTestCase ?? undefined}
-                                position={editingTestCase?.position ?? nextPosition}
-                                submitting={submitting}
-                                onSubmit={handleSubmit}
-                                onCancel={closeDrawer}
-                            />
-                        </div>
-                    </aside>
+            <div className="mt-5 min-w-0">
+                {isLoading ? (
+                    <div className="flex justify-center py-10">
+                        <LoadingSpinner />
+                    </div>
+                ) : isError ? (
+                    <EmptyState
+                        icon={<TestTube2 size={22} />}
+                        title="Unable to load test cases"
+                        description="Something went wrong while loading the test cases."
+                    />
+                ) : sortedTestCases.length === 0 ? (
+                    <EmptyState
+                        icon={<TestTube2 size={22} />}
+                        title="No test cases"
+                        description="Add test cases to evaluate learner submissions."
+                    />
+                ) : (
+                    <TestCaseTable
+                        testCases={sortedTestCases}
+                        onEdit={openEdit}
+                        onDelete={handleDelete}
+                        disabled={submitting}
+                    />
                 )}
             </div>
+
+            <Drawer
+                open={drawerOpen}
+                onClose={closeDrawer}
+                title={editingTestCase ? "Edit Test Case" : "Add Test Case"}
+                description="Configure the input, expected output, and visibility."
+            >
+                <TestCaseForm
+                    key={editingTestCase?.id ?? "new-test-case"}
+                    testCase={editingTestCase ?? undefined}
+                    position={editingTestCase?.position ?? nextPosition}
+                    submitting={submitting}
+                    onSubmit={handleSubmit}
+                    onCancel={closeDrawer}
+                />
+            </Drawer>
         </div>
     );
 };

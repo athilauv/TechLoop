@@ -2,6 +2,14 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
+using TechLoop.Application.Features.Admin.Commands.UpdateUserRole;
+using TechLoop.Application.Features.Admin.DTOs;
+using TechLoop.Application.Features.Admin.Queries.GetDashboard;
+using TechLoop.Application.Features.Admin.Queries.GetQuestions;
+using TechLoop.Application.Features.Admin.Queries.GetCommunity;
+using TechLoop.Application.Features.Admin.Queries.GetMentorOverview;
+using TechLoop.Application.Features.Admin.Queries.GetPendingContributions;
+using TechLoop.Application.Features.Admin.Queries.GetUsers;
 using TechLoop.Application.Features.Mentor.Commands.CreateMentor;
 using TechLoop.Application.Features.Mentor.Commands.DeleteMentor;
 using TechLoop.Application.Features.Mentor.DTOs;
@@ -9,6 +17,9 @@ using TechLoop.Application.Features.Mentor.Queries.Admin.GetAllMentors;
 using TechLoop.Application.Features.Mentor.Queries.Admin.GetMentorById;
 using TechLoop.Application.Features.Technologies.Commands.CreateTechnology;
 using TechLoop.Application.Features.Technologies.Commands.DeleteTechnology;
+using TechLoop.Application.Features.Technologies.Commands.PublishTechnology;
+using TechLoop.Application.Features.Technologies.Commands.PublishAdminTechnology;
+using TechLoop.Application.Features.Technologies.Commands.UpdateTechnology;
 using TechLoop.Application.Features.Technologies.DTOs;
 using TechLoop.Application.Features.Technologies.Queries.GetAllTechnologies.Mentor;
 using TechLoop.Application.Features.Technologies.Queries.GetTechnologyById.Mentor;
@@ -34,96 +45,128 @@ public sealed class AdminController : ControllerBase
         _mediator = mediator;
     }
 
-    //Create Category
+    [HttpGet("dashboard")]
+    public async Task<ActionResult<AdminDashboardResponse>> GetDashboard(CancellationToken cancellationToken)
+    {
+        return Ok(await _mediator.Send(new GetDashboardQuery(), cancellationToken));
+    }
+
+    [HttpGet("users")]
+    public async Task<ActionResult<IEnumerable<AdminUserResponse>>> GetUsers(CancellationToken cancellationToken)
+    {
+        return Ok(await _mediator.Send(new GetUsersQuery(), cancellationToken));
+    }
+
+    [HttpPatch("users/{userId:guid}/role")]
+    public async Task<IActionResult> UpdateUserRole(Guid userId, [FromBody] AdminUpdateUserRoleRequest request, CancellationToken cancellationToken)
+    {
+        var currentUserId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+        if (currentUserId == userId)
+            return BadRequest(new { message = "An administrator cannot change their own role." });
+
+        var updated = await _mediator.Send(new UpdateUserRoleCommand(userId, request), cancellationToken);
+        return updated ? Ok(new { success = true, message = "User role updated successfully." }) : NotFound();
+    }
+
+    [HttpGet("mentors/{mentorId:int}/overview")]
+    public async Task<ActionResult<AdminMentorOverviewResponse>> GetMentorOverview(int mentorId, CancellationToken cancellationToken)
+    {
+        var result = await _mediator.Send(new GetMentorOverviewQuery(mentorId), cancellationToken);
+        return result is null ? NotFound() : Ok(result);
+    }
+
+    [HttpGet("topic-contributions/pending")]
+    public async Task<IActionResult> GetPendingContributions(CancellationToken cancellationToken)
+    {
+        return Ok(await _mediator.Send(new GetPendingContributionsQuery(), cancellationToken));
+    }
+
+    [HttpGet("questions")]
+    public async Task<IActionResult> GetQuestions(CancellationToken cancellationToken)
+    {
+        return Ok(await _mediator.Send(new GetQuestionsQuery(), cancellationToken));
+    }
+
+    [HttpGet("community")]
+    public async Task<IActionResult> GetCommunity(CancellationToken cancellationToken)
+    {
+        return Ok(await _mediator.Send(new GetCommunityQuery(), cancellationToken));
+    }
+
     [HttpPost("technology-categories")]
-    public async Task<IActionResult> CreateTechnologyCategory([FromBody] CreateTechnologyCategoryRequest request)
+    public async Task<IActionResult> CreateTechnologyCategory([FromBody] CreateTechnologyCategoryRequest request, CancellationToken cancellationToken)
     {
         var createdBy = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
-        var result = await _mediator.Send(new CreateTechnologyCategoriesCommand(request, createdBy));
-        return Ok(result);
+        return Ok(await _mediator.Send(new CreateTechnologyCategoriesCommand(request, createdBy), cancellationToken));
     }
 
-    //Update Category
     [HttpPut("technology-categories/{id:int}")]
-    public async Task<IActionResult> UpdateTechnologyCategory(int id, [FromBody] UpdateTechnologyCategoryRequest request)
+    public async Task<IActionResult> UpdateTechnologyCategory(int id, [FromBody] UpdateTechnologyCategoryRequest request, CancellationToken cancellationToken)
     {
         var updatedBy = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
-        var result = await _mediator.Send(new UpdateTechnologyCategoryCommand(id, request, updatedBy));
-        return Ok(result);
+        return Ok(await _mediator.Send(new UpdateTechnologyCategoryCommand(id, request, updatedBy), cancellationToken));
     }
 
-    //Update Publish
     [HttpPatch("technology-categories/{id:int}/publish")]
-    public async Task<IActionResult> PublishTechnologyCategory(int id)
+    public async Task<IActionResult> PublishTechnologyCategory(int id, CancellationToken cancellationToken)
     {
-        var result = await _mediator.Send(new PublishTechnologyCategoryCommand(id));
-        return Ok(result);
+        var publishedBy = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+        return Ok(await _mediator.Send(new PublishTechnologyCategoryCommand(id, publishedBy), cancellationToken));
     }
 
-    //Soft Delete technology category
     [HttpDelete("technology-categories/{id:int}")]
-    public async Task<IActionResult> DeleteTechnologyCategory(int id)
+    public async Task<IActionResult> DeleteTechnologyCategory(int id, CancellationToken cancellationToken)
     {
         var deletedBy = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
-        var result = await _mediator.Send(new DeleteTechnologyCategoryCommand(id, deletedBy));
-        return Ok(result);
+        return Ok(await _mediator.Send(new DeleteTechnologyCategoryCommand(id, deletedBy), cancellationToken));
     }
-    
-    //Get all category
+
     [HttpGet("technology-categories")]
-    public async Task<IActionResult> GetAllTechnologyCategories()
+    public async Task<IActionResult> GetAllTechnologyCategories(CancellationToken cancellationToken)
     {
-        var result = await _mediator.Send(new GetAllTechnologyCategoriesQuery());
-        return Ok(result);
+        return Ok(await _mediator.Send(new GetAllTechnologyCategoriesQuery(), cancellationToken));
     }
 
-    //Get all category by id
     [HttpGet("technology-categories/{id:int}")]
-    public async Task<IActionResult> GetTechnologyCategoryById(int id)
+    public async Task<IActionResult> GetTechnologyCategoryById(int id, CancellationToken cancellationToken)
     {
-        var result = await _mediator.Send(new GetTechnologyCategoryByIdQuery(id));
-        if (result is null)
-            return NotFound();
-
-        return Ok(result);
+        var result = await _mediator.Send(new GetTechnologyCategoryByIdQuery(id), cancellationToken);
+        return result is null ? NotFound() : Ok(result);
     }
-    
-    // Create Technology
+
     [HttpPost("technologies")]
-    public async Task<ActionResult<CreateTechnologyCategoryResponse>> CreateTechnology(
-        [FromBody] CreateTechnologyRequest request, CancellationToken cancellationToken)
+    public async Task<IActionResult> CreateTechnology([FromBody] CreateTechnologyRequest request, CancellationToken cancellationToken)
     {
-        var command = new CreateTechnologyCommand(
-            request.CategoryId,
-            request.Name,
-            request.Description,
-            request.Slug,
-            request.ImageUrl,
-            request.Position);
-
-        var result = await _mediator.Send(command, cancellationToken);
-        return Ok(result);
+        var command = new CreateTechnologyCommand(request.CategoryId, request.Name, request.Description, request.Slug, request.ImageUrl, request.Position);
+        return Ok(await _mediator.Send(command, cancellationToken));
     }
-   
-    
-    //Soft Delete Technology
+
+    [HttpPut("technologies/{id:int}")]
+    public async Task<IActionResult> UpdateTechnology(int id, [FromBody] UpdateTechnologyRequest request, CancellationToken cancellationToken)
+    {
+        var command = new UpdateTechnologyCommand(id, request.CategoryId, request.Name, request.Description ?? string.Empty, request.Slug, request.ImageUrl ?? string.Empty, request.Position);
+        return Ok(await _mediator.Send(command, cancellationToken));
+    }
+
+    [HttpPatch("technologies/{id:int}/publish")]
+    public async Task<IActionResult> PublishTechnology(int id, CancellationToken cancellationToken)
+    {
+        var publishedBy = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+        return Ok(await _mediator.Send(new PublishAdminTechnologyCommand(id, publishedBy), cancellationToken));
+    }
+
     [HttpDelete("technologies/{id:int}")]
     public async Task<IActionResult> DeleteTechnology(int id, CancellationToken cancellationToken)
     {
-        var command = new DeleteTechnologyCommand(id);
-        var result = await _mediator.Send(command, cancellationToken);
-        return Ok(result);
+        return Ok(await _mediator.Send(new DeleteTechnologyCommand(id), cancellationToken));
     }
 
-    // Get all technologies with all details
     [HttpGet("technologies")]
     public async Task<ActionResult<IEnumerable<MentorTechnologyResponse>>> GetAllTechnologies(CancellationToken cancellationToken)
     {
-        var result = await _mediator.Send(new GetAllMentorTechnologiesQuery(), cancellationToken);
-        return Ok(result);
+        return Ok(await _mediator.Send(new GetAllMentorTechnologiesQuery(), cancellationToken));
     }
 
-    // Get all details of  technology by Id
     [HttpGet("technologies/{id:int}")]
     public async Task<ActionResult<MentorTechnologyResponse>> GetTechnologyById(int id, CancellationToken cancellationToken)
     {
@@ -131,43 +174,29 @@ public sealed class AdminController : ControllerBase
         return Ok(result);
     }
 
-
-    //Create mentor
-    [HttpPost]
-    public async Task<IActionResult> CreateMentor(
-        [FromBody] CreateMentorRequest request)
+    [HttpPost("mentors")]
+    public async Task<IActionResult> CreateMentor([FromBody] CreateMentorRequest request, CancellationToken cancellationToken)
     {
-        var command = new CreateMentorCommand(request.Name, request.Email, request.TechnologyId);
-        var result = await _mediator.Send(command);
-        return Ok(result);
+        return Ok(await _mediator.Send(new CreateMentorCommand(request.Name, request.Email, request.TechnologyId), cancellationToken));
     }
 
-    
-    //Soft delete mentor
-    [HttpDelete("{mentorId:int}")]
-    public async Task<IActionResult> DeleteMentor(int mentorId)
+    [HttpDelete("mentors/{mentorId:int}")]
+    public async Task<IActionResult> DeleteMentor(int mentorId, CancellationToken cancellationToken)
     {
-        await _mediator.Send(new DeleteMentorCommand(mentorId));
-        return NoContent();
-    }
-    
-    //Get all mentor
-    [HttpGet]
-    public async Task<IActionResult> GetAllMentors()
-    {
-        var result = await _mediator.Send(new GetAllMentorsQuery());
-        return Ok(result);
+        await _mediator.Send(new DeleteMentorCommand(mentorId), cancellationToken);
+        return Ok(new { success = true, message = "Mentor deleted successfully." });
     }
 
-    //Get mentor by id
-    [HttpGet("{mentorId:int}")]
-    public async Task<IActionResult> GetMentorById(int mentorId)
+    [HttpGet("mentors")]
+    public async Task<IActionResult> GetAllMentors(CancellationToken cancellationToken)
     {
-        var result = await _mediator.Send(new GetMentorByIdQuery(mentorId));
-        if (result is null)
-            return NotFound();
-
-        return Ok(result);
+        return Ok(await _mediator.Send(new GetAllMentorsQuery(), cancellationToken));
     }
 
+    [HttpGet("mentors/{mentorId:int}")]
+    public async Task<IActionResult> GetMentorById(int mentorId, CancellationToken cancellationToken)
+    {
+        var result = await _mediator.Send(new GetMentorByIdQuery(mentorId), cancellationToken);
+        return result is null ? NotFound() : Ok(result);
+    }
 }

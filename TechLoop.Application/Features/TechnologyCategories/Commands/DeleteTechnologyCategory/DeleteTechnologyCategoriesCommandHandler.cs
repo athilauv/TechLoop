@@ -1,4 +1,5 @@
 ﻿using MediatR;
+using TechLoop.Application.Common.Exceptions;
 using TechLoop.Application.Features.TechnologyCategories.DTOs;
 using TechLoop.Application.Interfaces.Repositories;
 
@@ -19,12 +20,14 @@ public sealed class DeleteTechnologyCategoryCommandHandler : IRequestHandler<Del
         var category = await _technologycategoryrepository.GetByIdForAdminAsync(request.Id, cancellationToken);
         if (category is null)
         {
-            throw new InvalidOperationException("Technology category not found.");
+            throw new NotFoundException("Technology category not found.");
         }
         
         await _technologycategoryrepository.DeleteAsync(request.Id, request.DeletedBy, cancellationToken);
+
         return new DeleteTechnologyCategoryResponse
         {
+            Success = true,
             Id = request.Id,
             Message = "Technology category deleted successfully."
         };

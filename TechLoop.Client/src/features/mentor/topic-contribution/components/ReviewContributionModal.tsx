@@ -1,27 +1,112 @@
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { CheckCircle2, X, XCircle } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
 
 import Button from "../../../../shared/Button.tsx";
-import type { ReviewTopicContributionRequest } from "../../../../types/topicContribution.types.ts";
+import {
+    getMentorSubTopics,
+} from "../../../../api/mentorSubTopic.api.ts";
+import {
+    getMentorTopics,
+} from "../../../../api/mentorTopic.api.ts";
+import type { ReviewTopicContributionRequest, TopicContributionResponse } from "../../../../types/topicContribution.types.ts";
 
 interface ReviewContributionModalProps {
     open: boolean;
     loading?: boolean;
+    contribution: TopicContributionResponse;
     onClose: () => void;
     onSubmit: (request: ReviewTopicContributionRequest) => void;
 }
 
-
 export default function ReviewContributionModal({
-                                                    open,
-                                                    loading = false,
-                                                    onClose,
-                                                    onSubmit,
-                                                }: ReviewContributionModalProps) {
+    open,
+    loading = false,
+    contribution,
+    onClose,
+    onSubmit,
+}: ReviewContributionModalProps) {
     const [status, setStatus] = useState<2 | 3>(2);
     const [reviewNotes, setReviewNotes] = useState("");
     const [position, setPosition] = useState("");
     const [parentSubTopicId, setParentSubTopicId] = useState("");
+
+    const isSubTopicContribution = contribution.subTopicId !== null;
+    const topicId = contribution.topicId ?? undefined;
+
+    const { data: subTopics = [], isLoading: isSubTopicsLoading } = useQuery({
+        queryKey: ["mentor-review-subtopics", topicId],
+        queryFn: () => getMentorSubTopics(topicId),
+        enabled: open && status === 2 && topicId !== undefined && isSubTopicContribution,
+    });
+
+    const { data: topics = [], isLoading: isTopicsLoading } = useQuery({
+        queryKey: ["mentor-review-topics", contribution.technologyId],
+        queryFn: getMentorTopics,
+        enabled: open && status === 2 && !isSubTopicContribution,
+    });
+
+    const availableParentSubTopics = useMemo(
+        () =>
+            subTopics
+                .filter((subTopic) => subTopic.id !== contribution.subTopicId)
+                .sort((a, b) => a.position - b.position),
+        [subTopics, contribution.subTopicId],
+    );
+
+    const nextPosition = useMemo(() => {
+        if (isSubTopicContribution) {
+            return (
+                Math.max(0, ...subTopics.map((subTopic) => subTopic.position)) + 1
+            );
+        }
+
+        const technologyTopics = topics.filter(
+            (topic) => topic.technologyId === contribution.technologyId,
+        );
+
+        return Math.max(0, ...technologyTopics.map((topic) => topic.position)) + 1;
+    }, [
+        contribution.technologyId,
+        isSubTopicContribution,
+        subTopics,
+        topics,
+    ]);
+
+    useEffect(() => {
+        if (!open) {
+            return;
+        }
+
+        setStatus(2);
+        setReviewNotes("");
+        setParentSubTopicId("");
+        setPosition("");
+    }, [open, contribution.id]);
+
+    useEffect(() => {
+        if (!open || status !== 2 || position.trim()) {
+            return;
+        }
+
+        if (isSubTopicContribution && isSubTopicsLoading) {
+            return;
+        }
+
+        if (!isSubTopicContribution && isTopicsLoading) {
+            return;
+        }
+
+        setPosition(String(nextPosition));
+    }, [
+        isSubTopicContribution,
+        isSubTopicsLoading,
+        isTopicsLoading,
+        nextPosition,
+        open,
+        position,
+        status,
+    ]);
 
     if (!open) {
         return null;
@@ -38,22 +123,33 @@ export default function ReviewContributionModal({
         if (loading) {
             return;
         }
+
         resetForm();
         onClose();
     };
 
     const handleSubmit = () => {
+        if (status === 2 && (!position.trim() || Number(position) <= 0)) {
+            return;
+        }
+
         onSubmit({
             status,
             reviewNotes: reviewNotes.trim() || null,
-            position: position.trim() ? Number(position) : null,
-            parentSubTopicId: parentSubTopicId.trim() ? Number(parentSubTopicId) : null,
+            position: status === 2 ? Number(position) : null,
+            parentSubTopicId:
+                status === 2 && isSubTopicContribution && parentSubTopicId.trim()
+                    ? Number(parentSubTopicId)
+                    : null,
         });
     };
 
+    const placementLoading =
+        status === 2 &&
+        (isSubTopicContribution ? isSubTopicsLoading : isTopicsLoading);
+
     return (
         <div className="fixed inset-0 z-50 flex justify-end">
-            {/* Scrim */}
             <button
                 type="button"
                 aria-label="Close review panel"
@@ -61,7 +157,6 @@ export default function ReviewContributionModal({
                 className="absolute inset-0 bg-black/60 backdrop-blur-[2px]"
             />
 
-            {/* Panel */}
             <div
                 role="dialog"
                 aria-modal="true"
@@ -84,7 +179,6 @@ export default function ReviewContributionModal({
                     }
                 `}</style>
 
-                {/* Header */}
                 <div className="flex items-center justify-between border-b border-[var(--cs-border)] px-6 py-5">
                     <div>
                         <p className="font-[var(--cs-font-mono)] text-[11px] uppercase tracking-widest text-[var(--cs-text-muted)]">
@@ -115,9 +209,7 @@ export default function ReviewContributionModal({
                     </button>
                 </div>
 
-                {/* Form */}
                 <div className="flex-1 space-y-6 overflow-y-auto px-6 py-6">
-                    {/* Decision */}
                     <div>
                         <label className="mb-2 block text-sm font-medium text-[var(--cs-text-primary)]">
                             Decision
@@ -163,7 +255,6 @@ export default function ReviewContributionModal({
                             </button>
                         </div>
 
-                        {/* Clarify what each decision actually does — approval ≠ publishing */}
                         <p className="mt-3 text-xs leading-5 text-[var(--cs-text-muted)]">
                             {status === 2
                                 ? "Approving moves this contribution into the relevant management area as a draft. It will not be published to learners automatically."
@@ -171,7 +262,6 @@ export default function ReviewContributionModal({
                         </p>
                     </div>
 
-                    {/* Review Notes */}
                     <div>
                         <label
                             htmlFor="review-notes"
@@ -201,7 +291,6 @@ export default function ReviewContributionModal({
                         />
                     </div>
 
-                    {/* Approval-only fields */}
                     {status === 2 && (
                         <div className="space-y-4 rounded-[var(--cs-radius-control)] border border-[var(--cs-accent-border)] bg-[var(--cs-accent-subtle)] p-4">
                             <p className="font-[var(--cs-font-mono)] text-[11px] uppercase tracking-widest text-[var(--cs-accent)]">
@@ -221,8 +310,8 @@ export default function ReviewContributionModal({
                                     min={1}
                                     value={position}
                                     onChange={(event) => setPosition(event.target.value)}
-                                    placeholder="Required"
-                                    disabled={loading}
+                                    placeholder={placementLoading ? "Calculating..." : "Required"}
+                                    disabled={loading || placementLoading}
                                     className="
                                         w-full rounded-[var(--cs-radius-control)]
                                         border border-[var(--cs-border)]
@@ -235,44 +324,59 @@ export default function ReviewContributionModal({
                                         disabled:cursor-not-allowed disabled:opacity-50
                                     "
                                 />
+                                <p className="mt-1.5 text-xs text-[var(--cs-text-muted)]">
+                                    The next available position is selected automatically.
+                                </p>
                             </div>
 
-                            <div>
-                                <label
-                                    htmlFor="parent-sub-topic-id"
-                                    className="mb-2 block text-sm font-medium text-[var(--cs-text-primary)]"
-                                >
-                                    Parent Sub Topic ID
-                                    <span className="ml-1 font-normal text-[var(--cs-text-muted)]">
-                                        (Optional)
-                                    </span>
-                                </label>
-                                <input
-                                    id="parent-sub-topic-id"
-                                    type="number"
-                                    min={1}
-                                    value={parentSubTopicId}
-                                    onChange={(event) => setParentSubTopicId(event.target.value)}
-                                    placeholder="Optional"
-                                    disabled={loading}
-                                    className="
-                                        w-full rounded-[var(--cs-radius-control)]
-                                        border border-[var(--cs-border)]
-                                        bg-[var(--cs-bg-input)]
-                                        px-3 py-2.5
-                                        text-sm text-[var(--cs-text-primary)]
-                                        outline-none transition
-                                        placeholder:text-[var(--cs-text-muted)]
-                                        focus:border-[var(--cs-accent-border)]
-                                        disabled:cursor-not-allowed disabled:opacity-50
-                                    "
-                                />
-                            </div>
+                            {isSubTopicContribution && (
+                                <div>
+                                    <label
+                                        htmlFor="parent-sub-topic-id"
+                                        className="mb-2 block text-sm font-medium text-[var(--cs-text-primary)]"
+                                    >
+                                        Parent SubTopic
+                                        <span className="ml-1 font-normal text-[var(--cs-text-muted)]">
+                                            (Optional)
+                                        </span>
+                                    </label>
+
+                                    <select
+                                        id="parent-sub-topic-id"
+                                        value={parentSubTopicId}
+                                        onChange={(event) => setParentSubTopicId(event.target.value)}
+                                        disabled={
+                                            loading ||
+                                            placementLoading ||
+                                            topicId === undefined
+                                        }
+                                        className="
+                                            h-11 w-full rounded-[var(--cs-radius-control)]
+                                            border border-[var(--cs-border)]
+                                            bg-[var(--cs-bg-input)]
+                                            px-3 text-sm text-[var(--cs-text-primary)]
+                                            outline-none transition
+                                            focus:border-[var(--cs-accent-border)]
+                                            disabled:cursor-not-allowed disabled:opacity-50
+                                        "
+                                    >
+                                        <option value="">Top-level SubTopic</option>
+                                        {availableParentSubTopics.map((subTopic) => (
+                                            <option key={subTopic.id} value={subTopic.id}>
+                                                {subTopic.title}
+                                            </option>
+                                        ))}
+                                    </select>
+
+                                    <p className="mt-1.5 text-xs text-[var(--cs-text-muted)]">
+                                        Only existing subtopics under "{contribution.topicTitle ?? "this topic"}" are shown.
+                                    </p>
+                                </div>
+                            )}
                         </div>
                     )}
                 </div>
 
-                {/* Footer */}
                 <div className="flex justify-end gap-3 border-t border-[var(--cs-border)] px-6 py-5">
                     <Button variant="secondary" size="sm" disabled={loading} onClick={handleClose}>
                         Cancel
@@ -282,6 +386,11 @@ export default function ReviewContributionModal({
                         variant={status === 3 ? "danger" : "primary"}
                         size="sm"
                         loading={loading}
+                        disabled={
+                            loading ||
+                            placementLoading ||
+                            (status === 2 && (!position.trim() || Number(position) <= 0))
+                        }
                         onClick={handleSubmit}
                     >
                         {status === 3 ? "Reject Contribution" : "Approve Contribution"}

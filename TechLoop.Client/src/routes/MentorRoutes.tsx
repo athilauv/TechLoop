@@ -21,6 +21,9 @@ import MentorTopicContributionsPage
 import MentorTopicContributionDetailsPage
     from "../features/mentor/topic-contribution/pages/MentorTopicContributionDetailsPage.tsx";
 
+import MentorPendingPage
+    from "../features/mentor/pending/pages/MentorPendingPage.tsx";
+
 // ==================== QUESTION MANAGEMENT ====================
 
 import QuestionTypePickerPage
@@ -86,6 +89,14 @@ export default function MentorRoutes() {
                     <Route
                         path="content"
                         element={<MentorContentPage />}
+                    />
+
+
+                    {/* ==================== PENDING WORK ==================== */}
+
+                    <Route
+                        path="pending"
+                        element={<MentorPendingPage />}
                     />
 
 

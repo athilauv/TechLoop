@@ -7,8 +7,8 @@ import {
     getQuestionDetails,
     getQuestions,
     getTestCases,
-    submitMcqAnswer,
 } from "../api/question.api.ts";
+import { submitMcqAnswer } from "../api/submission.api.ts";
 
 export const useQuestions = () => {
     return useQuery({

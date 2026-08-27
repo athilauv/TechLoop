@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { User } from "lucide-react";
-import { getMentorProfile, updateMentorProfile } from "../../../../api/mentorTopic.api.ts";
+import { getMentorProfile, updateMentorProfile } from "../../../../api/mentor.api.ts";
 import type { MentorProfileData, UpdateMentorProfileRequest } from "../../../../types/mentor.types.ts";
 import MentorProfileHeader from "../components/MentorProfileHeader";
 import MentorAbout from "../components/MentorAbout";

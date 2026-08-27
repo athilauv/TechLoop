@@ -1,56 +1,150 @@
-﻿using System.Text.Json;
-using TechLoop.Application.DTOs.Common;
+using System.Text.Json;
+using FluentValidation;
+using Npgsql;
 using TechLoop.Application.Common.Exceptions;
+using TechLoop.Application.DTOs.Common;
 
 namespace TechLoop.Api.Middleware;
 
-public class ExceptionMiddleware
+public sealed class ExceptionMiddleware
 {
     private readonly RequestDelegate _next;
-    public ExceptionMiddleware(RequestDelegate next)
+    private readonly ILogger<ExceptionMiddleware> _logger;
+
+    public ExceptionMiddleware(RequestDelegate next, ILogger<ExceptionMiddleware> logger)
     {
         _next = next;
+        _logger = logger;
     }
+
     public async Task InvokeAsync(HttpContext context)
     {
         try
         {
             await _next(context);
         }
-        catch(BadRequestException e){
-            await HandleException( context, 400, e.Message);
-        }
-        catch(UnauthorizedException e){
-            await HandleException(context, 401, e.Message);
-        }
-        catch(NotFoundException e){
-            await HandleException(context, 404, e.Message);
-        }
-        catch (Judge0Exception e)
+        catch (FluentValidation.ValidationException exception)
         {
-            await HandleException(context, 502, e.Message);
+            await HandleExceptionAsync(
+                context,
+                StatusCodes.Status400BadRequest,
+                string.Join(" ", exception.Errors.Select(error => error.ErrorMessage)));
         }
-        catch (ConflictException ex) {
-            await HandleException(context , 409, ex.Message);
+        catch (BadRequestException exception)
+        {
+            await HandleExceptionAsync(context, StatusCodes.Status400BadRequest, exception.Message);
         }
-        catch(Exception ex){
-            await HandleException(context , 500, ex.Message);
+        catch (UnauthorizedException exception)
+        {
+            await HandleExceptionAsync(context, StatusCodes.Status401Unauthorized, exception.Message);
         }
-        
-        
+        catch (ForbiddenException exception)
+        {
+            await HandleExceptionAsync(context, StatusCodes.Status403Forbidden, exception.Message);
+        }
+        catch (NotFoundException exception)
+        {
+            await HandleExceptionAsync(context, StatusCodes.Status404NotFound, exception.Message);
+        }
+        catch (ConflictException exception)
+        {
+            await HandleExceptionAsync(context, StatusCodes.Status409Conflict, exception.Message);
+        }
+        catch (Judge0Exception exception)
+        {
+            await HandleExceptionAsync(context, StatusCodes.Status502BadGateway, exception.Message);
+        }
+        catch (TechLoop.Application.Common.Exceptions.ValidationException exception)
+        {
+            await HandleExceptionAsync(context, StatusCodes.Status400BadRequest, exception.Message);
+        }
+        catch (PostgresException exception)
+        {
+            _logger.LogError(
+                exception,
+                "PostgreSQL error {SqlState} for {Method} {Path}",
+                exception.SqlState,
+                context.Request.Method,
+                context.Request.Path);
+
+            await HandlePostgresExceptionAsync(context, exception);
+        }
+        catch (TimeoutException exception)
+        {
+            _logger.LogError(
+                exception,
+                "Timeout for {Method} {Path}",
+                context.Request.Method,
+                context.Request.Path);
+
+            await HandleExceptionAsync(
+                context,
+                StatusCodes.Status504GatewayTimeout,
+                "The operation timed out. Please try again.");
+        }
+        catch (ArgumentException exception)
+        {
+            await HandleExceptionAsync(
+                context,
+                StatusCodes.Status400BadRequest,
+                exception.Message);
+        }
+        catch (Exception exception)
+        {
+            _logger.LogError(
+                exception,
+                "Unhandled exception for {Method} {Path}",
+                context.Request.Method,
+                context.Request.Path);
+
+            await HandleExceptionAsync(
+                context,
+                StatusCodes.Status500InternalServerError,
+                exception.Message);
+        }
     }
-    private static async Task HandleException(
+
+    private static async Task HandlePostgresExceptionAsync(
+        HttpContext context,
+        PostgresException exception)
+    {
+        var statusCode = exception.SqlState switch
+        {
+            PostgresErrorCodes.UniqueViolation => StatusCodes.Status409Conflict,
+            PostgresErrorCodes.ForeignKeyViolation => StatusCodes.Status409Conflict,
+            PostgresErrorCodes.NotNullViolation => StatusCodes.Status400BadRequest,
+            PostgresErrorCodes.CheckViolation => StatusCodes.Status400BadRequest,
+            PostgresErrorCodes.StringDataRightTruncation => StatusCodes.Status400BadRequest,
+            PostgresErrorCodes.InvalidTextRepresentation => StatusCodes.Status400BadRequest,
+            "42804" => StatusCodes.Status500InternalServerError,
+            _ => StatusCodes.Status500InternalServerError
+        };
+
+        await HandleExceptionAsync(context, statusCode, exception.Message);
+    }
+
+    private static async Task HandleExceptionAsync(
         HttpContext context,
         int statusCode,
-        string message){
+        string message)
+    {
+        if (context.Response.HasStarted)
+        {
+            return;
+        }
+
+        context.Response.Clear();
         context.Response.ContentType = "application/json";
         context.Response.StatusCode = statusCode;
-        
+
         var response = new ErrorResponse
         {
             Success = false,
-            Message = message
+            Message = string.IsNullOrWhiteSpace(message)
+                ? "An unexpected error occurred."
+                : message
         };
+
         await context.Response.WriteAsync(JsonSerializer.Serialize(response));
     }
 }

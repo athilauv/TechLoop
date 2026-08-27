@@ -1,4 +1,7 @@
-import { NavLink } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
+import { getCurrentUser, logout } from "../../api/auth.api.ts";
+import { getAdminUsers } from "../../api/admin.api.ts";
 import {
     LayoutDashboard,
     Boxes,
@@ -8,7 +11,6 @@ import {
     MessagesSquare,
     GraduationCap,
     Users,
-    UserCircle,
     ChevronLeft,
     ChevronRight,
     LogOut,
@@ -39,9 +41,6 @@ const mainNav: NavItem[] = [
     { to: "/admin/users", label: "Users", icon: Users },
 ];
 
-const accountNav: NavItem[] = [
-    { to: "/admin/profile", label: "Profile", icon: UserCircle },
-];
 
 const NavSection = ({ title, items, collapsed }: { title: string; items: NavItem[]; collapsed: boolean }) => (
     <div className="mb-6">
@@ -75,9 +74,24 @@ const NavSection = ({ title, items, collapsed }: { title: string; items: NavItem
 );
 
 const Sidebar = ({ collapsed, onToggleCollapsed, mobileOpen, onCloseMobile }: SidebarProps) => {
-    // const { user, logout } = useAuth();
-    const user = { name: "Admin", role: "Admin" }; // ⚠️ placeholder
-    const logout = () => {};
+    const navigate = useNavigate();
+    const { data: currentUser } = useQuery({ queryKey: ["current-user"], queryFn: getCurrentUser, staleTime: 5 * 60 * 1000 });
+    const { data: adminUsers = [] } = useQuery({ queryKey: ["admin-users"], queryFn: getAdminUsers, staleTime: 5 * 60 * 1000 });
+    const storedUsername = localStorage.getItem("username")?.trim() || localStorage.getItem("userName")?.trim();
+    const currentAdmin = currentUser?.userId
+        ? adminUsers.find((item) => item.id.toLowerCase() === currentUser.userId.toLowerCase())
+        : undefined;
+    const user = { name: currentAdmin?.username || storedUsername || "Admin", role: "Admin" };
+    const handleLogout = async () => {
+        try {
+            await logout();
+        } finally {
+            localStorage.removeItem("accessToken");
+            localStorage.removeItem("userId");
+            localStorage.removeItem("username");
+            navigate("/login", { replace: true });
+        }
+    };
 
     return (
         <>
@@ -119,7 +133,6 @@ const Sidebar = ({ collapsed, onToggleCollapsed, mobileOpen, onCloseMobile }: Si
 
                 <nav className="flex-1 overflow-y-auto px-3 py-5">
                     <NavSection title="Main" items={mainNav} collapsed={collapsed} />
-                    <NavSection title="Account" items={accountNav} collapsed={collapsed} />
                 </nav>
 
                 <div className="border-t border-[#223A59] p-3">
@@ -136,7 +149,7 @@ const Sidebar = ({ collapsed, onToggleCollapsed, mobileOpen, onCloseMobile }: Si
                         {!collapsed && (
                             <button
                                 type="button"
-                                onClick={logout}
+                                onClick={handleLogout}
                                 aria-label="Log out"
                                 className="shrink-0 rounded-md p-1.5 text-[#5C7394] transition-colors hover:bg-[#12233B] hover:text-[#F87171]"
                             >

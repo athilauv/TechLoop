@@ -9,6 +9,7 @@ import {
 import {
     useNavigate,
     useParams,
+    useSearchParams,
 } from "react-router-dom";
 
 import Breadcrumb from "../../../../../shared/Breadcrumb.tsx";
@@ -20,6 +21,7 @@ import {
     getMentorQuestionById,
     publishQuestion,
 } from "../../../../../api/mentorQuestion.api.ts";
+import { MENTOR_PENDING_QUERY_KEY } from "../../../../../hooks/useMentorPendingQueue.ts";
 
 import {
     getMentorDiscussions,
@@ -93,6 +95,7 @@ const CodingQuestionDetailsPage = () => {
         useParams<{ id: string }>();
 
     const navigate = useNavigate();
+    const [searchParams] = useSearchParams();
 
     const queryClient =
         useQueryClient();
@@ -100,8 +103,14 @@ const CodingQuestionDetailsPage = () => {
     const currentUserId =
         useCurrentUserId();
 
+    const requestedTab = searchParams.get("tab");
+    const validInitialTabs = new Set(TABS.map((tab) => tab.key));
+    const initialTab = requestedTab && validInitialTabs.has(requestedTab)
+        ? requestedTab
+        : "overview";
+
     const [activeTab, setActiveTab] =
-        useState("overview");
+        useState(initialTab);
 
     const [publishing, setPublishing] =
         useState(false);
@@ -520,6 +529,10 @@ const CodingQuestionDetailsPage = () => {
                                 ],
                             },
                         );
+
+                        await queryClient.invalidateQueries({
+                            queryKey: MENTOR_PENDING_QUERY_KEY,
+                        });
 
                         showToast.success(
                             "Coding question published successfully.",

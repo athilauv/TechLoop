@@ -6,8 +6,7 @@ import type {
     LearnerMcqOption, LearnerMcqQuestion,
     LearnerQuestion,
     LearnerTestCase,
-    SubmitMcqAnswerRequest,
-    SubmitMcqAnswerResponse,
+    QuestionDetails,
 } from "../types/question.types.ts";
 
 export const getQuestions = async (): Promise<
@@ -34,10 +33,10 @@ export const getQuestionById = async (
 
 export const getQuestionDetails = async (
     questionId: number,
-): Promise<LearnerQuestion> => {
+): Promise<QuestionDetails> => {
     const { data } =
-        await api.get<LearnerQuestion>(
-            `/questions/${questionId}`,
+        await api.get<QuestionDetails>(
+            `/questions/${questionId}/details`,
         );
 
     return data;
@@ -54,17 +53,6 @@ export const getMcqOptions = async (
     return data;
 };
 
-export const submitMcqAnswer = async (
-    request: SubmitMcqAnswerRequest,
-): Promise<SubmitMcqAnswerResponse> => {
-    const { data } =
-        await api.post<SubmitMcqAnswerResponse>(
-            "/api/submissions/mcq",
-            request,
-        );
-
-    return data;
-};
 
 export const getCodingTemplates = async (
     questionId: number,

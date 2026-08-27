@@ -8,7 +8,6 @@ namespace TechLoop.Infrastructure.Repositories;
 public class UserRepository : IUserRepository
 {
     private readonly IDapperContext _context;
-
     public UserRepository(IDapperContext context)
     {
         _context = context;

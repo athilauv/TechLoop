@@ -18,6 +18,7 @@ public sealed class GetAllMentorTechnologiesQueryHandler : IRequestHandler<GetAl
         return technologies.Select(technology => new MentorTechnologyResponse
         {
             Id = technology.Id,
+            CategoryId = technology.CategoryId,
             Name = technology.Name,
             Slug = technology.Slug,
             Description = technology.Description,

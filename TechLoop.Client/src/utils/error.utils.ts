@@ -7,19 +7,19 @@ interface ApiErrorResponse {
     message?: string;
     title?: string;
     detail?: string;
-    errors?: Record<string, string[]>;
+    errors?: Record<string, string[] | string>;
 }
 
 export const getErrorMessage = (
     error: unknown,
-    fallbackMessage: string
+    fallbackMessage: string,
 ): string => {
     if (axios.isAxiosError(error)) {
         const data = error.response?.data as ApiErrorResponse | undefined;
 
         if (data?.errors) {
             const messages = Object.values(data.errors)
-                .flat()
+                .flatMap((value) => Array.isArray(value) ? value : [value])
                 .filter(Boolean);
 
             if (messages.length > 0) {
@@ -27,21 +27,10 @@ export const getErrorMessage = (
             }
         }
 
-        if (data?.Message) {
-            return data.Message;
-        }
-
-        if (data?.message) {
-            return data.message;
-        }
-
-        if (data?.detail) {
-            return data.detail;
-        }
-
-        if (data?.title) {
-            return data.title;
-        }
+        if (data?.Message) return data.Message;
+        if (data?.message) return data.message;
+        if (data?.detail) return data.detail;
+        if (data?.title) return data.title;
     }
 
     if (error instanceof Error) {

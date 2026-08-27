@@ -29,7 +29,11 @@ public sealed class CreateTechnologyCommandHandler : IRequestHandler<CreateTechn
             throw new ValidationException($"Technology '{request.Name}' already exists in the category.");
         }
         
-        var slugExists = await _technologyRepository.SlugExistsAsync(request.Slug, cancellationToken);
+        var slug = string.IsNullOrWhiteSpace(request.Slug)
+            ? GenerateSlug(request.Name)
+            : request.Slug.Trim().ToLowerInvariant();
+
+        var slugExists = await _technologyRepository.SlugExistsAsync(slug, cancellationToken);
         if (slugExists)
         {
             throw new ValidationException($"Technology slug '{request.Slug}' already exists.");
@@ -49,19 +53,14 @@ public sealed class CreateTechnologyCommandHandler : IRequestHandler<CreateTechn
         {
             CategoryId = request.CategoryId,
             Name = request.Name.Trim(),
-            Slug = request.Slug.Trim().ToLowerInvariant(),
+            Slug = slug,
             Description = request.Description ?? string.Empty,
             ImageUrl = request.ImageUrl ?? string.Empty,
             Position = request.Position,
             CreatedBy = _currentUserService.UserId,
             CreatedAt = DateTime.UtcNow
         };
-        var id = await _technologyRepository.CreateAsync(technology, cancellationToken);
-        
-        var createdTechnology = await _technologyRepository.GetByIdAsync(id, cancellationToken);
-
-        if (createdTechnology is null)
-            throw new Exception("Failed to create technology.");
+        await _technologyRepository.CreateAsync(technology, cancellationToken);
 
         return new CreateTechnologyResponse
         {

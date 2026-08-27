@@ -28,19 +28,24 @@ public sealed class UpdateTechnologyCommandHandler : IRequestHandler<UpdateTechn
       {
          throw new NotFoundException(("Technology not found"));
       }
-      var exists = await _technologyRepository.ExistsAsync(request.CategoryId, request.Name, cancellationToken);
-
-      if (exists && !technology.Name.Equals(request.Name, StringComparison.OrdinalIgnoreCase))
+      var exists = await _technologyRepository.NameExistsAsync(request.CategoryId, request.Name, request.id, cancellationToken);
+      if (exists)
       {
          throw new ValidationException($"Technology '{request.Name}' already exists in the category.");
       }
-      var slugExists = await _technologyRepository.SlugExistsAsync(request.Slug, cancellationToken);
-      if (slugExists && !technology.Slug.Equals(request.Slug, StringComparison.OrdinalIgnoreCase))
+
+      var slug = string.IsNullOrWhiteSpace(request.Slug)
+         ? request.Name.Trim().ToLowerInvariant().Replace(" ", "-")
+         : request.Slug.Trim().ToLowerInvariant();
+
+      var slugExists = await _technologyRepository.SlugExistsAsync(slug, request.id, cancellationToken);
+      if (slugExists)
       {
-         throw new ValidationException($"Technology slug '{request.Slug}' already exists.");
+         throw new ValidationException($"Technology slug '{slug}' already exists.");
       }
-      var positionExists = await _technologyRepository.PositionExistsAsync(request.CategoryId,request.Position, cancellationToken);
-      if (positionExists && technology.Position != request.Position)
+
+      var positionExists = await _technologyRepository.PositionExistsAsync(request.CategoryId, request.Position, request.id, cancellationToken);
+      if (positionExists)
       {
          throw new ValidationException($"Technology position '{request.Position}' already exists in the category.");
       }
@@ -55,11 +60,13 @@ public sealed class UpdateTechnologyCommandHandler : IRequestHandler<UpdateTechn
       technology.CategoryId = request.CategoryId;
       technology.Name =request.Name.Trim();
       technology.Description = request.Description ?? string.Empty;
-      technology.Slug = request.Slug.Trim().ToLowerInvariant();
+      technology.Slug = slug;
       technology.ImageUrl = request.ImageUrl ?? string.Empty;
       technology.Position = request.Position;
       technology.UpdatedAt = DateTime.UtcNow;
       technology.UpdatedBy = _currentUserService.UserId;
+
+      await _technologyRepository.UpdateAsync(technology, cancellationToken);
 
       return new UpdateTechnologyResponse
       {

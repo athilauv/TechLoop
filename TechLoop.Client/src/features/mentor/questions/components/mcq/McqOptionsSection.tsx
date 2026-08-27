@@ -180,6 +180,7 @@ const McqOptionsSection = ({ questionId }: McqOptionsSectionProps) => {
                 open={drawerOpen}
                 onClose={closeDrawer}
                 title={editingOption ? "Edit Option" : "Add Option"}
+                description="Add or update an answer option for this MCQ."
             >
                 <McqOptionForm
                     key={editingOption?.id ?? "new-option"}

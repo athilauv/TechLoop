@@ -1,4 +1,4 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection;
 using TechLoop.Application.Interfaces.Repositories;
 using TechLoop.Infrastructure.Repositories;
 
@@ -27,6 +27,7 @@ public static class RepositoryServiceCollectionExtensions
         services.AddScoped<IDiscussionRepository, DiscussionRepository>();
         services.AddScoped<IDiscussionCommentRepository, DiscussionCommentRepository>();
         services.AddScoped<IAnalyticsRepository, AnalyticsRepository>();
+        services.AddScoped<IAdminRepository, AdminRepository>();
         services.AddScoped<ICommunityPostRepository, CommunityPostRepository>();
         services.AddScoped<IPostCommentRepository, PostCommentRepository>();
         services.AddScoped<IPostLikeRepository, PostLikeRepository>();

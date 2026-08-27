@@ -18,7 +18,6 @@ const RecentActivity = ({ items, isLoading }: RecentActivityProps) => {
     const { ref, inView } = useScrollReveal<HTMLDivElement>();
 
     if (!isLoading && (!items || items.length === 0)) {
-        // No activity API wired up yet — per the brief, we don't fabricate activity.
         return null;
     }
 

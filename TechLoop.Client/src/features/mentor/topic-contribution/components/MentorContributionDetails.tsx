@@ -12,7 +12,7 @@ export default function MentorContributionDetails({
                                                       contribution,
                                                   }: MentorContributionDetailsProps) {
 
-    const derivedType = contribution.topicId === null ? "Topic" : "SubTopic";
+    const derivedType = contribution.subTopicId !== null ? "SubTopic" : "Topic";
     const isReviewed = contribution.status !== 1;
 
     return (

@@ -7,8 +7,7 @@ const AdminHero = () => {
 
     return (
         <section className="relative overflow-hidden px-6 pb-20 pt-16 lg:px-10 lg:pb-28 lg:pt-20">
-            {/* ambient background — very low opacity, decorative only */}
-            <div className="pointer-events-none absolute inset-0 -z-10" aria-hidden="true">
+<div className="pointer-events-none absolute inset-0 -z-10" aria-hidden="true">
                 <div
                     className="absolute -top-40 left-1/2 h-[520px] w-[520px] -translate-x-1/2 rounded-full opacity-[0.14] blur-[120px]"
                     style={{ background: "#00E8C2" }}

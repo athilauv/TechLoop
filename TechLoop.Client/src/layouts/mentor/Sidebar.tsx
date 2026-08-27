@@ -1,13 +1,14 @@
 import { NavLink } from "react-router-dom";
+import { useMentorPendingQueue } from "../../hooks/useMentorPendingQueue.ts";
+import { getMentorPendingCount } from "../../types/mentorPending.types.ts";
 import {
     LayoutDashboard,
     GitPullRequest,
     MessagesSquare,
-    Cpu,
     BookOpen,
-    GraduationCap,
     Code2,
     Bell,
+    ClipboardList,
     User,
     ChevronLeft,
 } from "lucide-react";
@@ -35,29 +36,6 @@ const mainItems = [
     },
 ];
 
-const contentItems = [
-    {
-        label: "Technologies",
-        path: "/mentor/technologies",
-        icon: Cpu,
-    },
-    {
-        label: "Content",
-        path: "/mentor/content",
-        icon: BookOpen,
-    },
-    {
-        label: "Curriculum",
-        path: "/mentor/curriculum",
-        icon: GraduationCap,
-    },
-    {
-        label: "Questions",
-        path: "/mentor/questions",
-        icon: Code2,
-    },
-];
-
 const insightItems = [
     {
         label: "Notifications",
@@ -79,18 +57,20 @@ function SidebarItem({
                          path,
                          icon: Icon,
                          collapsed,
+                         badge,
                      }: {
     label: string;
     path: string;
     icon: typeof LayoutDashboard;
     collapsed: boolean;
+    badge?: number;
 }) {
     return (
         <NavLink
             to={path}
             className={({ isActive }) =>
                 [
-                    "group flex items-center rounded-lg px-3 py-2.5 text-sm font-medium transition",
+                    "group relative flex items-center rounded-lg px-3 py-2.5 text-sm font-medium transition",
                     collapsed ? "justify-center" : "gap-3",
                     isActive ? "bg-white/10 text-white" : "text-slate-400 hover:bg-white/5 hover:text-white",
                 ].join(" ")
@@ -100,8 +80,21 @@ function SidebarItem({
             <Icon size={18} strokeWidth={1.8} />
 
             {!collapsed && (
-                <span className="truncate">
+                <span className="min-w-0 flex-1 truncate">
                     {label}
+                </span>
+            )}
+
+            {badge !== undefined && badge > 0 && (
+                <span
+                    className={[
+                        "flex shrink-0 items-center justify-center rounded-full",
+                        "bg-cyan-500 px-1.5 text-[10px] font-bold text-slate-950",
+                        collapsed ? "absolute right-1 top-1 min-w-4 h-4" : "min-w-5 h-5",
+                    ].join(" ")}
+                    aria-label={`${badge} pending`}
+                >
+                    {badge > 99 ? "99+" : badge}
                 </span>
             )}
         </NavLink>
@@ -114,7 +107,12 @@ function Section({
                      collapsed,
                  }: {
     title: string;
-    items: typeof mainItems;
+    items: Array<{
+        label: string;
+        path: string;
+        icon: typeof LayoutDashboard;
+        badge?: number;
+    }>;
     collapsed: boolean;
 }) {
     return (
@@ -142,6 +140,38 @@ export default function MentorSidebar({
                                           collapsed,
                                           onToggle,
                                       }: MentorSidebarProps) {
+    const { data: pendingQueue } = useMentorPendingQueue();
+
+    const contributionCount =
+        pendingQueue?.pendingContributions.length ?? 0;
+
+    const pendingCount = getMentorPendingCount(pendingQueue);
+
+    const displayMainItems = mainItems.map((item) =>
+        item.label === "Contributions"
+            ? { ...item, badge: contributionCount }
+            : item,
+    );
+
+    const contentItems = [
+        {
+            label: "Content",
+            path: "/mentor/content",
+            icon: BookOpen,
+        },
+        {
+            label: "Pending",
+            path: "/mentor/pending",
+            icon: ClipboardList,
+            badge: pendingCount,
+        },
+        {
+            label: "Questions",
+            path: "/mentor/questions",
+            icon: Code2,
+        },
+    ];
+
     return (
         <aside
             className={[
@@ -190,7 +220,7 @@ export default function MentorSidebar({
             <nav className="flex-1 space-y-6 overflow-y-auto px-3 py-5">
                 <Section
                     title="Main"
-                    items={mainItems}
+                    items={displayMainItems}
                     collapsed={collapsed}
                 />
 

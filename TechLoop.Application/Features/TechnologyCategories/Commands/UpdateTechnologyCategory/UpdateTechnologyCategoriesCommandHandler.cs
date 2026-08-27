@@ -1,5 +1,6 @@
-﻿using FluentValidation;
+﻿// using FluentValidation;
 using MediatR;
+using TechLoop.Application.Common.Exceptions;
 using TechLoop.Application.Features.TechnologyCategories.DTOs;
 using TechLoop.Application.Interfaces.Repositories;
 using TechLoop.Domain.Entities;
@@ -24,7 +25,7 @@ public sealed class UpdateTechnologyCategoryCommandHandler
         var categoryExists = await _repository.ExistsAsync(request.Id, cancellationToken);
         if (!categoryExists)
         {
-            throw new InvalidOperationException("Technology category not found.");
+            throw new NotFoundException("Technology category not found.");
         }
         var exists = await _repository.NameExistsAsync(request.Request.Name, request.Id, cancellationToken);;
         if (exists)
@@ -39,9 +40,7 @@ public sealed class UpdateTechnologyCategoryCommandHandler
             UpdatedBy = request.UpdatedBy
         };
 
-        await _repository.UpdateAsync(
-            technologyCategory,
-            cancellationToken);
+        await _repository.UpdateAsync(technologyCategory, cancellationToken);
 
         return new UpdateTechnologyCategoryResponse
         {

@@ -11,7 +11,7 @@ interface QuestionTabsProps {
 
 const QuestionTabs = ({ tabs, active, onChange }: QuestionTabsProps) => {
     return (
-        <div className="flex gap-1 overflow-x-auto border-b border-[var(--cs-border)]">
+        <div className="flex justify-center gap-1 overflow-x-auto border-b border-[var(--cs-border)]">
             {tabs.map((tab) => {
                 const isActive = tab.key === active;
 

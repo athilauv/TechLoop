@@ -223,7 +223,7 @@ public sealed class TopicRepository : ITopicsRepository
                 cancellationToken: cancellationToken));
     }
 
-    public async Task<IEnumerable<MentorTopicResponse>> GetAllMentorAsync(CancellationToken cancellationToken)
+    public async Task<IEnumerable<MentorTopicResponse>> GetAllMentorAsync(Guid mentorId, CancellationToken cancellationToken)
     {
         const string sql = @"
             SELECT
@@ -243,6 +243,10 @@ public sealed class TopicRepository : ITopicsRepository
                 updated_user.username AS updated_by,
                 t.updated_at
             FROM fn_get_all_topics() t
+            INNER JOIN mentor mentor_user
+                ON mentor_user.technology_id = t.technology_id
+                AND mentor_user.user_id = @MentorId
+                AND mentor_user.deleted_at IS NULL
             LEFT JOIN users published_user ON published_user.id = t.published_by
             LEFT JOIN users created_user ON created_user.id = t.created_by
             LEFT JOIN users updated_user ON updated_user.id = t.updated_by
@@ -250,7 +254,7 @@ public sealed class TopicRepository : ITopicsRepository
 
         using var connection = _context.CreateConnection();
         return await connection.QueryAsync<MentorTopicResponse>(
-            new CommandDefinition(sql, cancellationToken: cancellationToken));
+            new CommandDefinition(sql, new { MentorId = mentorId }, cancellationToken: cancellationToken));
     }
 
     // Publish a topic.

@@ -1,6 +1,6 @@
 import { useId, useState } from "react";
 import { motion, useReducedMotion, AnimatePresence } from "framer-motion";
-import { ECOSYSTEM_NODES } from "../data/ecosystemNodes";
+import { ECOSYSTEM_NODES } from "../data/EcosystemNodes";
 
 interface EcosystemGraphProps {
     size?: number;

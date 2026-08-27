@@ -26,11 +26,7 @@ public sealed class DeleteTechnologyCommandHandler : IRequestHandler<DeleteTechn
             throw new NotFoundException("Technology not found.");
         }
 
-        var rowsAffected = await _technologyRepository.SoftDeleteAsync(request.Id, _currentUserService.UserId, cancellationToken);
-        if (rowsAffected <= 0)
-        {
-            throw new Exception("Failed to delete technology.");
-        }
+        await _technologyRepository.SoftDeleteAsync(request.Id, _currentUserService.UserId, cancellationToken);
 
         return new DeleteTechnologyResponse
         {

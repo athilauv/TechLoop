@@ -6,7 +6,10 @@ public interface ITechnologyRepository
 {
     Task<bool> ExistsAsync(int categoryId, string name, CancellationToken cancellationToken);
     Task<bool> SlugExistsAsync(string slug, CancellationToken cancellationToken);
+    Task<bool> SlugExistsAsync(string slug, int excludeId, CancellationToken cancellationToken);
     Task<bool> PositionExistsAsync(int categoryId, int position, CancellationToken cancellationToken);
+    Task<bool> PositionExistsAsync(int categoryId, int position, int excludeId, CancellationToken cancellationToken);
+    Task<bool> NameExistsAsync(int categoryId, string name, int excludeId, CancellationToken cancellationToken);
     Task<bool> CategoryExistsAsync(int categoryId, CancellationToken cancellationToken);
     Task<int> CreateAsync(Technology technology, CancellationToken cancellationToken);
     Task<int> UpdateAsync(Technology technology, CancellationToken cancellationToken);

@@ -1,6 +1,7 @@
 using MediatR;
 using TechLoop.Application.Features.Questions.DTOs;
 using TechLoop.Application.Interfaces.Repositories;
+using TechLoop.Application.Interfaces.Services;
 
 namespace TechLoop.Application.Features.Questions.Queries.GetAllQuestions.Mentor;
 
@@ -8,18 +9,21 @@ public sealed class GetAllMentorQuestionsQueryHandler
     : IRequestHandler<GetAllMentorQuestionsQuery, IEnumerable<MentorQuestionResponse>>
 {
     private readonly IQuestionRepository _repository;
+    private readonly ICurrentUserService _currentUser;
 
     public GetAllMentorQuestionsQueryHandler(
-        IQuestionRepository repository)
+        IQuestionRepository repository,
+        ICurrentUserService currentUser)
     {
         _repository = repository;
+        _currentUser = currentUser;
     }
 
     public async Task<IEnumerable<MentorQuestionResponse>> Handle(
         GetAllMentorQuestionsQuery request,
         CancellationToken cancellationToken)
     {
-        var questions = await _repository.GetAllAsync(cancellationToken);
+        var questions = await _repository.GetAllMentorAsync(_currentUser.UserId, cancellationToken);
 
         return questions.Select(question => new MentorQuestionResponse
         {

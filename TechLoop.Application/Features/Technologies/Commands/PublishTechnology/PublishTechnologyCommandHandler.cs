@@ -24,7 +24,6 @@ public sealed class PublishTechnologyCommandHandler
         PublishTechnologyCommand request,
         CancellationToken cancellationToken)
     {
-        // Check whether the technology exists.
         var technology = await _technologyRepository.GetByIdAsync(
             request.Id,
             cancellationToken);
@@ -34,13 +33,11 @@ public sealed class PublishTechnologyCommandHandler
             throw new NotFoundException("Technology not found.");
         }
 
-        // Check whether it is already published.
         if (technology.PublishedAt is not null)
         {
             throw new ValidationException("Technology is already published.");
         }
 
-        // Get the technology id.
         var technologyId = await _technologyRepository.GetTechnologyIdAsync(
             request.Id,
             cancellationToken);
@@ -50,14 +47,12 @@ public sealed class PublishTechnologyCommandHandler
             throw new NotFoundException("Technology not found.");
         }
 
-        // Get the logged-in mentor's technology.
         var mentorTechnologyId = await _technologyRepository.GetMentorTechnologyIdAsync(_currentUserService.UserId, cancellationToken);
         if (mentorTechnologyId is null)
         {
             throw new ValidationException("No technology is assigned to your account.");
         }
 
-        // Allow publishing only for the mentor's own technology.
         if (technologyId != mentorTechnologyId)
         {
             throw new ValidationException("You can publish only your own technology.");

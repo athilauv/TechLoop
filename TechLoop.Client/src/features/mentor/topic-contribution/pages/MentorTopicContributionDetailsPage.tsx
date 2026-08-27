@@ -1,21 +1,30 @@
 import { ArrowLeft, CheckCircle2, ClipboardCheck } from "lucide-react";
 import { useEffect, useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { useNavigate, useParams } from "react-router-dom";
 import Breadcrumb from "../../../../shared/Breadcrumb.tsx";
 import Button from "../../../../shared/Button.tsx";
 import EmptyState from "../../../../shared/EmptyState.tsx";
 import LoadingSpinner from "../../../../shared/LoadingSpinner.tsx";
-import {getMentorTopicContributionById, reviewTopicContribution,} from "../../../../api/mentorTopicContribution.api.ts";
+import {
+    getMentorTopicContributionById,
+    reviewTopicContribution,
+} from "../../../../api/mentorTopicContribution.api.ts";
+import { MENTOR_PENDING_QUERY_KEY } from "../../../../hooks/useMentorPendingQueue.ts";
 import MentorContributionDetails from "../components/MentorContributionDetails.tsx";
 import ReviewContributionModal from "../components/ReviewContributionModal.tsx";
 import type { ReviewTopicContributionRequest, TopicContributionResponse } from "../../../../types/topicContribution.types.ts";
 
 export default function MentorTopicContributionDetailsPage() {
-    const { id } = useParams<{ id: string }>();
+    const { contributionId } = useParams<{ contributionId: string }>();
     const navigate = useNavigate();
+    const queryClient = useQueryClient();
 
-    const contributionId = Number(id);
-    const isValidId = !!id && Number.isInteger(contributionId) && contributionId > 0;
+    const contributionIdNumber = Number(contributionId);
+    const isValidId =
+        !!contributionId &&
+        Number.isInteger(contributionIdNumber) &&
+        contributionIdNumber > 0;
 
     const [contribution, setContribution] = useState<TopicContributionResponse | null>(null);
     const [loading, setLoading] = useState(isValidId);
@@ -33,7 +42,7 @@ export default function MentorTopicContributionDetailsPage() {
 
         const loadContribution = async () => {
             try {
-                const data = await getMentorTopicContributionById(contributionId);
+                const data = await getMentorTopicContributionById(contributionIdNumber);
 
                 if (!cancelled) {
                     setContribution(data);
@@ -67,11 +76,14 @@ export default function MentorTopicContributionDetailsPage() {
             setError(null);
             setSuccessMessage(null);
 
-            await reviewTopicContribution(contributionId, request);
+            await reviewTopicContribution(contributionIdNumber, request);
 
-            const updated = await getMentorTopicContributionById(contributionId);
+            const updated = await getMentorTopicContributionById(contributionIdNumber);
 
             setContribution(updated);
+            await queryClient.invalidateQueries({
+                queryKey: MENTOR_PENDING_QUERY_KEY,
+            });
             setModalOpen(false);
 
             setSuccessMessage(
@@ -94,7 +106,7 @@ export default function MentorTopicContributionDetailsPage() {
                     <Button
                         variant="secondary"
                         icon={<ArrowLeft size={15} />}
-                        onClick={() => navigate("/mentor/topic-contributions")}
+                        onClick={() => navigate("/mentor/contributions")}
                     >
                         Back to Contributions
                     </Button>
@@ -117,7 +129,7 @@ export default function MentorTopicContributionDetailsPage() {
                     <Button
                         variant="secondary"
                         icon={<ArrowLeft size={15} />}
-                        onClick={() => navigate("/mentor/topic-contributions")}
+                        onClick={() => navigate("/mentor/contributions")}
                     >
                         Back to Contributions
                     </Button>
@@ -136,7 +148,7 @@ export default function MentorTopicContributionDetailsPage() {
                         { label: "Mentor" },
                         {
                             label: "Review Queue",
-                            onClick: () => navigate("/mentor/topic-contributions"),
+                            onClick: () => navigate("/mentor/contributions"),
                         },
                         { label: contribution.title },
                     ]}
@@ -158,7 +170,7 @@ export default function MentorTopicContributionDetailsPage() {
                             variant="secondary"
                             size="sm"
                             icon={<ArrowLeft size={14} />}
-                            onClick={() => navigate("/mentor/topic-contributions")}
+                            onClick={() => navigate("/mentor/contributions")}
                         >
                             Back
                         </Button>
@@ -202,6 +214,7 @@ export default function MentorTopicContributionDetailsPage() {
                 key={modalOpen ? "open" : "closed"}
                 open={modalOpen}
                 loading={reviewing}
+                contribution={contribution}
                 onClose={() => setModalOpen(false)}
                 onSubmit={handleReview}
             />

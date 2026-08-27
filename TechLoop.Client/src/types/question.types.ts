@@ -79,6 +79,26 @@ export interface SubmitMcqAnswerResponse {
     message: string;
 }
 
+export interface QuestionDetails {
+    id: number;
+    subTopicId: number | null;
+    questionType: QuestionType;
+    title: string;
+    slug: string | null;
+    description: string | null;
+    imageUrl: string | null;
+    mark: number;
+    hint: string | null;
+    explanation: string | null;
+    timeLimitSeconds: number | null;
+    memoryLimitMb: number | null;
+    difficulty: DifficultyLevel;
+    position: number;
+    options: LearnerMcqOption[] | null;
+    codingTemplate: LearnerCodingTemplate | null;
+    testCases: LearnerTestCase[] | null;
+}
+
 // MENTOR - QUESTION
 export interface MentorQuestion {
     id: number;

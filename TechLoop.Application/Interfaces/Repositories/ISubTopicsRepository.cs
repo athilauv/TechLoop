@@ -17,7 +17,7 @@ public interface ISubTopicsRepository
     Task<SubTopic?> GetByIdAsync(int id, CancellationToken cancellationToken);
     Task<MentorSubTopicResponse?> GetMentorByIdAsync(int id, CancellationToken cancellationToken);
     Task<IEnumerable<SubTopic>> GetAllAsync(CancellationToken cancellationToken);
-    Task<IEnumerable<MentorSubTopicResponse>> GetAllMentorAsync(CancellationToken cancellationToken);
+    Task<IEnumerable<MentorSubTopicResponse>> GetAllMentorAsync(Guid mentorId, CancellationToken cancellationToken);
     Task<IEnumerable<SubTopic>> GetPublishedAsync(CancellationToken cancellationToken);
     Task<SubTopic?> GetPublishedBySlugAsync(string slug, CancellationToken cancellationToken);
     Task<int?> GetTechnologyIdAsync(int subTopicId, CancellationToken cancellationToken);

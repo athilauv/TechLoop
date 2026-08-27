@@ -12,8 +12,8 @@ import {
     getQuestionDetails,
     getQuestions,
     getTestCases,
-    submitMcqAnswer,
 } from "../api/question.api.ts";
+import { submitMcqAnswer } from "../api/submission.api.ts";
 
 export const useQuestions = () => {
     return useQuery({
@@ -102,13 +102,11 @@ export const useMcqOptions = (
     });
 };
 
-export const useSubmitMcqAnswer =
-    () => {
-        return useMutation({
-            mutationFn:
-            submitMcqAnswer,
-        });
-    };
+export const useSubmitMcqAnswer = () => {
+    return useMutation({
+        mutationFn: submitMcqAnswer,
+    });
+};
 
 export const useCodingTemplates = (
     questionId: number,

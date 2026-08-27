@@ -147,6 +147,33 @@ public sealed class QuestionRepository : IQuestionRepository
         return await connection.QueryAsync<Question>(new CommandDefinition(sql, cancellationToken: cancellationToken));
     }
 
+    public async Task<IEnumerable<Question>> GetAllMentorAsync(
+        Guid mentorId,
+        CancellationToken cancellationToken)
+    {
+        const string sql = @"
+            SELECT q.*
+            FROM fn_get_all_questions() q
+            INNER JOIN sub_topics st
+                ON st.id = q.sub_topic_id
+                AND st.deleted_at IS NULL
+            INNER JOIN topics t
+                ON t.id = st.topic_id
+                AND t.deleted_at IS NULL
+            INNER JOIN mentor mentor_user
+                ON mentor_user.technology_id = t.technology_id
+                AND mentor_user.user_id = @MentorId
+                AND mentor_user.deleted_at IS NULL;";
+
+        using var connection = _context.CreateConnection();
+        return await connection.QueryAsync<Question>(
+            new CommandDefinition(
+                sql,
+                new { MentorId = mentorId },
+                cancellationToken: cancellationToken));
+    }
+
+
     // Publishes the specified question
     public async Task<int> PublishAsync(
         Question question,

@@ -59,7 +59,6 @@ const PlatformStatsSection = ({ stats, isLoading }: PlatformStatsSectionProps) =
     ];
 
     if (!isLoading && !stats) {
-        // No backend data available yet — per the brief, we don't fabricate numbers.
         return null;
     }
 

@@ -6,7 +6,6 @@ import type {
     UpdateTopicRequest,
 } from "../types/topic.types.ts";
 import type {OperationResponse} from "../types/common.types.ts";
-import type {MentorProfileData, UpdateMentorProfileRequest} from "../types/mentor.types.ts";
 
 export const getMentorTopics = async (): Promise<MentorTopic[]> => {
     const { data } = await api.get<MentorTopic[]>(
@@ -66,15 +65,5 @@ export const publishTopic = async (
         `/mentor/topics/${id}/publish`
     );
 
-    return data;
-};
-
-export const getMentorProfile = async (): Promise<MentorProfileData> => {
-    const { data } = await api.get<MentorProfileData>("/mentor/profile");
-    return data;
-};
-
-export const updateMentorProfile = async (request: UpdateMentorProfileRequest): Promise<OperationResponse> => {
-    const { data } = await api.put<OperationResponse>("/mentor/profile", request);
     return data;
 };

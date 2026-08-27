@@ -1,22 +1,37 @@
-export interface MentorCurriculumSubTopic {
-    id: number;
-    topicId: number;
-    parentSubTopicId: number | null;
-    title: string;
-    slug: string;
-    position: number;
-    createdAt: string;
-    updatedAt: string | null;
+import type { MentorTopic } from "./topic.types.ts";
+import type { MentorSubTopic } from "./subTopic.types.ts";
+
+export interface MentorProfileData {
+    mentorId: number;
+    userId: string;
+    username: string;
+    email: string;
+    phoneNumber?: string | null;
+    bio?: string | null;
+    linkedInUrl?: string | null;
+    githubUrl?: string | null;
+    profileImageUrl?: string | null;
+    technologyId: number;
+    technologyName: string;
 }
 
-export interface MentorCurriculumTopic {
+export interface UpdateMentorProfileRequest {
+    phoneNumber?: string | null;
+    bio?: string | null;
+    linkedInUrl?: string | null;
+    githubUrl?: string | null;
+    profileImageUrl?: string | null;
+}
+
+export interface MentorAdminResponse {
     id: number;
-    title: string;
-    slug: string;
-    position: number;
+    userId: string;
+    username: string;
+    email: string;
+    technologyId: number;
+    technologyName: string;
     createdAt: string;
     updatedAt: string | null;
-    subTopics: MentorCurriculumSubTopic[];
 }
 
 export interface MentorCurriculum {
@@ -25,22 +40,8 @@ export interface MentorCurriculum {
     topics: MentorCurriculumTopic[];
 }
 
-export interface MentorProfileData {
-    username: string;
-    email: string;
-    technologyId: number;
-    technologyName: string;
-    phoneNumber: string | null;
-    bio: string | null;
-    linkedInUrl: string | null;
-    githubUrl: string | null;
-    profileImageUrl: string | null;
+export interface MentorCurriculumTopic extends MentorTopic {
+    subTopics: MentorCurriculumSubTopic[];
 }
 
-export interface UpdateMentorProfileRequest {
-    phoneNumber: string;
-    bio: string;
-    linkedInUrl: string;
-    githubUrl: string;
-    profileImageUrl: string;
-}
+export interface MentorCurriculumSubTopic extends MentorSubTopic {}

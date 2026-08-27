@@ -17,7 +17,7 @@ export default function PendingContributionCard({
     return (
         <button
             type="button"
-            onClick={() => navigate(`/mentor/topic-contributions/${contribution.id}`)}
+            onClick={() => navigate(`/mentor/contributions/${contribution.id}`)}
             className="
                 group flex w-full items-center gap-5
                 rounded-[var(--cs-radius-card)]

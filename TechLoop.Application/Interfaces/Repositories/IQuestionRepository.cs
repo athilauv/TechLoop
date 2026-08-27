@@ -9,6 +9,7 @@ public interface IQuestionRepository
     Task<int> UpdateAsync(Question question, bool shiftPositions, CancellationToken cancellationToken);
     Task<int> SoftDeleteAsync(int id, Guid deletedBy, CancellationToken cancellationToken);
     Task<IEnumerable<Question>> GetAllAsync(CancellationToken cancellationToken);
+    Task<IEnumerable<Question>> GetAllMentorAsync(Guid mentorId, CancellationToken cancellationToken);
     Task<Question?> GetByIdAsync(int id, CancellationToken cancellationToken);
     Task<IEnumerable<Question>> GetPublishedAsync(CancellationToken cancellationToken);
     Task<Question?> GetPublishedByIdAsync(int id, CancellationToken cancellationToken);

@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { FileQuestion } from "lucide-react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 
 import Breadcrumb from "../../../../../shared/Breadcrumb.tsx";
 import EmptyState from "../../../../../shared/EmptyState.tsx";
@@ -12,6 +12,7 @@ import {
     getMentorQuestionById,
     publishQuestion,
 } from "../../../../../api/mentorQuestion.api.ts";
+import { MENTOR_PENDING_QUERY_KEY } from "../../../../../hooks/useMentorPendingQueue.ts";
 
 import { getErrorMessage } from "../../../../../utils/error.utils.ts";
 import { showToast } from "../../../../../utils/toast.tsx";
@@ -34,9 +35,16 @@ const TABS = [
 const McqQuestionDetailsPage = () => {
     const { id } = useParams<{ id: string }>();
     const navigate = useNavigate();
+    const [searchParams] = useSearchParams();
     const queryClient = useQueryClient();
 
-    const [activeTab, setActiveTab] = useState("overview");
+    const requestedTab = searchParams.get("tab");
+    const validInitialTabs = new Set(TABS.map((tab) => tab.key));
+    const initialTab = requestedTab && validInitialTabs.has(requestedTab)
+        ? requestedTab
+        : "overview";
+
+    const [activeTab, setActiveTab] = useState(initialTab);
     const [publishing, setPublishing] = useState(false);
 
     const questionId = Number(id);
@@ -78,6 +86,10 @@ const McqQuestionDetailsPage = () => {
                         });
                         await queryClient.invalidateQueries({
                             queryKey: ["mentor-questions"],
+                        });
+
+                        await queryClient.invalidateQueries({
+                            queryKey: MENTOR_PENDING_QUERY_KEY,
                         });
 
                         showToast.success("MCQ question published successfully.");

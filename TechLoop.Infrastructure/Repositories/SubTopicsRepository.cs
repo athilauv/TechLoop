@@ -266,7 +266,7 @@ public sealed class SubTopicsRepository : ISubTopicsRepository
                 cancellationToken: cancellationToken));
     }
 
-    public async Task<IEnumerable<MentorSubTopicResponse>> GetAllMentorAsync(CancellationToken cancellationToken)
+    public async Task<IEnumerable<MentorSubTopicResponse>> GetAllMentorAsync(Guid mentorId, CancellationToken cancellationToken)
     {
         const string sql = @"
             SELECT
@@ -288,6 +288,10 @@ public sealed class SubTopicsRepository : ISubTopicsRepository
                 st.updated_at
             FROM fn_get_all_subtopics() st
             INNER JOIN topics topic ON topic.id = st.topic_id AND topic.deleted_at IS NULL
+            INNER JOIN mentor mentor_user
+                ON mentor_user.technology_id = topic.technology_id
+                AND mentor_user.user_id = @MentorId
+                AND mentor_user.deleted_at IS NULL
             LEFT JOIN users published_user ON published_user.id = st.published_by
             LEFT JOIN users created_user ON created_user.id = st.created_by
             LEFT JOIN users updated_user ON updated_user.id = st.updated_by
@@ -295,7 +299,10 @@ public sealed class SubTopicsRepository : ISubTopicsRepository
 
         using var connection = _context.CreateConnection();
         return await connection.QueryAsync<MentorSubTopicResponse>(
-            new CommandDefinition(sql, cancellationToken: cancellationToken));
+            new CommandDefinition(
+                sql,
+                new { MentorId = mentorId },
+                cancellationToken: cancellationToken));
     }
 
     // Get all published subtopics.
