@@ -1,5 +1,6 @@
 ﻿import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import { useEffect, useRef, useState, type CSSProperties } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import Navbar from "../Navbar";
 import Sidebar from "../Sidebar";
 import Footer from "../Footer";
@@ -52,6 +53,7 @@ function useAutoHideNavbar(
 export default function LearnerLayout() {
     const location = useLocation();
     const navigate = useNavigate();
+    const queryClient = useQueryClient();
 
     const scrollRef = useRef<HTMLDivElement>(null);
 
@@ -105,6 +107,7 @@ export default function LearnerLayout() {
         try {
             await logout();
 
+            queryClient.removeQueries({ queryKey: ["current-user"] });
             localStorage.removeItem("username");
 
             setUser(null);

@@ -1,4 +1,4 @@
-﻿using Dapper;
+using Dapper;
 using TechLoop.Application.Features.Analytics.DTOs;
 using TechLoop.Application.Interfaces.Infrastructure;
 using TechLoop.Application.Interfaces.Repositories;
@@ -16,7 +16,7 @@ public sealed class AnalyticsRepository : IAnalyticsRepository
 
     public async Task<AnalyticsOverviewResponse?> GetOverviewAsync(Guid userId, CancellationToken cancellationToken)
     {
-        const string sql = @"SELECT * FROM fn_get_user_analytics_overview(@UserId);";
+        const string sql = @"SELECT * FROM fn_analytics_overview(@UserId);";
         using var connection = _context.CreateConnection();
         return await connection.QuerySingleOrDefaultAsync<AnalyticsOverviewResponse>(
             new CommandDefinition(
@@ -30,7 +30,7 @@ public sealed class AnalyticsRepository : IAnalyticsRepository
 
     public async Task<IReadOnlyList<PracticeActivityResponse>> GetPracticeActivityAsync(Guid userId, CancellationToken cancellationToken)
     {
-        const string sql = @"SELECT * FROM fn_get_user_practice_activity(@UserId);";
+        const string sql = @"SELECT * FROM fn_analytics_practice_activity(@UserId);";
         using var connection = _context.CreateConnection();
         var result = await connection.QueryAsync<PracticeActivityResponse>(
             new CommandDefinition(
@@ -46,7 +46,7 @@ public sealed class AnalyticsRepository : IAnalyticsRepository
 
     public async Task<IReadOnlyList<TechnologyPracticeResponse>> GetTechnologyPracticeAsync(Guid userId, CancellationToken cancellationToken)
     {
-        const string sql = @"SELECT * FROM fn_get_user_technology_practice(@UserId);";
+        const string sql = @"SELECT * FROM fn_analytics_technology_practice(@UserId);";
         using var connection = _context.CreateConnection();
         var result = await connection.QueryAsync<TechnologyPracticeResponse>(
             new CommandDefinition(
@@ -62,7 +62,7 @@ public sealed class AnalyticsRepository : IAnalyticsRepository
 
     public async Task<IReadOnlyList<TopicAnalyticsResponse>> GetTopicAnalyticsAsync(Guid userId, CancellationToken cancellationToken)
     {
-        const string sql = @"SELECT * FROM fn_get_user_topic_analytics(@UserId);";
+        const string sql = @"SELECT * FROM fn_analytics_topic(@UserId);";
         using var connection = _context.CreateConnection();
         var result = await connection.QueryAsync<TopicAnalyticsResponse>(
             new CommandDefinition(
@@ -78,9 +78,25 @@ public sealed class AnalyticsRepository : IAnalyticsRepository
 
     public async Task<IReadOnlyList<DifficultyProgressionResponse>> GetDifficultyProgressionAsync(Guid userId, CancellationToken cancellationToken)
     {
-        const string sql = @"SELECT * FROM fn_get_user_difficulty_progression(@UserId);";
+        const string sql = @"SELECT * FROM fn_analytics_difficulty(@UserId);";
         using var connection = _context.CreateConnection();
         var result = await connection.QueryAsync<DifficultyProgressionResponse>(
+            new CommandDefinition(
+                sql,
+                new
+                {
+                    UserId = userId
+                },
+                cancellationToken: cancellationToken));
+
+        return result.ToList();
+    }
+
+    public async Task<IReadOnlyList<DailyActivityResponse>> GetDailyActivityAsync(Guid userId, CancellationToken cancellationToken)
+    {
+        const string sql = @"SELECT * FROM fn_analytics_daily_activity(@UserId);";
+        using var connection = _context.CreateConnection();
+        var result = await connection.QueryAsync<DailyActivityResponse>(
             new CommandDefinition(
                 sql,
                 new

@@ -1,4 +1,4 @@
-﻿using MediatR;
+using MediatR;
 using TechLoop.Application.Interfaces.Repositories;
 
 namespace TechLoop.Application.Features.Analytics.Queries.GetAnalytics;
@@ -19,13 +19,15 @@ public sealed class GetAnalyticsQueryHandler : IRequestHandler<GetAnalyticsQuery
         var technologyPracticeTask = _analyticsRepository.GetTechnologyPracticeAsync(request.UserId, cancellationToken);
         var topicAnalyticsTask = _analyticsRepository.GetTopicAnalyticsAsync(request.UserId, cancellationToken);
         var difficultyProgressionTask = _analyticsRepository.GetDifficultyProgressionAsync(request.UserId, cancellationToken);
+        var dailyActivityTask = _analyticsRepository.GetDailyActivityAsync(request.UserId, cancellationToken);
         
         await Task.WhenAll(
             overviewTask,
             practiceActivityTask,
             technologyPracticeTask,
             topicAnalyticsTask,
-            difficultyProgressionTask);
+            difficultyProgressionTask,
+            dailyActivityTask);
 
         return new AnalyticsResponse
         {
@@ -33,7 +35,8 @@ public sealed class GetAnalyticsQueryHandler : IRequestHandler<GetAnalyticsQuery
             PracticeActivity = await practiceActivityTask,
             TechnologyPractice = await technologyPracticeTask,
             TopicAnalytics = await topicAnalyticsTask,
-            DifficultyProgression = await difficultyProgressionTask
+            DifficultyProgression = await difficultyProgressionTask,
+            DailyActivity = await dailyActivityTask
         };
     }
 }

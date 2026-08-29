@@ -73,7 +73,7 @@ const CodingQuestionFormPage = () => {
             />
 
             <div className="mx-auto mt-6 max-w-3xl">
-                <div className="rounded-xl border border-[var(--cs-border)] bg-[var(--cs-surface)] p-6">
+                <div className="rounded-2xl bg-[var(--cs-surface)] p-6 ring-1 ring-inset ring-[var(--cs-border)]/60">
                     <h1 className="text-xl font-bold text-[var(--cs-text)]">
                         {isEdit ? "Edit Coding Question" : "Create Coding Question"}
                     </h1>

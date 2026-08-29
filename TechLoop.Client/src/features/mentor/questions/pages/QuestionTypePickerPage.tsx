@@ -5,6 +5,7 @@ import Breadcrumb from "../../../../shared/Breadcrumb.tsx";
 interface QuestionTypeCardProps {
     title: string;
     description: string;
+    features?: string[];
     icon: typeof FileQuestion;
     onClick: () => void;
     available?: boolean;
@@ -13,6 +14,7 @@ interface QuestionTypeCardProps {
 const QuestionTypeCard = ({
                               title,
                               description,
+                              features,
                               icon: Icon,
                               onClick,
                               available = true,
@@ -23,24 +25,29 @@ const QuestionTypeCard = ({
             onClick={onClick}
             disabled={!available}
             className={[
-                "group w-full rounded-xl border p-6 text-left transition-all",
+                "group relative w-full overflow-hidden rounded-2xl p-6 text-left transition-all duration-200",
+                "bg-[var(--cs-surface)] ring-1 ring-inset ring-[var(--cs-border)]/60",
                 available
-                    ? "border-[var(--cs-border)] bg-[var(--cs-surface)] hover:-translate-y-0.5 hover:border-[var(--cs-primary)]/40 hover:bg-[var(--cs-surface-muted)]"
-                    : "cursor-not-allowed border-[var(--cs-border)] bg-[var(--cs-surface)] opacity-60",
+                    ? "hover:-translate-y-0.5 hover:bg-[var(--cs-surface-muted)] hover:ring-[var(--cs-primary)]/50 hover:shadow-[0_12px_32px_-16px_rgba(0,0,0,0.6)]"
+                    : "cursor-not-allowed opacity-60",
             ].join(" ")}
         >
+            {available && (
+                <span className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[var(--cs-primary)]/0 to-transparent opacity-0 transition-opacity duration-200 group-hover:via-[var(--cs-primary)]/40 group-hover:opacity-100" />
+            )}
+
             <div className="flex items-start justify-between gap-4">
-                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border border-[var(--cs-border)] bg-[var(--cs-surface-muted)] text-[var(--cs-primary)]">
-                    <Icon size={23} />
+                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-[var(--cs-primary)]/12 text-[var(--cs-primary)] transition-colors group-hover:bg-[var(--cs-primary)]/18">
+                    <Icon size={22} />
                 </div>
 
                 {available ? (
                     <ChevronRight
-                        size={19}
-                        className="mt-1 shrink-0 text-[var(--cs-text-muted)] transition-transform group-hover:translate-x-1 group-hover:text-[var(--cs-primary,00e5c0)]"
+                        size={18}
+                        className="mt-1.5 shrink-0 text-[var(--cs-text-muted)] transition-transform duration-200 group-hover:translate-x-1 group-hover:text-[var(--cs-primary)]"
                     />
                 ) : (
-                    <span className="rounded-full border border-[var(--cs-border)] px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wide text-[var(--cs-text-muted)]">
+                    <span className="rounded-full bg-[var(--cs-surface-muted)] px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wide text-[var(--cs-text-muted)] ring-1 ring-inset ring-[var(--cs-border)]/60">
                         Coming Soon
                     </span>
                 )}
@@ -50,10 +57,28 @@ const QuestionTypeCard = ({
 
             <p className="mt-2 text-sm leading-6 text-[var(--cs-text-muted)]">{description}</p>
 
-            {available && (
-                <span className="mt-5 inline-flex items-center gap-1.5 text-xs font-medium text-[var(--cs-primary)]">
+            {features && features.length > 0 && (
+                <ul className="mt-4 space-y-1.5">
+                    {features.map((feature) => (
+                        <li
+                            key={feature}
+                            className="flex items-center gap-2 text-xs text-[var(--cs-text-secondary)]"
+                        >
+                            <span className="h-1 w-1 shrink-0 rounded-full bg-[var(--cs-primary)]" />
+                            {feature}
+                        </li>
+                    ))}
+                </ul>
+            )}
+
+            {available ? (
+                <span className="mt-5 inline-flex items-center gap-1.5 text-xs font-semibold text-[var(--cs-primary)]">
                     Manage questions
-                    <ChevronRight size={14} />
+                    <ChevronRight size={14} className="transition-transform duration-200 group-hover:translate-x-1" />
+                </span>
+            ) : (
+                <span className="mt-5 block text-xs font-medium text-[var(--cs-text-muted)]">
+                    Not available yet
                 </span>
             )}
         </button>
@@ -78,21 +103,29 @@ const QuestionTypePickerPage = () => {
                 <div className="mt-8 grid gap-5 md:grid-cols-2 xl:grid-cols-3">
                     <QuestionTypeCard
                         title="MCQ"
-                        description="Create multiple-choice questions with up to four answer options and mark the correct answer."
+                        description="Multiple-choice questions for quick knowledge checks."
+                        features={[
+                            "Up to four answer options",
+                            "Mark the correct answer",
+                        ]}
                         icon={FileQuestion}
                         onClick={() => navigate("/mentor/questions/mcq")}
                     />
 
                     <QuestionTypeCard
                         title="Coding"
-                        description="Create programming questions with coding templates and test cases."
+                        description="Programming questions for hands-on practice."
+                        features={[
+                            "Starter & solution templates",
+                            "Automated test cases",
+                        ]}
                         icon={Code2}
                         onClick={() => navigate("/mentor/questions/coding")}
                     />
 
                     <QuestionTypeCard
                         title="Challenge"
-                        description="Create advanced challenge questions for learners."
+                        description="Advanced, multi-step challenge questions for learners."
                         icon={Brain}
                         available={false}
                         onClick={() => undefined}

@@ -32,46 +32,44 @@ const QuestionFilters = ({
     const hasFilters = search.trim().length > 0 || difficulty !== "all";
 
     return (
-        <div className="space-y-4">
-            <div className="flex items-center gap-2">
-                <Filter size={17} className="text-[var(--cs-text-muted)]" />
-                <h2 className="text-sm font-semibold text-[var(--cs-text)]">Filters</h2>
-            </div>
-
-            <div className="grid gap-3 lg:grid-cols-[1fr_220px_auto]">
-                <div className="relative">
-                    <Search
-                        size={17}
-                        className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-[var(--cs-text-muted)]"
-                    />
-
-                    <input
-                        type="text"
-                        value={search}
-                        onChange={(event) => onSearchChange(event.target.value)}
-                        placeholder="Search questions..."
-                        className="w-full rounded-lg border border-[var(--cs-border)] bg-[var(--cs-surface)] py-2.5 pl-10 pr-3 text-sm text-[var(--cs-text)] outline-none placeholder:text-[var(--cs-text-muted)] focus:border-[var(--cs-primary)] focus:ring-1 focus:ring-[var(--cs-primary)]/30"
-                    />
-                </div>
-
-                <CustomSelect
-                    value={difficulty}
-                    options={DIFFICULTY_OPTIONS}
-                    onChange={onDifficultyChange}
-                    placeholder="All difficulties"
+        <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
+            <div className="relative min-w-[200px] flex-1">
+                <Search
+                    size={16}
+                    className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-[var(--cs-text-muted)]"
                 />
 
-                {hasFilters && (
-                    <button
-                        type="button"
-                        onClick={onClear}
-                        className="inline-flex items-center justify-center gap-2 rounded-lg border border-[var(--cs-border)] px-4 py-2.5 text-sm font-medium text-[var(--cs-text-secondary)] transition-colors hover:bg-[var(--cs-surface-muted)] hover:text-[var(--cs-text)]"
-                    >
-                        <X size={16} />
-                        Clear
-                    </button>
-                )}
+                <input
+                    type="text"
+                    value={search}
+                    onChange={(event) => onSearchChange(event.target.value)}
+                    placeholder="Search questions..."
+                    className="w-full rounded-lg bg-[var(--cs-surface-muted)] py-2.5 pl-9 pr-3 text-sm text-[var(--cs-text)] outline-none ring-1 ring-inset ring-[var(--cs-border)]/60 placeholder:text-[var(--cs-text-muted)] transition-shadow focus:ring-2 focus:ring-[var(--cs-primary)]/40"
+                />
             </div>
+
+            <div className="flex items-center gap-2 text-[var(--cs-text-muted)] sm:shrink-0">
+                <Filter size={15} className="hidden sm:block" />
+                <div className="w-full sm:w-[190px]">
+                    <CustomSelect
+                        value={difficulty}
+                        options={DIFFICULTY_OPTIONS}
+                        onChange={onDifficultyChange}
+                        placeholder="All difficulties"
+                    />
+                </div>
+            </div>
+
+            {hasFilters && (
+                <button
+                    type="button"
+                    onClick={onClear}
+                    className="inline-flex shrink-0 items-center justify-center gap-1.5 rounded-lg px-3 py-2.5 text-sm font-medium text-[var(--cs-text-secondary)] transition-colors hover:bg-[var(--cs-surface-muted)] hover:text-[var(--cs-text)]"
+                >
+                    <X size={15} />
+                    Clear
+                </button>
+            )}
         </div>
     );
 };

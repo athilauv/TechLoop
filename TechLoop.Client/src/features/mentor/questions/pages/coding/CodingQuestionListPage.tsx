@@ -118,43 +118,49 @@ const CodingQuestionListPage = () => {
                     </Button>
                 </div>
 
-                <div className="mt-6 rounded-xl border border-[var(--cs-border)] bg-[var(--cs-surface)] p-4">
-                    <QuestionFilters
-                        search={search}
-                        difficulty={difficulty}
-                        onSearchChange={setSearch}
-                        onDifficultyChange={setDifficulty}
-                        onClear={clearFilters}
-                    />
-                </div>
+                <div className="mt-6 overflow-hidden rounded-2xl bg-[var(--cs-surface)] ring-1 ring-inset ring-[var(--cs-border)]/60">
+                    <div className="border-b border-[var(--cs-border)]/60 p-4">
+                        <QuestionFilters
+                            search={search}
+                            difficulty={difficulty}
+                            onSearchChange={setSearch}
+                            onDifficultyChange={setDifficulty}
+                            onClear={clearFilters}
+                        />
+                    </div>
 
-                <div className="mt-6">
                     {isLoading ? (
                         <div className="flex justify-center py-20">
                             <LoadingSpinner />
                         </div>
                     ) : isError ? (
-                        <EmptyState
-                            icon={<Code2 size={24} />}
-                            title="Unable to load coding questions"
-                            description="Something went wrong while loading coding questions."
-                        />
-                    ) : filteredQuestions.length === 0 ? (
-                        <div className="rounded-xl border border-[var(--cs-border)] bg-[var(--cs-surface)] py-12">
+                        <div className="py-12">
                             <EmptyState
                                 icon={<Code2 size={24} />}
-                                title="No coding questions"
+                                title="Unable to load coding questions"
+                                description="Something went wrong while loading coding questions."
+                            />
+                        </div>
+                    ) : filteredQuestions.length === 0 ? (
+                        <div className="py-12">
+                            <EmptyState
+                                icon={<Code2 size={24} />}
+                                title={
+                                    search || difficulty !== "all"
+                                        ? "No matching coding questions"
+                                        : "No coding questions yet"
+                                }
                                 description={
                                     search || difficulty !== "all"
                                         ? "No coding questions match the selected filters."
-                                        : "Create your first coding question to get started."
+                                        : "Create your first coding question to start building your question library."
                                 }
                                 action={
                                     search || difficulty !== "all" ? (
                                         <button
                                             type="button"
                                             onClick={clearFilters}
-                                            className="rounded-lg border border-[var(--cs-border)] px-4 py-2.5 text-sm font-medium text-[var(--cs-text)] transition-colors hover:bg-[var(--cs-surface-muted)]"
+                                            className="rounded-lg px-4 py-2.5 text-sm font-medium text-[var(--cs-text)] ring-1 ring-inset ring-[var(--cs-border)]/60 transition-colors hover:bg-[var(--cs-surface-muted)]"
                                         >
                                             Clear Filters
                                         </button>

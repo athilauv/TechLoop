@@ -2,12 +2,9 @@
     LayoutDashboard,
     BookOpen,
     Code2,
-    //Users,
     MessagesSquare,
-    //Bot,
+    GitPullRequest,
     BarChart3,
-    Trophy,
-    Bell,
     User,
     LogOut,
     LogIn,
@@ -61,7 +58,7 @@ const sections: NavSection[] = [
             {
                 label: "Contribution",
                 path: "/learner/topic-contributions",
-                icon: MessagesSquare,
+                icon: GitPullRequest,
                 dot: true,
             },
             // {
@@ -84,16 +81,6 @@ const sections: NavSection[] = [
                 label: "Analytics",
                 path: "/learner/analytics",
                 icon: BarChart3,
-            },
-            {
-                label: "Leaderboard",
-                path: "/learner/leaderboard",
-                icon: Trophy,
-            },
-            {
-                label: "Notifications",
-                path: "/learner/notifications",
-                icon: Bell,
             },
         ],
     },
@@ -302,10 +289,10 @@ export default function Sidebar({
                                                             {item.badge !==
                                                                 undefined && (
                                                                     <span className="rounded-full bg-[#17D4C3]/15 px-2 py-0.5 text-xs font-semibold text-[#17D4C3]">
-                                                                    {
-                                                                        item.badge
-                                                                    }
-                                                                </span>
+                                                                        {
+                                                                            item.badge
+                                                                        }
+                                                                    </span>
                                                                 )}
 
                                                             {item.dot && (
@@ -328,23 +315,22 @@ export default function Sidebar({
                 <div className="border-t border-white/5 p-4">
 
                     {isAuthenticated ? (
-                        <div
-                            className={`flex items-center ${
-                                collapsed
-                                    ? "justify-center"
-                                    : "gap-3"
-                            }`}
-                        >
-                            {/* INITIAL AVATAR */}
+                        <>
+                            <div
+                                className={`flex items-center ${
+                                    collapsed
+                                        ? "justify-center"
+                                        : "gap-3"
+                                }`}
+                            >
+                                {/* INITIAL AVATAR */}
 
-                            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#17D4C3]/20 font-semibold text-[#17D4C3]">
-                                {displayInitial}
-                            </div>
+                                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#17D4C3]/20 font-semibold text-[#17D4C3]">
+                                    {displayInitial}
+                                </div>
 
-                            {!collapsed && (
-                                <>
+                                {!collapsed && (
                                     <div className="min-w-0 flex-1">
-
                                         <p className="truncate text-sm text-white">
                                             {displayName}
                                         </p>
@@ -352,25 +338,31 @@ export default function Sidebar({
                                         <p className="truncate text-xs text-slate-500">
                                             {displayRole}
                                         </p>
-
                                     </div>
+                                )}
+                            </div>
 
-                                    <button
-                                        onClick={onLogout}
-                                        className="
-                                            rounded-lg
-                                            p-2
-                                            text-slate-500
-                                            transition
-                                            hover:bg-red-500/10
-                                            hover:text-red-400
-                                        "
-                                    >
-                                        <LogOut size={18} />
-                                    </button>
-                                </>
-                            )}
-                        </div>
+                            {/* LOGOUT */}
+
+                            <button
+                                type="button"
+                                onClick={onLogout}
+                                aria-label="Log out"
+                                className={`mt-3 flex w-full items-center rounded-xl py-3 text-sm font-medium text-slate-400 transition hover:bg-red-500/10 hover:text-red-400 ${
+                                    collapsed
+                                        ? "justify-center px-0"
+                                        : "gap-3 px-3"
+                                }`}
+                            >
+                                <LogOut size={18} />
+
+                                {!collapsed && (
+                                    <span>
+                                        Logout
+                                    </span>
+                                )}
+                            </button>
+                        </>
                     ) : (
                         <button
                             onClick={onLogin}

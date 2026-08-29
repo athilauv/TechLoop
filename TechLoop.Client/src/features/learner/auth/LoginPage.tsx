@@ -1,4 +1,5 @@
 ﻿import { useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import {getCurrentUser, login} from "../../../api/auth.api.ts";
 import { Link,useNavigate  } from "react-router-dom";
 import { showToast} from "../../../utils/toast.tsx";
@@ -87,6 +88,7 @@ export default function LoginPage() {
     };
 
     const navigate = useNavigate();
+    const queryClient = useQueryClient();
 
     const handleSignIn = async () => {
         if (!validate()) return;
@@ -94,12 +96,15 @@ export default function LoginPage() {
         setLoading(true);
 
         try {
+            queryClient.removeQueries({ queryKey: ["current-user"] });
+
             await login({
                 email,
                 password,
             });
 
             const currentUser = await getCurrentUser();
+            queryClient.setQueryData(["current-user"], currentUser);
 
             showToast.success("Login successful");
 

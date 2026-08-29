@@ -19,7 +19,8 @@ export default function ProtectedRoute({
         queryKey: ["current-user"],
         queryFn: getCurrentUser,
         retry: false,
-        staleTime: 5 * 60 * 1000,
+        staleTime: 0,
+        refetchOnMount: "always",
     });
 
     if (isLoading) {

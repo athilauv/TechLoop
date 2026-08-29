@@ -3,7 +3,6 @@ import {
     CheckCircle2,
     ChevronDown,
     ChevronRight,
-    CircleDot,
     FileCheck2,
     FileQuestion,
     Layers3,
@@ -40,6 +39,49 @@ import type { MentorQuestion } from "../../../../types/question.types.ts";
 import { getErrorMessage } from "../../../../utils/error.utils.ts";
 import { showToast } from "../../../../utils/toast.tsx";
 
+/* ---------------------------------------------------------------------- */
+/* Small presentational primitives used only by this page                  */
+/* ---------------------------------------------------------------------- */
+
+interface SectionTabProps {
+    active: boolean;
+    icon: ReactNode;
+    label: string;
+    count: number;
+    onClick: () => void;
+}
+
+function SectionTab({ active, icon, label, count, onClick }: SectionTabProps) {
+    return (
+        <button
+            type="button"
+            onClick={onClick}
+            className={`
+                relative inline-flex items-center gap-2 whitespace-nowrap px-1 pb-3 pt-1
+                text-xs font-medium transition
+                ${active ? "text-[var(--cs-accent)]" : "text-[var(--cs-text-secondary)] hover:text-[var(--cs-text-primary)]"}
+            `}
+        >
+            {icon}
+            {label}
+            <span
+                className={`rounded-full px-1.5 py-0.5 text-[10px] ${
+                    active ? "bg-[var(--cs-accent-subtle)] text-[var(--cs-accent)]" : "bg-white/5 text-[var(--cs-text-muted)]"
+                }`}
+            >
+                {count}
+            </span>
+            {active && (
+                <span className="absolute inset-x-0 -bottom-px h-[2px] rounded-full bg-[var(--cs-accent)]" />
+            )}
+        </button>
+    );
+}
+
+/* ---------------------------------------------------------------------- */
+/* Content-to-publish tree                                                 */
+/* ---------------------------------------------------------------------- */
+
 interface PendingTopicGroupProps {
     topic: MentorTopic;
     subTopics: MentorSubTopic[];
@@ -75,18 +117,25 @@ function PendingTopicGroup({
     }
 
     return (
-        <section className="overflow-hidden rounded-[var(--cs-radius-card)] border border-[var(--cs-border)] bg-[var(--cs-bg-card)]">
-            <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[var(--cs-border)] px-5 py-4">
+        <section className="overflow-hidden rounded-lg border-l-2 border-l-[var(--cs-warning)] bg-[var(--cs-bg-card)]">
+            <div className="flex flex-wrap items-center justify-between gap-3 px-4 py-3.5">
                 <button
                     type="button"
                     onClick={() => setOpen((value) => !value)}
-                    className="flex min-w-0 items-center gap-3 text-left"
+                    className="flex min-w-0 items-center gap-2.5 text-left"
                     aria-expanded={open}
                 >
-                    {open ? <ChevronDown size={17} /> : <ChevronRight size={17} />}
+                    <span className="shrink-0 text-[var(--cs-text-muted)]">
+                        {open ? <ChevronDown size={15} /> : <ChevronRight size={15} />}
+                    </span>
                     <span className="min-w-0">
-                        <span className="block truncate text-sm font-semibold text-[var(--cs-text-primary)]">
-                            {topic.title}
+                        <span className="flex flex-wrap items-center gap-2">
+                            <span className="block truncate text-sm font-semibold text-[var(--cs-text-primary)]">
+                                {topic.title}
+                            </span>
+                            <span className="rounded-full border border-[var(--cs-warning-border)] bg-[var(--cs-warning-subtle)] px-2 py-0.5 text-[10px] font-medium text-[var(--cs-warning)]">
+                                Pending
+                            </span>
                         </span>
                         <span className="mt-0.5 block text-xs text-[var(--cs-text-muted)]">
                             {pendingCount} item{pendingCount !== 1 ? "s" : ""} awaiting publication
@@ -94,57 +143,53 @@ function PendingTopicGroup({
                     </span>
                 </button>
 
-                <div className="flex items-center gap-2">
-                    <span className="rounded-full border border-[var(--cs-warning-border)] bg-[var(--cs-warning-subtle)] px-2.5 py-1 text-[11px] font-medium text-[var(--cs-warning)]">
-                        Pending
-                    </span>
-
-                    {pendingCount > 1 && (
-                        <Button
-                            type="button"
-                            size="sm"
-                            disabled={publishingId !== null}
-                            onClick={() => void onPublishAll(topic)}
-                            icon={
-                                publishingId === `topic-all-${topic.id}` ? (
-                                    <Loader2 size={14} className="animate-spin" />
-                                ) : (
-                                    <Send size={14} />
-                                )
-                            }
-                        >
-                            Publish All
-                        </Button>
-                    )}
-                </div>
+                {pendingCount > 1 && (
+                    <Button
+                        type="button"
+                        size="sm"
+                        disabled={publishingId !== null}
+                        onClick={() => void onPublishAll(topic)}
+                        icon={
+                            publishingId === `topic-all-${topic.id}` ? (
+                                <Loader2 size={14} className="animate-spin" />
+                            ) : (
+                                <Send size={14} />
+                            )
+                        }
+                    >
+                        Publish All
+                    </Button>
+                )}
             </div>
 
             {open && (
-                <div className="divide-y divide-[var(--cs-border)]">
-                    {topicPending && (
-                        <PendingPublishRow
-                            icon={<Layers3 size={16} />}
-                            label="Topic"
-                            title={topic.title}
-                            description="Publish this topic to make it available in the learner curriculum."
-                            onPublish={() => onPublishTopic(topic.id)}
-                            publishing={publishingId === `topic-${topic.id}`}
-                            disabled={publishingId !== null}
-                        />
-                    )}
+                <div className="border-t border-[var(--cs-border)] px-4 py-3">
+                    <div className="space-y-0.5">
+                        {topicPending && (
+                            <PendingPublishRow
+                                icon={<Layers3 size={16} />}
+                                label="Topic"
+                                title={topic.title}
+                                description="Publish this topic to make it available in the learner curriculum."
+                                onPublish={() => onPublishTopic(topic.id)}
+                                publishing={publishingId === `topic-${topic.id}`}
+                                disabled={publishingId !== null}
+                            />
+                        )}
 
-                    {subTopics.map((subTopic) => (
-                        <PendingSubTopicRow
-                            key={subTopic.id}
-                            subTopic={subTopic}
-                            questions={questions.filter(
-                                (question) => question.subTopicId === subTopic.id,
-                            )}
-                            onPublishSubTopic={onPublishSubTopic}
-                            onPublishQuestion={onPublishQuestion}
-                            publishingId={publishingId}
-                        />
-                    ))}
+                        {subTopics.map((subTopic) => (
+                            <PendingSubTopicRow
+                                key={subTopic.id}
+                                subTopic={subTopic}
+                                questions={questions.filter(
+                                    (question) => question.subTopicId === subTopic.id,
+                                )}
+                                onPublishSubTopic={onPublishSubTopic}
+                                onPublishQuestion={onPublishQuestion}
+                                publishingId={publishingId}
+                            />
+                        ))}
+                    </div>
                 </div>
             )}
         </section>
@@ -176,16 +221,15 @@ function PendingSubTopicRow({
     }
 
     return (
-        <div className="bg-[var(--cs-bg-card)]">
-            <div className="flex flex-wrap items-center justify-between gap-3 px-5 py-4 pl-12">
+        <div className="rounded-md pl-1">
+            <div className="flex flex-wrap items-center justify-between gap-3 py-2">
                 <button
                     type="button"
                     onClick={() => setOpen((value) => !value)}
                     className="flex min-w-0 items-center gap-2 text-left"
                     aria-expanded={open}
                 >
-                    {open ? <ChevronDown size={15} /> : <ChevronRight size={15} />}
-                    <CircleDot size={12} className="text-[var(--cs-accent)]" />
+                    {open ? <ChevronDown size={13} /> : <ChevronRight size={13} />}
                     <span className="min-w-0">
                         <span className="block truncate text-sm font-medium text-[var(--cs-text-primary)]">
                             {subTopic.title}
@@ -219,7 +263,7 @@ function PendingSubTopicRow({
             </div>
 
             {open && pendingQuestions.length > 0 && (
-                <div className="space-y-2 px-5 pb-4 pl-20">
+                <div className="ml-5 space-y-1 border-l border-[var(--cs-border)] py-1 pl-4">
                     {pendingQuestions.map((question) => {
                         const isCoding = question.questionType === QuestionType.Coding;
                         const questionTypeLabel = isCoding
@@ -243,62 +287,55 @@ function PendingSubTopicRow({
                                         navigate(targetPath);
                                     }
                                 }}
-                                className="group cursor-pointer rounded-xl border border-[var(--cs-border)] bg-[var(--cs-bg-input)] px-4 py-4 transition hover:border-[var(--cs-accent-border)] hover:bg-[var(--cs-bg-card)] focus:outline-none focus:ring-2 focus:ring-[var(--cs-accent)]/40"
+                                className="
+                                    group grid cursor-pointer grid-cols-1 items-start gap-2 rounded-md px-3 py-2.5
+                                    transition hover:bg-[var(--cs-bg-input)]
+                                    focus:outline-none focus:ring-2 focus:ring-[var(--cs-accent)]/40
+                                    sm:grid-cols-[auto_minmax(0,1fr)_auto_auto] sm:items-center sm:gap-3
+                                "
                             >
-                                <div className="flex flex-wrap items-start justify-between gap-4">
-                                    <div className="flex min-w-0 items-start gap-3">
-                                        <span className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-[var(--cs-border)] bg-[var(--cs-bg-card)] text-[var(--cs-accent)]">
-                                            <FileQuestion size={17} />
-                                        </span>
-                                        <div className="min-w-0">
-                                            <div className="flex flex-wrap items-center gap-2">
-                                                <p className="truncate text-sm font-semibold text-[var(--cs-text-primary)]">
-                                                    {question.title}
-                                                </p>
-                                                <span className="rounded-full border border-[var(--cs-border)] px-2 py-0.5 text-[10px] font-medium text-[var(--cs-text-muted)]">
-                                                    {questionTypeLabel}
-                                                </span>
-                                            </div>
-                                            <p className="mt-1 line-clamp-2 text-xs leading-5 text-[var(--cs-text-secondary)]">
-                                                {question.description || "No description available."}
-                                            </p>
-                                            <p className="mt-2 text-[11px] text-[var(--cs-text-muted)]">
-                                                Position {question.position} · Pending publication
-                                            </p>
-                                        </div>
-                                    </div>
+                                <span className="hidden shrink-0 text-[var(--cs-text-muted)] sm:block">
+                                    <FileQuestion size={14} />
+                                </span>
 
-                                    <div className="flex shrink-0 items-center gap-2">
-                                        <Button
-                                            type="button"
-                                            size="sm"
-                                            variant="secondary"
-                                            disabled={publishingId !== null}
-                                            onClick={(event) => {
-                                                event.stopPropagation();
-                                                void onPublishQuestion(question.id);
-                                            }}
-                                            icon={
-                                                publishingId === `question-${question.id}` ? (
-                                                    <Loader2 size={14} className="animate-spin" />
-                                                ) : (
-                                                    <Send size={14} />
-                                                )
-                                            }
-                                        >
-                                            Publish
-                                        </Button>
-                                        <span className="flex h-9 w-9 items-center justify-center rounded-lg border border-[var(--cs-border)] text-[var(--cs-text-muted)] transition group-hover:border-[var(--cs-accent-border)] group-hover:text-[var(--cs-accent)]">
-                                            <ChevronRight size={16} />
+                                <div className="min-w-0">
+                                    <div className="flex flex-wrap items-center gap-1.5">
+                                        <FileQuestion size={13} className="text-[var(--cs-text-muted)] sm:hidden" />
+                                        <p className="truncate text-sm font-medium text-[var(--cs-text-primary)]">
+                                            {question.title}
+                                        </p>
+                                        <span className="rounded-full border border-[var(--cs-border)] px-1.5 py-0.5 text-[9px] font-medium text-[var(--cs-text-muted)]">
+                                            {questionTypeLabel}
                                         </span>
                                     </div>
+                                    <p className="mt-0.5 line-clamp-1 text-xs leading-5 text-[var(--cs-text-secondary)]">
+                                        {question.description || "No description available."}
+                                    </p>
                                 </div>
 
-                                <p className="mt-3 border-t border-[var(--cs-border)] pt-3 text-[11px] text-[var(--cs-text-muted)]">
-                                    {isCoding
-                                        ? "Open the question setup to manage coding templates and test cases before publishing."
-                                        : "Open the question setup to manage MCQ options before publishing."}
-                                </p>
+                                <span className="hidden text-[10px] text-[var(--cs-text-muted)] sm:block">
+                                    Pos. {question.position}
+                                </span>
+
+                                <Button
+                                    type="button"
+                                    size="sm"
+                                    variant="secondary"
+                                    disabled={publishingId !== null}
+                                    onClick={(event) => {
+                                        event.stopPropagation();
+                                        void onPublishQuestion(question.id);
+                                    }}
+                                    icon={
+                                        publishingId === `question-${question.id}` ? (
+                                            <Loader2 size={13} className="animate-spin" />
+                                        ) : (
+                                            <Send size={13} />
+                                        )
+                                    }
+                                >
+                                    Publish
+                                </Button>
                             </div>
                         );
                     })}
@@ -328,13 +365,13 @@ function PendingPublishRow({
     disabled,
 }: PendingPublishRowProps) {
     return (
-        <div className="flex flex-wrap items-center justify-between gap-4 px-5 py-4 pl-12">
-            <div className="flex min-w-0 items-center gap-3">
-                <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-[var(--cs-border)] bg-[var(--cs-bg-input)] text-[var(--cs-text-muted)]">
+        <div className="flex flex-wrap items-center justify-between gap-3 rounded-md px-3 py-2.5 transition hover:bg-[var(--cs-bg-input)]">
+            <div className="flex min-w-0 items-center gap-2.5">
+                <span className="shrink-0 text-[var(--cs-text-muted)]">
                     {icon}
                 </span>
                 <div className="min-w-0">
-                    <p className="text-[11px] font-semibold uppercase tracking-wider text-[var(--cs-text-muted)]">
+                    <p className="text-[10px] font-semibold uppercase tracking-wider text-[var(--cs-text-muted)]">
                         {label}
                     </p>
                     <p className="truncate text-sm font-medium text-[var(--cs-text-primary)]">
@@ -360,10 +397,15 @@ function PendingPublishRow({
     );
 }
 
+/* ---------------------------------------------------------------------- */
+/* Page                                                                    */
+/* ---------------------------------------------------------------------- */
+
 export default function MentorPendingPage() {
     const queryClient = useQueryClient();
     const { data, isLoading, isError, refetch } = useMentorPendingQueue();
     const [publishingId, setPublishingId] = useState<string | null>(null);
+    const [activeSection, setActiveSection] = useState<"contributions" | "content" | null>(null);
 
     const topicMap = useMemo(() => {
         const map = new Map<number, MentorTopic>();
@@ -554,10 +596,15 @@ export default function MentorPendingPage() {
     };
 
     const totalPending = getMentorPendingCount(data);
+    const hasContributions = !!data && data.pendingContributions.length > 0;
+    const hasContent = grouped.length > 0;
+    const showTabs = hasContributions && hasContent;
+    const section = activeSection ?? (hasContributions ? "contributions" : "content");
+    const contentCount = data ? totalPending - data.pendingContributions.length : 0;
 
     return (
         <div className="content-studio-theme flex h-full min-h-0 flex-col">
-            <div className="shrink-0 border-b border-[var(--cs-border)] px-7 py-5">
+            <div className="shrink-0 border-b border-[var(--cs-border)] px-7 pt-5">
                 <Breadcrumb items={[{ label: "Mentor" }, { label: "Pending" }]} />
 
                 <div className="mt-4 flex flex-wrap items-end justify-between gap-4">
@@ -570,15 +617,34 @@ export default function MentorPendingPage() {
                         </p>
                     </div>
 
-                    <div className="rounded-xl border border-[var(--cs-border)] bg-[var(--cs-bg-card)] px-4 py-3">
-                        <p className="text-[10px] font-semibold uppercase tracking-widest text-[var(--cs-text-muted)]">
-                            Action items
+                    {!isLoading && !isError && data && totalPending > 0 && (
+                        <p className="text-xs text-[var(--cs-text-muted)]">
+                            <span className="font-semibold text-[var(--cs-accent)]">{totalPending}</span> total ·{" "}
+                            {data.pendingContributions.length} contribution
+                            {data.pendingContributions.length !== 1 ? "s" : ""} · {contentCount} content item
+                            {contentCount !== 1 ? "s" : ""}
                         </p>
-                        <p className="mt-1 text-xl font-semibold text-[var(--cs-text-primary)]">
-                            {totalPending}
-                        </p>
-                    </div>
+                    )}
                 </div>
+
+                {!isLoading && !isError && data && showTabs && (
+                    <div className="mt-5 flex gap-5">
+                        <SectionTab
+                            active={section === "contributions"}
+                            onClick={() => setActiveSection("contributions")}
+                            icon={<FileCheck2 size={14} />}
+                            label="Learner Contributions"
+                            count={data.pendingContributions.length}
+                        />
+                        <SectionTab
+                            active={section === "content"}
+                            onClick={() => setActiveSection("content")}
+                            icon={<BookOpen size={14} />}
+                            label="Content to Publish"
+                            count={contentCount}
+                        />
+                    </div>
+                )}
             </div>
 
             <div className="min-h-0 flex-1 overflow-y-auto p-7">
@@ -602,25 +668,24 @@ export default function MentorPendingPage() {
                         description="There are no learner contributions awaiting review and no unpublished topics, subtopics, or questions."
                     />
                 ) : (
-                    <div className="mx-auto max-w-5xl space-y-8">
-                        {data.pendingContributions.length > 0 && (
+                    <div className="mx-auto max-w-5xl">
+                        {hasContributions && section === "contributions" && (
                             <section>
-                                <div className="mb-3 flex items-center gap-2">
-                                    <FileCheck2 size={17} className="text-[var(--cs-accent)]" />
-                                    <div>
-                                        <h2 className="text-sm font-semibold text-[var(--cs-text-primary)]">
-                                            Learner Contributions
-                                        </h2>
-                                        <p className="text-xs text-[var(--cs-text-muted)]">
-                                            Awaiting mentor review
-                                        </p>
+                                {!showTabs && (
+                                    <div className="mb-3 flex items-center gap-2">
+                                        <FileCheck2 size={17} className="text-[var(--cs-accent)]" />
+                                        <div>
+                                            <h2 className="text-sm font-semibold text-[var(--cs-text-primary)]">
+                                                Learner Contributions
+                                            </h2>
+                                            <p className="text-xs text-[var(--cs-text-muted)]">
+                                                Awaiting mentor review
+                                            </p>
+                                        </div>
                                     </div>
-                                    <span className="ml-auto rounded-full border border-[var(--cs-border)] px-2.5 py-1 text-[10px] font-medium text-[var(--cs-text-muted)]">
-                                        {data.pendingContributions.length}
-                                    </span>
-                                </div>
+                                )}
 
-                                <div className="space-y-3">
+                                <div className="space-y-2">
                                     {data.pendingContributions.map((contribution) => (
                                         <PendingContributionCard
                                             key={contribution.id}
@@ -631,19 +696,21 @@ export default function MentorPendingPage() {
                             </section>
                         )}
 
-                        {grouped.length > 0 && (
+                        {hasContent && section === "content" && (
                             <section>
-                                <div className="mb-3 flex items-center gap-2">
-                                    <BookOpen size={17} className="text-[var(--cs-accent)]" />
-                                    <div>
-                                        <h2 className="text-sm font-semibold text-[var(--cs-text-primary)]">
-                                            Content to Publish
-                                        </h2>
-                                        <p className="text-xs text-[var(--cs-text-muted)]">
-                                            Topics, subtopics, and questions not yet visible to learners
-                                        </p>
+                                {!showTabs && (
+                                    <div className="mb-3 flex items-center gap-2">
+                                        <BookOpen size={17} className="text-[var(--cs-accent)]" />
+                                        <div>
+                                            <h2 className="text-sm font-semibold text-[var(--cs-text-primary)]">
+                                                Content to Publish
+                                            </h2>
+                                            <p className="text-xs text-[var(--cs-text-muted)]">
+                                                Topics, subtopics, and questions not yet visible to learners
+                                            </p>
+                                        </div>
                                     </div>
-                                </div>
+                                )}
 
                                 <div className="space-y-3">
                                     {grouped.map((group) => (

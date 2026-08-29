@@ -1,6 +1,3 @@
-import type { MentorTopic } from "./topic.types.ts";
-import type { MentorSubTopic } from "./subTopic.types.ts";
-
 export interface MentorProfileData {
     mentorId: number;
     userId: string;
@@ -33,15 +30,25 @@ export interface MentorAdminResponse {
     createdAt: string;
     updatedAt: string | null;
 }
+export interface MentorCurriculumSubTopic {
+    id: number;
+    title: string;
+    slug: string;
+    position: number;
+    publishedAt: string | null;
+}
+
+export interface MentorCurriculumTopic {
+    id: number;
+    title: string;
+    slug: string;
+    position: number;
+    publishedAt: string | null;
+    subTopics: MentorCurriculumSubTopic[];
+}
 
 export interface MentorCurriculum {
     technologyId: number;
     technologyName: string;
     topics: MentorCurriculumTopic[];
 }
-
-export interface MentorCurriculumTopic extends MentorTopic {
-    subTopics: MentorCurriculumSubTopic[];
-}
-
-export interface MentorCurriculumSubTopic extends MentorSubTopic {}

@@ -1,6 +1,7 @@
 import { Edit3, Eye, EyeOff, Trash2 } from "lucide-react";
 
 import type { MentorTestCase } from "../../../../../types/question.types.ts";
+import HorizontalScrollArea from "../shared/HorizontalScrollArea";
 
 interface TestCaseTableProps {
     testCases: MentorTestCase[];
@@ -16,8 +17,9 @@ const TestCaseTable = ({
                            disabled = false,
                        }: TestCaseTableProps) => {
     return (
-        <div className="overflow-hidden rounded-lg border border-[var(--cs-border)]/70 bg-[var(--cs-surface)]/25">
-            <table className="w-full text-left text-sm">
+        <div className="rounded-lg border border-[var(--cs-border)]/70 bg-[var(--cs-surface)]/25">
+            <HorizontalScrollArea>
+            <table className="w-full min-w-[640px] text-left text-sm">
                 <thead>
                 <tr className="border-b border-[var(--cs-border)] text-xs uppercase tracking-wide text-[var(--cs-text-muted)]">
                     <th className="px-4 py-3 font-medium">#</th>
@@ -85,6 +87,7 @@ const TestCaseTable = ({
                 ))}
                 </tbody>
             </table>
+            </HorizontalScrollArea>
         </div>
     );
 };

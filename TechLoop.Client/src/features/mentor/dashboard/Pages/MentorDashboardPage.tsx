@@ -152,10 +152,10 @@ export default function MentorDashboardPage() {
     );
 
     const totalAttentionItems =
-        (data?.pendingContributions.length ?? 0) +
-        (data?.unpublishedTopics.length ?? 0) +
-        (data?.unpublishedSubTopics.length ?? 0) +
-        (data?.unpublishedQuestions.length ?? 0);
+        (data?.pendingContributions?.length ?? 0) +
+        (data?.unpublishedTopics?.length ?? 0) +
+        (data?.unpublishedSubTopics?.length ?? 0) +
+        (data?.unpublishedQuestions?.length ?? 0);
 
     return (
         <div className="min-h-[calc(100vh-64px)] text-[#E8F0FE]">

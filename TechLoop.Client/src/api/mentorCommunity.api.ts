@@ -12,7 +12,7 @@ import type {
 
 const ROLE_BASE_PATHS: Record<CommunityRole, string> = {
     learner: "/api/learner/community",
-    mentor: "/mentor/community",
+    mentor: "/mentor",
 };
 
 function basePath(role: CommunityRole): string {

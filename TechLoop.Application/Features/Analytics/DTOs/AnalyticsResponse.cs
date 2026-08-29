@@ -1,4 +1,4 @@
-﻿using TechLoop.Application.Features.Analytics.DTOs;
+using TechLoop.Application.Features.Analytics.DTOs;
 
 namespace TechLoop.Application.Features.Analytics.Queries.GetAnalytics;
 
@@ -17,4 +17,7 @@ public sealed class AnalyticsResponse
 
     public IReadOnlyList<DifficultyProgressionResponse> DifficultyProgression { get; set; }
         = Array.Empty<DifficultyProgressionResponse>();
+
+    public IReadOnlyList<DailyActivityResponse> DailyActivity { get; set; }
+        = Array.Empty<DailyActivityResponse>();
 }

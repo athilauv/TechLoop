@@ -1,5 +1,6 @@
 import { CheckCircle2, Edit3, Trash2 } from "lucide-react";
 import type { MentorMcqOption } from "../../../../../types/question.types.ts";
+import HorizontalScrollArea from "../shared/HorizontalScrollArea";
 
 interface McqOptionTableProps {
     options: MentorMcqOption[];
@@ -15,8 +16,9 @@ const McqOptionTable = ({
                             disabled = false,
                         }: McqOptionTableProps) => {
     return (
-        <div className="overflow-hidden rounded-lg border border-[var(--cs-border)]">
-            <table className="w-full text-left text-sm">
+        <div className="rounded-lg border border-[var(--cs-border)]">
+            <HorizontalScrollArea>
+            <table className="w-full min-w-[480px] text-left text-sm">
                 <thead>
                 <tr className="border-b border-[var(--cs-border)] text-xs uppercase tracking-wide text-[var(--cs-text-muted)]">
                     <th className="px-4 py-3 font-medium">Option</th>
@@ -73,6 +75,7 @@ const McqOptionTable = ({
                 ))}
                 </tbody>
             </table>
+            </HorizontalScrollArea>
         </div>
     );
 };

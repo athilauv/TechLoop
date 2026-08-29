@@ -267,7 +267,7 @@ public sealed class TechnologyRepository : ITechnologyRepository
     {
         const string sql = """
             SELECT *
-            FROM fn_technology_get_by_id(@Id);
+            FROM fn_get_technology_by_id(@Id);
             """;
 
         return WithConnection(connection =>
@@ -283,7 +283,7 @@ public sealed class TechnologyRepository : ITechnologyRepository
     {
         const string sql = """
             SELECT *
-            FROM fn_technology_get_published();
+            FROM fn_get_published_technologies();
             """;
 
         return WithConnection(connection =>
@@ -299,7 +299,7 @@ public sealed class TechnologyRepository : ITechnologyRepository
     {
         const string sql = """
             SELECT *
-            FROM fn_technology_get_published_by_slug(@Slug);
+            FROM fn_get_published_technology_by_slug(@Slug);
             """;
 
         return WithConnection(connection =>

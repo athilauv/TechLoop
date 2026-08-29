@@ -17,25 +17,15 @@ export const getMentorPendingQueue = async (): Promise<MentorPendingQueueData> =
         getPendingTopicContributions(),
     ]);
 
-    const unpublishedTopics = allTopics.filter(
-        (topic) => !topic.publishedAt,
-    );
-
-    const unpublishedSubTopics = allSubTopics.filter(
-        (subTopic) => !subTopic.publishedAt,
-    );
-
-    const unpublishedQuestions = allQuestions.filter(
-        (question) => !question.publishedAt,
-    );
-
     return {
         pendingContributions,
         allTopics,
         allSubTopics,
         allQuestions,
-        unpublishedTopics,
-        unpublishedSubTopics,
-        unpublishedQuestions,
+        unpublishedTopics: allTopics.filter((topic) => !topic.publishedAt),
+        unpublishedSubTopics: allSubTopics.filter(
+            (subTopic) => !subTopic.publishedAt,),
+        unpublishedQuestions: allQuestions.filter(
+            (question) => !question.publishedAt,),
     };
 };

@@ -9,7 +9,7 @@ const AdminLayout = () => {
     const [mobileOpen, setMobileOpen] = useState(false);
 
     return (
-        <div className="min-h-screen bg-[#0A0E17]">
+        <div className="h-screen overflow-hidden bg-[#081423]">
             <Sidebar
                 collapsed={collapsed}
                 onToggleCollapsed={() => setCollapsed((current) => !current)}
@@ -17,20 +17,25 @@ const AdminLayout = () => {
                 onCloseMobile={() => setMobileOpen(false)}
             />
 
-            <Navbar
-                onOpenMobileSidebar={() => setMobileOpen(true)}
-                sidebarCollapsed={collapsed}
-            />
-
             <div
-                className={`flex min-h-screen flex-col pt-20 transition-all duration-200 ease-out
-                ${collapsed ? "lg:pl-[76px]" : "lg:pl-[264px]"}`}
+                className={[
+                    "ml-0 h-screen transition-all duration-300 md:ml-[72px]",
+                    collapsed ? "md:ml-[72px]" : "md:ml-64",
+                ].join(" ")}
             >
-                <main className="flex-1">
-                    <Outlet />
-                </main>
+                <Navbar
+                    onOpenMobileSidebar={() => setMobileOpen(true)}
+                    sidebarCollapsed={collapsed}
+                />
 
-                <Footer sidebarCollapsed={collapsed} />
+                <main className="h-full overflow-y-auto bg-[#081423] pt-16">
+                    <div className="flex min-h-full flex-col">
+                        <div className="flex-1 px-4 py-4 md:px-6 lg:px-8">
+                            <Outlet />
+                        </div>
+                        <Footer />
+                    </div>
+                </main>
             </div>
         </div>
     );

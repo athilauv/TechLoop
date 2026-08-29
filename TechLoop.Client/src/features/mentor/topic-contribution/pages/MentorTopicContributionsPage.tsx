@@ -9,6 +9,47 @@ import type { TopicContributionPendingResponse } from "../../../../types/topicCo
 
 type TypeFilter = "all" | "topic" | "subtopic";
 
+/* ---------------------------------------------------------------------- */
+/* Local presentational primitives                                        */
+/* ---------------------------------------------------------------------- */
+
+interface FilterTabProps {
+    active: boolean;
+    label: string;
+    count: number;
+    onClick: () => void;
+}
+
+function FilterTab({ active, label, count, onClick }: FilterTabProps) {
+    return (
+        <button
+            type="button"
+            onClick={onClick}
+            className={`
+                relative inline-flex items-center gap-2 whitespace-nowrap px-1 pb-3 pt-1
+                text-xs font-medium transition
+                ${active ? "text-[var(--cs-accent)]" : "text-[var(--cs-text-secondary)] hover:text-[var(--cs-text-primary)]"}
+            `}
+        >
+            {label}
+            <span
+                className={`rounded-full px-1.5 py-0.5 text-[10px] ${
+                    active ? "bg-[var(--cs-accent-subtle)] text-[var(--cs-accent)]" : "bg-white/5 text-[var(--cs-text-muted)]"
+                }`}
+            >
+                {count}
+            </span>
+            {active && (
+                <span className="absolute inset-x-0 -bottom-px h-[2px] rounded-full bg-[var(--cs-accent)]" />
+            )}
+        </button>
+    );
+}
+
+/* ---------------------------------------------------------------------- */
+/* Page                                                                    */
+/* ---------------------------------------------------------------------- */
+
 export default function MentorTopicContributionsPage() {
     const [contributions, setContributions] =
         useState<TopicContributionPendingResponse[]>([]);
@@ -66,9 +107,16 @@ export default function MentorTopicContributionsPage() {
         });
     }, [contributions, search, typeFilter]);
 
+    const filterOptions = [
+        { key: "all" as const, label: "All", count: contributions.length },
+        { key: "topic" as const, label: "Topics", count: typeCounts.topic },
+        { key: "subtopic" as const, label: "SubTopics", count: typeCounts.subtopic },
+    ];
+
     return (
         <div className="content-studio-theme flex h-full min-h-0 flex-col">
-            <div className="shrink-0 border-b border-[var(--cs-border)] px-7 py-5">
+            {/* Header */}
+            <div className="shrink-0 border-b border-[var(--cs-border)] px-7 pt-5">
                 <Breadcrumb items={[{ label: "Mentor" }, { label: "Topic Contributions" }]} />
 
                 <div className="mt-4 flex flex-wrap items-end justify-between gap-4">
@@ -82,7 +130,7 @@ export default function MentorTopicContributionsPage() {
                     </div>
 
                     {!loading && !error && contributions.length > 0 && (
-                        <div className="relative">
+                        <div className="relative w-full sm:w-64">
                             <Search
                                 size={14}
                                 className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-[var(--cs-text-muted)]"
@@ -93,7 +141,7 @@ export default function MentorTopicContributionsPage() {
                                 onChange={(event) => setSearch(event.target.value)}
                                 placeholder="Search the queue..."
                                 className="
-                                    w-64 rounded-[var(--cs-radius-control)]
+                                    w-full rounded-lg
                                     border border-[var(--cs-border)]
                                     bg-[var(--cs-bg-input)]
                                     py-2 pl-8 pr-3
@@ -108,35 +156,21 @@ export default function MentorTopicContributionsPage() {
                 </div>
 
                 {!loading && !error && contributions.length > 0 && (
-                    <div className="mt-5 flex flex-wrap gap-1.5">
-                        {[
-                            { key: "all" as const, label: "All", count: contributions.length },
-                            { key: "topic" as const, label: "Topics", count: typeCounts.topic },
-                            { key: "subtopic" as const, label: "SubTopics", count: typeCounts.subtopic },
-                        ].map((entry) => {
-                            const isActive = typeFilter === entry.key;
-                            return (
-                                <button
-                                    key={entry.key}
-                                    type="button"
-                                    onClick={() => setTypeFilter(entry.key)}
-                                    className={`inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-xs font-medium transition ${
-                                        isActive
-                                            ? "border-[var(--cs-accent-border)] bg-[var(--cs-accent-subtle)] text-[var(--cs-accent)]"
-                                            : "border-[var(--cs-border)] bg-transparent text-[var(--cs-text-secondary)] hover:bg-white/5 hover:text-[var(--cs-text-primary)]"
-                                    }`}
-                                >
-                                    {entry.label}
-                                    <span className="font-[var(--cs-font-mono)] text-[10px] text-[var(--cs-text-muted)]">
-                                        {entry.count}
-                                    </span>
-                                </button>
-                            );
-                        })}
+                    <div className="mt-5 flex gap-5 overflow-x-auto">
+                        {filterOptions.map((entry) => (
+                            <FilterTab
+                                key={entry.key}
+                                active={typeFilter === entry.key}
+                                label={entry.label}
+                                count={entry.count}
+                                onClick={() => setTypeFilter(entry.key)}
+                            />
+                        ))}
                     </div>
                 )}
             </div>
 
+            {/* Content */}
             <div className="min-h-0 flex-1 overflow-y-auto p-7">
                 {loading ? (
                     <LoadingSpinner size="lg" label="Loading contributions..." fullHeight />
@@ -153,8 +187,8 @@ export default function MentorTopicContributionsPage() {
                         description="There are no learner contributions waiting for review."
                     />
                 ) : (
-                    <div className="mx-auto max-w-4xl space-y-3">
-                        <p className="text-xs text-[var(--cs-text-muted)]">
+                    <div className="mx-auto max-w-4xl">
+                        <p className="mb-3 text-xs text-[var(--cs-text-muted)]">
                             {filteredContributions.length} of {contributions.length}{" "}
                             contribution{contributions.length !== 1 ? "s" : ""} waiting for review
                         </p>
@@ -166,13 +200,29 @@ export default function MentorTopicContributionsPage() {
                                 description="Try adjusting your search or type filter."
                             />
                         ) : (
-                            <div className="space-y-3">
-                                {filteredContributions.map((contribution) => (
-                                    <PendingContributionCard
-                                        key={contribution.id}
-                                        contribution={contribution}
-                                    />
-                                ))}
+                            <div>
+                                {/* Column header — desktop only, purely visual */}
+                                <div className="mb-2 hidden grid-cols-[minmax(0,1fr)_minmax(0,220px)_96px_20px] gap-5 px-4 md:grid">
+                                    <span className="text-[10px] font-semibold uppercase tracking-widest text-[var(--cs-text-muted)]">
+                                        Contribution
+                                    </span>
+                                    <span className="text-[10px] font-semibold uppercase tracking-widest text-[var(--cs-text-muted)]">
+                                        Description
+                                    </span>
+                                    <span className="text-right text-[10px] font-semibold uppercase tracking-widest text-[var(--cs-text-muted)]">
+                                        Submitted
+                                    </span>
+                                    <span />
+                                </div>
+
+                                <div className="space-y-2">
+                                    {filteredContributions.map((contribution) => (
+                                        <PendingContributionCard
+                                            key={contribution.id}
+                                            contribution={contribution}
+                                        />
+                                    ))}
+                                </div>
                             </div>
                         )}
                     </div>

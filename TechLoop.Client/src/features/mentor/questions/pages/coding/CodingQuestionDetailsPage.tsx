@@ -685,9 +685,9 @@ const CodingQuestionDetailsPage = () => {
                 ]}
             />
 
-            <div className="mx-auto mt-6 max-w-5xl">
+            <div className="mx-auto mt-6 max-w-5xl overflow-hidden rounded-2xl bg-[var(--cs-surface)] ring-1 ring-inset ring-[var(--cs-border)]/60">
                 {/* Question header */}
-                <section className="rounded-xl border border-[var(--cs-border)] bg-[var(--cs-surface)] p-6">
+                <section className="border-b border-[var(--cs-border)]/60 p-6">
                     <QuestionDetailHeader
                         question={question}
                         onEdit={handleEdit}
@@ -702,7 +702,7 @@ const CodingQuestionDetailsPage = () => {
                 </section>
 
                 {/* Tabs */}
-                <div className="mt-6 rounded-xl border border-[var(--cs-border)] bg-[var(--cs-surface)] px-6">
+                <div className="px-6">
                     <QuestionTabs
                         tabs={TABS}
                         active={activeTab}
@@ -892,8 +892,8 @@ const PageMessage = ({
                      }: PageMessageProps) => {
     return (
         <div className="min-h-full px-6 py-6">
-            <div className="mx-auto flex max-w-3xl flex-col items-center justify-center rounded-xl border border-[var(--cs-border)] bg-[var(--cs-surface)] px-6 py-16 text-center">
-                <div className="flex h-12 w-12 items-center justify-center rounded-full border border-[var(--cs-border)] bg-[var(--cs-surface-muted)] text-[var(--cs-primary)]">
+            <div className="mx-auto flex max-w-3xl flex-col items-center justify-center rounded-2xl bg-[var(--cs-surface)] px-6 py-16 text-center ring-1 ring-inset ring-[var(--cs-border)]/60">
+                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[var(--cs-primary)]/12 text-[var(--cs-primary)]">
                     <Code2 size={22} />
                 </div>
 

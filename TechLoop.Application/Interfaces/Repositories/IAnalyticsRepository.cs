@@ -1,4 +1,4 @@
-﻿using TechLoop.Application.Features.Analytics.DTOs;
+using TechLoop.Application.Features.Analytics.DTOs;
 
 namespace TechLoop.Application.Interfaces.Repositories;
 
@@ -9,4 +9,5 @@ public interface IAnalyticsRepository
     Task<IReadOnlyList<TechnologyPracticeResponse>> GetTechnologyPracticeAsync(Guid userId, CancellationToken cancellationToken);
     Task<IReadOnlyList<TopicAnalyticsResponse>> GetTopicAnalyticsAsync(Guid userId, CancellationToken cancellationToken);
     Task<IReadOnlyList<DifficultyProgressionResponse>> GetDifficultyProgressionAsync(Guid userId, CancellationToken cancellationToken);
+    Task<IReadOnlyList<DailyActivityResponse>> GetDailyActivityAsync(Guid userId, CancellationToken cancellationToken);
 }

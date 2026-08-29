@@ -2,7 +2,7 @@ import { useMemo } from "react";
 import { BookOpen, Plus, TriangleAlert } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { getMentorCurriculum } from "../../../../../api/mentor.api.ts";
-import type {MentorCurriculum, MentorCurriculumTopic} from "../../../../../types/mentor.types.ts";
+import type { MentorCurriculum, MentorCurriculumTopic} from "../../../../../types/mentor.types.ts";
 import Button from "../../../../../shared/Button.tsx";
 import LoadingSpinner from "../../../../../shared/LoadingSpinner.tsx";
 import TopicTreeItem from "./TopicTreeItem";

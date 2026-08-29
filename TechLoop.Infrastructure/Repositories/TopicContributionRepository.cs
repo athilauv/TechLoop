@@ -1,4 +1,4 @@
-﻿﻿using Dapper;
+﻿using Dapper;
 using TechLoop.Application.Features.TopicContributions.DTOs;
 using TechLoop.Application.Interfaces.Infrastructure;
 using TechLoop.Application.Interfaces.Repositories;
@@ -87,7 +87,7 @@ public sealed class TopicContributionRepository : ITopicContributionRepository
         CancellationToken cancellationToken)
     {
         const string sql = @"
-            CALL sp_review_topic_contribution(
+            CALL public.sp_review_topic_contribution(
                 @ContributionId,
                 @Status,
                 @ReviewNotes,
@@ -99,7 +99,7 @@ public sealed class TopicContributionRepository : ITopicContributionRepository
 
         using var connection = _context.CreateConnection();
 
-        var rows = await connection.ExecuteAsync(
+        await connection.ExecuteAsync(
             new CommandDefinition(
                 sql,
                 new
@@ -110,11 +110,11 @@ public sealed class TopicContributionRepository : ITopicContributionRepository
                     Position = position,
                     ParentSubTopicId = parentSubTopicId,
                     ReviewedBy = reviewedBy,
-                    ReviewedAt = DateTime.UtcNow
+                    ReviewedAt = DateTimeOffset.UtcNow
                 },
                 cancellationToken: cancellationToken));
 
-        return rows > 0;
+        return true;
     }
 
     // Gets all contributions created by a learner

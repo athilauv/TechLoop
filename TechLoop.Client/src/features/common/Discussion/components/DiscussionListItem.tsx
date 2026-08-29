@@ -9,6 +9,8 @@ import UserAvatar from "./UserAvatar.tsx";
 import DiscussionForm from "./DiscussionForm.tsx";
 import CommentThread from "./CommentThread.tsx";
 import CommentComposer from "./CommentComposer.tsx";
+import MentorBadge from "../../community/components/shared/MentorBadge.tsx";
+import { isMentor } from "../../../../utils/isMentor.ts";
 
 
 interface DiscussionListItemProps {
@@ -172,11 +174,7 @@ const DiscussionListItem = ({
                         <span className="text-sm font-semibold text-[var(--cs-text)]">
                             {discussion.userName}
                         </span>
-                        {discussion.userRoleId === 2 && (
-                            <span className="inline-flex items-center rounded-full border border-[var(--cs-primary)]/25 bg-[var(--cs-primary)]/10 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-[var(--cs-primary)]">
-                                Mentor
-                            </span>
-                        )}
+                        {isMentor(discussion) && <MentorBadge />}
                         <span className="text-[var(--cs-text-muted)]" aria-hidden>
                             ·
                         </span>

@@ -14,6 +14,7 @@ import { MENTOR_PENDING_QUERY_KEY } from "../../../../hooks/useMentorPendingQueu
 import MentorContributionDetails from "../components/MentorContributionDetails.tsx";
 import ReviewContributionModal from "../components/ReviewContributionModal.tsx";
 import type { ReviewTopicContributionRequest, TopicContributionResponse } from "../../../../types/topicContribution.types.ts";
+import { showToast } from "../../../../utils/toast.tsx";
 
 export default function MentorTopicContributionDetailsPage() {
     const { contributionId } = useParams<{ contributionId: string }>();
@@ -78,17 +79,21 @@ export default function MentorTopicContributionDetailsPage() {
 
             await reviewTopicContribution(contributionIdNumber, request);
 
-            const updated = await getMentorTopicContributionById(contributionIdNumber);
-
-            setContribution(updated);
             await queryClient.invalidateQueries({
                 queryKey: MENTOR_PENDING_QUERY_KEY,
             });
+
             setModalOpen(false);
 
-            setSuccessMessage(
-                request.status === 2 ? "Contribution approved successfully." : "Contribution rejected."
-            );
+            const message =
+                request.status === 2
+                    ? "Contribution approved successfully."
+                    : "Contribution rejected.";
+
+            setSuccessMessage(message);
+            showToast.success(message);
+
+            navigate("/mentor/contributions");
         } catch {
             setError("Unable to review the contribution.");
         } finally {
@@ -143,16 +148,31 @@ export default function MentorTopicContributionDetailsPage() {
     return (
         <div className="content-studio-theme flex h-full min-h-0 flex-col">
             <div className="shrink-0 border-b border-[var(--cs-border)] px-7 py-5">
-                <Breadcrumb
-                    items={[
-                        { label: "Mentor" },
-                        {
-                            label: "Review Queue",
-                            onClick: () => navigate("/mentor/contributions"),
-                        },
-                        { label: contribution.title },
-                    ]}
-                />
+                <div className="flex flex-wrap items-center gap-3">
+                    <button
+                        type="button"
+                        onClick={() => navigate("/mentor/contributions")}
+                        aria-label="Back to contributions"
+                        className="
+                            flex h-8 w-8 shrink-0 items-center justify-center rounded-[var(--cs-radius-control)]
+                            border border-[var(--cs-border)] text-[var(--cs-text-secondary)]
+                            transition hover:border-[var(--cs-accent-border)] hover:text-[var(--cs-accent)]
+                        "
+                    >
+                        <ArrowLeft size={15} />
+                    </button>
+
+                    <Breadcrumb
+                        items={[
+                            { label: "Mentor" },
+                            {
+                                label: "Review Queue",
+                                onClick: () => navigate("/mentor/contributions"),
+                            },
+                            { label: contribution.title },
+                        ]}
+                    />
+                </div>
 
                 <div className="mt-4 flex flex-wrap items-center justify-between gap-4">
                     <div>
@@ -165,26 +185,15 @@ export default function MentorTopicContributionDetailsPage() {
                         </p>
                     </div>
 
-                    <div className="flex items-center gap-3">
+                    {canReview && (
                         <Button
-                            variant="secondary"
                             size="sm"
-                            icon={<ArrowLeft size={14} />}
-                            onClick={() => navigate("/mentor/contributions")}
+                            icon={<ClipboardCheck size={14} />}
+                            onClick={() => setModalOpen(true)}
                         >
-                            Back
+                            Review Contribution
                         </Button>
-
-                        {canReview && (
-                            <Button
-                                size="sm"
-                                icon={<ClipboardCheck size={14} />}
-                                onClick={() => setModalOpen(true)}
-                            >
-                                Review Contribution
-                            </Button>
-                        )}
-                    </div>
+                    )}
                 </div>
 
                 {successMessage && (
@@ -205,7 +214,7 @@ export default function MentorTopicContributionDetailsPage() {
             </div>
 
             <div className="min-h-0 flex-1 overflow-y-auto p-7">
-                <div className="mx-auto max-w-4xl">
+                <div className="mx-auto max-w-5xl">
                     <MentorContributionDetails contribution={contribution} />
                 </div>
             </div>

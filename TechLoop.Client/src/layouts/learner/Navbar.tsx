@@ -1,4 +1,4 @@
-import { Menu, Search, Bell, ChevronDown } from "lucide-react";
+import { Menu, Search, ChevronDown } from "lucide-react";
 
 interface NavbarProps {
     hidden?: boolean;
@@ -104,34 +104,6 @@ ${
 
                 {/* RIGHT */}
                 <div className="flex items-center gap-3">
-
-                    {/* Notifications */}
-                    <button
-                        type="button"
-                        className="
-                            relative
-                            rounded-xl
-                            p-2
-                            text-slate-400
-                            transition
-                            hover:bg-white/10
-                            hover:text-white
-                        "
-                    >
-                        <Bell size={20} />
-
-                        <span
-                            className="
-                                absolute
-                                right-2
-                                top-2
-                                h-2
-                                w-2
-                                rounded-full
-                                bg-[#17D4C3]
-                            "
-                        />
-                    </button>
 
                     {/* User */}
                     <button
