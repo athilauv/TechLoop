@@ -87,7 +87,7 @@ public sealed class QuestionRepository : IQuestionRepository
 
     public async Task<int> UpdateAsync(Question question, bool shiftPositions, CancellationToken cancellationToken)
     {
-        const string sql = @"CALL public.sp_update_question(@Id, @SubTopicId, CAST(@QuestionType AS smallint), @Slug, @Title, @Description, @ImageUrl, @Mark, @Hint, @Explanation, @TimeLimitSeconds, @MemoryLimitMb, CAST(@Difficulty AS smallint), @Position, @UpdatedBy, @UpdatedAt, @ShiftPositions);";
+        const string sql = @"CALL sp_update_question(@Id, @SubTopicId, @QuestionType, @Slug, @Title, @Description, @ImageUrl, @Mark, @Hint, @Explanation, @TimeLimitSeconds, @MemoryLimitMb, @Difficulty, @Position, @UpdatedBy, @UpdatedAt, @ShiftPositions);";
         using var connection = _context.CreateConnection();
         await connection.ExecuteAsync(new CommandDefinition(
             sql,

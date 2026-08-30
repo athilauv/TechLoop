@@ -1,16 +1,21 @@
 export const validateCodingTemplate = (
     technologyId: number,
     starterCode: string,
-    executionCode: string,
+    executionCode?: string | null,
     solutionCode?: string | null,
 ): string | null => {
     if (technologyId <= 0) return "Technology is required.";
     if (!starterCode.trim()) return "Starter code is required.";
-    if (!executionCode.trim()) return "Execution code is required.";
-    if (!executionCode.includes("{{USER_CODE}}")) return "Execution code must contain {{USER_CODE}}.";
     if (starterCode.length > 50000) return "Starter code cannot exceed 50000 characters.";
-    if (executionCode.length > 50000) return "Execution code cannot exceed 50000 characters.";
-    if (solutionCode && solutionCode.trim() && solutionCode.length > 50000) return "Solution code cannot exceed 50000 characters.";
+    if (executionCode && executionCode.length > 50000) return "Execution code cannot exceed 50000 characters.";
+    if (
+        solutionCode &&
+        solutionCode.trim() &&
+        solutionCode.length > 50000
+    ) {
+        return "Solution code cannot exceed 50000 characters.";
+    }
+
     return null;
 };
 

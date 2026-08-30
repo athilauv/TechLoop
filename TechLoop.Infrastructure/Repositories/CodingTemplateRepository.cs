@@ -28,14 +28,14 @@ public sealed class CodingTemplateRepository : ICodingTemplateRepository
 
     public async Task<int> CreateAsync(CodingTemplate template, CancellationToken cancellationToken)
     {
-        const string sql = @"SELECT public.fn_create_coding_template(@QuestionId,@TechnologyId,@StarterCode,@ExecutionCode,@SolutionCode,@CreatedBy,CAST(@CreatedAt AS timestamptz));";
+        const string sql = @"SELECT fn_create_coding_template(@QuestionId, @TechnologyId, @StarterCode, @ExecutionCode, @SolutionCode, @CreatedBy, @CreatedAt);";
         using var connection = _context.CreateConnection();
         return await connection.ExecuteScalarAsync<int>(new CommandDefinition(sql, template, cancellationToken: cancellationToken));
     }
 
     public async Task<int> UpdateAsync(CodingTemplate template, CancellationToken cancellationToken)
     {
-        const string sql = @"CALL public.sp_update_coding_template(@Id, @TechnologyId, @StarterCode, @ExecutionCode, @SolutionCode, @UpdatedBy, CAST(@UpdatedAt AS timestamptz));";
+        const string sql = @"CALL sp_update_coding_template(@Id, @TechnologyId, @StarterCode, @ExecutionCode, @SolutionCode, @UpdatedBy, @UpdatedAt);";
         using var connection = _context.CreateConnection();
         return await connection.ExecuteAsync(new CommandDefinition(sql, template, cancellationToken: cancellationToken));
     }

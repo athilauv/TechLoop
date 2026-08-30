@@ -52,11 +52,8 @@ export default function RecentActivity({
                 </div>
             ) : (
                 <div className="divide-y divide-[#1e3254]">
-                    {recentActivities.map((activity) => (
-                        <div
-                            key={activity.activityDate}
-                            className="flex items-center justify-between px-5 py-4"
-                        >
+                    {recentActivities.map((activity, index) => (
+                        <div key={`${activity.activityDate}-${activity.totalAttempts}-${activity.successfulAttempts}-${activity.failedAttempts}-${index}`} className="flex items-center justify-between px-5 py-4">
                             <div className="flex items-center gap-3">
                                 <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-[#17D4C3]/15">
                                     <Activity

@@ -1,4 +1,4 @@
-using MediatR;
+﻿using MediatR;
 using TechLoop.Application.Features.Coding.DTOs;
 
 namespace TechLoop.Application.Features.Coding.Commands.UpdateCodingTemplate;
@@ -10,7 +10,6 @@ public sealed record UpdateCodingTemplateCommand : IRequest<UpdateCodingTemplate
     public int TechnologyId { get; init; }
 
     public string StarterCode { get; init; } = string.Empty;
-
     public string? ExecutionCode { get; init; }
 
     public string? SolutionCode { get; init; }

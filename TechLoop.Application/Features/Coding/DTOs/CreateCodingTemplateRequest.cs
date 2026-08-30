@@ -1,4 +1,4 @@
-namespace TechLoop.Application.Features.Coding.DTOs;
+﻿namespace TechLoop.Application.Features.Coding.DTOs;
 
 public sealed class CreateCodingTemplateRequest
 {

@@ -1,27 +1,13 @@
-import { Plus, TestTube2 } from "lucide-react";
+import {MessageSquarePlus, TestTube2} from "lucide-react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
-
 import EmptyState from "../../../../../shared/EmptyState";
 import LoadingSpinner from "../../../../../shared/LoadingSpinner";
 import Button from "../../../../../shared/Button.tsx";
-
-import {
-    createTestCase,
-    deleteTestCase,
-    getTestCasesByQuestion,
-    updateTestCase,
-} from "../../../../../api/mentorCoding.api.ts";
-
+import {createTestCase, deleteTestCase, getTestCasesByQuestion, updateTestCase } from "../../../../../api/mentorCoding.api.ts";
 import { getErrorMessage } from "../../../../../utils/error.utils.ts";
 import { showToast } from "../../../../../utils/toast.tsx";
-
-import type {
-    CreateTestCaseRequest,
-    MentorTestCase,
-    UpdateTestCaseRequest,
-} from "../../../../../types/question.types.ts";
-
+import type { CreateTestCaseRequest, MentorTestCase, UpdateTestCaseRequest } from "../../../../../types/question.types.ts";
 import TestCaseTable from "./TestCaseTable";
 import TestCaseForm from "./TestCaseForm";
 import Drawer from "../shared/Drawer";
@@ -32,7 +18,6 @@ interface TestCasesSectionProps {
 
 const TestCasesSection = ({ questionId }: TestCasesSectionProps) => {
     const queryClient = useQueryClient();
-
     const [drawerOpen, setDrawerOpen] = useState(false);
     const [editingTestCase, setEditingTestCase] = useState<MentorTestCase | null>(null);
     const [submitting, setSubmitting] = useState(false);
@@ -50,31 +35,16 @@ const TestCasesSection = ({ questionId }: TestCasesSectionProps) => {
     });
 
     const sortedTestCases = [...testCases].sort((a, b) => a.position - b.position);
-
-    const nextPosition =
-        sortedTestCases.length > 0
-            ? Math.max(...sortedTestCases.map((testCase) => testCase.position)) + 1
-            : 1;
-
-    const closeDrawer = () => {
-        setDrawerOpen(false);
-        setEditingTestCase(null);
-    };
-
-    const openCreate = () => {
-        setEditingTestCase(null);
-        setDrawerOpen(true);
-    };
-
+    const nextPosition = sortedTestCases.length > 0 ? Math.max(...sortedTestCases.map((testCase) => testCase.position)) + 1 : 1;
+    const closeDrawer = () => {setDrawerOpen(false);setEditingTestCase(null);};
+    const openCreate = () => {setEditingTestCase(null);setDrawerOpen(true);};
     const openEdit = (testCase: MentorTestCase) => {
         setEditingTestCase(testCase);
         setDrawerOpen(true);
     };
 
     const invalidateTestCases = async () => {
-        await queryClient.invalidateQueries({
-            queryKey: ["mentor-test-cases", questionId],
-        });
+        await queryClient.invalidateQueries({queryKey: ["mentor-test-cases", questionId],});
     };
 
     const handleSubmit = async (request: CreateTestCaseRequest | UpdateTestCaseRequest) => {
@@ -148,8 +118,8 @@ const TestCasesSection = ({ questionId }: TestCasesSectionProps) => {
     return (
         <div className="py-6">
             <div className="flex justify-end">
-                <Button type="button" onClick={openCreate} disabled={submitting}>
-                    <Plus size={16} className="mr-1.5 inline" />
+                <Button type="button" onClick={openCreate} disabled={submitting}className="inline-flex shrink-0 items-center gap-2 rounded-lg bg-[var(--cs-primary)] px-4 py-2.5 text-sm font-semibold text-[var(--cs-primary-contrast)] transition-colors duration-150 hover:bg-[var(--cs-primary-hover,var(--cs-primary))] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--cs-primary)]/40">
+                    <MessageSquarePlus size={16} />
                     Add Test Case
                 </Button>
             </div>

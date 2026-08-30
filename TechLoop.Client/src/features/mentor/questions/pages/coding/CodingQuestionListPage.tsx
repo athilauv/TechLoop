@@ -1,4 +1,4 @@
-import { ArrowLeft, Code2, Plus } from "lucide-react";
+import { Code2, Plus } from "lucide-react";
 import { useMemo, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
@@ -104,7 +104,9 @@ const CodingQuestionListPage = () => {
                         <h1 className="text-2xl font-bold text-[var(--cs-text)]">
                             Coding Questions
                         </h1>
-
+                        <p className="mt-1 text-sm text-[var(--cs-text-muted)]">
+                            Create and manage programming questions.
+                        </p>
                     </div>
 
                     <Button

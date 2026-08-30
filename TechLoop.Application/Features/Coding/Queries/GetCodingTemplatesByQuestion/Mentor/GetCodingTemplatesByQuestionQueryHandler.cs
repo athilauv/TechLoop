@@ -29,6 +29,7 @@ public sealed class GetCodingTemplatesByQuestionQueryHandler : IRequestHandler<G
             QuestionId = x.QuestionId,
             TechnologyId = x.TechnologyId,
             StarterCode = x.StarterCode,
+            ExecutionCode = x.ExecutionCode,
             SolutionCode = x.SolutionCode,
             CreatedBy = x.CreatedBy,
             CreatedAt = x.CreatedAt,

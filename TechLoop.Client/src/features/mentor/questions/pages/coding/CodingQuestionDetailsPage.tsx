@@ -1,5 +1,5 @@
-import { useEffect, useState } from "react";
-import { ArrowLeft, Code2, MessageSquarePlus } from "lucide-react";
+import { useState } from "react";
+import { Code2, MessageSquarePlus } from "lucide-react";
 
 import {
     useQuery,
@@ -60,7 +60,6 @@ import {
 import QuestionDetailHeader from "../../components/question-details/QuestionDetailHeader.tsx";
 import QuestionTabs from "../../components/question-details/QuestionTabs.tsx";
 import OverviewTab from "../../components/question-details/OverviewTab.tsx";
-import DescriptionTab from "../../components/question-details/DescriptionTab.tsx";
 import CodingTemplatesSection from "../../components/coding/CodingTemplatesSection.tsx";
 import TestCasesSection from "../../components/coding/TestCasesSection.tsx";
 import DiscussionList from "../../../../common/Discussion/components/DiscussionList.tsx";
@@ -71,10 +70,6 @@ const TABS = [
     {
         key: "overview",
         label: "Overview",
-    },
-    {
-        key: "description",
-        label: "Description",
     },
     {
         key: "templates",
@@ -96,17 +91,21 @@ const CodingQuestionDetailsPage = () => {
     const navigate = useNavigate();
     const [searchParams] = useSearchParams();
 
-    const queryClient =
-        useQueryClient();
+    const queryClient = useQueryClient();
 
-    const currentUserId =
-        useCurrentUserId();
+    const currentUserId = useCurrentUserId();
 
     const requestedTab = searchParams.get("tab");
-    const validInitialTabs = new Set(TABS.map((tab) => tab.key));
-    const initialTab = requestedTab && validInitialTabs.has(requestedTab)
-        ? requestedTab
-        : "overview";
+
+    const validInitialTabs = new Set(
+        TABS.map((tab) => tab.key),
+    );
+
+    const initialTab =
+        requestedTab &&
+        validInitialTabs.has(requestedTab)
+            ? requestedTab
+            : "overview";
 
     const [activeTab, setActiveTab] =
         useState(initialTab);
@@ -118,10 +117,8 @@ const CodingQuestionDetailsPage = () => {
         useState(false);
 
     const questionSlug = slug ?? "";
-    const validQuestionSlug = Boolean(questionSlug.trim());
-    const [resolvedQuestionId, setResolvedQuestionId] = useState<number>(0);
-    const questionId = resolvedQuestionId;
-
+    const validQuestionSlug =
+        Boolean(questionSlug.trim());
 
     const {
         data: question,
@@ -129,15 +126,20 @@ const CodingQuestionDetailsPage = () => {
         isError,
         refetch,
     } = useQuery<MentorQuestion>({
-        queryKey: ["mentor-question", questionSlug],
-        queryFn: () => getMentorQuestionBySlug(questionSlug),
+        queryKey: [
+            "mentor-question",
+            questionSlug,
+        ],
+        queryFn: () =>
+            getMentorQuestionBySlug(questionSlug),
         enabled: validQuestionSlug,
     });
 
-    useEffect(() => {
-        if (question?.id) setResolvedQuestionId(question.id);
-    }, [question?.id]);
-
+    /*
+     * question.id is already available from React Query.
+     * No extra state or useEffect is required.
+     */
+    const questionId = question?.id ?? 0;
 
     const {
         data: discussions = [],
@@ -148,12 +150,10 @@ const CodingQuestionDetailsPage = () => {
             "mentor-discussions",
             questionId,
         ],
-        queryFn:
-        getMentorDiscussions,
+        queryFn: getMentorDiscussions,
         enabled:
             questionId > 0 &&
-            activeTab ===
-            "discussion",
+            activeTab === "discussion",
     });
 
     const questionDiscussions =
@@ -163,18 +163,14 @@ const CodingQuestionDetailsPage = () => {
                 questionId,
         );
 
-
     const invalidateDiscussions =
         async () => {
-            await queryClient.invalidateQueries(
-                {
-                    queryKey: [
-                        "mentor-discussions",
-                    ],
-                },
-            );
+            await queryClient.invalidateQueries({
+                queryKey: [
+                    "mentor-discussions",
+                ],
+            });
         };
-
 
     const handleCreateDiscussion =
         async (
@@ -192,9 +188,7 @@ const CodingQuestionDetailsPage = () => {
                     "Discussion created successfully.",
                 );
 
-                setCreatingDiscussion(
-                    false,
-                );
+                setCreatingDiscussion(false);
 
                 await invalidateDiscussions();
             } catch (error) {
@@ -208,7 +202,6 @@ const CodingQuestionDetailsPage = () => {
                 throw error;
             }
         };
-
 
     const handleEditDiscussion =
         async (
@@ -239,7 +232,6 @@ const CodingQuestionDetailsPage = () => {
                 throw error;
             }
         };
-
 
     const handleDeleteDiscussion =
         async (
@@ -282,7 +274,6 @@ const CodingQuestionDetailsPage = () => {
             );
         };
 
-
     const handleCreateComment =
         async (
             discussion: Discussion,
@@ -293,8 +284,7 @@ const CodingQuestionDetailsPage = () => {
                     discussion.id,
                     {
                         content,
-                        parentCommentId:
-                            null,
+                        parentCommentId: null,
                     },
                 );
 
@@ -310,7 +300,6 @@ const CodingQuestionDetailsPage = () => {
                 throw error;
             }
         };
-
 
     const handleReplyComment =
         async (
@@ -340,7 +329,6 @@ const CodingQuestionDetailsPage = () => {
                 throw error;
             }
         };
-
 
     const handleEditComment =
         async (
@@ -372,7 +360,6 @@ const CodingQuestionDetailsPage = () => {
                 throw error;
             }
         };
-
 
     const handleDeleteComment =
         async (
@@ -408,7 +395,6 @@ const CodingQuestionDetailsPage = () => {
             }
         };
 
-
     const handleTogglePin =
         async (
             discussion: Discussion,
@@ -442,7 +428,6 @@ const CodingQuestionDetailsPage = () => {
                 );
             }
         };
-
 
     const handleBack = () => {
         navigate(
@@ -490,9 +475,12 @@ const CodingQuestionDetailsPage = () => {
                             },
                         );
 
-                        await queryClient.invalidateQueries({
-                            queryKey: MENTOR_PENDING_QUERY_KEY,
-                        });
+                        await queryClient.invalidateQueries(
+                            {
+                                queryKey:
+                                MENTOR_PENDING_QUERY_KEY,
+                            },
+                        );
 
                         showToast.success(
                             "Coding question published successfully.",
@@ -505,9 +493,7 @@ const CodingQuestionDetailsPage = () => {
                             ),
                         );
                     } finally {
-                        setPublishing(
-                            false,
-                        );
+                        setPublishing(false);
                     }
                 })();
             },
@@ -519,34 +505,29 @@ const CodingQuestionDetailsPage = () => {
     const handleDelete = () => {
         if (!question) return;
 
-        showToast.confirm(
-            "Delete Coding Question",
-            "Are you sure you want to delete this coding question? This action cannot be undone.",
+        showToast.confirm("Delete Coding Question", "Are you sure you want to delete this coding question? This action cannot be undone.",
             () => {
                 void (async () => {
                     try {
-                        await deleteQuestion(question.id);
-
-                        showToast.success(
-                            "Coding question deleted successfully.",
-                        );
-
+                        await deleteQuestion(question.id,);
+                        showToast.success("Coding question deleted successfully.",);
                         queryClient.removeQueries({
-                            queryKey: ["mentor-question", questionSlug],
+                            queryKey: ["mentor-question", questionSlug,],
                         });
 
                         try {
-                            await queryClient.invalidateQueries({
-                                queryKey: ["mentor-questions"],
-                            });
-                        } catch (refreshError) {
-                            console.error(
-                                "Failed to refresh mentor questions after deletion:",
-                                refreshError,
+                            await queryClient.invalidateQueries(
+                                {
+                                    queryKey: ["mentor-questions",],
+                                },
                             );
+                        } catch (refreshError) {
+                            console.error("Failed to refresh mentor questions after deletion:", refreshError,);
                         }
 
-                        navigate("/mentor/questions/coding");
+                        navigate(
+                            "/mentor/questions/coding",
+                        );
                     } catch (error) {
                         showToast.error(
                             getErrorMessage(
@@ -561,7 +542,6 @@ const CodingQuestionDetailsPage = () => {
             "Delete",
         );
     };
-
 
     if (!validQuestionSlug) {
         return (
@@ -588,21 +568,13 @@ const CodingQuestionDetailsPage = () => {
                 title="Unable to Load Question"
                 message="The coding question could not be loaded."
                 actionLabel="Retry"
-                onAction={() =>
-                    void refetch()
-                }
+                onAction={() => void refetch()}
                 secondaryActionLabel="Back to Coding Questions"
-                onSecondaryAction={
-                    handleBack
-                }
-            />
+                onSecondaryAction={handleBack}/>
         );
     }
 
-    if (
-        question.questionType !==
-        QuestionType.Coding
-    ) {
+    if (question.questionType !== QuestionType.Coding) {
         return (
             <PageMessage
                 title="Invalid Question Type"
@@ -615,34 +587,24 @@ const CodingQuestionDetailsPage = () => {
 
     return (
         <div className="min-h-full px-6 py-6">
-            <div className="mb-4 flex items-center gap-3">
-                <button type="button" onClick={handleBack} aria-label="Back to coding questions" className="flex h-8 w-8 items-center justify-center rounded-lg border border-[var(--cs-border)] text-[var(--cs-text-secondary)] transition hover:border-[var(--cs-accent-border)] hover:text-[var(--cs-accent)]">
-                    <ArrowLeft size={15} />
-                </button>
-                <Breadcrumb
+            <Breadcrumb
                 items={[
                     {
                         label: "Questions",
                         onClick: () =>
-                            navigate(
-                                "/mentor/questions",
-                            ),
+                            navigate("/mentor/questions",),
                     },
                     {
-                        label:
-                            "Coding Questions",
+                        label: "Coding Questions",
                         onClick: () =>
-                            navigate(
-                                "/mentor/questions/coding",
-                            ),
+                            navigate("/mentor/questions/coding",),
                     },
                     {
                         label:
                         question.title,
                     },
                 ]}
-                />
-            </div>
+            />
 
             <div className="mx-auto mt-6 max-w-5xl overflow-hidden rounded-2xl bg-[var(--cs-surface)] ring-1 ring-inset ring-[var(--cs-border)]/60">
                 <section className="border-b border-[var(--cs-border)]/60 p-6">
@@ -650,57 +612,16 @@ const CodingQuestionDetailsPage = () => {
                         question={question}
                         onEdit={handleEdit}
                         onDelete={handleDelete}
-                        onPublish={
-                            handlePublish
-                        }
-                        publishing={
-                            publishing
-                        }
-                    />
+                        onPublish={handlePublish}
+                        publishing={publishing}/>
                 </section>
 
                 <div className="px-6">
-                    <QuestionTabs
-                        tabs={TABS}
-                        active={activeTab}
-                        onChange={
-                            setActiveTab
-                        }
-                    />
-
-                    {activeTab ===
-                        "overview" && (
-                            <OverviewTab
-                                question={
-                                    question
-                                }
-                            />
-                        )}
-
-                    {activeTab ===
-                        "description" && (
-                            <DescriptionTab />
-                        )}
-
-                    {activeTab ===
-                        "templates" && (
-                            <CodingTemplatesSection
-                                questionId={
-                                    question.id
-                                }
-                            />
-                        )}
-
-                    {activeTab ===
-                        "test-cases" && (
-                            <TestCasesSection
-                                questionId={
-                                    question.id
-                                }
-                            />
-                        )}
-                    {activeTab ===
-                        "discussion" && (
+                    <QuestionTabs tabs={TABS} active={activeTab} onChange={setActiveTab}/>
+                    {activeTab === "overview" && (<OverviewTab question={question}/>)}
+                    {activeTab === "templates" && (<CodingTemplatesSection questionId={question.id}/>)}
+                    {activeTab === "test-cases" && (<TestCasesSection questionId={question.id}/>)}
+                    {activeTab === "discussion" && (
                             <div className="py-6">
                                 <div className="mb-5 flex items-start justify-between gap-4">
                                     <div>
@@ -746,73 +667,30 @@ const CodingQuestionDetailsPage = () => {
                                 )}
 
                                 <DiscussionList
-                                    discussions={
-                                        questionDiscussions
-                                    }
-                                    isLoading={
-                                        discussionsLoading
-                                    }
-                                    isError={
-                                        discussionsError
-                                    }
-                                    currentUserId={
-                                        currentUserId
-                                    }
-                                    fetchComments={
-                                        getDiscussionComments
-                                    }
-
-
-                                    onCreateComment={
-                                        handleCreateComment
-                                    }
-
-                                    onReplyComment={
-                                        handleReplyComment
-                                    }
-
-                                    onEditComment={
-                                        handleEditComment
-                                    }
-
-                                    onDeleteComment={
-                                        handleDeleteComment
-                                    }
-
-                                    onEditDiscussion={
-                                        handleEditDiscussion
-                                    }
-
-                                    onDeleteDiscussion={
-                                        handleDeleteDiscussion
-                                    }
-
-                                    renderExtraAction={(
-                                        discussion,
-                                    ) => (
+                                    discussions={questionDiscussions}
+                                    isLoading={discussionsLoading}
+                                    isError={discussionsError}
+                                    currentUserId={currentUserId}
+                                    fetchComments={getDiscussionComments}
+                                    onCreateComment={handleCreateComment}
+                                    onReplyComment={handleReplyComment}
+                                    onEditComment={handleEditComment}
+                                    onDeleteComment={handleDeleteComment}
+                                    onEditDiscussion={handleEditDiscussion}
+                                    onDeleteDiscussion={handleDeleteDiscussion}
+                                    renderExtraAction={(discussion,) => (
                                         <PinToggleButton
-                                            isPinned={
-                                                discussion.isPinned
-                                            }
-                                            onToggle={() =>
-                                                void handleTogglePin(
-                                                    discussion,
-                                                )
-                                            }
+                                            isPinned={discussion.isPinned}
+                                            onToggle={() => void handleTogglePin(discussion,)}
                                         />
                                     )}
-
                                     renderContextSlot={(
                                         discussion,
                                     ) => (
                                         <span className="text-[var(--cs-text-muted)]">
-                                        Question #
-                                            {
-                                                discussion.questionId
-                                            }
+                                        Question #{discussion.questionId}
                                     </span>
                                     )}
-
                                     emptyTitle="No discussions"
                                     emptyDescription="There are no discussions for this coding question yet."
                                 />
@@ -857,10 +735,7 @@ const PageMessage = ({
                 </p>
 
                 <div className="mt-6 flex flex-wrap justify-center gap-2">
-                    <Button
-                        type="button"
-                        onClick={onAction}
-                    >
+                    <Button type="button" onClick={onAction}>
                         {actionLabel}
                     </Button>
 
@@ -869,13 +744,8 @@ const PageMessage = ({
                             <Button
                                 type="button"
                                 variant="secondary"
-                                onClick={
-                                    onSecondaryAction
-                                }
-                            >
-                                {
-                                    secondaryActionLabel
-                                }
+                                onClick={onSecondaryAction}>
+                                {secondaryActionLabel}
                             </Button>
                         )}
                 </div>

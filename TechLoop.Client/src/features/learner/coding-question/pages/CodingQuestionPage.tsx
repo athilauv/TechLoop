@@ -81,7 +81,7 @@ const CodingQuestionPage = () => {
     const [isRunning, setIsRunning] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [submission, setSubmission] = useState<Submission | null>(null);
-   // const id = question?.id ?? 0;
+    //const id = question?.id ?? 0;
     const starterCode = useMemo(
         () => questionDetails?.codingTemplate?.starterCode ?? "",
         [questionDetails],

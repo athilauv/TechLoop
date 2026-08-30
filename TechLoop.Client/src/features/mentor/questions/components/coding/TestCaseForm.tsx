@@ -97,10 +97,8 @@ const TestCaseForm = ({
                 <Button type="button" variant="secondary" onClick={onCancel} disabled={submitting}>
                     Cancel
                 </Button>
-                <Button
-                    type="submit"
-                    disabled={submitting || !input.trim() || !expectedOutput.trim()}
-                >
+                <Button type="submit"
+                    disabled={submitting || !input.trim() || !expectedOutput.trim()} className="inline-flex shrink-0 items-center gap-2 rounded-lg bg-[var(--cs-primary)] px-4 py-2.5 text-sm font-semibold text-[var(--cs-primary-contrast)] transition-colors duration-150 hover:bg-[var(--cs-primary-hover,var(--cs-primary))] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--cs-primary)]/40">
                     {submitting ? "Saving..." : testCase ? "Update Test Case" : "Add Test Case"}
                 </Button>
             </div>

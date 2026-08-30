@@ -534,20 +534,18 @@ export default function MentorPendingPage() {
                 "Publish",
             );
         });
+
         if (!confirmed) return false;
 
         try {
             setPublishingId(`question-${questionId}`);
             await publishQuestion(questionId);
-            await queryClient.invalidateQueries({ queryKey: MENTOR_PENDING_QUERY_KEY });
+            await queryClient.invalidateQueries({queryKey: MENTOR_PENDING_QUERY_KEY,});
             showToast.success("Question published successfully.");
-
-            const publishedQuestion = data?.unpublishedQuestions.find((question) => question.id === questionId);
-            if (publishedQuestion?.questionType === QuestionType.Coding && publishedQuestion.slug) navigate(`/mentor/questions/coding/${publishedQuestion.slug}`);
 
             return true;
         } catch (error) {
-            showToast.error(getErrorMessage(error, "Unable to publish question."));
+            showToast.error(getErrorMessage(error, "Unable to publish question."),);
             return false;
         } finally {
             setPublishingId(null);

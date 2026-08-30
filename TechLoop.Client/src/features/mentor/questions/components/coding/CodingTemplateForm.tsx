@@ -48,7 +48,7 @@ const CodingTemplateForm = ({
         const validationError = validateCodingTemplate(
             technologyId,
             trimmedStarterCode,
-            trimmedExecutionCode,
+            trimmedExecutionCode || null,
             trimmedSolutionCode || null,
         );
 
@@ -60,7 +60,7 @@ const CodingTemplateForm = ({
         await onSubmit({
             technologyId,
             starterCode: trimmedStarterCode,
-            executionCode: trimmedExecutionCode,
+            executionCode: trimmedExecutionCode || null,
             solutionCode: trimmedSolutionCode || null,
         });
     };
@@ -106,11 +106,10 @@ const CodingTemplateForm = ({
                     id="execution-code"
                     value={executionCode}
                     onChange={(event) => setExecutionCode(event.target.value)}
-                    required
                     maxLength={50000}
-                    rows={12}
+                    rows={10}
                     disabled={submitting}
-                    placeholder="Use {{USER_CODE}} where learner code should be inserted..."
+                    placeholder="Enter execution code..."
                     className="w-full resize-y rounded-lg border border-[var(--cs-border)] bg-[var(--cs-surface)]/45 px-3 py-3 font-mono text-sm text-[var(--cs-text)] outline-none placeholder:text-[var(--cs-text-muted)] focus:border-[var(--cs-primary)] focus:ring-1 focus:ring-[var(--cs-primary)]/30 disabled:cursor-not-allowed disabled:opacity-60"
                 />
             </div>
@@ -135,7 +134,7 @@ const CodingTemplateForm = ({
                 <Button type="button" variant="secondary" onClick={onCancel} disabled={submitting}>
                     Cancel
                 </Button>
-                <Button type="submit" disabled={submitting || technologyId <= 0 || !starterCode.trim() || !executionCode.trim()}>
+                <Button type="submit" disabled={submitting || technologyId <= 0 || !starterCode.trim()} className="inline-flex shrink-0 items-center gap-2 rounded-lg bg-[var(--cs-primary)] px-4 py-2.5 text-sm font-semibold text-[var(--cs-primary-contrast)] transition-colors duration-150 hover:bg-[var(--cs-primary-hover,var(--cs-primary))] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--cs-primary)]/40">
                     {submitting ? "Saving..." : template ? "Update Template" : "Add Template"}
                 </Button>
             </div>

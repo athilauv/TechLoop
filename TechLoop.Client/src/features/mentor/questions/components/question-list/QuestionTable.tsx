@@ -1,11 +1,10 @@
-import { Edit3, Trash2 } from "lucide-react";
+import { Edit3, Eye, Trash2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 import type { MentorQuestion } from "../../../../../types/question.types.ts";
 
 import DifficultyBadge from "../badges/DifficultyBadge";
 import QuestionStatusBadge from "../badges/QuestionStatusBadge";
-import HorizontalScrollArea from "../shared/HorizontalScrollArea";
 
 interface QuestionTableProps {
     questions: MentorQuestion[];
@@ -29,8 +28,7 @@ const QuestionTable = ({
     return (
         <>
             <div className="hidden sm:block">
-                <HorizontalScrollArea>
-                <table className="w-full min-w-[720px] text-left text-sm">
+                <table className="w-full table-fixed text-left text-sm">
                     <thead>
                     <tr className="border-b border-[var(--cs-border)]/70 text-xs uppercase tracking-wide text-[var(--cs-text-muted)]">
                         <th className="px-5 py-3 font-medium">Title</th>
@@ -76,6 +74,14 @@ const QuestionTable = ({
                                     className="flex items-center justify-end gap-1"
                                     onClick={(event) => event.stopPropagation()}
                                 >
+                                    <button
+                                        type="button"
+                                        onClick={() => navigate(getDetailsPath(question))}
+                                        aria-label="View question details"
+                                        className="rounded-lg p-2 text-[var(--cs-text-muted)] transition-colors hover:bg-[var(--cs-surface)] hover:text-[var(--cs-text)]"
+                                    >
+                                        <Eye size={16} />
+                                    </button>
 
                                     <button
                                         type="button"
@@ -102,7 +108,6 @@ const QuestionTable = ({
                     ))}
                     </tbody>
                 </table>
-                </HorizontalScrollArea>
             </div>
 
             <div className="divide-y divide-[var(--cs-border)]/70 sm:hidden">
@@ -123,6 +128,14 @@ const QuestionTable = ({
                                 className="flex shrink-0 items-center gap-1"
                                 onClick={(event) => event.stopPropagation()}
                             >
+                                <button
+                                    type="button"
+                                    onClick={() => navigate(getDetailsPath(question))}
+                                    aria-label="View question details"
+                                    className="rounded-lg p-2 text-[var(--cs-text-muted)] transition-colors hover:bg-[var(--cs-surface)] hover:text-[var(--cs-text)]"
+                                >
+                                    <Eye size={15} />
+                                </button>
 
                                 <button
                                     type="button"

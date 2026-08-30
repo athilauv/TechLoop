@@ -118,7 +118,6 @@ public sealed class QuestionController : ControllerBase
         return Ok(result);
     }
     
-    
     [HttpGet("sub-topic/{subTopicId:int}/mcq")]
     public async Task<IActionResult> GetMcqQuestionBySubTopic(int subTopicId, CancellationToken cancellationToken)
     {

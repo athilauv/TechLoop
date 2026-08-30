@@ -1,4 +1,4 @@
-import { Plus } from "lucide-react";
+import {MessageSquarePlus, } from "lucide-react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 
@@ -194,8 +194,9 @@ const CodingTemplatesSection = ({ questionId }: CodingTemplatesSectionProps) => 
     return (
         <div className="py-6">
             <div className="flex justify-end">
-                <Button type="button" onClick={openCreate} disabled={submitting}>
-                    <Plus size={16} className="mr-1.5 inline" />
+                <Button type="button" onClick={openCreate} disabled={submitting} className="inline-flex shrink-0 items-center gap-2 rounded-lg bg-[var(--cs-primary)] px-4 py-2.5 text-sm font-semibold text-[var(--cs-primary-contrast)] transition-colors duration-150 hover:bg-[var(--cs-primary-hover,var(--cs-primary))] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--cs-primary)]/40"
+                >
+                    <MessageSquarePlus size={16} />
                     Add Template
                 </Button>
             </div>
