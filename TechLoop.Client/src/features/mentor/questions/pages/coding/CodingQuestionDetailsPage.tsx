@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { Code2, MessageSquarePlus } from "lucide-react";
+import { useEffect, useState } from "react";
+import { ArrowLeft, Code2, MessageSquarePlus } from "lucide-react";
 
 import {
     useQuery,
@@ -18,7 +18,7 @@ import LoadingSpinner from "../../../../../shared/LoadingSpinner.tsx";
 
 import {
     deleteQuestion,
-    getMentorQuestionById,
+    getMentorQuestionBySlug,
     publishQuestion,
 } from "../../../../../api/mentorQuestion.api.ts";
 import { MENTOR_PENDING_QUERY_KEY } from "../../../../../hooks/useMentorPendingQueue.ts";
@@ -91,8 +91,7 @@ const TABS = [
 ];
 
 const CodingQuestionDetailsPage = () => {
-    const { id } =
-        useParams<{ id: string }>();
+    const { slug } = useParams<{ slug: string }>();
 
     const navigate = useNavigate();
     const [searchParams] = useSearchParams();
@@ -118,15 +117,11 @@ const CodingQuestionDetailsPage = () => {
     const [creatingDiscussion, setCreatingDiscussion] =
         useState(false);
 
-    const questionId = Number(id);
+    const questionSlug = slug ?? "";
+    const validQuestionSlug = Boolean(questionSlug.trim());
+    const [resolvedQuestionId, setResolvedQuestionId] = useState<number>(0);
+    const questionId = resolvedQuestionId;
 
-    const validQuestionId =
-        Number.isInteger(questionId) &&
-        questionId > 0;
-
-    // ============================================================
-    // QUESTION
-    // ============================================================
 
     const {
         data: question,
@@ -134,20 +129,15 @@ const CodingQuestionDetailsPage = () => {
         isError,
         refetch,
     } = useQuery<MentorQuestion>({
-        queryKey: [
-            "mentor-question",
-            questionId,
-        ],
-        queryFn: () =>
-            getMentorQuestionById(
-                questionId,
-            ),
-        enabled: validQuestionId,
+        queryKey: ["mentor-question", questionSlug],
+        queryFn: () => getMentorQuestionBySlug(questionSlug),
+        enabled: validQuestionSlug,
     });
 
-    // ============================================================
-    // DISCUSSIONS
-    // ============================================================
+    useEffect(() => {
+        if (question?.id) setResolvedQuestionId(question.id);
+    }, [question?.id]);
+
 
     const {
         data: discussions = [],
@@ -161,7 +151,7 @@ const CodingQuestionDetailsPage = () => {
         queryFn:
         getMentorDiscussions,
         enabled:
-            validQuestionId &&
+            questionId > 0 &&
             activeTab ===
             "discussion",
     });
@@ -173,9 +163,6 @@ const CodingQuestionDetailsPage = () => {
                 questionId,
         );
 
-    // ============================================================
-    // INVALIDATE
-    // ============================================================
 
     const invalidateDiscussions =
         async () => {
@@ -188,9 +175,6 @@ const CodingQuestionDetailsPage = () => {
             );
         };
 
-    // ============================================================
-    // CREATE DISCUSSION
-    // ============================================================
 
     const handleCreateDiscussion =
         async (
@@ -225,9 +209,6 @@ const CodingQuestionDetailsPage = () => {
             }
         };
 
-    // ============================================================
-    // EDIT DISCUSSION
-    // ============================================================
 
     const handleEditDiscussion =
         async (
@@ -259,9 +240,6 @@ const CodingQuestionDetailsPage = () => {
             }
         };
 
-    // ============================================================
-    // DELETE DISCUSSION
-    // ============================================================
 
     const handleDeleteDiscussion =
         async (
@@ -304,9 +282,6 @@ const CodingQuestionDetailsPage = () => {
             );
         };
 
-    // ============================================================
-    // CREATE COMMENT
-    // ============================================================
 
     const handleCreateComment =
         async (
@@ -336,9 +311,6 @@ const CodingQuestionDetailsPage = () => {
             }
         };
 
-    // ============================================================
-    // REPLY
-    // ============================================================
 
     const handleReplyComment =
         async (
@@ -369,9 +341,6 @@ const CodingQuestionDetailsPage = () => {
             }
         };
 
-    // ============================================================
-    // EDIT COMMENT
-    // ============================================================
 
     const handleEditComment =
         async (
@@ -404,9 +373,6 @@ const CodingQuestionDetailsPage = () => {
             }
         };
 
-    // ============================================================
-    // DELETE COMMENT
-    // ============================================================
 
     const handleDeleteComment =
         async (
@@ -442,9 +408,6 @@ const CodingQuestionDetailsPage = () => {
             }
         };
 
-    // ============================================================
-    // PIN / UNPIN
-    // ============================================================
 
     const handleTogglePin =
         async (
@@ -480,9 +443,6 @@ const CodingQuestionDetailsPage = () => {
             }
         };
 
-    // ============================================================
-    // QUESTION ACTIONS
-    // ============================================================
 
     const handleBack = () => {
         navigate(
@@ -493,7 +453,7 @@ const CodingQuestionDetailsPage = () => {
     const handleEdit = () => {
         if (question) {
             navigate(
-                `/mentor/questions/coding/${question.id}/edit`,
+                `/mentor/questions/coding/${question.slug}/edit`,
             );
         }
     };
@@ -517,7 +477,7 @@ const CodingQuestionDetailsPage = () => {
                             {
                                 queryKey: [
                                     "mentor-question",
-                                    question.id,
+                                    questionSlug,
                                 ],
                             },
                         );
@@ -567,15 +527,12 @@ const CodingQuestionDetailsPage = () => {
                     try {
                         await deleteQuestion(question.id);
 
-                        // The DELETE request itself determines success.
-                        // A later query refresh must not turn a successful
-                        // backend mutation into an error toast.
                         showToast.success(
                             "Coding question deleted successfully.",
                         );
 
                         queryClient.removeQueries({
-                            queryKey: ["mentor-question", question.id],
+                            queryKey: ["mentor-question", questionSlug],
                         });
 
                         try {
@@ -605,15 +562,12 @@ const CodingQuestionDetailsPage = () => {
         );
     };
 
-    // ============================================================
-    // INVALID QUESTION
-    // ============================================================
 
-    if (!validQuestionId) {
+    if (!validQuestionSlug) {
         return (
             <PageMessage
                 title="Invalid Question"
-                message="The coding question ID is invalid."
+                message="The coding question slug is invalid."
                 actionLabel="Back to Coding Questions"
                 onAction={handleBack}
             />
@@ -661,7 +615,11 @@ const CodingQuestionDetailsPage = () => {
 
     return (
         <div className="min-h-full px-6 py-6">
-            <Breadcrumb
+            <div className="mb-4 flex items-center gap-3">
+                <button type="button" onClick={handleBack} aria-label="Back to coding questions" className="flex h-8 w-8 items-center justify-center rounded-lg border border-[var(--cs-border)] text-[var(--cs-text-secondary)] transition hover:border-[var(--cs-accent-border)] hover:text-[var(--cs-accent)]">
+                    <ArrowLeft size={15} />
+                </button>
+                <Breadcrumb
                 items={[
                     {
                         label: "Questions",
@@ -683,10 +641,10 @@ const CodingQuestionDetailsPage = () => {
                         question.title,
                     },
                 ]}
-            />
+                />
+            </div>
 
             <div className="mx-auto mt-6 max-w-5xl overflow-hidden rounded-2xl bg-[var(--cs-surface)] ring-1 ring-inset ring-[var(--cs-border)]/60">
-                {/* Question header */}
                 <section className="border-b border-[var(--cs-border)]/60 p-6">
                     <QuestionDetailHeader
                         question={question}
@@ -701,7 +659,6 @@ const CodingQuestionDetailsPage = () => {
                     />
                 </section>
 
-                {/* Tabs */}
                 <div className="px-6">
                     <QuestionTabs
                         tabs={TABS}
@@ -742,11 +699,6 @@ const CodingQuestionDetailsPage = () => {
                                 }
                             />
                         )}
-
-                    {/* ==================================================
-                        DISCUSSION
-                    ================================================== */}
-
                     {activeTab ===
                         "discussion" && (
                             <div className="py-6">
@@ -772,7 +724,6 @@ const CodingQuestionDetailsPage = () => {
                                     )}
                                 </div>
 
-                                {/* Create discussion */}
                                 {creatingDiscussion && (
                                     <div className="mb-6 rounded-xl border border-[var(--cs-border)]/60 bg-[var(--cs-surface)]/50 p-5 backdrop-blur-sm">
                                         <h3 className="mb-3 text-sm font-semibold text-[var(--cs-text)]">

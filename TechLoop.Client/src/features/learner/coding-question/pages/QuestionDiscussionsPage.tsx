@@ -17,19 +17,26 @@ import {
 } from "../../../../api/discussion.api.ts";
 import type { Discussion, DiscussionComment } from "../../../../types/discussion.types.ts";
 import { useCurrentUserId } from "../../../../hooks/useCurrentUserId.ts";
+import { getQuestionBySlug } from "../../../../api/question.api.ts";
 import DiscussionList from "../../../common/Discussion/components/DiscussionList.tsx";
 import DiscussionForm from "../../../common/Discussion/components/DiscussionForm.tsx";
 
 const QuestionDiscussionsPage = () => {
-    const { questionId } = useParams<{ questionId: string }>();
+    const { questionSlug } = useParams<{ questionSlug: string }>();
     const navigate = useNavigate();
     const queryClient = useQueryClient();
     const currentUserId = useCurrentUserId();
 
     const [creating, setCreating] = useState(false);
 
-    const parsedQuestionId = Number(questionId);
-    const validQuestionId = Number.isInteger(parsedQuestionId) && parsedQuestionId > 0;
+    const validQuestionSlug = Boolean(questionSlug?.trim());
+    const { data: question } = useQuery({
+        queryKey: ["question", questionSlug],
+        queryFn: () => getQuestionBySlug(questionSlug!),
+        enabled: validQuestionSlug,
+    });
+    const parsedQuestionId = question?.id ?? 0;
+    const validQuestionId = parsedQuestionId > 0;
 
     const {
         data: discussions = [],

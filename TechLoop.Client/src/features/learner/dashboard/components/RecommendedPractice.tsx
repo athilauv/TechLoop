@@ -68,7 +68,7 @@ export default function RecommendedPractice() {
                     {questions.map((question) => (
                         <Link
                             key={question.id}
-                            to={`/learner/coding-questions/${question.id}`}
+                            to={`/learner/coding-questions/${question.slug}`}
                             className="group flex items-center justify-between rounded-xl border border-[#1e3254] px-4 py-3 no-underline transition-colors hover:border-[#29466d] hover:bg-[#12243b]"
                         >
                             <div className="min-w-0">

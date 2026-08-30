@@ -14,7 +14,6 @@ public class SubmissionRepository : ISubmissionRepository
         _context = context;
     }
 
-    // Checks if the user has already submitted the specified question
     public async Task<bool> ExistsAsync(Guid userId, int questionId, CancellationToken cancellationToken)
     {
         const string sql = @"SELECT fn_submission_exists(@UserId, @QuestionId);";
@@ -28,7 +27,6 @@ public class SubmissionRepository : ISubmissionRepository
                 cancellationToken: cancellationToken));
     }
     
-    // Creates a new submission and returns the generated ID
     public async Task<int> CreateAsync(
         Submission submission,
         CancellationToken cancellationToken)
@@ -77,7 +75,6 @@ public class SubmissionRepository : ISubmissionRepository
     }
     
 
-// Retrieves a submission by its ID
     public async Task<Submission?> GetByIdAsync(int id, CancellationToken cancellationToken)
     {
         const string sql = @"SELECT * FROM fn_get_submission_by_id(@Id);";
@@ -88,7 +85,6 @@ public class SubmissionRepository : ISubmissionRepository
                 cancellationToken: cancellationToken));
     }
     
-    // Retrieves all submissions of the specified user
     public async Task<IEnumerable<Submission>> GetByUserIdAsync(Guid userId, CancellationToken cancellationToken)
     {
         const string sql = @"SELECT * FROM fn_get_user_submissions(@UserId);";
@@ -103,7 +99,6 @@ public class SubmissionRepository : ISubmissionRepository
                 cancellationToken: cancellationToken));
     }
 
-    // Retrieves all submissions for the specified question
     public async Task<IEnumerable<Submission>> GetByQuestionIdAsync(int questionId, CancellationToken cancellationToken)
     {
         const string sql = @"SELECT * FROM fn_get_question_submissions(@QuestionId);";
@@ -117,7 +112,6 @@ public class SubmissionRepository : ISubmissionRepository
                 cancellationToken: cancellationToken));
     }
 
-    // Updates the execution result of the specified submission
     public async Task<int> UpdateResultAsync(Submission submission, CancellationToken cancellationToken)
     {
         const string sql = @"CALL sp_update_submission_result(@Id,@Status,@ExecutionTimeMs,@MemoryUsedMb,@PassedTestCases,@TotalTestCases,@Score,@CompilerOutput,@RuntimeOutput,@AiReview,@JudgeToken);";

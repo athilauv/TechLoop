@@ -14,7 +14,6 @@ public sealed class QuestionRepository : IQuestionRepository
         _context = context;
     }
 
-    // Checks if the specified slug already exists
     public async Task<bool> SlugExistsAsync(string slug, CancellationToken cancellationToken)
     {
         const string sql = @"SELECT fn_question_slug_exists(@Slug);";
@@ -28,7 +27,6 @@ public sealed class QuestionRepository : IQuestionRepository
                 cancellationToken: cancellationToken));
     }
 
-    // Checks if the specified position is already assigned within the subtopic
     public async Task<bool> PositionExistsAsync(int subTopicId, int position, CancellationToken cancellationToken)
     {
         const string sql = @"SELECT fn_question_position_exists(@SubTopicId, @Position);";
@@ -45,7 +43,6 @@ public sealed class QuestionRepository : IQuestionRepository
                 cancellationToken: cancellationToken));
     }
 
-    // Checks if the specified subtopic exists
     public async Task<bool> SubTopicExistsAsync(int subTopicId, CancellationToken cancellationToken)
     {
         const string sql = @"SELECT fn_question_subtopic_exists(@SubTopicId);";
@@ -58,15 +55,13 @@ public sealed class QuestionRepository : IQuestionRepository
                 cancellationToken: cancellationToken));
     }
 
-    // Creates a new question and returns the generated ID
     public async Task<int> CreateAsync(Question question, bool shiftPositions, CancellationToken cancellationToken)
     {
-        const string sql = @"SELECT fn_create_question(@SubTopicId,@QuestionType,@Slug,@Title,@Description,@ImageUrl,@Mark,@Hint,@Explanation,@TimeLimitSeconds,@MemoryLimitMb,@Difficulty,@Position,@CreatedBy,@CreatedAt,@ShiftPositions);";
+        const string sql = @"SELECT fn_create_question(@SubTopicId,CAST(@QuestionType AS smallint),@Slug,@Title,@Description,@ImageUrl,@Mark,@Hint,@Explanation,@TimeLimitSeconds,@MemoryLimitMb,CAST(@Difficulty AS smallint),@Position,@CreatedBy,@CreatedAt,@ShiftPositions);";
         using var connection = _context.CreateConnection();
         return await connection.ExecuteScalarAsync<int>(new CommandDefinition(sql, new { question.SubTopicId, question.QuestionType, question.Slug, question.Title, question.Description, question.ImageUrl, question.Mark, question.Hint, question.Explanation, question.TimeLimitSeconds, question.MemoryLimitMb, question.Difficulty, question.Position, question.CreatedBy, question.CreatedAt, ShiftPositions = shiftPositions }, cancellationToken: cancellationToken));
     }
 
-    // Retrieves a question by its ID
     public async Task<Question?> GetByIdAsync(int id, CancellationToken cancellationToken)
     {
         const string sql = @"SELECT * FROM fn_get_question_by_id(@Id);";
@@ -79,10 +74,20 @@ public sealed class QuestionRepository : IQuestionRepository
                 cancellationToken: cancellationToken));
     }
 
-    // Updates the specified question
+    public async Task<Question?> GetBySlugAsync(string slug, CancellationToken cancellationToken)
+    {
+        const string sql = @"SELECT * FROM fn_get_question_by_slug(@Slug);";
+        using var connection = _context.CreateConnection();
+        return await connection.QuerySingleOrDefaultAsync<Question>(
+            new CommandDefinition(
+                sql,
+                new { Slug = slug },
+                cancellationToken: cancellationToken));
+    }
+
     public async Task<int> UpdateAsync(Question question, bool shiftPositions, CancellationToken cancellationToken)
     {
-        const string sql = @"CALL sp_update_question(@Id, @SubTopicId, @QuestionType, @Slug, @Title, @Description, @ImageUrl, @Mark, @Hint, @Explanation, @TimeLimitSeconds, @MemoryLimitMb, @Difficulty, @Position, @UpdatedBy, @UpdatedAt, @ShiftPositions);";
+        const string sql = @"CALL public.sp_update_question(@Id, @SubTopicId, CAST(@QuestionType AS smallint), @Slug, @Title, @Description, @ImageUrl, @Mark, @Hint, @Explanation, @TimeLimitSeconds, @MemoryLimitMb, CAST(@Difficulty AS smallint), @Position, @UpdatedBy, @UpdatedAt, @ShiftPositions);";
         using var connection = _context.CreateConnection();
         await connection.ExecuteAsync(new CommandDefinition(
             sql,
@@ -116,7 +121,6 @@ public sealed class QuestionRepository : IQuestionRepository
         return updated ? 1 : 0;
     }
 
-    // Soft deletes the specified question
     public async Task<int> SoftDeleteAsync(int id, Guid deletedBy, CancellationToken cancellationToken)
     {
         const string sql = @"CALL sp_soft_delete_question(@Id, @DeletedBy, @DeletedAt);";
@@ -139,7 +143,6 @@ public sealed class QuestionRepository : IQuestionRepository
         return stillExists ? 0 : 1;
     }
 
-    // Retrieves all active questions
     public async Task<IEnumerable<Question>> GetAllAsync(CancellationToken cancellationToken)
     {
         const string sql = @"SELECT * FROM fn_get_all_questions();";
@@ -174,7 +177,6 @@ public sealed class QuestionRepository : IQuestionRepository
     }
 
 
-    // Publishes the specified question
     public async Task<int> PublishAsync(
         Question question,
         CancellationToken cancellationToken)
@@ -193,7 +195,6 @@ public sealed class QuestionRepository : IQuestionRepository
                 cancellationToken: cancellationToken));
     }
 
-    // Retrieves all published questions
     public async Task<IEnumerable<Question>> GetPublishedAsync(
         CancellationToken cancellationToken)
     {
@@ -202,7 +203,6 @@ public sealed class QuestionRepository : IQuestionRepository
         return await connection.QueryAsync<Question>(new CommandDefinition(sql, cancellationToken: cancellationToken));
     }
 
-    // Retrieves a published question by its ID
     public async Task<Question?> GetPublishedByIdAsync(int id, CancellationToken cancellationToken)
     {
         const string sql = @"SELECT * FROM fn_get_published_question_by_id(@Id);";
@@ -216,7 +216,17 @@ public sealed class QuestionRepository : IQuestionRepository
                 cancellationToken: cancellationToken));
     }
    
-    // Returns the number of active MCQ options for a question
+    public async Task<Question?> GetPublishedBySlugAsync(string slug, CancellationToken cancellationToken)
+    {
+        const string sql = @"SELECT * FROM fn_get_published_question_by_slug(@Slug);";
+        using var connection = _context.CreateConnection();
+        return await connection.QuerySingleOrDefaultAsync<Question>(
+            new CommandDefinition(
+                sql,
+                new { Slug = slug },
+                cancellationToken: cancellationToken));
+    }
+
     public async Task<int> GetMcqOptionCountAsync(int questionId, CancellationToken cancellationToken)
     {
         const string sql = @"SELECT fn_get_mcq_option_count(@QuestionId);";
@@ -230,7 +240,6 @@ public sealed class QuestionRepository : IQuestionRepository
                 cancellationToken: cancellationToken));
     }
     
-    // Checks whether the coding question has at least one template
     public async Task<bool> HasCodingTemplateAsync(int questionId, CancellationToken cancellationToken)
     {
         const string sql = @"SELECT fn_has_coding_template(@QuestionId);";
@@ -244,7 +253,6 @@ public sealed class QuestionRepository : IQuestionRepository
                 cancellationToken: cancellationToken));
     }
    
-    // Checks whether the coding question has at least one test case
     public async Task<bool> HasTestCasesAsync(int questionId, CancellationToken cancellationToken)
     {
         const string sql = @"SELECT fn_has_test_cases(@QuestionId);";
@@ -258,7 +266,6 @@ public sealed class QuestionRepository : IQuestionRepository
                 cancellationToken: cancellationToken));
     }
     
-    // Returns the technology of the question
     public async Task<int?> GetQuestionTechnologyIdAsync(int questionId, CancellationToken cancellationToken)
     {
         const string sql = @"SELECT fn_get_question_technology(@QuestionId);";
@@ -271,7 +278,6 @@ public sealed class QuestionRepository : IQuestionRepository
                 cancellationToken: cancellationToken));
     }
     
-    // Returns the technology assigned to the logged-in mentor
     public async Task<int?> GetMentorTechnologyIdAsync(Guid userId, CancellationToken cancellationToken)
     {
         const string sql = @"SELECT fn_get_mentor_technology(@UserId);";

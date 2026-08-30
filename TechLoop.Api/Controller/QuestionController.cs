@@ -7,8 +7,9 @@ using TechLoop.Application.Features.Questions.DTOs;
 using TechLoop.Application.Features.Questions.Queries.GetAllQuestions.Learner;
 using TechLoop.Application.Features.Questions.Queries.GetCodingQuestions;
 using TechLoop.Application.Features.Questions.Queries.GetLearnerQuestionById;
+using TechLoop.Application.Features.Questions.Queries.GetQuestionBySlug.Learner;
 using TechLoop.Application.Features.Questions.Queries.GetMcqQuestionBySubTopic;
-using TechLoop.Application.Features.Questions.Queries.GetQuestionDetailsById;
+using TechLoop.Application.Features.Questions.Queries.GetQuestionDetailsBySlug;
 
 
 namespace TechLoop.Api.Controllers;
@@ -24,7 +25,6 @@ public sealed class QuestionController : ControllerBase
         _mediator = mediator;
     }
 
-    // Get all questions
     [HttpGet]
     public async Task<ActionResult<IEnumerable<LearnerQuestionResponse>>> GetAllQuestions(
         CancellationToken cancellationToken)
@@ -36,7 +36,30 @@ public sealed class QuestionController : ControllerBase
         return Ok(result);
     }
 
-    // Get question by id
+    [HttpGet("slug/{slug}")]
+    public async Task<ActionResult<LearnerQuestionResponse>> GetQuestionBySlug(
+        string slug,
+        CancellationToken cancellationToken)
+    {
+        var result = await _mediator.Send(
+            new GetLearnerQuestionBySlugQuery(slug),
+            cancellationToken);
+
+        return Ok(result);
+    }
+
+    [HttpGet("slug/{slug}/details")]
+    public async Task<ActionResult<QuestionDetailsResponse>> GetQuestionDetailsBySlug(
+        string slug,
+        CancellationToken cancellationToken)
+    {
+        var result = await _mediator.Send(
+            new GetQuestionDetailsBySlugQuery(slug),
+            cancellationToken);
+
+        return Ok(result);
+    }
+
     [HttpGet("{id:int}")]
     public async Task<ActionResult<LearnerQuestionResponse>> GetQuestionById(
         int id,
@@ -49,7 +72,6 @@ public sealed class QuestionController : ControllerBase
         return Ok(result);
     }
     
-    //get question by filtering
     [HttpGet("coding")]
     public async Task<IActionResult> GetCodingQuestions(
         [FromQuery] int page = 1,
@@ -75,7 +97,6 @@ public sealed class QuestionController : ControllerBase
         return Ok(result);
     }
     
-    //get mcq-option by question 
     [HttpGet("questions/{questionId:int}/mcq-options")]
     public async Task<IActionResult> GetPublishedMcqOptionsByQuestionId(int questionId, CancellationToken cancellationToken)
     {
@@ -83,7 +104,6 @@ public sealed class QuestionController : ControllerBase
         return Ok(result);
     }
     
-    //get coding template by question
     [HttpGet("questions/{questionId:int}/coding-templates")]
     public async Task<IActionResult> GetPublishedCodingTemplatesByQuestion(int questionId, CancellationToken cancellationToken)
     {
@@ -91,7 +111,6 @@ public sealed class QuestionController : ControllerBase
         return Ok(result);
     }
     
-    //get testcase
     [HttpGet("questions/{questionId:int}/test-cases")]
     public async Task<IActionResult> GetPublishedTestCasesByQuestion(int questionId, CancellationToken cancellationToken)
     {
@@ -99,13 +118,6 @@ public sealed class QuestionController : ControllerBase
         return Ok(result);
     }
     
-    //Gets the complete details of a question.
-    [HttpGet("{id:int}/details")]
-    public async Task<ActionResult<QuestionDetailsResponse>> GetQuestionDetails(int id, CancellationToken cancellationToken)
-    {
-        var result = await _mediator.Send(new GetQuestionDetailsByIdQuery(id), cancellationToken);
-        return Ok(result);
-    }
     
     [HttpGet("sub-topic/{subTopicId:int}/mcq")]
     public async Task<IActionResult> GetMcqQuestionBySubTopic(int subTopicId, CancellationToken cancellationToken)

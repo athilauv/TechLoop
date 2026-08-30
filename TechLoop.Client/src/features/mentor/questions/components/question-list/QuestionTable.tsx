@@ -23,10 +23,11 @@ const QuestionTable = ({
                            disabled = false,
                        }: QuestionTableProps) => {
     const navigate = useNavigate();
+    const getDetailsPath = (question: MentorQuestion) =>
+        `${basePath}/${basePath.includes("/coding") ? question.slug : question.id}`;
 
     return (
         <>
-            {/* Desktop / tablet: scrollable table, no visible scrollbar, drag-to-scroll enabled */}
             <div className="hidden sm:block">
                 <HorizontalScrollArea>
                 <table className="w-full min-w-[720px] text-left text-sm">
@@ -35,7 +36,6 @@ const QuestionTable = ({
                         <th className="px-5 py-3 font-medium">Title</th>
                         <th className="px-5 py-3 font-medium">Difficulty</th>
                         <th className="px-5 py-3 font-medium">Marks</th>
-                        <th className="px-5 py-3 font-medium">Position</th>
                         <th className="px-5 py-3 font-medium">Status</th>
                         <th className="hidden px-5 py-3 font-medium lg:table-cell">Slug</th>
                         <th className="px-5 py-3 text-right font-medium">Actions</th>
@@ -46,15 +46,12 @@ const QuestionTable = ({
                     {questions.map((question) => (
                         <tr
                             key={question.id}
-                            onClick={() => navigate(`${basePath}/${question.id}`)}
+                            onClick={() => navigate(getDetailsPath(question))}
                             className="cursor-pointer border-b border-[var(--cs-border)]/70 transition-colors last:border-b-0 hover:bg-[var(--cs-surface-muted)]"
                         >
                             <td className="max-w-[320px] px-5 py-3">
                                 <p className="truncate font-medium text-[var(--cs-text)]">
                                     {question.title}
-                                </p>
-                                <p className="mt-0.5 truncate text-xs text-[var(--cs-text-muted)]">
-                                    {question.description || "No description available."}
                                 </p>
                             </td>
 
@@ -64,10 +61,6 @@ const QuestionTable = ({
 
                             <td className="px-5 py-3 text-[var(--cs-text-secondary)]">
                                 {question.mark}
-                            </td>
-
-                            <td className="px-5 py-3 text-[var(--cs-text-secondary)]">
-                                {question.position}
                             </td>
 
                             <td className="px-5 py-3">
@@ -83,6 +76,7 @@ const QuestionTable = ({
                                     className="flex items-center justify-end gap-1"
                                     onClick={(event) => event.stopPropagation()}
                                 >
+
                                     <button
                                         type="button"
                                         onClick={() => onEdit(question)}
@@ -111,12 +105,11 @@ const QuestionTable = ({
                 </HorizontalScrollArea>
             </div>
 
-            {/* Mobile: stacked card list */}
             <div className="divide-y divide-[var(--cs-border)]/70 sm:hidden">
                 {questions.map((question) => (
                     <div
                         key={question.id}
-                        onClick={() => navigate(`${basePath}/${question.id}`)}
+                        onClick={() => navigate(getDetailsPath(question))}
                         className="cursor-pointer px-4 py-4 transition-colors hover:bg-[var(--cs-surface-muted)]"
                     >
                         <div className="flex items-start justify-between gap-3">
@@ -124,15 +117,13 @@ const QuestionTable = ({
                                 <p className="truncate font-medium text-[var(--cs-text)]">
                                     {question.title}
                                 </p>
-                                <p className="mt-0.5 truncate text-xs text-[var(--cs-text-muted)]">
-                                    {question.description || "No description available."}
-                                </p>
                             </div>
 
                             <div
                                 className="flex shrink-0 items-center gap-1"
                                 onClick={(event) => event.stopPropagation()}
                             >
+
                                 <button
                                     type="button"
                                     onClick={() => onEdit(question)}
@@ -160,9 +151,6 @@ const QuestionTable = ({
                             <QuestionStatusBadge publishedAt={question.publishedAt ?? null} />
                             <span className="text-xs text-[var(--cs-text-muted)]">
                                 Marks: {question.mark}
-                            </span>
-                            <span className="text-xs text-[var(--cs-text-muted)]">
-                                Pos: {question.position}
                             </span>
                         </div>
                     </div>

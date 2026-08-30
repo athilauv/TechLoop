@@ -23,10 +23,19 @@ export const getQuestions = async (): Promise<
 export const getQuestionById = async (
     questionId: number,
 ): Promise<LearnerQuestion> => {
-    const { data } =
-        await api.get<LearnerQuestion>(
-            `/questions/${questionId}`,
-        );
+    const { data } = await api.get<LearnerQuestion>(
+        `/questions/${questionId}`,
+    );
+
+    return data;
+};
+
+export const getQuestionBySlug = async (
+    slug: string,
+): Promise<LearnerQuestion> => {
+    const { data } = await api.get<LearnerQuestion>(
+        `/questions/slug/${encodeURIComponent(slug)}`,
+    );
 
     return data;
 };
@@ -34,10 +43,19 @@ export const getQuestionById = async (
 export const getQuestionDetails = async (
     questionId: number,
 ): Promise<QuestionDetails> => {
-    const { data } =
-        await api.get<QuestionDetails>(
-            `/questions/${questionId}/details`,
-        );
+    const { data } = await api.get<QuestionDetails>(
+        `/questions/${questionId}/details`,
+    );
+
+    return data;
+};
+
+export const getQuestionDetailsBySlug = async (
+    slug: string,
+): Promise<QuestionDetails> => {
+    const { data } = await api.get<QuestionDetails>(
+        `/questions/slug/${encodeURIComponent(slug)}/details`,
+    );
 
     return data;
 };

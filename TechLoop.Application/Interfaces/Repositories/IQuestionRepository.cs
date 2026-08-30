@@ -1,4 +1,4 @@
-﻿using TechLoop.Application.Features.Questions.DTOs;
+using TechLoop.Application.Features.Questions.DTOs;
 using TechLoop.Domain.Entities;
 
 namespace TechLoop.Application.Interfaces.Repositories;
@@ -11,8 +11,10 @@ public interface IQuestionRepository
     Task<IEnumerable<Question>> GetAllAsync(CancellationToken cancellationToken);
     Task<IEnumerable<Question>> GetAllMentorAsync(Guid mentorId, CancellationToken cancellationToken);
     Task<Question?> GetByIdAsync(int id, CancellationToken cancellationToken);
+    Task<Question?> GetBySlugAsync(string slug, CancellationToken cancellationToken);
     Task<IEnumerable<Question>> GetPublishedAsync(CancellationToken cancellationToken);
     Task<Question?> GetPublishedByIdAsync(int id, CancellationToken cancellationToken);
+    Task<Question?> GetPublishedBySlugAsync(string slug, CancellationToken cancellationToken);
     Task<bool> SlugExistsAsync(string slug, CancellationToken cancellationToken);
     Task<bool> PositionExistsAsync(int subTopicId, int position, CancellationToken cancellationToken);
     Task<bool> SubTopicExistsAsync(int subTopicId, CancellationToken cancellationToken);

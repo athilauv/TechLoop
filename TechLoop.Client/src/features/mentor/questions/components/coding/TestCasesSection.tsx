@@ -114,7 +114,6 @@ const TestCasesSection = ({ questionId }: TestCasesSectionProps) => {
                     setSubmitting(true);
 
                     try {
-                        // Only the delete request itself determines success.
                         await deleteTestCase(id);
                         showToast.success("Test case deleted successfully.");
 
@@ -125,8 +124,6 @@ const TestCasesSection = ({ questionId }: TestCasesSectionProps) => {
                         try {
                             await invalidateTestCases();
                         } catch (refreshError) {
-                            // A refresh failure must not turn a
-                            // successful delete into a failure toast.
                             console.error(
                                 "Failed to refresh test cases after deletion:",
                                 refreshError,
@@ -150,11 +147,7 @@ const TestCasesSection = ({ questionId }: TestCasesSectionProps) => {
 
     return (
         <div className="py-6">
-            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-                <p className="text-sm text-[var(--cs-text-muted)]">
-                    Input and expected output values used to evaluate coding submissions.
-                </p>
-
+            <div className="flex justify-end">
                 <Button type="button" onClick={openCreate} disabled={submitting}>
                     <Plus size={16} className="mr-1.5 inline" />
                     Add Test Case
@@ -192,7 +185,6 @@ const TestCasesSection = ({ questionId }: TestCasesSectionProps) => {
                 open={drawerOpen}
                 onClose={closeDrawer}
                 title={editingTestCase ? "Edit Test Case" : "Add Test Case"}
-                description="Configure the input, expected output, and visibility."
             >
                 <TestCaseForm
                     key={editingTestCase?.id ?? "new-test-case"}

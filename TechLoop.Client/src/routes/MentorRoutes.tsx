@@ -52,8 +52,8 @@ export default function MentorRoutes() {
                     {/* ==================== CODING ==================== */}
                     <Route path="questions/coding" element={<CodingQuestionListPage />}/>
                     <Route path="questions/coding/create" element={<CodingQuestionFormPage />}/>
-                    <Route path="questions/coding/:id" element={<CodingQuestionDetailsPage />}/>
-                    <Route path="questions/coding/:id/edit" element={<CodingQuestionFormPage />}/>
+                    <Route path="questions/coding/:slug" element={<CodingQuestionDetailsPage />}/>
+                    <Route path="questions/coding/:slug/edit" element={<CodingQuestionFormPage />}/>
                     {/* ==================== COMMUNITY ==================== */}
                     <Route path="community" element={<MentorCommunityPage />}/>
                     <Route path="community/post/:postId" element={<MentorCommunityPostPage />}/>

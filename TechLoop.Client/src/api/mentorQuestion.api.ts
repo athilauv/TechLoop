@@ -29,6 +29,16 @@ export const getMentorQuestionById = async (
     return response.data;
 };
 
+export const getMentorQuestionBySlug = async (
+    slug: string,
+): Promise<MentorQuestion> => {
+    const response = await api.get<MentorQuestion>(
+        `/mentor/questions/slug/${encodeURIComponent(slug)}`,
+    );
+
+    return response.data;
+};
+
 export const createQuestion = async (
     request: CreateQuestionRequest,
 ): Promise<OperationResponse> => {

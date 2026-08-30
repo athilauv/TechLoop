@@ -18,33 +18,24 @@ import QuestionDiscussionsPage from "../features/learner/coding-question/pages/Q
 export default function LearnerRoutes() {
     return (
         <Routes>
-            {/* Public */}
             <Route index element={<LandingPage />} />
 
-            {/* Protected Learner Area */}
             <Route element={<ProtectedRoute allowedRoles={["Learner"]} />}>
                 <Route element={<LearnerLayout />}>
 
-                    {/* Learning */}
                     <Route path="learning" element={<TechnologyCategoryPage />}/>
                     <Route path="learning/:technologySlug" element={<LearningPage />}/>
                     <Route path="learning/:technologySlug/:topicSlug" element={<LearningPage />}/>
                     <Route path="learning/:technologySlug/:topicSlug/:subTopicSlug" element={<LearningPage />}/>
-                    {/* Coding Questions */}
                     <Route path="coding-questions" element={<CodingQuestionsPage />}/>
-                    <Route path="coding-questions/:questionId" element={<CodingQuestionPage />}/>
-                    <Route path="coding-questions/:questionId/discussions" element={<QuestionDiscussionsPage />}/>
-                    {/* Profile */}
+                    <Route path="coding-questions/:questionSlug" element={<CodingQuestionPage />}/>
+                    <Route path="coding-questions/:questionSlug/discussions" element={<QuestionDiscussionsPage />}/>
                     <Route path="profile" element={<ProfilePage />}/>
-                    {/* Dashboard */}
                     <Route path="dashboard" element={<DashboardPage />}/>
-                    {/* Analytics */}
                     <Route path="analytics" element={<AnalyticsPage />}/>
-                    {/* Topic Contributions */}
                     <Route path="topic-contributions" element={<TopicContributionPage />}/>
                     <Route path="topic-contributions/new" element={<CreateTopicContributionPage />}/>
                     <Route path="topic-contributions/:contributionId" element={<TopicContributionDetailsPage />}/>
-                    {/* Community */}
                     <Route path="community" element={<LearnerCommunityPage />}/>
                     <Route path="community/posts/:postId" element={<LearnerCommunityPostPage />}/>
                     <Route path="community/saved-posts" element={<LearnerSavedPostsPage />}/>

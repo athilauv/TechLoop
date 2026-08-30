@@ -1,4 +1,4 @@
-﻿using MediatR;
+using MediatR;
 using TechLoop.Application.Common.Exceptions;
 using TechLoop.Application.Features.Coding.DTOs;
 using TechLoop.Application.Interfaces.Repositories;
@@ -38,6 +38,7 @@ public sealed class UpdateCodingTemplateCommandHandler : IRequestHandler<UpdateC
 
         template.TechnologyId = request.TechnologyId;
         template.StarterCode = request.StarterCode.Trim();
+        template.ExecutionCode = request.ExecutionCode?.Trim();
         template.SolutionCode = request.SolutionCode?.Trim();
         template.UpdatedBy = _currentUser.UserId;
         template.UpdatedAt = DateTime.UtcNow;

@@ -48,11 +48,7 @@ public sealed class SubmissionExecutionService : ISubmissionExecutionService
 
     Console.WriteLine($"Test Cases : {testCases.Count}");
 
-    if (!testCases.Any())
-    {
-        throw new InvalidOperationException("No test cases found for this question.");
-    }
-
+    if (!testCases.Any()) throw new InvalidOperationException("No test cases found for this question.");
     int passed = 0;
     int total = testCases.Count;
     Judge0ResultResponse? lastResult = null;
@@ -74,11 +70,7 @@ public sealed class SubmissionExecutionService : ISubmissionExecutionService
         var judgeSubmission = await _judge0Service.SubmitAsync(request, cancellationToken);
         Console.WriteLine($"Judge Token : {judgeSubmission?.Token}");
 
-        if (judgeSubmission is null)
-        {
-            throw new InvalidOperationException("Judge0 submission failed.");
-        }
-
+        if (judgeSubmission is null) throw new InvalidOperationException("Judge0 submission failed.");
         lastResult = await WaitForResultAsync( judgeSubmission.Token, cancellationToken);
         Console.WriteLine($"Judge Status : {lastResult.Status.Id}");
 
@@ -101,10 +93,7 @@ public sealed class SubmissionExecutionService : ISubmissionExecutionService
             return;
         }
 
-        if (lastResult.StandardOutput?.Trim() == testCase.ExpectedOutput.Trim())
-        {
-            passed++;
-        }
+        if (lastResult.StandardOutput?.Trim() == testCase.ExpectedOutput.Trim()) passed++;
     }
 
     Console.WriteLine($"Passed : {passed}/{total}");
@@ -145,11 +134,7 @@ public sealed class SubmissionExecutionService : ISubmissionExecutionService
                 token,
                 cancellationToken);
 
-            if (result is null)
-            {
-                continue;
-            }
-
+            if (result is null) continue;
             if (result.Status.Id > 2)
             {
                 Console.WriteLine("========== Judge0 Result ==========");

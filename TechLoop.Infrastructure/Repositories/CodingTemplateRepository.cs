@@ -12,7 +12,6 @@ public sealed class CodingTemplateRepository : ICodingTemplateRepository
         _context = context;
     }
 
-    // Exists
     public async Task<bool> ExistsAsync(int questionId, int technologyId, CancellationToken cancellationToken)
     {
         const string sql = @"SELECT fn_coding_template_exists(@QuestionId, @TechnologyId);";
@@ -27,23 +26,20 @@ public sealed class CodingTemplateRepository : ICodingTemplateRepository
                 cancellationToken: cancellationToken));
     }
 
-    // Create
     public async Task<int> CreateAsync(CodingTemplate template, CancellationToken cancellationToken)
     {
-        const string sql = @"SELECT fn_create_coding_template( @QuestionId,@TechnologyId,@StarterCode,@SolutionCode,@CreatedBy,@CreatedAt);";
+        const string sql = @"SELECT public.fn_create_coding_template(@QuestionId,@TechnologyId,@StarterCode,@ExecutionCode,@SolutionCode,@CreatedBy,CAST(@CreatedAt AS timestamptz));";
         using var connection = _context.CreateConnection();
         return await connection.ExecuteScalarAsync<int>(new CommandDefinition(sql, template, cancellationToken: cancellationToken));
     }
 
-    // Update
     public async Task<int> UpdateAsync(CodingTemplate template, CancellationToken cancellationToken)
     {
-        const string sql = @"CALL sp_update_coding_template( @Id, @TechnologyId, @StarterCode, @SolutionCode, @UpdatedBy, @UpdatedAt);";
+        const string sql = @"CALL public.sp_update_coding_template(@Id, @TechnologyId, @StarterCode, @ExecutionCode, @SolutionCode, @UpdatedBy, CAST(@UpdatedAt AS timestamptz));";
         using var connection = _context.CreateConnection();
         return await connection.ExecuteAsync(new CommandDefinition(sql, template, cancellationToken: cancellationToken));
     }
 
-    // Soft Delete
     public async Task<int> SoftDeleteAsync(int id, Guid deletedBy, CancellationToken cancellationToken)
     {
         const string sql = @"CALL sp_soft_delete_coding_template( @Id,@DeletedBy, @DeletedAt);";
@@ -65,7 +61,6 @@ public sealed class CodingTemplateRepository : ICodingTemplateRepository
         return stillExists ? 0 : 1;
     }
 
-    // Soft Delete By Question
     public async Task<int> SoftDeleteByQuestionIdAsync(int questionId, Guid deletedBy, CancellationToken cancellationToken)
     {
         const string sql = @"CALL sp_soft_delete_coding_template_by_question(@QuestionId, @DeletedBy, @DeletedAt);";
@@ -80,7 +75,6 @@ public sealed class CodingTemplateRepository : ICodingTemplateRepository
                 cancellationToken: cancellationToken));
     }
 
-    // Get By Id
     public async Task<CodingTemplate?> GetByIdAsync(int id, CancellationToken cancellationToken)
     {
         const string sql = @"SELECT * FROM fn_get_coding_template_by_id(@Id);";
@@ -93,7 +87,6 @@ public sealed class CodingTemplateRepository : ICodingTemplateRepository
                 cancellationToken: cancellationToken));
     }
 
-    // Get By Question
     public async Task<IEnumerable<CodingTemplate>> GetByQuestionIdAsync(int questionId, CancellationToken cancellationToken)
     {
         const string sql = @"SELECT * FROM fn_get_coding_templates_by_question_id(@QuestionId);";

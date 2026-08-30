@@ -88,7 +88,7 @@ interface PendingTopicGroupProps {
     questions: MentorQuestion[];
     onPublishTopic: (topicId: number) => Promise<void>;
     onPublishSubTopic: (subTopicId: number) => Promise<void>;
-    onPublishQuestion: (questionId: number) => Promise<void>;
+    onPublishQuestion: (questionId: number) => Promise<boolean>;
     onPublishAll: (topic: MentorTopic) => Promise<void>;
     publishingId: string | null;
 }
@@ -200,7 +200,7 @@ interface PendingSubTopicRowProps {
     subTopic: MentorSubTopic;
     questions: MentorQuestion[];
     onPublishSubTopic: (subTopicId: number) => Promise<void>;
-    onPublishQuestion: (questionId: number) => Promise<void>;
+    onPublishQuestion: (questionId: number) => Promise<boolean>;
     publishingId: string | null;
 }
 
@@ -272,7 +272,7 @@ function PendingSubTopicRow({
                                 ? "MCQ"
                                 : "Challenge";
                         const targetPath = isCoding
-                            ? `/mentor/questions/coding/${question.id}?tab=templates`
+                            ? `/mentor/questions/coding/${question.slug}?tab=templates`
                             : `/mentor/questions/mcq/${question.id}?tab=options`;
 
                         return (
@@ -324,7 +324,10 @@ function PendingSubTopicRow({
                                     disabled={publishingId !== null}
                                     onClick={(event) => {
                                         event.stopPropagation();
-                                        void onPublishQuestion(question.id);
+                                        void (async () => {
+                                            const published = await onPublishQuestion(question.id);
+                                            if (published) navigate(targetPath);
+                                        })();
                                     }}
                                     icon={
                                         publishingId === `question-${question.id}` ? (
@@ -470,7 +473,7 @@ export default function MentorPendingPage() {
         key: string,
         action: () => Promise<unknown>,
         successMessage: string,
-    ) => {
+    ): Promise<void> => {
         try {
             setPublishingId(key);
             await action();
@@ -521,7 +524,7 @@ export default function MentorPendingPage() {
         );
     };
 
-    const handlePublishQuestion = async (questionId: number) => {
+    const handlePublishQuestion = async (questionId: number): Promise<boolean> => {
         const confirmed = await new Promise<boolean>((resolve) => {
             showToast.confirm(
                 "Publish question",
@@ -531,13 +534,24 @@ export default function MentorPendingPage() {
                 "Publish",
             );
         });
-        if (!confirmed) return;
+        if (!confirmed) return false;
 
-        return publishAndRefresh(
-            `question-${questionId}`,
-            () => publishQuestion(questionId),
-            "Question published successfully.",
-        );
+        try {
+            setPublishingId(`question-${questionId}`);
+            await publishQuestion(questionId);
+            await queryClient.invalidateQueries({ queryKey: MENTOR_PENDING_QUERY_KEY });
+            showToast.success("Question published successfully.");
+
+            const publishedQuestion = data?.unpublishedQuestions.find((question) => question.id === questionId);
+            if (publishedQuestion?.questionType === QuestionType.Coding && publishedQuestion.slug) navigate(`/mentor/questions/coding/${publishedQuestion.slug}`);
+
+            return true;
+        } catch (error) {
+            showToast.error(getErrorMessage(error, "Unable to publish question."));
+            return false;
+        } finally {
+            setPublishingId(null);
+        }
     };
 
     const handlePublishAll = async (topic: MentorTopic) => {

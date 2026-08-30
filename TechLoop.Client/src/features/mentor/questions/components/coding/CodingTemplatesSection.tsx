@@ -193,15 +193,7 @@ const CodingTemplatesSection = ({ questionId }: CodingTemplatesSectionProps) => 
 
     return (
         <div className="py-6">
-            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-                <p className="text-sm text-[var(--cs-text-muted)]">
-                    Starter and solution code for{" "}
-                    <span className="font-medium text-[var(--cs-text-secondary)]">
-                        {technologyName}
-                    </span>
-                    .
-                </p>
-
+            <div className="flex justify-end">
                 <Button type="button" onClick={openCreate} disabled={submitting}>
                     <Plus size={16} className="mr-1.5 inline" />
                     Add Template
@@ -230,7 +222,6 @@ const CodingTemplatesSection = ({ questionId }: CodingTemplatesSectionProps) => 
                 open={drawerOpen}
                 onClose={closeDrawer}
                 title={editingTemplate ? "Edit Coding Template" : "Add Coding Template"}
-                description="Configure the starter and solution code for this coding question."
             >
                 <CodingTemplateForm
                     key={editingTemplate?.id ?? "new-template"}

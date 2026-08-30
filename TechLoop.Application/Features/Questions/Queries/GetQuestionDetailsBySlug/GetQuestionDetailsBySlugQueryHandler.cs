@@ -4,15 +4,15 @@ using TechLoop.Application.Features.Questions.DTOs;
 using TechLoop.Application.Interfaces.Repositories;
 using TechLoop.Domain.Enums;
 
-namespace TechLoop.Application.Features.Questions.Queries.GetQuestionDetailsById;
+namespace TechLoop.Application.Features.Questions.Queries.GetQuestionDetailsBySlug;
 
-public sealed class GetQuestionDetailsByIdQueryHandler : IRequestHandler<GetQuestionDetailsByIdQuery, QuestionDetailsResponse>
+public sealed class GetQuestionDetailsBySlugQueryHandler : IRequestHandler<GetQuestionDetailsBySlugQuery, QuestionDetailsResponse>
 {
     private readonly IQuestionRepository _questionRepository;
     private readonly IMcqOptionRepository _mcqOptionRepository;
     private readonly ICodingTemplateRepository _codingTemplateRepository;
     private readonly ITestCaseRepository _testCaseRepository;
-    public GetQuestionDetailsByIdQueryHandler(IQuestionRepository questionRepository, IMcqOptionRepository mcqOptionRepository, ICodingTemplateRepository codingTemplateRepository, ITestCaseRepository testCaseRepository)
+    public GetQuestionDetailsBySlugQueryHandler(IQuestionRepository questionRepository, IMcqOptionRepository mcqOptionRepository, ICodingTemplateRepository codingTemplateRepository, ITestCaseRepository testCaseRepository)
     {
         _questionRepository = questionRepository;
         _mcqOptionRepository = mcqOptionRepository;
@@ -20,9 +20,9 @@ public sealed class GetQuestionDetailsByIdQueryHandler : IRequestHandler<GetQues
         _testCaseRepository = testCaseRepository;
     }
 
-    public async Task<QuestionDetailsResponse> Handle(GetQuestionDetailsByIdQuery request, CancellationToken cancellationToken)
+    public async Task<QuestionDetailsResponse> Handle(GetQuestionDetailsBySlugQuery request, CancellationToken cancellationToken)
     {
-        var question = await _questionRepository.GetPublishedByIdAsync(request.Id, cancellationToken);
+        var question = await _questionRepository.GetPublishedBySlugAsync(request.Slug, cancellationToken);
 
         if (question is null)
             throw new NotFoundException("Question not found.");
@@ -68,11 +68,11 @@ public sealed class GetQuestionDetailsByIdQueryHandler : IRequestHandler<GetQues
                     Id = x.Id,
                     TechnologyId = x.TechnologyId,
                     StarterCode = x.StarterCode,
-                    SolutionCode = x.SolutionCode
+                    SolutionCode = null
                 })
                 .FirstOrDefault();
 
-            var testCases = await _testCaseRepository.GetByQuestionIdAsync(
+            var testCases = await _testCaseRepository.GetVisibleByQuestionIdAsync(
                 question.Id,
                 cancellationToken);
 

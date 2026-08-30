@@ -30,12 +30,14 @@ const CodingTemplateForm = ({
                                 onCancel,
                             }: CodingTemplateFormProps) => {
     const [starterCode, setStarterCode] = useState(template?.starterCode ?? "");
+    const [executionCode, setExecutionCode] = useState(template?.executionCode ?? "");
     const [solutionCode, setSolutionCode] = useState(template?.solutionCode ?? "");
 
     const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
         event.preventDefault();
 
         const trimmedStarterCode = starterCode.trim();
+        const trimmedExecutionCode = executionCode.trim();
         const trimmedSolutionCode = solutionCode.trim();
 
         if (technologyId <= 0) {
@@ -46,6 +48,7 @@ const CodingTemplateForm = ({
         const validationError = validateCodingTemplate(
             technologyId,
             trimmedStarterCode,
+            trimmedExecutionCode,
             trimmedSolutionCode || null,
         );
 
@@ -57,6 +60,7 @@ const CodingTemplateForm = ({
         await onSubmit({
             technologyId,
             starterCode: trimmedStarterCode,
+            executionCode: trimmedExecutionCode,
             solutionCode: trimmedSolutionCode || null,
         });
     };
@@ -95,6 +99,23 @@ const CodingTemplateForm = ({
             </div>
 
             <div>
+                <label htmlFor="execution-code" className="mb-2 block text-sm font-medium text-[var(--cs-text)]">
+                    Execution Code
+                </label>
+                <textarea
+                    id="execution-code"
+                    value={executionCode}
+                    onChange={(event) => setExecutionCode(event.target.value)}
+                    required
+                    maxLength={50000}
+                    rows={12}
+                    disabled={submitting}
+                    placeholder="Use {{USER_CODE}} where learner code should be inserted..."
+                    className="w-full resize-y rounded-lg border border-[var(--cs-border)] bg-[var(--cs-surface)]/45 px-3 py-3 font-mono text-sm text-[var(--cs-text)] outline-none placeholder:text-[var(--cs-text-muted)] focus:border-[var(--cs-primary)] focus:ring-1 focus:ring-[var(--cs-primary)]/30 disabled:cursor-not-allowed disabled:opacity-60"
+                />
+            </div>
+
+            <div>
                 <label htmlFor="solution-code" className="mb-2 block text-sm font-medium text-[var(--cs-text)]">
                     Solution Code
                 </label>
@@ -114,7 +135,7 @@ const CodingTemplateForm = ({
                 <Button type="button" variant="secondary" onClick={onCancel} disabled={submitting}>
                     Cancel
                 </Button>
-                <Button type="submit" disabled={submitting || technologyId <= 0 || !starterCode.trim()}>
+                <Button type="submit" disabled={submitting || technologyId <= 0 || !starterCode.trim() || !executionCode.trim()}>
                     {submitting ? "Saving..." : template ? "Update Template" : "Add Template"}
                 </Button>
             </div>

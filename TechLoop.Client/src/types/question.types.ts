@@ -1,7 +1,6 @@
 import { DifficultyLevel } from "./enums/difficulty-level.ts";
 import { QuestionType } from "./enums/question-type.ts";
 
-// LEARNER
 export interface LearnerQuestion {
     id: number;
     subTopicId: number;
@@ -99,7 +98,6 @@ export interface QuestionDetails {
     testCases: LearnerTestCase[] | null;
 }
 
-// MENTOR - QUESTION
 export interface MentorQuestion {
     id: number;
     subTopicId: number;
@@ -142,7 +140,6 @@ export interface CreateQuestionRequest {
 
 export type UpdateQuestionRequest = CreateQuestionRequest;
 
-// MENTOR - MCQ OPTIONS
 export interface MentorMcqOption {
     id: number;
     questionId: number;
@@ -163,12 +160,12 @@ export interface CreateMcqOptionRequest {
 
 export type UpdateMcqOptionRequest = CreateMcqOptionRequest;
 
-// MENTOR - CODING TEMPLATES
 export interface MentorCodingTemplate {
     id: number;
     questionId: number;
     technologyId: number;
     starterCode: string;
+    executionCode?: string | null;
     solutionCode?: string | null;
     createdBy: string;
     createdAt: string;
@@ -179,13 +176,13 @@ export interface MentorCodingTemplate {
 export interface CreateCodingTemplateRequest {
     technologyId: number;
     starterCode: string;
+    executionCode?: string | null;
     solutionCode?: string | null;
 }
 
 export type UpdateCodingTemplateRequest =
     CreateCodingTemplateRequest;
 
-// MENTOR - TEST CASES
 export interface MentorTestCase {
     id: number;
     questionId: number;

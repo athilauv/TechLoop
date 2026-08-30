@@ -1,4 +1,4 @@
-﻿using MediatR;
+using MediatR;
 using TechLoop.Application.Common.Exceptions;
 using TechLoop.Application.Features.Coding.DTOs;
 using TechLoop.Application.Interfaces.Repositories;
@@ -25,22 +25,18 @@ public sealed class CreateCodingTemplateCommandHandler : IRequestHandler<CreateC
 
     public async Task<CreateCodingTemplateResponse> Handle(CreateCodingTemplateCommand request, CancellationToken cancellationToken)
     {
-        // Question exists
         var question = await _questionRepository.GetByIdAsync(request.QuestionId, cancellationToken);
         if (question is null)
             throw new NotFoundException("Question not found.");
 
-        // Must be coding question
         if (question.QuestionType != QuestionType.coding)
             throw new ValidationException(
                 "Coding templates can only be added to coding questions.");
 
-        // Technology exists
         var technology = await _technologyRepository.GetByIdAsync(request.TechnologyId, cancellationToken);
         if (technology is null)
             throw new NotFoundException("Technology not found.");
 
-        // Duplicate check
         var exists = await _codingTemplateRepository.ExistsAsync(request.QuestionId, request.TechnologyId, cancellationToken);
         if (exists)
             throw new ValidationException("Coding template already exists for this technology.");
@@ -50,6 +46,7 @@ public sealed class CreateCodingTemplateCommandHandler : IRequestHandler<CreateC
             QuestionId = request.QuestionId,
             TechnologyId = request.TechnologyId,
             StarterCode = request.StarterCode.Trim(),
+            ExecutionCode = request.ExecutionCode?.Trim(),
             SolutionCode = request.SolutionCode?.Trim(),
             CreatedAt = DateTime.UtcNow,
             CreatedBy = _currentUser.UserId

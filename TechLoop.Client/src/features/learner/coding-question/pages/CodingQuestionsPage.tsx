@@ -76,7 +76,7 @@ const CodingQuestionsPage = () => {
     const handleQuestionClick = (
         question: LearnerCodingQuestion
     ) => {
-        navigate(`/learner/coding-questions/${question.id}`);
+        navigate(`/learner/coding-questions/${question.slug}`);
     };
 
     if (isLoading) {
@@ -184,13 +184,11 @@ const CodingQuestionsPage = () => {
                                             onClick={() => handleQuestionClick(question)}
                                             className="group flex w-full items-center gap-4 border-b border-[#223A59] px-5 py-4 text-left transition last:border-b-0 hover:bg-[#101C30]">
 
-                                        {/* Number */}
 
                                         <span className="w-8 shrink-0 text-sm text-[#5C7394]">
                                             {questionNumber}
                                         </span>
 
-                                        {/* Question */}
 
                                         <div className="min-w-0 flex-1">
                                             <h3 className="truncate text-sm font-semibold text-white transition group-hover:text-[#00E8C2]">
@@ -203,26 +201,22 @@ const CodingQuestionsPage = () => {
 
                                         </div>
 
-                                        {/* Technology */}
 
                                         <span className="hidden shrink-0 text-xs text-[#5C7394] lg:block">
                                             {question.technologyName}
                                         </span>
 
-                                        {/* Difficulty */}
 
                                         <span className={`hidden shrink-0 text-sm font-medium sm:block ${difficultyClass}`}>
                                             {difficultyLabel}
                                         </span>
 
-                                        {/* Marks */}
 
                                         <span className="hidden w-16 shrink-0 text-right text-xs text-[#5C7394] md:block">
                                             {question.marks}{" "}
                                             marks
                                         </span>
 
-                                        {/* Arrow */}
 
                                         <ChevronRight
                                             size={18}

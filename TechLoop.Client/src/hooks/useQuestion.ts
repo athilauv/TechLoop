@@ -3,8 +3,8 @@ import {
     getCodingQuestions,
     getCodingTemplates,
     getMcqOptions,
-    getQuestionById,
-    getQuestionDetails,
+    getQuestionBySlug,
+    getQuestionDetailsBySlug,
     getQuestions,
     getTestCases,
 } from "../api/question.api.ts";
@@ -17,19 +17,19 @@ export const useQuestions = () => {
     });
 };
 
-export const useQuestion = (questionId: number) => {
+export const useQuestion = (slug: string) => {
     return useQuery({
-        queryKey: ["question", questionId],
-        queryFn: () => getQuestionById(questionId),
-        enabled: Number.isInteger(questionId) && questionId > 0,
+        queryKey: ["question", slug],
+        queryFn: () => getQuestionBySlug(slug),
+        enabled: Boolean(slug?.trim()),
     });
 };
 
-export const useQuestionDetails = (questionId: number) => {
+export const useQuestionDetails = (slug: string) => {
     return useQuery({
-        queryKey: ["question-details", questionId],
-        queryFn: () => getQuestionDetails(questionId),
-        enabled: Number.isInteger(questionId) && questionId > 0,
+        queryKey: ["question-details", slug],
+        queryFn: () => getQuestionDetailsBySlug(slug),
+        enabled: Boolean(slug?.trim()),
     });
 };
 

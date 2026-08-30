@@ -37,12 +37,6 @@ const formatDate = (value?: string | null): string => {
 
 const OverviewTab = ({ question }: OverviewTabProps) => {
     const isCoding = question.questionType === QuestionType.Coding;
-
-    // Reuses the same query key as the create/edit form pages
-    // (see CodingQuestionFormPage / McqQuestionFormPage), so this
-    // never fires a second network request if the list is already
-    // cached from elsewhere in the app — it only resolves the name
-    // for display, never invents or hardcodes one.
     const { data: subTopics, isLoading: subTopicsLoading } = useQuery<MentorSubTopic[]>({
         queryKey: ["mentor-subtopics"],
         queryFn: () => getMentorSubTopics(),
@@ -58,7 +52,6 @@ const OverviewTab = ({ question }: OverviewTabProps) => {
         <div className="space-y-8 py-6">
             <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
                 <InfoItem label="Marks" value={String(question.mark)} />
-                <InfoItem label="Position" value={String(question.position)} />
                 <InfoItem label="Slug" value={question.slug} />
                 <InfoItem label="Sub Topic" value={subTopicValue} />
 
