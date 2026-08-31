@@ -65,7 +65,6 @@ public class AuthController : ControllerBase
         var refreshToken = Request.Cookies["refreshToken"];
         await _authService.LogoutAsync(refreshToken);
         DeleteAuthCookies();
-
         return Ok(new
         {
             Message = "Logged out successfully."
@@ -123,12 +122,15 @@ public class AuthController : ControllerBase
         Response.Cookies.Delete("refreshToken", options);
     }
 
-    // MENTOR PROFILE SETUP
-    [HttpPut("update-profile/{email}")]
-    public async Task<IActionResult> UpdateProfile(string email, [FromBody] UpdateMentorProfileRequest request)
+    // MENTOR INITIAL SETUP
+    [HttpPut("mentor-setup")]
+    public async Task<IActionResult> MentorSetup(
+        [FromQuery] string token,
+        [FromBody] UpdateMentorProfileRequest request,
+        CancellationToken cancellationToken)
     {
         var command = new UpdateProfileCommand(
-            email,
+            token,
             request.Password,
             request.ConfirmPassword,
             request.PhoneNumber,
@@ -137,7 +139,7 @@ public class AuthController : ControllerBase
             request.GithubUrl,
             request.ProfileImageUrl);
 
-        var result = await _mediator.Send(command);
+        var result = await _mediator.Send(command, cancellationToken);
         return Ok(result);
     }
 

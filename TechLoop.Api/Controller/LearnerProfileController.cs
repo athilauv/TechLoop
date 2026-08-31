@@ -11,7 +11,6 @@ namespace TechLoop.Api.Controllers.Learner;
 public sealed class LearnerProfileController : ControllerBase
 {
     private readonly IMediator _mediator;
-
     public LearnerProfileController(IMediator mediator)
     {
         _mediator = mediator;

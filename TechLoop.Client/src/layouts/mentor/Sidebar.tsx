@@ -1,4 +1,4 @@
-﻿import { NavLink, useNavigate } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 import { useMentorPendingQueue } from "../../hooks/useMentorPendingQueue.ts";
 import { getMentorPendingCount } from "../../types/mentorPending.types.ts";
 import {
@@ -17,8 +17,9 @@ import {
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { useEffect } from "react";
-import { useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { logout } from "../../api/auth.api.ts";
+import { getMentorProfile } from "../../api/mentor.api.ts";
 
 interface MentorSidebarProps {
     collapsed: boolean;
@@ -132,6 +133,22 @@ export default function MentorSidebar({
 }: MentorSidebarProps) {
     const { data: pendingQueue } = useMentorPendingQueue();
 
+    const { data: mentorProfile } = useQuery({
+        queryKey: ["mentor-profile"],
+        queryFn: getMentorProfile,
+        staleTime: 5 * 60 * 1000,
+        retry: false,
+    });
+
+    const mentorName =
+        mentorProfile?.username?.trim() ||
+        localStorage.getItem("username")?.trim() ||
+        localStorage.getItem("userName")?.trim() ||
+        "Mentor";
+
+    const mentorInitial =
+        mentorName.charAt(0).toUpperCase();
+
     useEffect(() => {
         document.body.style.overflow = mobileOpen ? "hidden" : "";
         return () => {
@@ -230,11 +247,11 @@ export default function MentorSidebar({
                 <div className="border-t border-white/5 p-4">
                     <div className={`flex items-center ${collapsed ? "justify-center" : "gap-3"}`}>
                         <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#17D4C3]/20 font-semibold text-[#17D4C3]">
-                            M
+                            {mentorInitial}
                         </div>
                         {!collapsed && (
                             <div className="min-w-0 flex-1">
-                                <p className="truncate text-sm text-white">Mentor</p>
+                                <p className="truncate text-sm text-white">{mentorName}</p>
                                 <p className="truncate text-xs text-slate-500">Mentor Account</p>
                             </div>
                         )}

@@ -10,7 +10,6 @@ namespace TechLoop.Infrastructure.Repositories;
 public sealed class TechnologyCategoryRepository : ITechnologyCategoryRepository
 {
     private readonly IDapperContext _context;
-
     public TechnologyCategoryRepository(IDapperContext context)
     {
         _context = context;
@@ -24,47 +23,82 @@ public sealed class TechnologyCategoryRepository : ITechnologyCategoryRepository
 
     public Task<int> CreateAsync(TechnologyCategory technologyCategory, CancellationToken cancellationToken)
     {
-        const string sql = "CALL sp_technology_category('CREATE', NULL, @Name, @CreatedBy, NULL, NULL);";
-        return WithConnection(connection => connection.ExecuteAsync(
-            new CommandDefinition(sql, new
-            {
-                technologyCategory.Name,
-                technologyCategory.CreatedBy
-            }, cancellationToken: cancellationToken)));
+        const string sql = @"CALL public.sp_manage_technology_category('CREATE', NULL, @Name, @CreatedBy, NULL, NULL, 0);";
+
+        return WithConnection(connection =>
+            connection.QuerySingleAsync<int>new CommandDefinition(
+                    sql,
+                    new
+                    {
+                        technologyCategory.Name,
+                        technologyCategory.CreatedBy
+                    },
+                    cancellationToken: cancellationToken)));
     }
 
     public Task<int> UpdateAsync(TechnologyCategory technologyCategory, CancellationToken cancellationToken)
     {
-        const string sql = "CALL sp_technology_category('UPDATE', @Id, @Name, NULL, @UpdatedBy, NULL);";
-        return WithConnection(connection => connection.ExecuteAsync(
-            new CommandDefinition(sql, new
-            {
-                technologyCategory.Id,
-                technologyCategory.Name,
-                technologyCategory.UpdatedBy
-            }, cancellationToken: cancellationToken)));
+        const string sql = @"CALL public.sp_manage_technology_category('UPDATE', @Id, @Name, NULL, @UpdatedBy, NULL, 0 );";
+        return WithConnection(connection =>
+            connection.QuerySingleAsync<int>(new CommandDefinition(
+                    sql,
+                    new
+                    {
+                        technologyCategory.Id,
+                        technologyCategory.Name,
+                        technologyCategory.UpdatedBy
+                    },
+                    cancellationToken: cancellationToken)));
     }
 
     public Task<int> PublishAsync(int id, Guid publishedBy, CancellationToken cancellationToken)
     {
-        const string sql = "CALL sp_technology_category('PUBLISH', @Id, NULL, NULL, @PublishedBy, NULL);";
-        return WithConnection(connection => connection.ExecuteAsync(
-            new CommandDefinition(sql, new
-            {
-                Id = id,
-                PublishedBy = publishedBy
-            }, cancellationToken: cancellationToken)));
+        const string sql = @"
+            CALL public.sp_manage_technology_category(
+                'PUBLISH',
+                @Id,
+                NULL,
+                NULL,
+                @UpdatedBy,
+                NULL,
+                0
+            );";
+
+        return WithConnection(connection =>
+            connection.QuerySingleAsync<int>(
+                new CommandDefinition(
+                    sql,
+                    new
+                    {
+                        Id = id,
+                        UpdatedBy = publishedBy
+                    },
+                    cancellationToken: cancellationToken)));
     }
 
     public Task<int> DeleteAsync(int id, Guid deletedBy, CancellationToken cancellationToken)
     {
-        const string sql = "CALL sp_technology_category('DELETE', @Id, NULL, NULL, NULL, @DeletedBy);";
-        return WithConnection(connection => connection.ExecuteAsync(
-            new CommandDefinition(sql, new
-            {
-                Id = id,
-                DeletedBy = deletedBy
-            }, cancellationToken: cancellationToken)));
+        const string sql = @"
+            CALL public.sp_manage_technology_category(
+                'DELETE',
+                @Id,
+                NULL,
+                NULL,
+                NULL,
+                @DeletedBy,
+                0
+            );";
+
+        return WithConnection(connection =>
+            connection.QuerySingleAsync<int>(
+                new CommandDefinition(
+                    sql,
+                    new
+                    {
+                        Id = id,
+                        DeletedBy = deletedBy
+                    },
+                    cancellationToken: cancellationToken)));
     }
 
     public Task<IEnumerable<AdminTechnologyCategoryResponse>> GetAllForAdminAsync()

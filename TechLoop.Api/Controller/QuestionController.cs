@@ -19,56 +19,36 @@ namespace TechLoop.Api.Controllers;
 public sealed class QuestionController : ControllerBase
 {
     private readonly IMediator _mediator;
-
     public QuestionController(IMediator mediator)
     {
         _mediator = mediator;
     }
 
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<LearnerQuestionResponse>>> GetAllQuestions(
-        CancellationToken cancellationToken)
+    public async Task<ActionResult<IEnumerable<LearnerQuestionResponse>>> GetAllQuestions(CancellationToken cancellationToken)
     {
-        var result = await _mediator.Send(
-            new GetAllLearnerQuestionsQuery(),
-            cancellationToken);
-
+        var result = await _mediator.Send( new GetAllLearnerQuestionsQuery(), cancellationToken);
         return Ok(result);
     }
 
     [HttpGet("slug/{slug}")]
-    public async Task<ActionResult<LearnerQuestionResponse>> GetQuestionBySlug(
-        string slug,
-        CancellationToken cancellationToken)
+    public async Task<ActionResult<LearnerQuestionResponse>> GetQuestionBySlug(string slug, CancellationToken cancellationToken)
     {
-        var result = await _mediator.Send(
-            new GetLearnerQuestionBySlugQuery(slug),
-            cancellationToken);
-
+        var result = await _mediator.Send(new GetLearnerQuestionBySlugQuery(slug), cancellationToken);
         return Ok(result);
     }
 
     [HttpGet("slug/{slug}/details")]
-    public async Task<ActionResult<QuestionDetailsResponse>> GetQuestionDetailsBySlug(
-        string slug,
-        CancellationToken cancellationToken)
+    public async Task<ActionResult<QuestionDetailsResponse>> GetQuestionDetailsBySlug(string slug, CancellationToken cancellationToken)
     {
-        var result = await _mediator.Send(
-            new GetQuestionDetailsBySlugQuery(slug),
-            cancellationToken);
-
+        var result = await _mediator.Send(new GetQuestionDetailsBySlugQuery(slug), cancellationToken);
         return Ok(result);
     }
 
     [HttpGet("{id:int}")]
-    public async Task<ActionResult<LearnerQuestionResponse>> GetQuestionById(
-        int id,
-        CancellationToken cancellationToken)
+    public async Task<ActionResult<LearnerQuestionResponse>> GetQuestionById(int id,CancellationToken cancellationToken)
     {
-        var result = await _mediator.Send(
-            new GetLearnerQuestionByIdQuery(id),
-            cancellationToken);
-
+        var result = await _mediator.Send(new GetLearnerQuestionByIdQuery(id), cancellationToken);
         return Ok(result);
     }
     
@@ -83,17 +63,7 @@ public sealed class QuestionController : ControllerBase
         [FromQuery] string? sort = null,
         CancellationToken cancellationToken = default)
     {
-        var result = await _mediator.Send(
-            new GetCodingQuestionsQuery(
-                page,
-                pageSize,
-                technologyId,
-                difficulty,
-                subTopicId,
-                search,
-                sort),
-            cancellationToken);
-
+        var result = await _mediator.Send(new GetCodingQuestionsQuery(page, pageSize, technologyId, difficulty, subTopicId, search, sort),cancellationToken);
         return Ok(result);
     }
     

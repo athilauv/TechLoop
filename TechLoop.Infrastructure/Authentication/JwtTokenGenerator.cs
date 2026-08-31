@@ -13,7 +13,6 @@ namespace TechLoop.Infrastructure.Authentication;
 public class JwtTokenGenerator : IJwtGenerator
 {
     private readonly IConfiguration _configuration;
-
     public JwtTokenGenerator(IConfiguration configuration)
     {
         _configuration = configuration;
@@ -103,6 +102,68 @@ public class JwtTokenGenerator : IJwtGenerator
                 return null;
 
             if (!Guid.TryParse(userId, out var id))
+                return null;
+
+            return id;
+        }
+        catch
+        {
+            return null;
+        }
+    }
+
+
+    // MENTOR INITIAL SETUP TOKEN
+    public string GenerateMentorSetupToken(User user)
+    {
+        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Secret"]!));
+        var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+        var expiryMinutes = _configuration.GetValue<int?>("Jwt:MentorSetupExpiryMinutes") ?? 1440;
+        var claims = new[]
+        {
+            new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
+            new Claim("email", user.Email),
+            new Claim("purpose", "mentor-initial-setup")
+        };
+
+        var token = new JwtSecurityToken(
+            issuer: _configuration["Jwt:Issuer"],
+            audience: _configuration["Jwt:Audience"],
+            claims: claims,
+            expires: DateTime.UtcNow.AddMinutes(expiryMinutes),
+            signingCredentials: credentials
+        );
+
+        return new JwtSecurityTokenHandler().WriteToken(token);
+    }
+
+    public Guid? ValidateMentorSetupToken(string token)
+    {
+        try
+        {
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Secret"]!));
+            var tokenHandler = new JwtSecurityTokenHandler();
+            var principal = tokenHandler.ValidateToken(token,
+                new TokenValidationParameters
+                {
+                    ValidateIssuerSigningKey = true,
+                    IssuerSigningKey = key,
+                    ValidateIssuer = true,
+                    ValidIssuer = _configuration["Jwt:Issuer"],
+                    ValidateAudience = true,
+                    ValidAudience = _configuration["Jwt:Audience"],
+                    ValidateLifetime = true,
+                    ClockSkew = TimeSpan.Zero
+                },
+                out _);
+
+            if (principal.FindFirstValue("purpose") != "mentor-initial-setup")
+                return null;
+
+            var userId = principal.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            if (string.IsNullOrWhiteSpace(userId) ||
+                !Guid.TryParse(userId, out var id))
                 return null;
 
             return id;

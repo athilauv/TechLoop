@@ -1,4 +1,4 @@
-﻿using Dapper;
+using Dapper;
 using TechLoop.Application.Features.Mentor.DTOs;
 using TechLoop.Application.Interfaces.Infrastructure;
 using TechLoop.Application.Interfaces.Repositories;
@@ -27,23 +27,25 @@ public sealed class MentorRepository : IMentorRepository
     public async Task<bool> TechnologyExistsAsync(int technologyId, CancellationToken cancellationToken)
     {
         using var connection = _context.CreateConnection();
-        return await connection.QuerySingleAsync<bool>(new CommandDefinition("SELECT fn_technology_exists(@TechnologyId);",
-                new { TechnologyId = technologyId },
-                cancellationToken: cancellationToken));
+        return await connection.QuerySingleAsync<bool>(new CommandDefinition(
+            "SELECT EXISTS (SELECT 1 FROM fn_get_technology_by_id(@TechnologyId));",
+            new { TechnologyId = technologyId },
+            cancellationToken: cancellationToken));
     }
 
     //create mentor
     public async Task<int> CreateAsync(Guid userId, int technologyId, DateTimeOffset createdAt, CancellationToken cancellationToken)
     {
         using var connection = _context.CreateConnection();
-        return await connection.ExecuteAsync(new CommandDefinition("CALL sp_create_mentor(@UserId,@TechnologyId,@CreatedAt);",
-                new
-                {
-                    UserId = userId,
-                    TechnologyId = technologyId,
-                    CreatedAt = createdAt
-                },
-                cancellationToken: cancellationToken));
+        return await connection.ExecuteAsync(new CommandDefinition(
+            "CALL public.sp_manage_mentor('CREATE', @UserId, @TechnologyId, @CreatedAt, CAST(NULL AS integer), CAST(NULL AS timestamptz), CAST(NULL AS integer));",
+            new
+            {
+                UserId = userId,
+                TechnologyId = technologyId,
+                CreatedAt = createdAt
+            },
+            cancellationToken: cancellationToken));
     }
 
     //get all mentors
@@ -94,12 +96,13 @@ public sealed class MentorRepository : IMentorRepository
     public async Task DeleteAsync(int mentorId, DateTimeOffset deletedAt, CancellationToken cancellationToken)
     {
         using var connection = _context.CreateConnection();
-        await connection.ExecuteAsync(new CommandDefinition("CALL sp_delete_mentor(@MentorId,@DeletedAt);",
-                new
-                {
-                    MentorId = mentorId,
-                    DeletedAt = deletedAt
-                },
-                cancellationToken: cancellationToken));
+        await connection.ExecuteAsync(new CommandDefinition(
+            "CALL public.sp_manage_mentor('DELETE', CAST(NULL AS uuid), CAST(NULL AS integer), CAST(NULL AS timestamptz), @MentorId, @DeletedAt, CAST(NULL AS integer));",
+            new
+            {
+                MentorId = mentorId,
+                DeletedAt = deletedAt
+            },
+            cancellationToken: cancellationToken));
     }
 }

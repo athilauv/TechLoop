@@ -430,16 +430,12 @@ const CodingQuestionDetailsPage = () => {
         };
 
     const handleBack = () => {
-        navigate(
-            "/mentor/questions/coding",
-        );
+        navigate("/mentor/questions/coding",);
     };
 
     const handleEdit = () => {
         if (question) {
-            navigate(
-                `/mentor/questions/coding/${question.slug}/edit`,
-            );
+            navigate(`/mentor/questions/coding/${question.slug}/edit`,);
         }
     };
 
@@ -454,24 +450,16 @@ const CodingQuestionDetailsPage = () => {
                     setPublishing(true);
 
                     try {
-                        await publishQuestion(
-                            question.id,
-                        );
-
+                        await publishQuestion(question.id,);
                         await queryClient.invalidateQueries(
                             {
-                                queryKey: [
-                                    "mentor-question",
-                                    questionSlug,
-                                ],
+                                queryKey: ["mentor-question", questionSlug],
                             },
                         );
 
                         await queryClient.invalidateQueries(
                             {
-                                queryKey: [
-                                    "mentor-questions",
-                                ],
+                                queryKey: ["mentor-questions"],
                             },
                         );
 
@@ -482,16 +470,10 @@ const CodingQuestionDetailsPage = () => {
                             },
                         );
 
-                        showToast.success(
-                            "Coding question published successfully.",
-                        );
+                        showToast.success("Coding question published successfully.",);
                     } catch (error) {
                         showToast.error(
-                            getErrorMessage(
-                                error,
-                                "Failed to publish coding question.",
-                            ),
-                        );
+                            getErrorMessage(error, "Failed to publish coding question."),);
                     } finally {
                         setPublishing(false);
                     }
@@ -525,16 +507,9 @@ const CodingQuestionDetailsPage = () => {
                             console.error("Failed to refresh mentor questions after deletion:", refreshError,);
                         }
 
-                        navigate(
-                            "/mentor/questions/coding",
-                        );
+                        navigate("/mentor/questions/coding",);
                     } catch (error) {
-                        showToast.error(
-                            getErrorMessage(
-                                error,
-                                "Failed to delete coding question.",
-                            ),
-                        );
+                        showToast.error(getErrorMessage(error, "Failed to delete coding question.",),);
                     }
                 })();
             },

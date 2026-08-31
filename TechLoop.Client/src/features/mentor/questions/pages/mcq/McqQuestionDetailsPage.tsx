@@ -22,12 +22,10 @@ import type { MentorQuestion } from "../../../../../types/question.types.ts";
 import QuestionDetailHeader from "../../components/question-details/QuestionDetailHeader.tsx";
 import QuestionTabs from "../../components/question-details/QuestionTabs.tsx";
 import OverviewTab from "../../components/question-details/OverviewTab.tsx";
-import DescriptionTab from "../../components/question-details/DescriptionTab.tsx";
 import McqOptionsSection from "../../components/mcq/McqOptionsSection.tsx";
 
 const TABS = [
     { key: "overview", label: "Overview" },
-    { key: "description", label: "Description" },
     { key: "options", label: "Options" },
     { key: "discussion", label: "Discussion" },
 ];
@@ -194,7 +192,6 @@ const McqQuestionDetailsPage = () => {
                     <QuestionTabs tabs={TABS} active={activeTab} onChange={setActiveTab} />
 
                     {activeTab === "overview" && <OverviewTab question={question} />}
-                    {activeTab === "description" && <DescriptionTab />}
                     {activeTab === "options" && <McqOptionsSection questionId={question.id} />}
                     {/*{activeTab === "discussion" && <DiscussionPlaceholder />}*/}
                 </div>

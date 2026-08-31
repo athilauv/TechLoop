@@ -2,8 +2,8 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
 import { CheckCircle2, Edit3, Plus, Trash2 } from "lucide-react";
 import { deleteAdminTechnology, getAdminTechnologies, publishAdminTechnology } from "../../../../api/admin.api.ts";
-import AdminPageHeader from "../../components/AdminPageHeader.tsx";
-import AdminTable from "../../components/AdminTable.tsx";
+import AdminPageHeader from "../../components/AdminPageHeader";
+import AdminTable from "../../components/AdminTable";
 import { getErrorMessage } from "../../../../utils/error.utils.ts";
 import { showToast } from "../../../../utils/toast.tsx";
 

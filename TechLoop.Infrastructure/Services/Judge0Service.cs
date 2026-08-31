@@ -1,5 +1,7 @@
-﻿﻿using System.Net.Http.Json;
+using System.Net.Http.Headers;
+using System.Text;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using TechLoop.Application.Common.Exceptions;
 using TechLoop.Application.Feature.Judge0.DTOs;
 using TechLoop.Application.Interfaces.Infrastructure;
@@ -11,7 +13,7 @@ public sealed class Judge0Service : IJudge0Service
     private static readonly JsonSerializerOptions JsonOptions =
         new()
         {
-            PropertyNameCaseInsensitive = true
+            PropertyNameCaseInsensitive = true,
         };
 
     private readonly HttpClient _httpClient;
@@ -21,43 +23,139 @@ public sealed class Judge0Service : IJudge0Service
         _httpClient = httpClient;
     }
 
-    public async Task<Judge0SubmissionResponse?> SubmitAsync(Judge0SubmissionRequest request, CancellationToken cancellationToken = default)
+    public async Task<Judge0SubmissionResponse?> SubmitAsync(
+        Judge0SubmissionRequest request,
+        CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(request);
 
-        var payload = new
-        {
-            source_code = request.SourceCode,
-            language_id = request.LanguageId,
-            stdin = request.StandardInput,
-            expected_output = request.ExpectedOutput,
-            cpu_time_limit = request.CpuTimeLimit,
-            memory_limit = request.MemoryLimit
-        };
-        
-        var json = JsonSerializer.Serialize(payload);
-        Console.WriteLine("=================================");
-        Console.WriteLine(json);
-        Console.WriteLine("=================================");
+        if (request.LanguageId <= 0)
+            throw new Judge0Exception("A valid Judge0 language id is required.");
 
-        var content = new StringContent(json, System.Text.Encoding.UTF8, "application/json");
-        using var response = await _httpClient.PostAsync("submissions?base64_encoded=false&wait=false", content, cancellationToken);
+        if (string.IsNullOrWhiteSpace(request.SourceCode))
+            throw new Judge0Exception("Source code is required.");
+
+        var payload = new Judge0CreateSubmissionPayload
+        {
+            SourceCode = request.SourceCode,
+            LanguageId = request.LanguageId,
+            Stdin = request.StandardInput,
+            ExpectedOutput = request.ExpectedOutput,
+            CpuTimeLimit = request.CpuTimeLimit,
+            MemoryLimit = request.MemoryLimit,
+        };
+
+        var json = JsonSerializer.Serialize(payload, JsonOptions);
+
+        using var httpRequest = new HttpRequestMessage(
+            HttpMethod.Post,
+            "submissions?base64_encoded=false&wait=false");
+
+        httpRequest.Content = new StringContent(
+            json,
+            Encoding.UTF8,
+            "application/json");
+
+        httpRequest.Headers.Accept.Add(
+            new MediaTypeWithQualityHeaderValue("application/json"));
+
+        using var response = await _httpClient.SendAsync(
+            httpRequest,
+            HttpCompletionOption.ResponseHeadersRead,
+            cancellationToken);
+
+        var responseBody = await response.Content.ReadAsStringAsync(
+            cancellationToken);
+
         if (!response.IsSuccessStatusCode)
         {
-            var error = await response.Content.ReadAsStringAsync(cancellationToken);
-            throw new Judge0Exception($"Judge0 submission failed. {error}");
+            throw new Judge0Exception(
+                $"Judge0 submission failed ({(int)response.StatusCode}). {responseBody}");
         }
-        return await response.Content.ReadFromJsonAsync<Judge0SubmissionResponse>(JsonOptions, cancellationToken);
+
+        var result = JsonSerializer.Deserialize<Judge0SubmissionResponse>(
+            responseBody,
+            JsonOptions);
+
+        if (result is null || string.IsNullOrWhiteSpace(result.Token))
+            throw new Judge0Exception(
+                "Judge0 returned an invalid submission response.");
+
+        return result;
     }
 
-    public async Task<Judge0ResultResponse?> GetResultAsync(string token, CancellationToken cancellationToken = default)
+    public async Task<Judge0ResultResponse?> GetResultAsync(
+        string token,
+        CancellationToken cancellationToken = default)
     {
-        using var response = await _httpClient.GetAsync($"submissions/{token}?base64_encoded=false", cancellationToken);
+        if (string.IsNullOrWhiteSpace(token))
+            throw new Judge0Exception("Judge0 submission token is required.");
+
+        using var response = await _httpClient.GetAsync(
+            $"submissions/{Uri.EscapeDataString(token)}?base64_encoded=false",
+            cancellationToken);
+
         if (!response.IsSuccessStatusCode)
         {
-            var error = await response.Content.ReadAsStringAsync(cancellationToken);
-            throw new Judge0Exception($"Judge0 result retrieval failed. {error}");
+            var error = await response.Content.ReadAsStringAsync(
+                cancellationToken);
+
+            throw new Judge0Exception(
+                $"Judge0 result retrieval failed ({(int)response.StatusCode}). {error}");
         }
-        return await response.Content.ReadFromJsonAsync<Judge0ResultResponse>(JsonOptions, cancellationToken);
+
+        var responseBody = await response.Content.ReadAsStringAsync(
+            cancellationToken);
+
+        return JsonSerializer.Deserialize<Judge0ResultResponse>(
+            responseBody,
+            JsonOptions);
+    }
+
+    public async Task<Judge0ResultResponse> WaitForResultAsync(
+        string token,
+        TimeSpan? timeout = null,
+        CancellationToken cancellationToken = default)
+    {
+        var maxWait = timeout ?? TimeSpan.FromSeconds(60);
+        var startedAt = DateTime.UtcNow;
+
+        while (DateTime.UtcNow - startedAt < maxWait)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+
+            var result = await GetResultAsync(token, cancellationToken);
+
+            if (result is not null && result.Status.Id > 2)
+                return result;
+
+            await Task.Delay(
+                TimeSpan.FromMilliseconds(300),
+                cancellationToken);
+        }
+
+        throw new Judge0Exception(
+            $"Judge0 execution timed out while waiting for token '{token}'.");
+    }
+
+    private sealed class Judge0CreateSubmissionPayload
+    {
+        [JsonPropertyName("source_code")]
+        public string SourceCode { get; init; } = string.Empty;
+
+        [JsonPropertyName("language_id")]
+        public int LanguageId { get; init; }
+
+        [JsonPropertyName("stdin")]
+        public string? Stdin { get; init; }
+
+        [JsonPropertyName("expected_output")]
+        public string? ExpectedOutput { get; init; }
+
+        [JsonPropertyName("cpu_time_limit")]
+        public decimal? CpuTimeLimit { get; init; }
+
+        [JsonPropertyName("memory_limit")]
+        public decimal? MemoryLimit { get; init; }
     }
 }

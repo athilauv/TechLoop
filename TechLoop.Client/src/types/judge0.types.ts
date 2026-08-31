@@ -1,4 +1,5 @@
 export interface RunCodeRequest {
+    questionId: number;
     technologyId: number;
     sourceCode: string;
     standardInput?: string | null;

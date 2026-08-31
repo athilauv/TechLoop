@@ -10,7 +10,7 @@ export const submitToJudge0 = async (
 ): Promise<Judge0SubmissionResponse> => {
     const { data } = await api.post<Judge0SubmissionResponse>(
         "/api/judge0/run",
-        { request },
+        request,
     );
 
     return data;

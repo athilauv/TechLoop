@@ -10,7 +10,6 @@ namespace TechLoop.Infrastructure.Repositories;
 public sealed class DiscussionCommentRepository : IDiscussionCommentRepository
 {
     private readonly IDapperContext _context;
-
     public DiscussionCommentRepository(IDapperContext context)
     {
         _context = context;

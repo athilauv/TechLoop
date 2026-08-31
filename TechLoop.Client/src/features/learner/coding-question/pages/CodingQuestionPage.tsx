@@ -81,7 +81,6 @@ const CodingQuestionPage = () => {
     const [isRunning, setIsRunning] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [submission, setSubmission] = useState<Submission | null>(null);
-    //const id = question?.id ?? 0;
     const starterCode = useMemo(
         () => questionDetails?.codingTemplate?.starterCode ?? "",
         [questionDetails],
@@ -122,12 +121,13 @@ const CodingQuestionPage = () => {
 
             for (const testCase of testCases) {
                 const judgeSubmission = await submitToJudge0({
+                    questionId: question.id,
                     technologyId: template.technologyId,
                     sourceCode: code,
                     standardInput: testCase.input,
                     expectedOutput: testCase.expectedOutput,
                     cpuTimeLimit: question?.timeLimitSeconds ?? null,
-                    memoryLimit: question?.memoryLimitMb ? question.memoryLimitMb * 1024 : null,
+                    memoryLimit: question?.memoryLimitMb ?? null,
                 });
 
                 const result = await waitForJudge0Result(judgeSubmission.token);
@@ -135,10 +135,10 @@ const CodingQuestionPage = () => {
 
                 const timeSeconds = Number(result.time ?? 0);
                 if (Number.isFinite(timeSeconds)) executionTimeMs += Math.round(timeSeconds * 1000);
-                const memoryBytes = result.memory ?? 0;
+                const memoryKb = result.memory ?? 0;
                 memoryUsedMb = Math.max(
                     memoryUsedMb,
-                    Math.ceil(memoryBytes / 1024 / 1024),
+                    Math.ceil(memoryKb / 1024),
                 );
 
                 compilerOutput = result.compileOutput;

@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { getAdminCommunity } from "../../../../api/admin.api.ts";
-import AdminPageHeader from "../../components/AdminPageHeader.tsx";
-import AdminTable from "../../components/AdminTable.tsx";
+import AdminPageHeader from "../../components/AdminPageHeader";
+import AdminTable from "../../components/AdminTable";
 
 export default function AdminCommunityPage() {
     const { data = [], isLoading } = useQuery({ queryKey: ["admin-community-feed"], queryFn: getAdminCommunity });

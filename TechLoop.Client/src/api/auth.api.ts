@@ -1,4 +1,5 @@
-import type {CurrentUser} from "../types/auth.types.ts";
+﻿import type {CurrentUser} from "../types/auth.types.ts";
+import { assertBackendValidation } from "../validations/backend.validation.ts";
 
 const API_URL = `${import.meta.env.VITE_API_URL}/Auth`;
 
@@ -7,6 +8,7 @@ export async function login(data: {
     email: string;
     password: string;
 }) {
+    assertBackendValidation("POST", "/Auth/login", data);
     const response = await fetch(`${API_URL}/login`, {
         method: "POST",
         headers: {
@@ -35,6 +37,7 @@ export async function register(data: {
     email: string;
     password: string;
 }) {
+    assertBackendValidation("POST", "/Auth/register", data);
     const response = await fetch(`${API_URL}/register`, {
         method: "POST",
         headers: {
@@ -103,6 +106,7 @@ export async function changePassword(data: {
     newPassword: string;
     confirmPassword: string;
 }) {
+    assertBackendValidation("PUT", "/Auth/change-password", data);
     const response = await fetch(`${API_URL}/change-password`, {
         method: "PUT",
         headers: {
@@ -129,6 +133,7 @@ export async function changePassword(data: {
 export async function forgotPassword(data: {
     email: string;
 }) {
+    assertBackendValidation("POST", "/Auth/forgot-password", data);
     const response = await fetch(`${API_URL}/forgot-password`, {
         method: "POST",
         headers: {
@@ -157,6 +162,7 @@ export async function resetPassword(data: {
     newPassword: string;
     confirmPassword: string;
 }) {
+    assertBackendValidation("PUT", "/Auth/reset-password", data);
     const response = await fetch(`${API_URL}/reset-password`, {
         method: "PUT",
         headers: {
@@ -181,7 +187,7 @@ export async function resetPassword(data: {
 
 // MENTOR INITIAL PROFILE / PASSWORD SETUP
 export async function setupMentorProfile(
-    email: string,
+    token: string,
     data: {
         password: string;
         confirmPassword: string;
@@ -191,9 +197,11 @@ export async function setupMentorProfile(
         githubUrl: string;
         profileImageUrl: string;
     }
-) {
+ ) {
+    assertBackendValidation("PUT", "/Auth/mentor-setup", data);
+
     const response = await fetch(
-        `${API_URL}/update-profile/${encodeURIComponent(email)}`,
+        `${API_URL}/mentor-setup?token=${encodeURIComponent(token)}`,
         {
             method: "PUT",
             headers: {

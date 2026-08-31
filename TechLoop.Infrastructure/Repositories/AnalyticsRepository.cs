@@ -8,7 +8,6 @@ namespace TechLoop.Infrastructure.Repositories;
 public sealed class AnalyticsRepository : IAnalyticsRepository
 {
     private readonly IDapperContext _context;
-
     public AnalyticsRepository(IDapperContext context)
     {
         _context = context;

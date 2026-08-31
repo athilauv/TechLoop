@@ -19,8 +19,8 @@ const AdminLayout = () => {
 
             <div
                 className={[
-                    "ml-0 h-screen transition-all duration-300 md:ml-[72px]",
-                    collapsed ? "md:ml-[72px]" : "md:ml-64",
+                    "h-screen min-w-0 transition-all duration-300",
+                    collapsed ? "ml-0 md:ml-[72px]" : "ml-0 md:ml-64",
                 ].join(" ")}
             >
                 <Navbar
@@ -28,9 +28,9 @@ const AdminLayout = () => {
                     sidebarCollapsed={collapsed}
                 />
 
-                <main className="h-full overflow-y-auto bg-[#081423] pt-16">
+                <main className="h-full overflow-x-hidden overflow-y-auto bg-[#081423] pt-16">
                     <div className="flex min-h-full flex-col">
-                        <div className="flex-1 px-4 py-4 md:px-6 lg:px-8">
+                        <div className="min-w-0 flex-1 px-4 py-4 md:px-6 lg:px-8">
                             <Outlet />
                         </div>
                         <Footer />

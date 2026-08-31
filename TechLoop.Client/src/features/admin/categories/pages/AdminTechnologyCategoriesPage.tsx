@@ -2,10 +2,11 @@ import { useState, type FormEvent } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { CheckCircle2, Edit3, Plus, Trash2 } from "lucide-react";
 import { createAdminTechnologyCategory, deleteAdminTechnologyCategory, getAdminTechnologyCategories, publishAdminTechnologyCategory, updateAdminTechnologyCategory } from "../../../../api/admin.api.ts";
-import AdminPageHeader from "../../components/AdminPageHeader.tsx";
-import AdminTable from "../../components/AdminTable.tsx";
+import AdminPageHeader from "../../components/AdminPageHeader";
+import AdminTable from "../../components/AdminTable";
 import { getErrorMessage } from "../../../../utils/error.utils.ts";
 import { showToast } from "../../../../utils/toast.tsx";
+import { getBackendValidationMessage } from "../../../../validations/backend.validation.ts";
 
 export default function AdminTechnologyCategoriesPage() {
     const client = useQueryClient();
@@ -19,10 +20,22 @@ export default function AdminTechnologyCategoriesPage() {
     const remove = useMutation({ mutationFn: deleteAdminTechnologyCategory, onSuccess: (result) => { showToast.success(result.message || "Category deleted successfully."); refresh(); }, onError: (error) => showToast.error(getErrorMessage(error, "Failed to delete category.")) });
     const submit = (event: FormEvent) => {
         event.preventDefault();
-        const value = name.trim();
-        if (!value) return;
-        if (editingId) update.mutate({ id: editingId, value });
-        else create.mutate(value);
+        const value = name;
+        const validationMessage = getBackendValidationMessage(
+            editingId ? "PUT" : "POST",
+            editingId
+                ? `/admin/technology-categories/${editingId}`
+                : "/admin/technology-categories",
+            { name: value },
+        );
+
+        if (validationMessage) {
+            showToast.error(validationMessage);
+            return;
+        }
+
+        if (editingId) update.mutate({ id: editingId, value: value.trim() });
+        else create.mutate(value.trim());
     };
     return <div className="p-6 lg:p-10">
         <AdminPageHeader eyebrow="Content structure" title="Technology categories" description="Create, update, publish, and soft-delete the category structure used to organize technologies." />

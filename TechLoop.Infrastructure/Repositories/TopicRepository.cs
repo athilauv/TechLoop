@@ -19,8 +19,7 @@ public sealed class TopicRepository : ITopicsRepository
     {
         using var connection = _context.CreateConnection();
         return await connection.ExecuteScalarAsync<bool>(
-            new CommandDefinition(
-                "SELECT fn_topic_exists(@TechnologyId,@Title);",
+            new CommandDefinition("SELECT fn_topic_exists(@TechnologyId,@Title);",
                 new
                 {
                     TechnologyId = technologyId,
@@ -34,8 +33,7 @@ public sealed class TopicRepository : ITopicsRepository
     {
         using var connection = _context.CreateConnection();
         return await connection.ExecuteScalarAsync<bool>(
-            new CommandDefinition(
-                "SELECT fn_topic_slug_exists(@Slug);",
+            new CommandDefinition("SELECT fn_topic_slug_exists(@Slug);",
                 new
                 {
                     Slug = slug
@@ -48,8 +46,7 @@ public sealed class TopicRepository : ITopicsRepository
     {
         using var connection = _context.CreateConnection();
         return await connection.ExecuteScalarAsync<bool>(
-            new CommandDefinition(
-                "SELECT fn_topic_position_exists(@TechnologyId,@Position);",
+            new CommandDefinition("SELECT fn_topic_position_exists(@TechnologyId,@Position);",
                 new
                 {
                     TechnologyId = technologyId,
@@ -63,8 +60,7 @@ public sealed class TopicRepository : ITopicsRepository
     {
         using var connection = _context.CreateConnection();
         return await connection.ExecuteScalarAsync<bool>(
-            new CommandDefinition(
-                "SELECT fn_topic_technology_exists(@TechnologyId);",
+            new CommandDefinition("SELECT fn_topic_technology_exists(@TechnologyId);",
                 new
                 {
                     TechnologyId = technologyId
@@ -76,9 +72,7 @@ public sealed class TopicRepository : ITopicsRepository
     public async Task<int> CreateAsync(Topic topic, bool shiftPositions, CancellationToken cancellationToken)
     {
         using var connection = _context.CreateConnection();
-        return await connection.ExecuteScalarAsync<int>(new CommandDefinition(
-                @"
-                SELECT fn_create_topic(
+        return await connection.ExecuteScalarAsync<int>(new CommandDefinition(@"SELECT fn_create_topic(
                     @TechnologyId,
                     @Title,
                     @Slug,
@@ -89,8 +83,7 @@ public sealed class TopicRepository : ITopicsRepository
                     @Position,
                     @CreatedBy,
                     @CreatedAt,
-                    @ShiftPositions
-                );",
+                    @ShiftPositions);",
                 new
                 {
                     topic.TechnologyId,
@@ -114,8 +107,7 @@ public sealed class TopicRepository : ITopicsRepository
     {
         using var connection = _context.CreateConnection();
         return await connection.QuerySingleOrDefaultAsync<Topic>(
-            new CommandDefinition(
-                "SELECT * FROM fn_get_topic_by_id(@Id);",
+            new CommandDefinition("SELECT * FROM fn_get_topic_by_id(@Id);",
                 new
                 {
                     Id = id
@@ -125,8 +117,7 @@ public sealed class TopicRepository : ITopicsRepository
 
     public async Task<MentorTopicResponse?> GetMentorByIdAsync(int id, CancellationToken cancellationToken)
     {
-        const string sql = @"
-            SELECT
+        const string sql = @"SELECT
                 t.id,
                 t.technology_id,
                 t.title,
@@ -154,15 +145,10 @@ public sealed class TopicRepository : ITopicsRepository
 
     
     // Update an existing topic.
-    public async Task<int> UpdateAsync(
-        Topic topic,
-        bool shiftPositions,
-        CancellationToken cancellationToken)
+    public async Task<int> UpdateAsync(Topic topic, bool shiftPositions, CancellationToken cancellationToken)
     {
         using var connection = _context.CreateConnection();
-
-        return await connection.ExecuteAsync(
-            new CommandDefinition(
+        return await connection.ExecuteAsync(new CommandDefinition(
                 @"
                 CALL sp_update_topic(
                     @Id,
@@ -201,9 +187,7 @@ public sealed class TopicRepository : ITopicsRepository
     public async Task<int> SoftDeleteAsync(int id, Guid deletedBy, CancellationToken cancellationToken)
     {
         using var connection = _context.CreateConnection();
-        return await connection.ExecuteAsync(
-            new CommandDefinition(
-                @"CALL sp_soft_delete_topic(@Id, @DeletedBy, @DeletedAt);",
+        return await connection.ExecuteAsync(new CommandDefinition(@"CALL sp_soft_delete_topic(@Id, @DeletedBy, @DeletedAt);",
                 new
                 {
                     Id = id,
@@ -217,10 +201,7 @@ public sealed class TopicRepository : ITopicsRepository
     public async Task<IEnumerable<Topic>> GetAllAsync(CancellationToken cancellationToken)
     {
         using var connection = _context.CreateConnection();
-        return await connection.QueryAsync<Topic>(
-            new CommandDefinition(
-                "SELECT * FROM fn_get_all_topics();",
-                cancellationToken: cancellationToken));
+        return await connection.QueryAsync<Topic>(new CommandDefinition("SELECT * FROM fn_get_all_topics();", cancellationToken: cancellationToken));
     }
 
     public async Task<IEnumerable<MentorTopicResponse>> GetAllMentorAsync(Guid mentorId, CancellationToken cancellationToken)
@@ -263,16 +244,8 @@ public sealed class TopicRepository : ITopicsRepository
         using var connection = _context.CreateConnection();
 
         return await connection.ExecuteAsync(
-            new CommandDefinition(
-                """
-                CALL sp_publish_topic(
-                    @Id,
-                    @PublishedBy,
-                    @PublishedAt
-                );
-                """,
-                topic,
-                cancellationToken: cancellationToken));
+            new CommandDefinition(@"CALL sp_publish_topic( @Id, @PublishedBy, @PublishedAt);",
+                topic, cancellationToken: cancellationToken));
     }
     
     
@@ -280,8 +253,7 @@ public sealed class TopicRepository : ITopicsRepository
     public async Task<IEnumerable<Topic>> GetPublishedAsync(CancellationToken cancellationToken)
     {
         using var connection = _context.CreateConnection();
-        return await connection.QueryAsync<Topic>(
-            new CommandDefinition("SELECT * FROM fn_get_published_topics();", cancellationToken: cancellationToken));
+        return await connection.QueryAsync<Topic>(new CommandDefinition("SELECT * FROM fn_get_published_topics();", cancellationToken: cancellationToken));
     }
     
 
@@ -289,8 +261,7 @@ public sealed class TopicRepository : ITopicsRepository
     public async Task<Topic?> GetPublishedBySlugAsync(string slug, CancellationToken cancellationToken)
     {
         using var connection = _context.CreateConnection();
-        return await connection.QuerySingleOrDefaultAsync<Topic>(new CommandDefinition(
-                "SELECT * FROM fn_get_published_topic_by_slug(@Slug);",
+        return await connection.QuerySingleOrDefaultAsync<Topic>(new CommandDefinition("SELECT * FROM fn_get_published_topic_by_slug(@Slug);",
                 new
                 {
                     Slug = slug

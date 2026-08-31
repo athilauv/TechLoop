@@ -77,6 +77,14 @@ export const getAdminTechnologies = async (): Promise<MentorTechnology[]> => {
     return data;
 };
 
+// Mentor assignment only needs the technologies available for selection.
+// Keep the admin technology-management endpoint separate because it also
+// contains draft/publishing state.
+export const getMentorAssignmentTechnologies = async (): Promise<MentorTechnology[]> => {
+    const { data } = await api.get<MentorTechnology[]>("/technologies");
+    return data;
+};
+
 export const createAdminTechnology = async (request: CreateTechnologyRequest): Promise<OperationResponse> => {
     const { data } = await api.post<OperationResponse>("/admin/technologies", request);
     return data;

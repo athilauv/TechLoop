@@ -19,8 +19,7 @@ public sealed class SubTopicController : ControllerBase
 
     // Get all subtopics
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<LearnerSubTopicResponse>>> GetAllSubTopics(
-        CancellationToken cancellationToken)
+    public async Task<ActionResult<IEnumerable<LearnerSubTopicResponse>>> GetAllSubTopics(CancellationToken cancellationToken)
     {
         var result = await _mediator.Send(new GetAllLearnerSubTopicsQuery(), cancellationToken);
         return Ok(result);

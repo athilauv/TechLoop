@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { RotateCcw } from "lucide-react";
 
 interface CodingEditorProps {
@@ -11,11 +11,6 @@ const CodingEditor = ({
                           onCodeChange,
                       }: CodingEditorProps) => {
     const [code, setCode] = useState(starterCode);
-
-    useEffect(() => {
-        setCode(starterCode);
-    }, [starterCode]);
-
     const handleChange = (
         event: React.ChangeEvent<HTMLTextAreaElement>
     ) => {

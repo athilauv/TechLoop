@@ -14,7 +14,7 @@ public static class AuthenticationServiceCollectionExtensions
         services.AddScoped<IJwtGenerator, JwtTokenGenerator>();
         services.AddScoped<IPasswordHasher, PasswordHasher>();
         services.AddScoped<ICurrentUserService, CurrentUserService>();
-
+        
         return services;
     }
 }

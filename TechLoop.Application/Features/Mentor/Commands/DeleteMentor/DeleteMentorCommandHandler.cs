@@ -1,4 +1,5 @@
 ﻿using MediatR;
+using TechLoop.Application.Common.Exceptions;
 using TechLoop.Application.Interfaces.Repositories;
 
 namespace TechLoop.Application.Features.Mentor.Commands.DeleteMentor;
@@ -16,7 +17,7 @@ public sealed class DeleteMentorCommandHandler : IRequestHandler<DeleteMentorCom
         var mentor = await _repository.GetByIdAsync(request.MentorId, cancellationToken);
         if (mentor is null)
         {
-            throw new Exception("Mentor not found.");
+            throw new NotFoundException("Mentor not found.");
         }
 
         await _repository.DeleteAsync(request.MentorId, DateTimeOffset.UtcNow, cancellationToken);

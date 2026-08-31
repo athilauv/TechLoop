@@ -40,6 +40,16 @@ builder.Services.AddFluentValidationAutoValidation();
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddInfrastructure(builder.Configuration);
 
+// Fail fast when the local email configuration is not loaded. Without this,
+// mentor creation can persist the user/mentor and only then fail in
+// MailAddress with an empty sender address.
+var emailSender = builder.Configuration["EmailSettings:SenderEmail"];
+if (string.IsNullOrWhiteSpace(emailSender))
+{
+    throw new InvalidOperationException(
+        "EmailSettings:SenderEmail is missing. Start the API with the Development environment or configure a valid sender email.");
+}
+
 // Swagger
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options =>

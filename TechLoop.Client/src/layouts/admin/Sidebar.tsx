@@ -12,7 +12,6 @@ import {
     ChevronLeft,
     ChevronRight,
     LogOut,
-    Menu,
     X,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
@@ -45,11 +44,11 @@ const mainNav: NavItem[] = [
 ];
 
 function NavSection({
-    title,
-    items,
-    collapsed,
-    onCloseMobile,
-}: {
+                        title,
+                        items,
+                        collapsed,
+                        onCloseMobile,
+                    }: {
     title: string;
     items: NavItem[];
     collapsed: boolean;
@@ -108,11 +107,11 @@ function NavSection({
 }
 
 const Sidebar = ({
-    collapsed,
-    onToggleCollapsed,
-    mobileOpen,
-    onCloseMobile,
-}: SidebarProps) => {
+                     collapsed,
+                     onToggleCollapsed,
+                     mobileOpen,
+                     onCloseMobile,
+                 }: SidebarProps) => {
     const navigate = useNavigate();
     const queryClient = useQueryClient();
 
@@ -149,7 +148,7 @@ const Sidebar = ({
 
             <aside
                 className={[
-                    "fixed inset-y-0 left-0 z-50 flex flex-col border-r border-white/5 bg-[#0A1930] transition-all duration-300",
+                    "fixed inset-y-0 left-0 z-50 flex max-w-[85vw] flex-col border-r border-white/5 bg-[#0A1930] transition-all duration-300",
                     collapsed ? "w-[72px]" : "w-64",
                     mobileOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0",
                 ].join(" ")}
@@ -220,15 +219,6 @@ const Sidebar = ({
                         {!collapsed && <span>Logout</span>}
                     </button>
                 </div>
-
-                <button
-                    type="button"
-                    onClick={onCloseMobile}
-                    aria-label="Open menu"
-                    className="fixed left-4 top-4 z-30 rounded-xl border border-white/10 bg-[#0A1930] p-2 text-white shadow-lg md:hidden"
-                >
-                    <Menu size={20} />
-                </button>
             </aside>
         </>
     );

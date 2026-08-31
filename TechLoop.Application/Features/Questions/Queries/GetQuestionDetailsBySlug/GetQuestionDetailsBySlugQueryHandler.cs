@@ -1,4 +1,4 @@
-﻿using MediatR;
+using MediatR;
 using TechLoop.Application.Common.Exceptions;
 using TechLoop.Application.Features.Questions.DTOs;
 using TechLoop.Application.Interfaces.Repositories;
@@ -6,13 +6,19 @@ using TechLoop.Domain.Enums;
 
 namespace TechLoop.Application.Features.Questions.Queries.GetQuestionDetailsBySlug;
 
-public sealed class GetQuestionDetailsBySlugQueryHandler : IRequestHandler<GetQuestionDetailsBySlugQuery, QuestionDetailsResponse>
+public sealed class GetQuestionDetailsBySlugQueryHandler
+    : IRequestHandler<GetQuestionDetailsBySlugQuery, QuestionDetailsResponse>
 {
     private readonly IQuestionRepository _questionRepository;
     private readonly IMcqOptionRepository _mcqOptionRepository;
     private readonly ICodingTemplateRepository _codingTemplateRepository;
     private readonly ITestCaseRepository _testCaseRepository;
-    public GetQuestionDetailsBySlugQueryHandler(IQuestionRepository questionRepository, IMcqOptionRepository mcqOptionRepository, ICodingTemplateRepository codingTemplateRepository, ITestCaseRepository testCaseRepository)
+
+    public GetQuestionDetailsBySlugQueryHandler(
+        IQuestionRepository questionRepository,
+        IMcqOptionRepository mcqOptionRepository,
+        ICodingTemplateRepository codingTemplateRepository,
+        ITestCaseRepository testCaseRepository)
     {
         _questionRepository = questionRepository;
         _mcqOptionRepository = mcqOptionRepository;
@@ -20,9 +26,13 @@ public sealed class GetQuestionDetailsBySlugQueryHandler : IRequestHandler<GetQu
         _testCaseRepository = testCaseRepository;
     }
 
-    public async Task<QuestionDetailsResponse> Handle(GetQuestionDetailsBySlugQuery request, CancellationToken cancellationToken)
+    public async Task<QuestionDetailsResponse> Handle(
+        GetQuestionDetailsBySlugQuery request,
+        CancellationToken cancellationToken)
     {
-        var question = await _questionRepository.GetPublishedBySlugAsync(request.Slug, cancellationToken);
+        var question = await _questionRepository.GetPublishedBySlugAsync(
+            request.Slug,
+            cancellationToken);
 
         if (question is null)
             throw new NotFoundException("Question not found.");
@@ -47,14 +57,22 @@ public sealed class GetQuestionDetailsBySlugQueryHandler : IRequestHandler<GetQu
 
         if (question.QuestionType == QuestionType.mcq)
         {
-            var options = await _mcqOptionRepository.GetByQuestionIdAsync(question.Id, cancellationToken);
-            response.Options = options.Select(x => new QuestionMcqOptionResponse()
-            {
-                Id = x.Id,
-                OptionText = x.OptionText,
-                IsCorrect = x.IsCorrect,
-                Position = x.Position
-            }).ToList();
+            var options = await _mcqOptionRepository.GetByQuestionIdAsync(
+                question.Id,
+                cancellationToken);
+
+            response.Options = options
+                .Select(x => new QuestionMcqOptionResponse
+                {
+                    Id = x.Id,
+                    OptionText = x.OptionText,
+
+                    // Never expose the correct answer to a learner.
+                    IsCorrect = false,
+
+                    Position = x.Position
+                })
+                .ToList();
         }
         else if (question.QuestionType == QuestionType.coding)
         {
@@ -76,14 +94,16 @@ public sealed class GetQuestionDetailsBySlugQueryHandler : IRequestHandler<GetQu
                 question.Id,
                 cancellationToken);
 
-            response.TestCases = testCases.Select(x => new TestCaseResponse
-            {
-                Id = x.Id,
-                Input = x.Input,
-                ExpectedOutput = x.ExpectedOutput,
-                IsHidden = x.IsHidden,
-                Position = x.Position
-            }).ToList();
+            response.TestCases = testCases
+                .Select(x => new TestCaseResponse
+                {
+                    Id = x.Id,
+                    Input = x.Input,
+                    ExpectedOutput = x.ExpectedOutput,
+                    IsHidden = x.IsHidden,
+                    Position = x.Position
+                })
+                .ToList();
         }
 
         return response;

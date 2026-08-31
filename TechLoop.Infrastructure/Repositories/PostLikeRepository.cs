@@ -10,7 +10,6 @@ namespace TechLoop.Infrastructure.Repositories;
 public sealed class PostLikeRepository : IPostLikeRepository
 {
     private readonly IDapperContext _context;
-
     public PostLikeRepository(IDapperContext context)
     {
         _context = context;

@@ -1,8 +1,9 @@
-﻿using FluentValidation;
+using FluentValidation;
 
 namespace TechLoop.Application.Features.Coding.Commands.CreateTestCase;
 
-public sealed class CreateTestCaseCommandValidator : AbstractValidator<CreateTestCaseCommand>
+public sealed class CreateTestCaseCommandValidator
+    : AbstractValidator<CreateTestCaseCommand>
 {
     public CreateTestCaseCommandValidator()
     {
@@ -10,12 +11,13 @@ public sealed class CreateTestCaseCommandValidator : AbstractValidator<CreateTes
             .GreaterThan(0)
             .WithMessage("Question is required.");
 
+        // Empty input is valid for programs that do not read stdin.
         RuleFor(x => x.Input)
-            .NotEmpty()
+            .NotNull()
             .WithMessage("Input is required.");
 
         RuleFor(x => x.ExpectedOutput)
-            .NotEmpty()
+            .NotNull()
             .WithMessage("Expected output is required.");
 
         RuleFor(x => x.Position)

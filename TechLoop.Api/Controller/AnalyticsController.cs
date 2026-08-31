@@ -16,58 +16,37 @@ public sealed class AnalyticsController : ControllerBase
     private readonly IMediator _mediator;
     private readonly ICurrentUserService _currentUserService;
 
-    public AnalyticsController(
-        IMediator mediator,
-        ICurrentUserService currentUserService)
+    public AnalyticsController(IMediator mediator, ICurrentUserService currentUserService)
     {
         _mediator = mediator;
         _currentUserService = currentUserService;
     }
 
     // Returns combined analytics/dashboard data
-    // for the currently logged-in user.
     [HttpGet]
-    public async Task<IActionResult> GetAnalytics(
-        CancellationToken cancellationToken)
+    public async Task<IActionResult> GetAnalytics(CancellationToken cancellationToken)
     {
         var userId = _currentUserService.UserId;
-
         var query = new GetAnalyticsQuery(userId);
-
-        var response = await _mediator.Send(
-            query,
-            cancellationToken);
-
+        var response = await _mediator.Send(query, cancellationToken);
         return Ok(response);
     }
 
     // Returns progress of all topics
-    // for the currently logged-in user.
     [HttpGet("topic-progress")]
-    public async Task<IActionResult> GetTopicProgress(
-        CancellationToken cancellationToken)
+    public async Task<IActionResult> GetTopicProgress(CancellationToken cancellationToken)
     {
         var userId = _currentUserService.UserId;
-
-        var response = await _mediator.Send(
-            new GetUserTopicProgressListQuery(userId),
-            cancellationToken);
-
+        var response = await _mediator.Send(new GetUserTopicProgressListQuery(userId), cancellationToken);
         return Ok(response);
     }
 
     // Returns progress of a specific topic.
     [HttpGet("topic-progress/{topicId:int}")]
-    public async Task<IActionResult> GetTopicProgressByTopic(
-        int topicId,
-        CancellationToken cancellationToken)
+    public async Task<IActionResult> GetTopicProgressByTopic(int topicId, CancellationToken cancellationToken)
     {
         var userId = _currentUserService.UserId;
-
-        var response = await _mediator.Send(
-            new GetUserTopicProgressQuery(userId, topicId),
-            cancellationToken);
-
+        var response = await _mediator.Send(new GetUserTopicProgressQuery(userId, topicId), cancellationToken);
         return Ok(response);
     }
 }

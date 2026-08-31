@@ -1,4 +1,4 @@
-import { useState } from "react";
+﻿import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { forgotPassword } from "../../../api/auth.api.ts";
 import { showToast } from "../../../utils/toast.tsx";
@@ -146,17 +146,11 @@ export default function ForgotPasswordPage() {
 
                     {/* Tabs */}
                     <div className="flex border border-[#1e3254] rounded-lg overflow-hidden mb-7">
-                        <Link
-                            to="/login"
-                            className="flex-1 flex items-center justify-center py-2.5 bg-[#0f3d30] text-[#00e5c0] text-sm font-semibold no-underline"
-                        >
+                        <Link to="/login" className="flex-1 flex items-center justify-center py-2.5 bg-[#0f3d30] text-[#00e5c0] text-sm font-semibold no-underline">
                             Sign In
                         </Link>
 
-                        <Link
-                            to="/register"
-                            className="flex-1 flex items-center justify-center py-2.5 text-[#7a99bb] text-sm font-medium no-underline hover:text-[#e8f0fe] transition-colors"
-                        >
+                        <Link to="/register" className="flex-1 flex items-center justify-center py-2.5 text-[#7a99bb] text-sm font-medium no-underline hover:text-[#e8f0fe] transition-colors">
                             Register
                         </Link>
                     </div>
@@ -191,19 +185,14 @@ export default function ForgotPasswordPage() {
                                     disabled={loading}
                                     className="w-full py-[13px] bg-[#00e5c0] border-none rounded-lg text-[#001a14] text-[15px] font-bold cursor-pointer tracking-[0.1px] font-[inherit] transition-all duration-150 hover:bg-[#00b89a] active:scale-[0.99] disabled:opacity-50 disabled:cursor-not-allowed"
                                 >
-                                    {loading
-                                        ? "Sending..."
-                                        : "Send Reset Link"}
+                                    {loading ? "Sending..." : "Send Reset Link"}
                                 </button>
                             </div>
 
                             {/* Back to Login */}
                             <p className="mt-6 text-xs text-[#4a6380] text-center">
                                 Remember your password?{" "}
-                                <Link
-                                    to="/login"
-                                    className="text-[#00e5c0] underline underline-offset-2 text-xs hover:text-[#00b89a]"
-                                >
+                                <Link to="/login" className="text-[#00e5c0] underline underline-offset-2 text-xs hover:text-[#00b89a]">
                                     Sign in
                                 </Link>
                             </p>
@@ -227,10 +216,8 @@ export default function ForgotPasswordPage() {
                                 password reset link has been sent.
                             </p>
 
-                            <button
-                                onClick={() => navigate("/login")}
-                                className="mt-6 w-full py-[13px] bg-[#00e5c0] border-none rounded-lg text-[#001a14] text-[15px] font-bold cursor-pointer font-[inherit] transition-all duration-150 hover:bg-[#00b89a] active:scale-[0.99]"
-                            >
+                            <button onClick={() => navigate("/login")}
+                                className="mt-6 w-full py-[13px] bg-[#00e5c0] border-none rounded-lg text-[#001a14] text-[15px] font-bold cursor-pointer font-[inherit] transition-all duration-150 hover:bg-[#00b89a] active:scale-[0.99]">
                                 Back to Login
                             </button>
                         </div>

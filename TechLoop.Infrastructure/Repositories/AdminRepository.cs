@@ -9,7 +9,6 @@ namespace TechLoop.Infrastructure.Repositories;
 public sealed class AdminRepository : IAdminRepository
 {
     private readonly IDapperContext _context;
-
     public AdminRepository(IDapperContext context)
     {
         _context = context;

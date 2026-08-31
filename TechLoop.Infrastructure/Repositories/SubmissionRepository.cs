@@ -44,7 +44,6 @@ public class SubmissionRepository : ISubmissionRepository
         );";
 
         using var connection = _context.CreateConnection();
-
         return await connection.ExecuteScalarAsync<int>(
             new CommandDefinition(
                 sql,

@@ -12,7 +12,6 @@ namespace TechLoop.Api.Controllers;
 public sealed class TechnologyCategoryController : ControllerBase
 {
     private readonly IMediator _mediator;
-
     public TechnologyCategoryController(IMediator mediator)
     {
         _mediator = mediator;

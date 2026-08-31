@@ -16,7 +16,7 @@ public class UserRepository : IUserRepository
     public async Task<User?> GetByIdAsync(Guid userId)
     {
         using var connection = _context.CreateConnection();
-        const string sql = """
+        const string sql = @"
             SELECT
                 id,
                 username,
@@ -29,8 +29,7 @@ public class UserRepository : IUserRepository
                 created_at,
                 updated_at
             FROM users
-            WHERE id = @Id;
-            """;
+            WHERE id = @Id;";
         return await connection.QueryFirstOrDefaultAsync<User>(
             sql,
             new { Id = userId });
@@ -39,7 +38,7 @@ public class UserRepository : IUserRepository
     public async Task<User?> GetByUsernameAsync(string username)
     {
         using var connection = _context.CreateConnection();
-        const string sql = """
+        const string sql = @"
             SELECT
                 id,
                 username,
@@ -52,8 +51,7 @@ public class UserRepository : IUserRepository
                 created_at,
                 updated_at
             FROM users
-            WHERE username = @Username;
-            """;
+            WHERE username = @Username;";
         return await connection.QueryFirstOrDefaultAsync<User>(
             sql,
             new { Username = username });
@@ -62,7 +60,7 @@ public class UserRepository : IUserRepository
     public async Task<User?> GetByEmailAsync(string email)
     {
         using var connection = _context.CreateConnection();
-        const string sql = """
+        const string sql = @"
             SELECT
                 id,
                 username,
@@ -75,8 +73,8 @@ public class UserRepository : IUserRepository
                 created_at,
                 updated_at
             FROM users
-            WHERE email = @Email;
-            """;
+            WHERE email = @Email;";
+            
         return await connection.QueryFirstOrDefaultAsync<User>(
             sql,
             new { Email = email });

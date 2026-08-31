@@ -3,10 +3,11 @@
 public sealed class EmailSettings
 {
     public string Host { get; set; } = string.Empty;
-    public int Port { get; set; }
-    public string SenderName { get; set; } = string.Empty;
+    public int Port { get; set; } = 587;
+    public string SenderName { get; set; } = "TechLoop";
     public string SenderEmail { get; set; } = string.Empty;
     public string Username { get; set; } = string.Empty;
     public string Password { get; set; } = string.Empty;
-    public bool EnableSsl { get; set; }
+    public bool EnableSsl { get; set; } = true;
+    public string FrontendBaseUrl { get; set; } = "http://localhost:5173";
 }

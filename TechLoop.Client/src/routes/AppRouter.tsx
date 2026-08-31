@@ -1,11 +1,11 @@
 ﻿import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-import LoginPage from "../features/learner/auth/LoginPage.tsx";
-import RegisterPage from "../features/learner/auth/RegisterPage.tsx";
+import LoginPage from "../features/common/auth/LoginPage.tsx";
+import RegisterPage from "../features/common/auth/RegisterPage.tsx";
 import LearnerRoutes from "./LearnerRoutes.tsx";
-import ForgotPasswordPage from "../features/learner/auth/ForgotPasswordPage.tsx";
-import ResetPasswordPage from "../features/learner/auth/ResetPasswordPage.tsx";
-import ChangePasswordPage from "../features/learner/auth/ChangePasswordPage.tsx";
-import MentorSetupPage from "../features/learner/auth/MentorSetupPage.tsx";
+import ForgotPasswordPage from "../features/common/auth/ForgotPasswordPage.tsx";
+import ResetPasswordPage from "../features/common/auth/ResetPasswordPage.tsx";
+import ChangePasswordPage from "../features/common/auth/ChangePasswordPage.tsx";
+import MentorSetupPage from "../features/common/auth/MentorSetupPage.tsx";
 import MentorRoutes from "./MentorRoutes.tsx";
 import AdminRoutes from "./AdminRoutes.tsx";
 

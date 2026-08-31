@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { Activity, BookOpen, Boxes, CircleHelp, FileQuestion, GraduationCap, Layers, MessageSquare, Users } from "lucide-react";
 import { getAdminDashboard } from "../../../../api/admin.api.ts";
-import AdminPageHeader from "../../components/AdminPageHeader.tsx";
+import AdminPageHeader from "../../components/AdminPageHeader";
 import AdminStatCard from "../../components/AdminStatCard.tsx";
 
 export default function AdminDashboardPage() {

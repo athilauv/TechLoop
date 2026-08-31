@@ -44,48 +44,32 @@ public sealed class DiscussionsController : ControllerBase
 
     // Returns a discussion by id.
     [HttpGet("{id:int}")]
-    public async Task<IActionResult> GetDiscussionById(
-        int id,
-        CancellationToken cancellationToken)
+    public async Task<IActionResult> GetDiscussionById(int id, CancellationToken cancellationToken)
     {
-        var result = await _mediator.Send(
-            new GetDiscussionByIdQuery(id),
-            cancellationToken);
-
+        var result = await _mediator.Send(new GetDiscussionByIdQuery(id), cancellationToken);
         return Ok(result);
     }
 
     // Returns all discussions.
     [HttpGet]
-    public async Task<IActionResult> GetAllDiscussions(
-        CancellationToken cancellationToken)
+    public async Task<IActionResult> GetAllDiscussions(CancellationToken cancellationToken)
     {
-        var result = await _mediator.Send(
-            new GetDiscussionsQuery(),
-            cancellationToken);
-
+        var result = await _mediator.Send(new GetDiscussionsQuery(), cancellationToken);
         return Ok(result);
     }
 
     // Returns discussions for a question.
     [HttpGet("question/{questionId:int}")]
-    public async Task<IActionResult> GetQuestionDiscussions(
-        int questionId,
-        CancellationToken cancellationToken)
+    public async Task<IActionResult> GetQuestionDiscussions(int questionId, CancellationToken cancellationToken)
     {
-        var result = await _mediator.Send(
-            new GetQuestionDiscussionsQuery(questionId),
-            cancellationToken);
-
+        var result = await _mediator.Send(new GetQuestionDiscussionsQuery(questionId), cancellationToken);
         return Ok(result);
     }
 
     // Updates a discussion.
     [HttpPut("{id:int}")]
     public async Task<IActionResult> UpdateDiscussion(
-        int id,
-        [FromBody] UpdatedDiscussionCommand command,
-        CancellationToken cancellationToken)
+        int id, [FromBody] UpdatedDiscussionCommand command, CancellationToken cancellationToken)
     {
         if (id != command.Id)
         {
@@ -93,20 +77,14 @@ public sealed class DiscussionsController : ControllerBase
         }
 
         var result = await _mediator.Send(command, cancellationToken);
-
         return Ok(result);
     }
 
     // Deletes a discussion.
     [HttpDelete("{id:int}")]
-    public async Task<IActionResult> DeleteDiscussion(
-        int id,
-        CancellationToken cancellationToken)
+    public async Task<IActionResult> DeleteDiscussion(int id, CancellationToken cancellationToken)
     {
-        await _mediator.Send(
-            new DeleteDiscussionCommand(id),
-            cancellationToken);
-
+        await _mediator.Send(new DeleteDiscussionCommand(id), cancellationToken);
         return NoContent();
     }
 
@@ -121,27 +99,17 @@ public sealed class DiscussionsController : ControllerBase
 
     // Returns a comment by id.
     [HttpGet("comments/{id:int}")]
-    public async Task<IActionResult> GetCommentById(
-        int id,
-        CancellationToken cancellationToken)
+    public async Task<IActionResult> GetCommentById(int id, CancellationToken cancellationToken)
     {
-        var result = await _mediator.Send(
-            new GetCommentByIdQuery(id),
-            cancellationToken);
-
+        var result = await _mediator.Send(new GetCommentByIdQuery(id), cancellationToken);
         return Ok(result);
     }
 
     // Returns all comments for a discussion.
     [HttpGet("{discussionId:int}/comments")]
-    public async Task<IActionResult> GetDiscussionComments(
-        int discussionId,
-        CancellationToken cancellationToken)
+    public async Task<IActionResult> GetDiscussionComments(int discussionId, CancellationToken cancellationToken)
     {
-        var result = await _mediator.Send(
-            new GetDiscussionCommentsQuery(discussionId),
-            cancellationToken);
-
+        var result = await _mediator.Send(new GetDiscussionCommentsQuery(discussionId), cancellationToken);
         return Ok(result);
     }
 
@@ -156,14 +124,9 @@ public sealed class DiscussionsController : ControllerBase
 
     // Deletes a comment.
     [HttpDelete("comments/{id:int}")]
-    public async Task<IActionResult> DeleteComment(
-        int id,
-        CancellationToken cancellationToken)
+    public async Task<IActionResult> DeleteComment(int id, CancellationToken cancellationToken)
     {
-        await _mediator.Send(
-            new DeleteCommentCommand(id),
-            cancellationToken);
-
+        await _mediator.Send(new DeleteCommentCommand(id), cancellationToken);
         return NoContent();
     }
 }

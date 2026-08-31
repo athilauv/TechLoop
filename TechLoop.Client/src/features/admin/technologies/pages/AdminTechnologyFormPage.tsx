@@ -12,9 +12,10 @@ import type {
     CreateTechnologyRequest,
     UpdateTechnologyRequest,
 } from "../../../../types/technology.types.ts";
-import AdminPageHeader from "../../components/AdminPageHeader.tsx";
+import AdminPageHeader from "../../components/AdminPageHeader";
 import { getErrorMessage } from "../../../../utils/error.utils.ts";
 import { showToast } from "../../../../utils/toast.tsx";
+import { getBackendValidationMessage } from "../../../../validations/backend.validation.ts";
 
 export default function AdminTechnologyFormPage() {
     const { id } = useParams();
@@ -147,7 +148,14 @@ function TechnologyForm({
     const submit = (event: FormEvent) => {
         event.preventDefault();
 
-        if (!form.name.trim() || !form.categoryId || !form.position) {
+        const validationMessage = getBackendValidationMessage(
+            editing ? "PUT" : "POST",
+            editing ? `/admin/technologies/${id}` : "/admin/technologies",
+            form,
+        );
+
+        if (validationMessage) {
+            showToast.error(validationMessage);
             return;
         }
 
@@ -171,11 +179,12 @@ function TechnologyForm({
                 eyebrow="Technology"
                 title={editing ? "Edit technology" : "Create technology"}
                 description="Keep technology metadata aligned with the existing backend validation rules."
+                backTo="/admin/technologies"
             />
 
             <form
                 onSubmit={submit}
-                className="max-w-3xl space-y-5 rounded-2xl border border-[#223A59] bg-[#12233B] p-6"
+                className="mx-auto w-full max-w-3xl space-y-5 rounded-2xl border border-[#223A59] bg-[#12233B] p-4 sm:p-6"
             >
                 <label className="block text-sm text-[#8CA3BF]">
                     Name
@@ -250,7 +259,7 @@ function TechnologyForm({
                     />
                 </label>
 
-                <div className="flex gap-3">
+                <div className="flex flex-wrap gap-3">
                     <button
                         type="button"
                         onClick={() => navigate("/admin/technologies")}

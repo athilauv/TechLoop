@@ -19,9 +19,7 @@ public sealed class TopicContributionRepository : ITopicContributionRepository
     {
         const string sql = @"SELECT fn_topic_contribution_technology_exists(@TechnologyId);";
         using var connection = _context.CreateConnection();
-
-        return await connection.ExecuteScalarAsync<bool>(
-            new CommandDefinition(
+        return await connection.ExecuteScalarAsync<bool>(new CommandDefinition(
                 sql,
                 new
                 {
@@ -43,8 +41,7 @@ public sealed class TopicContributionRepository : ITopicContributionRepository
         string? referenceUrl,
         CancellationToken cancellationToken)
     {
-        const string sql = @"
-            SELECT fn_create_topic_contribution(
+        const string sql = @"SELECT fn_create_topic_contribution(
                 @LearnerId,
                 @TechnologyId,
                 @TopicId,
@@ -53,11 +50,9 @@ public sealed class TopicContributionRepository : ITopicContributionRepository
                 @Description,
                 @Example,
                 @ExampleType,
-                @ReferenceUrl
-            );";
+                @ReferenceUrl);";
 
         using var connection = _context.CreateConnection();
-
         return await connection.ExecuteScalarAsync<int>(
             new CommandDefinition(
                 sql,
@@ -134,14 +129,11 @@ public sealed class TopicContributionRepository : ITopicContributionRepository
     }
 
     // Gets contributions for a technology
-    public async Task<IEnumerable<TopicContributionResponse>>
-        GetTechnologyContributionsAsync(
-        int technologyId, CancellationToken cancellationToken)
+    public async Task<IEnumerable<TopicContributionResponse>> GetTechnologyContributionsAsync(int technologyId, CancellationToken cancellationToken)
     {
         const string sql = @"SELECT * FROM fn_get_technology_topic_contributions(@TechnologyId);";
         using var connection = _context.CreateConnection();
-        return await connection.QueryAsync<TopicContributionResponse>(
-            new CommandDefinition(
+        return await connection.QueryAsync<TopicContributionResponse>(new CommandDefinition(
                 sql,
                 new
                 {
@@ -181,19 +173,11 @@ public sealed class TopicContributionRepository : ITopicContributionRepository
                 cancellationToken: cancellationToken));
     }
 
-    public async Task<IEnumerable<TopicContributionPendingResponse>>
-        GetPendingContributionsAsync(
-            Guid mentorId,
-            CancellationToken cancellationToken)
+    public async Task<IEnumerable<TopicContributionPendingResponse>> GetPendingContributionsAsync(Guid mentorId, CancellationToken cancellationToken)
     {
-        const string sql = @"
-            SELECT *
-            FROM fn_get_pending_topic_contributions(@MentorId);";
-
+        const string sql = @"SELECT * FROM fn_get_pending_topic_contributions(@MentorId);";
         using var connection = _context.CreateConnection();
-
-        return await connection.QueryAsync<TopicContributionPendingResponse>(
-            new CommandDefinition(
+        return await connection.QueryAsync<TopicContributionPendingResponse>(new CommandDefinition(
                 sql,
                 new
                 {
@@ -205,22 +189,11 @@ public sealed class TopicContributionRepository : ITopicContributionRepository
     // Gets a contribution for a mentor by ID.
     // All SQL/data shaping is kept inside the PostgreSQL function.
     public async Task<TopicContributionResponse?>
-        GetMentorContributionByIdAsync(
-            Guid mentorId,
-            int contributionId,
-            CancellationToken cancellationToken)
+        GetMentorContributionByIdAsync(Guid mentorId, int contributionId, CancellationToken cancellationToken)
     {
-        const string sql = @"
-            SELECT *
-            FROM fn_get_mentor_topic_contribution_by_id(
-                @MentorId,
-                @ContributionId
-            );";
-
+        const string sql = @"SELECT * FROM fn_get_mentor_topic_contribution_by_id( @MentorId, @ContributionId);";
         using var connection = _context.CreateConnection();
-
-        return await connection.QuerySingleOrDefaultAsync<TopicContributionResponse>(
-            new CommandDefinition(
+        return await connection.QuerySingleOrDefaultAsync<TopicContributionResponse>(new CommandDefinition(
                 sql,
                 new
                 {

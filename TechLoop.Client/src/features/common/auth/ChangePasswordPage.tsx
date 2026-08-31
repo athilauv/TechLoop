@@ -1,4 +1,4 @@
-import { useState } from "react";
+﻿import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { changePassword } from "../../../api/auth.api.ts";
 import { showToast } from "../../../utils/toast.tsx";
@@ -37,18 +37,11 @@ function PasswordField({
                     className={`w-full px-3.5 pr-16 py-[11px] bg-[#0a1525] border rounded-[7px] text-sm text-[#e8f0fe] placeholder-[#4a6380] outline-none transition-all duration-200
                     focus:border-[#00e5c0]
                     focus:shadow-[0_0_0_3px_rgba(0,229,192,0.1)]
-                    ${
-                        error
-                            ? "border-[#e05c5c]"
-                            : "border-[#1e3254]"
-                    }`}
+                    ${error ? "border-[#e05c5c]" : "border-[#1e3254]"}`}
                 />
 
-                <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-[#7a99bb] hover:text-[#00e5c0]"
-                >
+                <button type="button" onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-[#7a99bb] hover:text-[#00e5c0]">
                     {showPassword ? "Hide" : "Show"}
                 </button>
             </div>
@@ -75,9 +68,7 @@ function Requirement({
         <div className="flex items-center gap-2">
             <span
                 className={`text-[11px] ${
-                    valid
-                        ? "text-[#00e5c0]"
-                        : "text-[#4a6380]"
+                    valid ? "text-[#00e5c0]" : "text-[#4a6380]"
                 }`}
             >
                 {valid ? "✓" : "○"}

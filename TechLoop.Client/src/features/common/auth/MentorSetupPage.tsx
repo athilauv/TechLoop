@@ -1,4 +1,4 @@
-import { useState } from "react";
+﻿import { useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { setupMentorProfile } from "../../../api/auth.api.ts";
 import { showToast } from "../../../utils/toast.tsx";
@@ -147,7 +147,7 @@ export default function MentorSetupPage() {
     const navigate = useNavigate();
     const [searchParams] = useSearchParams();
 
-    const email = searchParams.get("email") ?? "";
+    const token = searchParams.get("token") ?? "";
 
     const [password, setPassword] = useState("");
     const [confirmPassword, setConfirmPassword] = useState("");
@@ -165,8 +165,8 @@ export default function MentorSetupPage() {
     const validate = (): boolean => {
         const e: Record<string, string> = {};
 
-        if (!email.trim()) {
-            e.email = "Invalid mentor invitation link.";
+        if (!token.trim()) {
+            e.token = "Invalid mentor invitation link.";
         }
 
         if (!password) {
@@ -234,7 +234,7 @@ export default function MentorSetupPage() {
         setLoading(true);
 
         try {
-            await setupMentorProfile(email, {
+            await setupMentorProfile(token, {
                 password,
                 confirmPassword,
                 phoneNumber,
@@ -342,12 +342,12 @@ export default function MentorSetupPage() {
                         </label>
 
                         <div className="mt-1.5 px-3.5 py-[11px] bg-[#07111f] border border-[#1e3254] rounded-[7px] text-sm text-[#7a99bb]">
-                            {email || "Invalid invitation"}
+                            "Your mentor invitation email"
                         </div>
 
-                        {errors.email && (
+                        {errors.token && (
                             <span className="text-[11px] text-[#e05c5c]">
-                                {errors.email}
+                                {errors.token}
                             </span>
                         )}
                     </div>

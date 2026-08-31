@@ -49,8 +49,7 @@ public class SubmissionController : ControllerBase
     
     // Get current user's submissions.
     [HttpGet("me")]
-    public async Task<IActionResult> GetMySubmissions(
-        CancellationToken cancellationToken)
+    public async Task<IActionResult> GetMySubmissions(CancellationToken cancellationToken)
     {
         var userId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
         var query = new GetUserSubmissionsQuery(userId);
@@ -68,9 +67,7 @@ public class SubmissionController : ControllerBase
     }
     
     [HttpPost("mcq")]
-    public async Task<IActionResult> SubmitMcqAnswer(
-        [FromBody] SubmitMcqAnswerRequest request,
-        CancellationToken cancellationToken)
+    public async Task<IActionResult> SubmitMcqAnswer([FromBody] SubmitMcqAnswerRequest request, CancellationToken cancellationToken)
     {
         var userId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
         var command = new SubmitMcqAnswerCommand(userId, request);

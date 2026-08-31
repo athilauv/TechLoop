@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import Button from "../../../../../shared/Button.tsx";
 import {
     DifficultyLevel,
@@ -74,13 +74,6 @@ const CodingQuestionForm = ({
                                 onCancel,
                             }: CodingQuestionFormProps) => {
     const [form, setForm] = useState<FormState>(() => createInitialState(question));
-
-    useEffect(() => {
-        if (question) {
-            setForm(createInitialState(question));
-        }
-    }, [question]);
-
     const updateField = <K extends keyof FormState>(field: K, value: FormState[K]) => {
         setForm((current) => ({ ...current, [field]: value }));
     };

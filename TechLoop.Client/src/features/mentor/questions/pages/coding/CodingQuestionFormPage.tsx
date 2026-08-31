@@ -83,6 +83,7 @@ const CodingQuestionFormPage = () => {
 
                     <div className="mt-6">
                         <CodingQuestionForm
+                            key={question?.id ?? "create"}
                             question={question}
                             subTopics={subTopics}
                             subTopicsLoading={subTopicsLoading}

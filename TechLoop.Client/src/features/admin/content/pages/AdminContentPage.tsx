@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { BookOpen, Boxes, FileQuestion, ListTree } from "lucide-react";
-import AdminPageHeader from "../../components/AdminPageHeader.tsx";
+import AdminPageHeader from "../../components/AdminPageHeader";
 
 const areas = [
     { title: "Technologies", description: "Manage the root technology entities and publishing state.", href: "/admin/technologies", icon: Boxes },

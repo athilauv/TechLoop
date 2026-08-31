@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { getAdminPendingContributions } from "../../../../api/admin.api.ts";
-import AdminPageHeader from "../../components/AdminPageHeader.tsx";
-import AdminTable from "../../components/AdminTable.tsx";
+import AdminPageHeader from "../../components/AdminPageHeader";
+import AdminTable from "../../components/AdminTable";
 
 export default function AdminPendingContributionsPage() {
     const { data = [], isLoading } = useQuery({ queryKey: ["admin-pending-contributions"], queryFn: getAdminPendingContributions });

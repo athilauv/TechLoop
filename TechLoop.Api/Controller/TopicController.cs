@@ -11,7 +11,6 @@ namespace TechLoop.Api.Controllers;
 public sealed class TopicController : ControllerBase
 {
     private readonly IMediator _mediator;
-
     public TopicController(IMediator mediator)
     {
         _mediator = mediator;
@@ -19,13 +18,9 @@ public sealed class TopicController : ControllerBase
 
     // Get all published topics 
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<LearnerTopicResponse>>> GetAllTopics(
-        CancellationToken cancellationToken)
+    public async Task<ActionResult<IEnumerable<LearnerTopicResponse>>> GetAllTopics(CancellationToken cancellationToken)
     {
-        var result = await _mediator.Send(
-            new GetAllLearnerTopicsQuery(),
-            cancellationToken);
-
+        var result = await _mediator.Send(new GetAllLearnerTopicsQuery(), cancellationToken);
         return Ok(result);
     }
 
