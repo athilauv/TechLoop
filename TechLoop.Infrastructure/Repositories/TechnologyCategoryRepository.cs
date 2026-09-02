@@ -26,7 +26,7 @@ public sealed class TechnologyCategoryRepository : ITechnologyCategoryRepository
         const string sql = @"CALL public.sp_manage_technology_category('CREATE', NULL, @Name, @CreatedBy, NULL, NULL, 0);";
 
         return WithConnection(connection =>
-            connection.QuerySingleAsync<int>new CommandDefinition(
+            connection.QuerySingleAsync<int>(new CommandDefinition(
                     sql,
                     new
                     {

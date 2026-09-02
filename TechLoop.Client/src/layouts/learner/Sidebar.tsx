@@ -59,7 +59,6 @@ const sections: NavSection[] = [
                 label: "Contribution",
                 path: "/learner/topic-contributions",
                 icon: GitPullRequest,
-                dot: true,
             },
             // {
             //     label: "Messages",

@@ -9,7 +9,7 @@ export interface AnalyticsOverview {
 }
 
 export interface PracticeActivity {
-    activityDate: string;
+    date: string;
     totalAttempts: number;
     successfulAttempts: number;
     failedAttempts: number;

@@ -16,6 +16,7 @@ import RecommendedPractice from "../components/RecommendedPractice";
 import CommunityPreview from "../components/CommunityPreview";
 import AssistancePanel from "../components/AssistancePanel";
 import ContributionCta from "../components/ContributionCta";
+
 import type { DashboardResponse } from "../../../../types/dashboard.types";
 import { getDashboard } from "../../../../api/dashboard.api.ts";
 
@@ -27,6 +28,8 @@ export default function DashboardPage() {
     const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
+        let cancelled = false;
+
         const loadDashboard = async () => {
             try {
                 setLoading(true);
@@ -34,25 +37,37 @@ export default function DashboardPage() {
 
                 const response = await getDashboard();
 
-                setDashboard(response);
+                if (!cancelled) {
+                    setDashboard(response);
+                }
             } catch (err: unknown) {
                 console.error("Failed to load dashboard:", err);
 
-                setError(
-                    err instanceof Error
-                        ? err.message
-                        : "Failed to load dashboard."
-                );
+                if (!cancelled) {
+                    setError(
+                        err instanceof Error
+                            ? err.message
+                            : "Failed to load dashboard."
+                    );
+                }
             } finally {
-                setLoading(false);
+                if (!cancelled) {
+                    setLoading(false);
+                }
             }
         };
 
         void loadDashboard();
+
+        return () => {
+            cancelled = true;
+        };
     }, []);
 
     const currentTopic = useMemo(() => {
-        if (!dashboard?.topicAnalytics?.length) return null;
+        if (!dashboard?.topicAnalytics?.length) {
+            return null;
+        }
 
         return [...dashboard.topicAnalytics].sort((a, b) => {
             const dateA = a.lastPracticedAt
@@ -71,7 +86,6 @@ export default function DashboardPage() {
         return (
             <div className="min-h-full bg-[#081423]">
                 <div className="mx-auto max-w-7xl px-5 py-7 sm:px-6 lg:px-8">
-
                     <div className="h-40 animate-pulse rounded-2xl bg-[#0f1e35]" />
 
                     <div className="mt-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
@@ -83,6 +97,17 @@ export default function DashboardPage() {
                         ))}
                     </div>
 
+                    <div className="mt-6 grid gap-6 xl:grid-cols-[1.35fr_1fr]">
+                        <div className="h-72 animate-pulse rounded-2xl bg-[#0f1e35]" />
+                        <div className="h-72 animate-pulse rounded-2xl bg-[#0f1e35]" />
+                    </div>
+
+                    <div className="mt-6 h-64 animate-pulse rounded-2xl bg-[#0f1e35]" />
+
+                    <div className="mt-6 grid gap-6 lg:grid-cols-2">
+                        <div className="h-64 animate-pulse rounded-2xl bg-[#0f1e35]" />
+                        <div className="h-64 animate-pulse rounded-2xl bg-[#0f1e35]" />
+                    </div>
                 </div>
             </div>
         );
@@ -92,8 +117,10 @@ export default function DashboardPage() {
         return (
             <div className="min-h-full bg-[#081423]">
                 <div className="mx-auto max-w-7xl px-5 py-7 sm:px-6 lg:px-8">
-
-                    <DashboardHeader hasData={false} />
+                    <DashboardHeader
+                        hasData={false}
+                        currentTopic={null}
+                    />
 
                     <div className="mt-8 rounded-xl border border-[#5c3038] bg-[#24151b] p-5">
                         <p className="text-sm font-semibold text-[#ef8b8b]">
@@ -104,7 +131,6 @@ export default function DashboardPage() {
                             {error}
                         </p>
                     </div>
-
                 </div>
             </div>
         );
@@ -116,17 +142,13 @@ export default function DashboardPage() {
     return (
         <div className="min-h-full bg-[#081423]">
             <div className="mx-auto max-w-7xl space-y-6 px-5 py-7 sm:px-6 lg:px-8">
-
-                {/* HERO */}
                 <DashboardHeader
                     hasData={hasData}
                     currentTopic={currentTopic}
                 />
 
-                {/* STATS */}
                 {overview ? (
                     <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-
                         <DashboardStatCard
                             title="Questions Solved"
                             value={overview.questionsSolved}
@@ -154,7 +176,6 @@ export default function DashboardPage() {
                             icon={<Award size={19} />}
                             subtitle="Total time spent"
                         />
-
                     </div>
                 ) : (
                     <div className="rounded-xl border border-[#1e3254] bg-[#0f1e35] p-8 text-center">
@@ -168,7 +189,6 @@ export default function DashboardPage() {
                     </div>
                 )}
 
-                {/* CONTINUE LEARNING + QUICK ACTIONS */}
                 <div className="grid gap-6 xl:grid-cols-[1.35fr_1fr]">
                     <ContinueLearning
                         topics={dashboard?.topicAnalytics ?? []}
@@ -177,26 +197,21 @@ export default function DashboardPage() {
                     <QuickActions />
                 </div>
 
-                {/* TECHNOLOGIES */}
                 <TechnologiesPreview />
 
-                {/* PRACTICE + COMMUNITY */}
                 <div className="grid gap-6 lg:grid-cols-2">
                     <RecommendedPractice />
                     <CommunityPreview />
                 </div>
 
-                {/* ASSISTANCE + CONTRIBUTION */}
                 <div className="grid gap-6 lg:grid-cols-2">
                     <AssistancePanel />
                     <ContributionCta />
                 </div>
 
-                {/* RECENT ACTIVITY */}
                 <RecentActivity
                     activities={dashboard?.practiceActivity ?? []}
                 />
-
             </div>
         </div>
     );

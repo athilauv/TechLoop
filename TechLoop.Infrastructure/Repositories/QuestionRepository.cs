@@ -66,7 +66,8 @@ public sealed class QuestionRepository : IQuestionRepository
     {
         const string sql = @"SELECT * FROM fn_get_question_by_id(@Id);";
         using var connection = _context.CreateConnection();
-        return await connection.QuerySingleOrDefaultAsync<Question>(new CommandDefinition(sql,
+        return await connection.QuerySingleOrDefaultAsync<Question>(new CommandDefinition(
+                sql,
                 new
                 {
                     Id = id
@@ -331,11 +332,11 @@ public sealed class QuestionRepository : IQuestionRepository
                 cancellationToken: cancellationToken));
     }
     
-    public async Task<Question?> GetPublishedMcqQuestionBySubTopicAsync( int subTopicId, CancellationToken cancellationToken)
+    public async Task<IEnumerable<Question>> GetPublishedMcqQuestionsBySubTopicAsync(int subTopicId, CancellationToken cancellationToken)
     {
         const string sql = @"SELECT * FROM fn_get_published_mcq_question_by_subtopic(@SubTopicId);";
         using var connection = _context.CreateConnection();
-        return await connection.QuerySingleOrDefaultAsync<Question>(new CommandDefinition(
+        return await connection.QueryAsync<Question>(new CommandDefinition(
                 sql,
                 new
                 {

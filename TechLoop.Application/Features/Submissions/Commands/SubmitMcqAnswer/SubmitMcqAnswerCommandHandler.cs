@@ -35,7 +35,8 @@ public sealed class SubmitMcqAnswerCommandHandler
     {
         Console.WriteLine("===== SubmitMcqAnswer Started =====");
 
-        var question = await _questionRepository.GetByIdAsync(
+        // Learners may only submit answers for published questions.
+        var question = await _questionRepository.GetPublishedByIdAsync(
             request.Request.QuestionId,
             cancellationToken);
 
@@ -47,6 +48,18 @@ public sealed class SubmitMcqAnswerCommandHandler
 
         if (question.QuestionType != QuestionType.mcq)
             throw new BadRequestException("Selected question is not an MCQ.");
+
+        var questionTechnologyId =
+            await _questionRepository.GetQuestionTechnologyIdAsync(
+                question.Id,
+                cancellationToken);
+
+        if (!questionTechnologyId.HasValue ||
+            questionTechnologyId.Value != request.Request.TechnologyId)
+        {
+            throw new BadRequestException(
+                "Selected question does not belong to the selected technology.");
+        }
 
         var alreadySolved = await _submissionRepository.IsQuestionSolvedAsync(
             request.UserId,

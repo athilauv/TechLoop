@@ -1,4 +1,4 @@
-import { FileQuestion, Plus } from "lucide-react";
+import {FileQuestion, MessageSquarePlus, Plus} from "lucide-react";
 import { useMemo, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
@@ -107,8 +107,8 @@ const McqQuestionListPage = () => {
                         </p>
                     </div>
 
-                    <Button type="button" onClick={() => navigate("/mentor/questions/mcq/create")}>
-                        <Plus size={16} className="mr-1.5 inline" />
+                    <Button type="button" onClick={() => navigate("/mentor/questions/mcq/create")} className="inline-flex shrink-0 items-center gap-2 rounded-lg bg-[var(--cs-primary)] px-4 py-2.5 text-sm font-semibold text-[var(--cs-primary-contrast)] transition-colors duration-150 hover:bg-[var(--cs-primary-hover,var(--cs-primary))] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--cs-primary)]/40">
+                        <MessageSquarePlus size={16} />
                         Create MCQ
                     </Button>
                 </div>

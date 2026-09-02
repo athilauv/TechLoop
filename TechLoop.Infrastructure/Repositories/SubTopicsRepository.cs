@@ -72,11 +72,26 @@ public sealed class SubTopicsRepository : ISubTopicsRepository
     public async Task<int> CreateAsync(SubTopic subTopic, bool shiftPositions, CancellationToken cancellationToken)
     {
         using var connection = _context.CreateConnection();
-        return await connection.ExecuteScalarAsync<int>(
+
+        await connection.ExecuteAsync(
             new CommandDefinition(
-                @"SELECT public.fn_create_subtopic
-                (@TopicId, @ParentSubTopicId, @Slug, @Title, @Description, @ImageUrl,
-                    @Example, @ExampleType, @Position, @CreatedBy, @CreatedAt, @ShiftPositions);",
+                @"CALL public.sp_manage_subtopic(
+                    'CREATE',
+                    NULL,
+                    @TopicId,
+                    @ParentSubTopicId,
+                    @Slug,
+                    @Title,
+                    @Description,
+                    @ImageUrl,
+                    @Example,
+                    @ExampleType,
+                    @Position,
+                    @CreatedBy,
+                    NULL,
+                    NULL,
+                    NULL,
+                    @ShiftPositions);",
                 new
                 {
                     subTopic.TopicId,
@@ -89,10 +104,11 @@ public sealed class SubTopicsRepository : ISubTopicsRepository
                     subTopic.ExampleType,
                     subTopic.Position,
                     subTopic.CreatedBy,
-                    subTopic.CreatedAt,
                     ShiftPositions = shiftPositions
                 },
                 cancellationToken: cancellationToken));
+
+        return 1;
     }
 
     // Update an existing subtopic.
@@ -100,9 +116,25 @@ public sealed class SubTopicsRepository : ISubTopicsRepository
     {
         using var connection = _context.CreateConnection();
 
-        await connection.ExecuteAsync(new CommandDefinition(@"CALL public.sp_update_subtopic(
-                    @Id, @TopicId, @ParentSubTopicId, @Slug, @Title, @Description,
-                    @ImageUrl, @Example, @ExampleType, @Position, @UpdatedBy, @UpdatedAt, @ShiftPositions);",
+        await connection.ExecuteAsync(
+            new CommandDefinition(
+                @"CALL public.sp_manage_subtopic(
+                    'UPDATE',
+                    @Id,
+                    @TopicId,
+                    @ParentSubTopicId,
+                    @Slug,
+                    @Title,
+                    @Description,
+                    @ImageUrl,
+                    @Example,
+                    @ExampleType,
+                    @Position,
+                    NULL,
+                    @UpdatedBy,
+                    NULL,
+                    NULL,
+                    @ShiftPositions);",
                 new
                 {
                     subTopic.Id,
@@ -116,7 +148,6 @@ public sealed class SubTopicsRepository : ISubTopicsRepository
                     subTopic.ExampleType,
                     subTopic.Position,
                     subTopic.UpdatedBy,
-                    subTopic.UpdatedAt,
                     ShiftPositions = shiftPositions
                 },
                 cancellationToken: cancellationToken));

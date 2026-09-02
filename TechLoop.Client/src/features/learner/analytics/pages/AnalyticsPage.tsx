@@ -1,14 +1,11 @@
 import { useEffect, useState } from "react";
-
 import AnalyticsHeader from "../components/AnalyticsHeader";
 import AnalyticsOverview from "../components/AnalyticsOverview";
 import LearningActivityPulse from "../components/LearningActivityPulse/LearningActivityPulse";
-import CircuitBloom from "../components/Circuit Bloom/CircuitBloom";
 import DailyActivityTimeline from "../components/DailyActivityTimeline";
-import TechnologyPractice from "../components/TechnologyPractice";
+import PracticeOverview from "../components/PracticeOverview";
 import TopicAnalytics from "../components/TopicAnalytics";
 import DifficultyProgression from "../components/DifficultyProgression";
-
 import { getAnalytics } from "../../../../api/analytics.api";
 import type { AnalyticsResponse } from "../../../../types/analytics.types";
 
@@ -151,27 +148,16 @@ export default function AnalyticsPage() {
                     <DailyActivityTimeline data={analytics.dailyActivity ?? []}/>
                 </div>
 
-                <div className="mt-6">
-                    <CircuitBloom
-                        technologies={
-                            analytics.technologyPractice
-                        }
-                        topics={
-                            analytics.topicAnalytics
-                        }
-                    />
-                </div>
-
                 <div className="mt-6 grid gap-6 xl:grid-cols-2">
-                    <TechnologyPractice
+                    <PracticeOverview
                         technologies={
-                            analytics.technologyPractice
+                            analytics.technologyPractice ?? []
                         }
                     />
 
                     <TopicAnalytics
                         topics={
-                            analytics.topicAnalytics
+                            analytics.topicAnalytics ?? []
                         }
                     />
                 </div>

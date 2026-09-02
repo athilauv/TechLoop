@@ -1,4 +1,4 @@
-import type { DailyActivity } from "../../../../../types/analytics.types";
+import type { DailyActivity } from "../types/analytics.types.ts";
 
 export type ActivityLevel = | "none" | "low" | "medium" | "high";
 

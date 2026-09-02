@@ -169,10 +169,10 @@ export const getCodingQuestions = async (
 
 export const getMcqQuestionBySubTopic = async (
     subTopicId: number,
-): Promise<LearnerMcqQuestion | null> => {
+): Promise<LearnerMcqQuestion[]> => {
     const { data } =
-        await api.get<LearnerMcqQuestion>(
-            `/questions/mcq/subtopic/${subTopicId}`,
+        await api.get<LearnerMcqQuestion[]>(
+            `/questions/sub-topic/${subTopicId}/mcq`,
         );
 
     return data;

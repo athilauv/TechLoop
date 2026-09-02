@@ -30,20 +30,28 @@ public sealed class UserStatisticsRepository : IUserStatisticsRepository
 
     public async Task<Guid> CreateAsync(UserStatistics statistics, CancellationToken cancellationToken)
     {
-        const string sql = @"SELECT fn_create_user_statistics(@UserId);";
+        const string sql = @"CALL sp_manage_user_statistics('CREATE', NULL, @UserId, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);";
         using var connection = _context.CreateConnection();
-        return await connection.ExecuteScalarAsync<Guid>(new CommandDefinition(
+        await connection.ExecuteAsync(new CommandDefinition(
                 sql,
                 new
                 {
                     statistics.UserId
                 },
                 cancellationToken: cancellationToken));
+
+        var created = await GetByUserIdAsync(statistics.UserId, cancellationToken);
+        if (created is null)
+        {
+            throw new InvalidOperationException("Unable to create user statistics.");
+        }
+
+        return created.Id;
     }
 
     public async Task<int> UpdateAsync(UserStatistics statistics, CancellationToken cancellationToken)
     {
-        const string sql = @"CALL sp_update_user_statistics( @Id, @ReputationPoints, @QuestionsSolved, @McqSolved, @CodingSolved, @TotalSubmissions, @AcceptedSubmissions, @FailedSubmissions, @TotalTimeSpentMinutes);";
+        const string sql = @"CALL sp_manage_user_statistics('UPDATE', @Id, NULL, @ReputationPoints, @QuestionsSolved, @McqSolved, @CodingSolved, @TotalSubmissions, @AcceptedSubmissions, @FailedSubmissions, @TotalTimeSpentMinutes);";
         using var connection = _context.CreateConnection();
         return await connection.ExecuteAsync(new CommandDefinition(
                 sql,

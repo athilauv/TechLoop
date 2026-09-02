@@ -2,8 +2,8 @@ import type { DailyActivity } from "../../../../../types/analytics.types";
 import {
     formatMinutes,
     formatShortDate,
-    getActivityLevel,
-} from "./activityUtils";
+    getActivityLevel
+} from "../../../../../utils/activityUtils.ts";
 
 interface ActivityNodeProps {
     activity: DailyActivity;

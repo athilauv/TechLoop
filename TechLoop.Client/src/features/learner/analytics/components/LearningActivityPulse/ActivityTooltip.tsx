@@ -1,5 +1,5 @@
 import type { DailyActivity } from "../../../../../types/analytics.types";
-import { formatMinutes, formatShortDate } from "./activityUtils";
+import { formatMinutes, formatShortDate } from "../../../../../utils/activityUtils.ts";
 
 interface ActivityTooltipProps {
     activity: DailyActivity;

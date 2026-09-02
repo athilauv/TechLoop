@@ -38,6 +38,7 @@ export default function LearnerRoutes() {
                     <Route path="topic-contributions/:contributionId" element={<TopicContributionDetailsPage />}/>
                     <Route path="community" element={<LearnerCommunityPage />}/>
                     <Route path="community/posts/:postId" element={<LearnerCommunityPostPage />}/>
+                    <Route path="community/post/:postId" element={<LearnerCommunityPostPage />}/>
                     <Route path="community/saved-posts" element={<LearnerSavedPostsPage />}/>
                 </Route>
             </Route>

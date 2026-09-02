@@ -68,10 +68,11 @@ public sealed class UpdateProfileCommandHandler
         if (!string.IsNullOrWhiteSpace(user.PasswordHash))
             throw new BadRequestException("Mentor account has already been activated.");
 
-        user.PasswordHash = _passwordHasher.HashPassword(request.Password);
-        user.UpdatedAt = DateTime.UtcNow;
-
-        await _userRepository.UpdateAsync(user);
+        var passwordHash = _passwordHasher.HashPassword(request.Password);
+        await _userRepository.UpdatePasswordAsync(
+            user.Id,
+            passwordHash,
+            DateTime.UtcNow);
 
         await _mentorRepository.UpdateProfileAsync(
             user.Id,

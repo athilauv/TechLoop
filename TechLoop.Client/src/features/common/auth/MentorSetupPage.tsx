@@ -1,4 +1,4 @@
-﻿import { useState } from "react";
+import { useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { setupMentorProfile } from "../../../api/auth.api.ts";
 import { showToast } from "../../../utils/toast.tsx";
@@ -478,6 +478,16 @@ export default function MentorSetupPage() {
                         <p className="text-center text-[11px] text-[#4a6380]">
                             This setup link is only for your initial
                             mentor account activation.
+                        </p>
+
+                        <p className="text-center text-[11px] text-[#7a99bb]">
+                            Already have an account?{" "}
+                            <Link
+                                to="/login"
+                                className="font-semibold text-[#00e5c0] transition-colors hover:text-[#7fffea] hover:underline"
+                            >
+                                Go to Login
+                            </Link>
                         </p>
 
                     </div>

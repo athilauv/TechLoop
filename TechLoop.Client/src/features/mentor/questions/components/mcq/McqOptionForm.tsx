@@ -75,6 +75,7 @@ const McqOptionForm = ({
                 <Button type="button" variant="secondary" onClick={onCancel} disabled={submitting}>
                     Cancel
                 </Button>
+
                 <Button type="submit" disabled={submitting || !optionText.trim()}>
                     {submitting ? "Saving..." : option ? "Update Option" : "Add Option"}
                 </Button>

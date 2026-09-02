@@ -72,7 +72,12 @@ public sealed class TopicRepository : ITopicsRepository
     public async Task<int> CreateAsync(Topic topic, bool shiftPositions, CancellationToken cancellationToken)
     {
         using var connection = _context.CreateConnection();
-        return await connection.ExecuteScalarAsync<int>(new CommandDefinition(@"SELECT fn_create_topic(
+
+        await connection.ExecuteAsync(
+            new CommandDefinition(
+                @"CALL public.sp_manage_topic(
+                    'CREATE',
+                    NULL,
                     @TechnologyId,
                     @Title,
                     @Slug,
@@ -81,8 +86,10 @@ public sealed class TopicRepository : ITopicsRepository
                     @Example,
                     @ExampleType,
                     @Position,
+                    NULL,
                     @CreatedBy,
-                    @CreatedAt,
+                    NULL,
+                    NULL,
                     @ShiftPositions);",
                 new
                 {
@@ -95,9 +102,20 @@ public sealed class TopicRepository : ITopicsRepository
                     topic.ExampleType,
                     topic.Position,
                     topic.CreatedBy,
-                    topic.CreatedAt,
                     ShiftPositions = shiftPositions
                 },
+                cancellationToken: cancellationToken));
+
+        return await connection.ExecuteScalarAsync<int>(
+            new CommandDefinition(
+                @"SELECT id
+                  FROM public.topics
+                  WHERE technology_id = @TechnologyId
+                    AND slug = @Slug
+                    AND deleted_at IS NULL
+                  ORDER BY created_at DESC, id DESC
+                  LIMIT 1;",
+                new { topic.TechnologyId, topic.Slug },
                 cancellationToken: cancellationToken));
     }
     
@@ -150,7 +168,8 @@ public sealed class TopicRepository : ITopicsRepository
         using var connection = _context.CreateConnection();
         return await connection.ExecuteAsync(new CommandDefinition(
                 @"
-                CALL sp_update_topic(
+                CALL public.sp_manage_topic(
+                    'UPDATE',
                     @Id,
                     @TechnologyId,
                     @Title,
@@ -161,7 +180,9 @@ public sealed class TopicRepository : ITopicsRepository
                     @ExampleType,
                     @Position,
                     @UpdatedBy,
-                    @UpdatedAt,
+                    NULL,
+                    NULL,
+                    NULL,
                     @ShiftPositions
                 );",
                 new
@@ -243,9 +264,13 @@ public sealed class TopicRepository : ITopicsRepository
     {
         using var connection = _context.CreateConnection();
 
-        return await connection.ExecuteAsync(
+        await connection.ExecuteAsync(
             new CommandDefinition(@"CALL sp_publish_topic( @Id, @PublishedBy, @PublishedAt);",
                 topic, cancellationToken: cancellationToken));
+
+        // PostgreSQL CALL does not provide a reliable affected-row count
+        // through Dapper. The procedure either completes or throws.
+        return 1;
     }
     
     

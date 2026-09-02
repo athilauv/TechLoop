@@ -209,7 +209,7 @@ export default function MentorContentPage() {
             const topic = await getMentorTopicById(topicId);
 
             setSelectedType("topic");
-            setSelectedId(topicId);
+            setSelectedId(topic.id);
             setSelectedTopic(topic);
             setSelectedSubTopic(null);
             setFormType("topic-edit");
@@ -224,7 +224,12 @@ export default function MentorContentPage() {
             return;
         }
 
-        const topicId = selectedId;
+        const topicId = selectedTopic?.id ?? selectedId;
+        if (topicId === null || topicId <= 0) {
+            toast.error("No valid topic selected.");
+            return;
+        }
+
         const submit = (shiftPositions: boolean) =>
             updateTopic(topicId, { ...request, shiftPositions });
 

@@ -375,7 +375,7 @@ export default function TopicContributionForm() {
 
                 {isOpen && !disabled && (
                     <div
-                        className="absolute left-0 right-0 top-full z-50 mt-2 overflow-hidden rounded-[var(--cs-radius-control)] border border-[var(--cs-accent-border)] bg-[var(--cs-bg-card-raised)] shadow-xl shadow-black/30"
+                        className="relative mt-2 w-full overflow-hidden rounded-[var(--cs-radius-control)] border border-[var(--cs-accent-border)] bg-[var(--cs-bg-card-raised)] shadow-xl shadow-black/30"
                         onClick={(event) => event.stopPropagation()}>
                         {/* Search */}
                         <div className="sticky top-0 z-10 border-b border-[var(--cs-border)] bg-[var(--cs-bg-card-raised)] p-2.5">

@@ -30,7 +30,11 @@ function countSubTopics(
     );
 }
 
-export default function CurriculumSidebar() {
+interface CurriculumSidebarProps {
+    onNavigate?: () => void;
+}
+
+export default function CurriculumSidebar({ onNavigate }: CurriculumSidebarProps) {
     const navigate = useNavigate();
 
     const {
@@ -198,6 +202,7 @@ export default function CurriculumSidebar() {
                                 technology.slug
                             }
                             topic={topic}
+                            onNavigate={onNavigate}
                         />
                     )
                 )}

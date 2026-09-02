@@ -1,4 +1,4 @@
-﻿import { Outlet, useLocation, useNavigate } from "react-router-dom";
+import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import { useEffect, useRef, useState, type CSSProperties } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import Navbar from "../Navbar";
@@ -61,6 +61,7 @@ export default function LearnerLayout() {
 
     const [collapsed, setCollapsed] = useState(false);
     const [mobileOpen, setMobileOpen] = useState(false);
+    const [learningCurriculumOpen, setLearningCurriculumOpen] = useState(false);
 
     const [user, setUser] = useState<UserProfile | null>(null);
 
@@ -165,9 +166,14 @@ export default function LearnerLayout() {
             >
                 <Navbar
                     hidden={navHidden}
-                    onMenuClick={() =>
-                        setMobileOpen(true)
-                    }
+                    onMenuClick={() => {
+                        if (isLearningPage) {
+                            setLearningCurriculumOpen(true);
+                            return;
+                        }
+
+                        setMobileOpen(true);
+                    }}
                     username={user?.username}
                     role={user?.role}
                     initial={userInitial}
@@ -182,7 +188,12 @@ export default function LearnerLayout() {
                 >
                     {isLearningPage ? (
                         <div className="min-h-[calc(100vh-64px)] bg-[#081423]">
-                            <Outlet />
+                            <Outlet
+                                context={{
+                                    learningCurriculumOpen,
+                                    setLearningCurriculumOpen,
+                                }}
+                            />
                         </div>
                     ) : (
                         <div className="flex min-h-full flex-col">

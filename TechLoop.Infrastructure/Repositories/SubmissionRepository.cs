@@ -32,45 +32,81 @@ public class SubmissionRepository : ISubmissionRepository
         CancellationToken cancellationToken)
     {
         const string sql = @"
-        SELECT fn_create_submission(
-            @UserId,
-            @QuestionId,
-            @TechnologyId,
-            @SourceCode,
-            @SelectedOptionId,
-            @AttemptNumber,
-            @Status,
-            @SubmittedAt
-        );";
+            CALL sp_manage_submission(
+                'CREATE',
+                NULL,
+                @UserId,
+                @QuestionId,
+                @TechnologyId,
+                @SourceCode,
+                @Status,
+                @SubmittedAt,
+                @ExecutionTimeMs,
+                @MemoryUsedMb,
+                @PassedTestCases,
+                @TotalTestCases,
+                @Score,
+                @CompilerOutput,
+                @RuntimeOutput,
+                @AiReview,
+                @JudgeToken,
+                @AttemptNumber,
+                @SelectedOptionId
+            );";
 
         using var connection = _context.CreateConnection();
-        return await connection.ExecuteScalarAsync<int>(
-            new CommandDefinition(
-                sql,
-                new
+        await connection.ExecuteAsync(new CommandDefinition(
+            sql,
+            new
+            {
+                submission.UserId,
+                submission.QuestionId,
+                submission.TechnologyId,
+                submission.SourceCode,
+                Status = submission.Status switch
                 {
-                    submission.UserId,
-                    submission.QuestionId,
-                    submission.TechnologyId,
-                    submission.SourceCode,
-                    submission.SelectedOptionId,
-                    submission.AttemptNumber,
-
-                    Status = submission.Status switch
-                    {
-                        SubmissionStatus.Pending => "pending",
-                        SubmissionStatus.Accepted => "accepted",
-                        SubmissionStatus.WrongAnswer => "wrong_answer",
-                        SubmissionStatus.RuntimeError => "runtime_error",
-                        SubmissionStatus.CompileError => "compile_error",
-                        SubmissionStatus.TimeLimitExceeded => "time_limit_exceeded",
-                        SubmissionStatus.MemoryLimitExceeded => "memory_limit_exceeded",
-                        _ => throw new ArgumentOutOfRangeException(nameof(submission.Status))
-                    },
-
-                    submission.SubmittedAt
+                    SubmissionStatus.Pending => "pending",
+                    SubmissionStatus.Accepted => "accepted",
+                    SubmissionStatus.WrongAnswer => "wrong_answer",
+                    SubmissionStatus.RuntimeError => "runtime_error",
+                    SubmissionStatus.CompileError => "compile_error",
+                    SubmissionStatus.TimeLimitExceeded => "time_limit_exceeded",
+                    SubmissionStatus.MemoryLimitExceeded => "memory_limit_exceeded",
+                    _ => throw new ArgumentOutOfRangeException(nameof(submission.Status))
                 },
-                cancellationToken: cancellationToken));
+                submission.SubmittedAt,
+                submission.ExecutionTimeMs,
+                submission.MemoryUsedMb,
+                submission.PassedTestCases,
+                submission.TotalTestCases,
+                submission.Score,
+                submission.CompilerOutput,
+                submission.RuntimeOutput,
+                submission.AiReview,
+                submission.JudgeToken,
+                submission.AttemptNumber,
+                submission.SelectedOptionId
+            },
+            cancellationToken: cancellationToken));
+
+        const string idSql = @"
+            SELECT id
+            FROM public.submissions
+            WHERE user_id = @UserId
+              AND question_id = @QuestionId
+              AND attempt_number = @AttemptNumber
+            ORDER BY id DESC
+            LIMIT 1;";
+
+        return await connection.ExecuteScalarAsync<int>(new CommandDefinition(
+            idSql,
+            new
+            {
+                submission.UserId,
+                submission.QuestionId,
+                submission.AttemptNumber
+            },
+            cancellationToken: cancellationToken));
     }
     
 
@@ -113,7 +149,7 @@ public class SubmissionRepository : ISubmissionRepository
 
     public async Task<int> UpdateResultAsync(Submission submission, CancellationToken cancellationToken)
     {
-        const string sql = @"CALL sp_update_submission_result(@Id,@Status,@ExecutionTimeMs,@MemoryUsedMb,@PassedTestCases,@TotalTestCases,@Score,@CompilerOutput,@RuntimeOutput,@AiReview,@JudgeToken);";
+        const string sql = @"CALL sp_manage_submission('UPDATE_RESULT', @Id, NULL, NULL, NULL, NULL, @Status, NULL, @ExecutionTimeMs, @MemoryUsedMb, @PassedTestCases, @TotalTestCases, @Score, @CompilerOutput, @RuntimeOutput, @AiReview, @JudgeToken);";
         using var connection = _context.CreateConnection();
         return await connection.ExecuteAsync(
             new CommandDefinition(

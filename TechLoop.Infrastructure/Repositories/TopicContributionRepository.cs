@@ -41,19 +41,31 @@ public sealed class TopicContributionRepository : ITopicContributionRepository
         string? referenceUrl,
         CancellationToken cancellationToken)
     {
-        const string sql = @"SELECT fn_create_topic_contribution(
-                @LearnerId,
-                @TechnologyId,
-                @TopicId,
-                @SubTopicId,
-                @Title,
-                @Description,
-                @Example,
-                @ExampleType,
-                @ReferenceUrl);";
+        const string sql = @"CALL public.sp_manage_topic_contribution(
+            'CREATE',
+            NULL,
+            @LearnerId,
+            @TechnologyId,
+            @TopicId,
+            @SubTopicId,
+            @Title,
+            @Description,
+            @Example,
+            @ExampleType,
+            @ReferenceUrl,
+            NULL,
+            NULL,
+            NULL,
+            NULL,
+            NULL,
+            NULL,
+            NULL,
+            NULL,
+            0);";
 
         using var connection = _context.CreateConnection();
-        return await connection.ExecuteScalarAsync<int>(
+
+        await connection.ExecuteAsync(
             new CommandDefinition(
                 sql,
                 new
@@ -69,6 +81,18 @@ public sealed class TopicContributionRepository : ITopicContributionRepository
                     ReferenceUrl = referenceUrl
                 },
                 cancellationToken: cancellationToken));
+
+        return await connection.ExecuteScalarAsync<int>(
+            new CommandDefinition(
+                @"SELECT id
+                  FROM public.tobic_contributions
+                  WHERE created_by = @LearnerId
+                    AND technology_id = @TechnologyId
+                    AND title = @Title
+                  ORDER BY created_at DESC, id DESC
+                  LIMIT 1;",
+                new { LearnerId = learnerId, TechnologyId = technologyId, Title = title },
+                cancellationToken: cancellationToken));
     }
 
     // Reviews a contribution
@@ -82,14 +106,27 @@ public sealed class TopicContributionRepository : ITopicContributionRepository
         CancellationToken cancellationToken)
     {
         const string sql = @"
-            CALL public.sp_review_topic_contribution(
+            CALL public.sp_manage_topic_contribution(
+                'REVIEW',
                 @ContributionId,
+                NULL,
+                NULL,
+                NULL,
+                NULL,
+                NULL,
+                NULL,
+                NULL,
+                NULL,
+                NULL,
                 @Status,
                 @ReviewNotes,
                 @Position,
                 @ParentSubTopicId,
                 @ReviewedBy,
-                @ReviewedAt
+                @ReviewedAt,
+                @ReviewedBy,
+                NULL,
+                0
             );";
 
         using var connection = _context.CreateConnection();

@@ -9,7 +9,7 @@ export interface DashboardOverview {
 }
 
 export interface DashboardActivity {
-    activityDate: string;
+    date: string;
     totalAttempts: number;
     successfulAttempts: number;
     failedAttempts: number;

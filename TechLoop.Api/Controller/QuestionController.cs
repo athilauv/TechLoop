@@ -67,21 +67,21 @@ public sealed class QuestionController : ControllerBase
         return Ok(result);
     }
     
-    [HttpGet("questions/{questionId:int}/mcq-options")]
+    [HttpGet("{questionId:int}/mcq-options")]
     public async Task<IActionResult> GetPublishedMcqOptionsByQuestionId(int questionId, CancellationToken cancellationToken)
     {
         var result = await _mediator.Send(new GetPublishedMcqOptionByIdQuery(questionId), cancellationToken);
         return Ok(result);
     }
     
-    [HttpGet("questions/{questionId:int}/coding-templates")]
+    [HttpGet("{questionId:int}/coding-templates")]
     public async Task<IActionResult> GetPublishedCodingTemplatesByQuestion(int questionId, CancellationToken cancellationToken)
     {
         var result = await _mediator.Send(new GetPublishedCodingTemplatesByQuestionQuery(questionId), cancellationToken);
         return Ok(result);
     }
     
-    [HttpGet("questions/{questionId:int}/test-cases")]
+    [HttpGet("{questionId:int}/test-cases")]
     public async Task<IActionResult> GetPublishedTestCasesByQuestion(int questionId, CancellationToken cancellationToken)
     {
         var result = await _mediator.Send( new GetPublishedTestCasesByQuestionQuery(questionId), cancellationToken);

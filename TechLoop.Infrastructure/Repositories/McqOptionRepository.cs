@@ -56,9 +56,12 @@ public sealed class McqOptionRepository : IMcqOptionRepository
     // Create
     public async Task<int> CreateAsync(McqOption option, CancellationToken cancellationToken)
     {
-        const string sql = @"SELECT fn_create_mcq_option(@QuestionId,@OptionText,@IsCorrect,@Position,@CreatedBy,@CreatedAt);";
+        const string sql = @"CALL public.sp_manage_mcq_option(
+            'CREATE', NULL, @QuestionId, @OptionText, @IsCorrect, @Position,
+            @CreatedBy, NULL, NULL);";
         using var connection = _context.CreateConnection();
-        return await connection.ExecuteScalarAsync<int>(new CommandDefinition(sql, option, cancellationToken: cancellationToken));
+        await connection.ExecuteAsync(new CommandDefinition(sql, option, cancellationToken: cancellationToken));
+        return 1;
     }
 
     // Update

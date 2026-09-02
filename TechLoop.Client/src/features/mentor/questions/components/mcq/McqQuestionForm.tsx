@@ -12,6 +12,7 @@ import { validateQuestion } from "../../../../../validations/question.validation
 import { showToast } from "../../../../../utils/toast.tsx";
 import SubTopicSelect from "../shared/SubTopicSelect";
 import CustomSelect from "../../../../../shared/Customselect.tsx";
+//import {MessageSquarePlus} from "lucide-react";
 
 interface McqQuestionFormProps {
     question?: MentorQuestion;
@@ -272,7 +273,8 @@ const McqQuestionForm = ({
                 <Button type="button" variant="secondary" onClick={onCancel} disabled={submitting}>
                     Cancel
                 </Button>
-                <Button type="submit" disabled={submitting}>
+                <Button type="submit" disabled={submitting}  className="inline-flex shrink-0 items-center gap-2 rounded-lg bg-[var(--cs-primary)] px-4 py-2.5 text-sm font-semibold text-[var(--cs-primary-contrast)] transition-colors duration-150 hover:bg-[var(--cs-primary-hover,var(--cs-primary))] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--cs-primary)]/40"
+                >
                     {submitting
                         ? "Saving..."
                         : question

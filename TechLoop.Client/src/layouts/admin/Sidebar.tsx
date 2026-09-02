@@ -6,7 +6,6 @@ import {
     Layers,
     FileText,
     ListChecks,
-    MessagesSquare,
     GraduationCap,
     Users,
     ChevronLeft,
@@ -38,7 +37,7 @@ const mainNav: NavItem[] = [
     { to: "/admin/technology-categories", label: "Technology Categories", icon: Layers },
     { to: "/admin/content", label: "Content", icon: FileText },
     { to: "/admin/questions", label: "Questions", icon: ListChecks },
-    { to: "/admin/community", label: "Community", icon: MessagesSquare },
+    //{ to: "/admin/community", label: "Community", icon: MessagesSquare },
     { to: "/admin/mentors", label: "Mentors", icon: GraduationCap },
     { to: "/admin/users", label: "Users", icon: Users },
 ];

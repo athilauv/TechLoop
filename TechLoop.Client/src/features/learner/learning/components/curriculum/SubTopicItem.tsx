@@ -11,6 +11,7 @@ export interface CurriculumSubTopicNode {
     slug: string;
     position?: number;
     subTopics?: CurriculumSubTopicNode[];
+    children?: CurriculumSubTopicNode[];
 }
 
 interface SubTopicItemProps {
@@ -18,6 +19,7 @@ interface SubTopicItemProps {
     topicSlug: string;
     subTopic: CurriculumSubTopicNode;
     level?: number;
+    onNavigate?: () => void;
 }
 
 export default function SubTopicItem({
@@ -25,12 +27,14 @@ export default function SubTopicItem({
                                          topicSlug,
                                          subTopic,
                                          level = 0,
+                                         onNavigate,
                                      }: SubTopicItemProps) {
-    const hasChildren =
-        Boolean(
-            subTopic.subTopics &&
-            subTopic.subTopics.length > 0
-        );
+    const childNodes =
+        subTopic.subTopics ??
+        subTopic.children ??
+        [];
+
+    const hasChildren = childNodes.length > 0;
 
     const [open, setOpen] =
         useState(true);
@@ -39,7 +43,7 @@ export default function SubTopicItem({
         `/learner/learning/${technologySlug}/${topicSlug}/${subTopic.slug}`;
 
     const sortedChildren = [
-        ...(subTopic.subTopics ?? []),
+        ...childNodes,
     ].sort(
         (a, b) =>
             (a.position ?? 0) -
@@ -93,6 +97,8 @@ export default function SubTopicItem({
                                 }
                             );
                         }
+
+                        onNavigate?.();
                     }}
                     className={({ isActive }) =>
                         `
@@ -198,6 +204,7 @@ export default function SubTopicItem({
                                         level +
                                         1
                                     }
+                                    onNavigate={onNavigate}
                                 />
                             )
                         )}
