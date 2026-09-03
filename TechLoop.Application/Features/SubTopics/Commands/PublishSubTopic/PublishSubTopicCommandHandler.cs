@@ -1,4 +1,5 @@
-﻿using MediatR;
+using MediatR;
+using TechLoop.Application.Common.Caching;
 using TechLoop.Application.Common.Exceptions;
 using TechLoop.Application.Features.SubTopics.DTOs;
 using TechLoop.Application.Interfaces.Repositories;
@@ -11,13 +12,15 @@ public sealed class PublishSubTopicCommandHandler
 {
     private readonly ISubTopicsRepository _repository;
     private readonly ICurrentUserService _currentUser;
+    private readonly ICacheService _cache;
 
     public PublishSubTopicCommandHandler(
         ISubTopicsRepository repository,
-        ICurrentUserService currentUser)
+        ICurrentUserService currentUser, ICacheService cache)
     {
         _repository = repository;
         _currentUser = currentUser;
+        _cache = cache;
     }
 
     public async Task<PublishSubTopicResponse> Handle(PublishSubTopicCommand request, CancellationToken cancellationToken)
@@ -58,6 +61,10 @@ public sealed class PublishSubTopicCommandHandler
         {
             throw new Exception( "Failed to publish sub topic.");
         }
+
+        await _cache.RemoveAsync(CacheKeys.SubTopics);
+        await _cache.RemoveAsync(CacheKeys.SubTopicBySlug(subTopic.Slug));
+        await _cache.RemoveAsync(CacheKeys.Curriculum(subTopicTechnologyId.Value));
 
         return new PublishSubTopicResponse
         {

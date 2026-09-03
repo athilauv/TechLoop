@@ -1,4 +1,5 @@
 using MediatR;
+using TechLoop.Application.Common.Caching;
 using TechLoop.Application.Common.Exceptions;
 using TechLoop.Application.Features.Technologies.DTOs;
 using TechLoop.Application.Interfaces.Repositories;
@@ -8,10 +9,12 @@ namespace TechLoop.Application.Features.Technologies.Commands.PublishAdminTechno
 public sealed class PublishAdminTechnologyCommandHandler : IRequestHandler<PublishAdminTechnologyCommand, PublishTechnologyResponse>
 {
     private readonly ITechnologyRepository _technologyRepository;
+    private readonly ICacheService _cache;
 
-    public PublishAdminTechnologyCommandHandler(ITechnologyRepository technologyRepository)
+    public PublishAdminTechnologyCommandHandler(ITechnologyRepository technologyRepository, ICacheService cache)
     {
         _technologyRepository = technologyRepository;
+        _cache = cache;
     }
 
     public async Task<PublishTechnologyResponse> Handle(PublishAdminTechnologyCommand request, CancellationToken cancellationToken)
@@ -31,6 +34,9 @@ public sealed class PublishAdminTechnologyCommandHandler : IRequestHandler<Publi
         technology.PublishedBy = request.PublishedBy;
 
         await _technologyRepository.PublishAsync(technology, cancellationToken);
+        await _cache.RemoveAsync(CacheKeys.Technologies);
+        await _cache.RemoveAsync(CacheKeys.TechnologyBySlug(technology.Slug));
+        await _cache.RemoveAsync(CacheKeys.Curriculum(technology.Id));
 
         return new PublishTechnologyResponse
         {

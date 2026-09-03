@@ -1,4 +1,5 @@
-﻿using MediatR;
+using MediatR;
+using TechLoop.Application.Common.Caching;
 using TechLoop.Application.Common.Exceptions;
 using TechLoop.Application.Features.SubTopics.DTOs;
 using TechLoop.Application.Interfaces.Repositories;
@@ -11,13 +12,15 @@ public sealed class DeleteSubTopicCommandHandler
 {
     private readonly ISubTopicsRepository _repository;
     private readonly ICurrentUserService _currentUserService;
+    private readonly ICacheService _cache;
 
     public DeleteSubTopicCommandHandler(
         ISubTopicsRepository repository,
-        ICurrentUserService currentUserService)
+        ICurrentUserService currentUserService, ICacheService cache)
     {
         _repository = repository;
         _currentUserService = currentUserService;
+        _cache = cache;
     }
 
     public async Task<DeleteSubTopicResponse> Handle(DeleteSubTopicCommand request, CancellationToken cancellationToken)
@@ -30,11 +33,17 @@ public sealed class DeleteSubTopicCommandHandler
         
 
         // Soft delete
+        var technologyId = await _repository.GetTechnologyIdAsync(request.Id, cancellationToken);
         var rowsAffected = await _repository.SoftDeleteAsync(request.Id, _currentUserService.UserId, cancellationToken);
         if (rowsAffected <= 0)
         {
             throw new Exception("Failed to delete sub topic.");
         }
+
+        await _cache.RemoveAsync(CacheKeys.SubTopics);
+        await _cache.RemoveAsync(CacheKeys.SubTopicBySlug(subTopic.Slug));
+        if (technologyId.HasValue)
+            await _cache.RemoveAsync(CacheKeys.Curriculum(technologyId.Value));
 
         return new DeleteSubTopicResponse
         {

@@ -1,4 +1,5 @@
-﻿using FluentValidation;
+using FluentValidation;
+using TechLoop.Application.Common.Caching;
 using MediatR;
 using TechLoop.Application.Features.TechnologyCategories.DTOs;
 using TechLoop.Application.Interfaces.Repositories;
@@ -9,9 +10,11 @@ namespace TechLoop.Application.Features.TechnologyCategories.Commands.CreateTech
 public sealed class CreateTechnologyCategoriesCommandHandler : IRequestHandler<CreateTechnologyCategoriesCommand, CreateTechnologyCategoryResponse>
 {
     private readonly ITechnologyCategoryRepository _repository;
-    public CreateTechnologyCategoriesCommandHandler(ITechnologyCategoryRepository repository)
+    private readonly ICacheService _cache;
+    public CreateTechnologyCategoriesCommandHandler(ITechnologyCategoryRepository repository, ICacheService cache)
     {
         _repository = repository;
+        _cache = cache;
     }
 
     public async Task<CreateTechnologyCategoryResponse> Handle(CreateTechnologyCategoriesCommand request, CancellationToken cancellationToken)
@@ -29,6 +32,7 @@ public sealed class CreateTechnologyCategoriesCommandHandler : IRequestHandler<C
         };
 
         await _repository.CreateAsync(technologyCategory, cancellationToken);
+        await _cache.RemoveAsync(CacheKeys.TechnologyCategories);
         return new CreateTechnologyCategoryResponse
         {
             Success = true,

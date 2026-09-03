@@ -1,4 +1,5 @@
-﻿using TechLoop.Application.Features.Technologies.DTOs;
+using TechLoop.Application.Features.Technologies.DTOs;
+using TechLoop.Application.Common.Caching;
 using TechLoop.Application.Interfaces.Repositories;
 using TechLoop.Application.Interfaces.Services;
 using MediatR;
@@ -13,12 +14,14 @@ public sealed class UpdateTechnologyCommandHandler : IRequestHandler<UpdateTechn
    private readonly ITechnologyRepository _technologyRepository;
    private readonly ICurrentUserService _currentUserService;
    private readonly ITechnologyCategoryRepository _technologycategoryRepository;
+   private readonly ICacheService _cache;
 
-   public UpdateTechnologyCommandHandler(ITechnologyRepository technologyRepository, ITechnologyCategoryRepository technologycategoryRepository, ICurrentUserService currentUserService)
+   public UpdateTechnologyCommandHandler(ITechnologyRepository technologyRepository, ITechnologyCategoryRepository technologycategoryRepository, ICurrentUserService currentUserService, ICacheService cache)
    {
       _technologyRepository = technologyRepository;
       _technologycategoryRepository = technologycategoryRepository;
       _currentUserService = currentUserService;
+      _cache = cache;
    }
 
    public async Task<UpdateTechnologyResponse> Handle(UpdateTechnologyCommand request, CancellationToken cancellationToken)
@@ -66,7 +69,12 @@ public sealed class UpdateTechnologyCommandHandler : IRequestHandler<UpdateTechn
       technology.UpdatedAt = DateTime.UtcNow;
       technology.UpdatedBy = _currentUserService.UserId;
 
+      var oldSlug = technology.Slug;
       await _technologyRepository.UpdateAsync(technology, cancellationToken);
+      await _cache.RemoveAsync(CacheKeys.Technologies);
+      await _cache.RemoveAsync(CacheKeys.TechnologyBySlug(oldSlug));
+      await _cache.RemoveAsync(CacheKeys.TechnologyBySlug(technology.Slug));
+      await _cache.RemoveAsync(CacheKeys.Curriculum(technology.Id));
 
       return new UpdateTechnologyResponse
       {

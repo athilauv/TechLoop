@@ -1,4 +1,5 @@
-﻿using MediatR;
+using MediatR;
+using TechLoop.Application.Common.Caching;
 using TechLoop.Application.Common.Exceptions;
 using TechLoop.Application.Features.SubTopics.DTOs;
 using TechLoop.Application.Interfaces.Repositories;
@@ -11,10 +12,12 @@ public sealed class UpdateSubTopicCommandHandler : IRequestHandler<UpdateSubTopi
 {
     private readonly ISubTopicsRepository _subtopicrepository;
     private readonly ICurrentUserService _currentUserService;
-    public UpdateSubTopicCommandHandler(ISubTopicsRepository repository, ICurrentUserService currentUserService)
+    private readonly ICacheService _cache;
+    public UpdateSubTopicCommandHandler(ISubTopicsRepository repository, ICurrentUserService currentUserService, ICacheService cache)
     {
         _subtopicrepository = repository;
         _currentUserService = currentUserService;
+        _cache = cache;
     }
 
     public async Task<UpdateSubTopicResponse> Handle(UpdateSubTopicCommand request, CancellationToken cancellationToken)
@@ -66,6 +69,8 @@ public sealed class UpdateSubTopicCommandHandler : IRequestHandler<UpdateSubTopi
             throw new ValidationException($"Sub topic '{request.Title}' already exists in the topic.");
         }
 
+        var oldSlug = subTopic.Slug;
+        var oldTopicId = subTopic.TopicId;
         subTopic.TopicId = request.TopicId;
         subTopic.ParentSubTopicId = request.ParentSubTopicId;
         subTopic.Title = request.Title.Trim();
@@ -83,6 +88,13 @@ public sealed class UpdateSubTopicCommandHandler : IRequestHandler<UpdateSubTopi
         {
             throw new Exception("Failed to update sub topic.");
         }
+
+        var oldTechnologyId = await _subtopicrepository.GetTechnologyIdAsync(request.Id, cancellationToken);
+        await _cache.RemoveAsync(CacheKeys.SubTopics);
+        await _cache.RemoveAsync(CacheKeys.SubTopicBySlug(oldSlug));
+        await _cache.RemoveAsync(CacheKeys.SubTopicBySlug(subTopic.Slug));
+        if (oldTechnologyId.HasValue)
+            await _cache.RemoveAsync(CacheKeys.Curriculum(oldTechnologyId.Value));
 
         return new UpdateSubTopicResponse
         {

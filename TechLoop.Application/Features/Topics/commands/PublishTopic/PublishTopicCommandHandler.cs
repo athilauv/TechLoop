@@ -1,4 +1,5 @@
-﻿using MediatR;
+using MediatR;
+using TechLoop.Application.Common.Caching;
 using TechLoop.Application.Common.Exceptions;
 using TechLoop.Application.Features.Topics.DTOs;
 using TechLoop.Application.Interfaces.Repositories;
@@ -10,11 +11,13 @@ public sealed class PublishTopicCommandHandler : IRequestHandler<PublishTopicCom
 {
     private readonly ITopicsRepository _repository;
     private readonly ICurrentUserService _currentUser;
+    private readonly ICacheService _cache;
 
-    public PublishTopicCommandHandler(ITopicsRepository repository, ICurrentUserService currentUser)
+    public PublishTopicCommandHandler(ITopicsRepository repository, ICurrentUserService currentUser, ICacheService cache)
     {
         _repository = repository;
         _currentUser = currentUser;
+        _cache = cache;
     }
 
     public async Task<PublishTopicResponse> Handle(
@@ -64,6 +67,10 @@ public sealed class PublishTopicCommandHandler : IRequestHandler<PublishTopicCom
         {
             throw new Exception("Failed to publish topic.");
         }
+
+        await _cache.RemoveAsync(CacheKeys.Topics);
+        await _cache.RemoveAsync(CacheKeys.TopicBySlug(topic.Slug));
+        await _cache.RemoveAsync(CacheKeys.Curriculum(topic.TechnologyId));
 
         return new PublishTopicResponse
         {

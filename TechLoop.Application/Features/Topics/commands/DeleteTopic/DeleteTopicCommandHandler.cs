@@ -1,4 +1,5 @@
-﻿using MediatR;
+using MediatR;
+using TechLoop.Application.Common.Caching;
 using TechLoop.Application.Features.Topics.DTOs;
 using TechLoop.Application.Interfaces.Repositories;
 using TechLoop.Application.Interfaces.Services;
@@ -9,11 +10,13 @@ public sealed class DeleteTopicCommandHandler : IRequestHandler<DeleteTopicComma
 {
     private readonly ITopicsRepository _repository;
     private readonly ICurrentUserService _currentUser;
+    private readonly ICacheService _cache;
 
-    public DeleteTopicCommandHandler(ITopicsRepository repository, ICurrentUserService currentUser)
+    public DeleteTopicCommandHandler(ITopicsRepository repository, ICurrentUserService currentUser, ICacheService cache)
     {
         _repository = repository;
         _currentUser = currentUser;
+        _cache = cache;
     }
 
     public async Task<DeleteTopicResponse> Handle(
@@ -28,6 +31,9 @@ public sealed class DeleteTopicCommandHandler : IRequestHandler<DeleteTopicComma
         }
 
         await _repository.SoftDeleteAsync(request.Id, _currentUser.UserId, cancellationToken);
+        await _cache.RemoveAsync(CacheKeys.Topics);
+        await _cache.RemoveAsync(CacheKeys.TopicBySlug(topic.Slug));
+        await _cache.RemoveAsync(CacheKeys.Curriculum(topic.TechnologyId));
 
         return new DeleteTopicResponse
         {

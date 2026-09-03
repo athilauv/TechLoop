@@ -1,5 +1,6 @@
-﻿using TechLoop.Application.Common.Exceptions;
+using TechLoop.Application.Common.Exceptions;
 using TechLoop.Application.Features.Technologies.DTOs;
+using TechLoop.Application.Common.Caching;
 using TechLoop.Application.Interfaces.Repositories;
 using TechLoop.Application.Interfaces.Services;
 using TechLoop.Domain.Entities;
@@ -13,12 +14,14 @@ public sealed class CreateTechnologyCommandHandler : IRequestHandler<CreateTechn
     private readonly ITechnologyRepository _technologyRepository;
     private readonly ICurrentUserService _currentUserService;
     private readonly ITechnologyCategoryRepository _technologycategoryRepository;
+    private readonly ICacheService _cache;
 
-    public CreateTechnologyCommandHandler(ITechnologyRepository technologyRepository, ITechnologyCategoryRepository technologycategoryRepository, ICurrentUserService currentUserService)
+    public CreateTechnologyCommandHandler(ITechnologyRepository technologyRepository, ITechnologyCategoryRepository technologycategoryRepository, ICurrentUserService currentUserService, ICacheService cache)
     {
         _technologyRepository = technologyRepository;
         _technologycategoryRepository = technologycategoryRepository;
         _currentUserService = currentUserService;
+        _cache = cache;
     }
 
     public async Task<CreateTechnologyResponse> Handle(CreateTechnologyCommand request, CancellationToken cancellationToken)
@@ -61,6 +64,8 @@ public sealed class CreateTechnologyCommandHandler : IRequestHandler<CreateTechn
             CreatedAt = DateTime.UtcNow
         };
         await _technologyRepository.CreateAsync(technology, cancellationToken);
+        await _cache.RemoveAsync(CacheKeys.Technologies);
+        await _cache.RemoveAsync(CacheKeys.TechnologyBySlug(technology.Slug));
 
         return new CreateTechnologyResponse
         {

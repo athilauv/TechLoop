@@ -1,4 +1,5 @@
-﻿using FluentValidation;
+using FluentValidation;
+using TechLoop.Application.Common.Caching;
 using MediatR;
 using TechLoop.Application.Features.SubTopics.DTOs;
 using TechLoop.Application.Interfaces.Repositories;
@@ -13,15 +14,17 @@ public sealed class CreateSubTopicCommandHandler
     private readonly ISubTopicsRepository _subTopicsRepository;
     private readonly ITopicsRepository _topicsRepository;
     private readonly ICurrentUserService _currentUserService;
+    private readonly ICacheService _cache;
 
     public CreateSubTopicCommandHandler(
         ISubTopicsRepository subTopicsRepository,
         ITopicsRepository topicsRepository,
-        ICurrentUserService currentUserService)
+        ICurrentUserService currentUserService, ICacheService cache)
     {
         _subTopicsRepository = subTopicsRepository;
         _topicsRepository = topicsRepository;
         _currentUserService = currentUserService;
+        _cache = cache;
     }
 
     public async Task<CreateSubTopicResponse> Handle(CreateSubTopicCommand request, CancellationToken cancellationToken)
@@ -84,6 +87,9 @@ public sealed class CreateSubTopicCommandHandler
         };
 
         await _subTopicsRepository.CreateAsync(subTopic,request.ShiftPositions, cancellationToken);
+        await _cache.RemoveAsync(CacheKeys.SubTopics);
+        await _cache.RemoveAsync(CacheKeys.SubTopicBySlug(subTopic.Slug));
+        await _cache.RemoveAsync(CacheKeys.Curriculum(topic.TechnologyId));
         return new CreateSubTopicResponse
         {
             Success = true,

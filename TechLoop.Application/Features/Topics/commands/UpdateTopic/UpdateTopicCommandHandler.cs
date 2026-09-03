@@ -1,4 +1,5 @@
-﻿using MediatR;
+using MediatR;
+using TechLoop.Application.Common.Caching;
 using TechLoop.Application.Common.Exceptions;
 using TechLoop.Application.Features.Topics.DTOs;
 using TechLoop.Application.Interfaces.Repositories;
@@ -12,12 +13,14 @@ public sealed class UpdateTopicCommandHandler : IRequestHandler<UpdatedTopicComm
     private readonly ITopicsRepository _repository;
     private readonly ITechnologyRepository _technologyRepository;
     private readonly ICurrentUserService _currentUser;
+    private readonly ICacheService _cache;
 
-    public UpdateTopicCommandHandler(ITopicsRepository repository,ITechnologyRepository technologyRepository,ICurrentUserService currentUser)
+    public UpdateTopicCommandHandler(ITopicsRepository repository,ITechnologyRepository technologyRepository,ICurrentUserService currentUser, ICacheService cache)
     {
         _repository = repository;
         _technologyRepository = technologyRepository;
         _currentUser = currentUser;
+        _cache = cache;
     }
 
     public async Task<UpdateTopicResponse> Handle(UpdatedTopicCommand request, CancellationToken cancellationToken)
@@ -50,6 +53,8 @@ public sealed class UpdateTopicCommandHandler : IRequestHandler<UpdatedTopicComm
         {
             throw new ValidationException($"Topic '{request.Title}' already exists in the technology.");
         }
+        var oldSlug = topic.Slug;
+        var oldTechnologyId = topic.TechnologyId;
         topic.TechnologyId = request.TechnologyId;
         topic.Title = request.Title.Trim();
         topic.Description = request.Description;
@@ -62,6 +67,11 @@ public sealed class UpdateTopicCommandHandler : IRequestHandler<UpdatedTopicComm
         topic.UpdatedAt = DateTime.UtcNow;
 
         await _repository.UpdateAsync(topic, request.ShiftPositions, cancellationToken);
+        await _cache.RemoveAsync(CacheKeys.Topics);
+        await _cache.RemoveAsync(CacheKeys.TopicBySlug(oldSlug));
+        await _cache.RemoveAsync(CacheKeys.TopicBySlug(topic.Slug));
+        await _cache.RemoveAsync(CacheKeys.Curriculum(oldTechnologyId));
+        await _cache.RemoveAsync(CacheKeys.Curriculum(topic.TechnologyId));
 
         return new UpdateTopicResponse
         {
