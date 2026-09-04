@@ -26,6 +26,10 @@ export default function CommentItem({
                                     }: CommentItemProps) {
     const currentUser = useCurrentUser(currentUserId);
     const isOwner = currentUser.owns(comment);
+    const avatarTone =
+        (comment.userName?.trim().toUpperCase().charCodeAt(0) ?? 0) % 2 === 0
+            ? "bg-[#3b82f6]/15 text-[#60a5fa] ring-1 ring-[#3b82f6]/25"
+            : "bg-[#2563eb]/20 text-[#93c5fd] ring-1 ring-[#2563eb]/30";
 
     const [isEditing, setIsEditing] = useState(false);
     const [editText, setEditText] = useState(comment.content);
@@ -142,7 +146,7 @@ export default function CommentItem({
             <div className="space-y-2" style={indentStyle}>
                 <div className="rounded-xl border border-[#1e3254] bg-[#081423] p-3">
                     <div className="flex items-center gap-2">
-                        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#17D4C3] text-xs font-semibold text-[#06141f]">
+                        <div className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-xs font-semibold ${avatarTone}`}>
                             {comment.userName.charAt(0).toUpperCase()}
                         </div>
                         <div>
@@ -197,7 +201,7 @@ export default function CommentItem({
             <div className="rounded-xl border border-[#1e3254] bg-[#081423] p-3">
                 <div className="flex items-start justify-between gap-3">
                     <div className="flex min-w-0 items-center gap-2">
-                        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#17D4C3] text-xs font-semibold text-[#06141f]">
+                        <div className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-xs font-semibold ${avatarTone}`}>
                             {comment.userName.charAt(0).toUpperCase()}
                         </div>
 

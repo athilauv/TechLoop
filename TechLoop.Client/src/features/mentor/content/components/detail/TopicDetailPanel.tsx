@@ -51,7 +51,7 @@ export default function TopicDetailPanel({
                     </div>
 
                     {/* Actions */}
-                    <div className="mt-6 flex flex-wrap gap-3">
+                    <div className="sticky top-0 z-10 mt-6 flex flex-wrap gap-3 bg-[var(--cs-bg-card)] py-1">
                         <Button
                             variant="secondary"
                             icon={<Edit3 size={15} />}

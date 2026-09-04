@@ -24,12 +24,12 @@ import {
 import { MENTOR_PENDING_QUERY_KEY } from "../../../../../hooks/useMentorPendingQueue.ts";
 
 import {
-    getMentorDiscussions,
     pinDiscussion,
     unpinDiscussion,
 } from "../../../../../api/mentorDiscussion.api.ts";
 
 import {
+    getQuestionDiscussions,
     createDiscussion,
     createDiscussionComment,
     deleteDiscussion,
@@ -142,32 +142,26 @@ const CodingQuestionDetailsPage = () => {
     const questionId = question?.id ?? 0;
 
     const {
-        data: discussions = [],
+        data: questionDiscussions = [],
         isLoading: discussionsLoading,
         isError: discussionsError,
     } = useQuery<Discussion[]>({
         queryKey: [
-            "mentor-discussions",
+            "question-discussions",
             questionId,
         ],
-        queryFn: getMentorDiscussions,
+        queryFn: () => getQuestionDiscussions(questionId),
         enabled:
             questionId > 0 &&
             activeTab === "discussion",
     });
 
-    const questionDiscussions =
-        discussions.filter(
-            (discussion) =>
-                discussion.questionId ===
-                questionId,
-        );
-
     const invalidateDiscussions =
         async () => {
             await queryClient.invalidateQueries({
                 queryKey: [
-                    "mentor-discussions",
+                    "question-discussions",
+                    questionId,
                 ],
             });
         };

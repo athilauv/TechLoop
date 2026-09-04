@@ -54,7 +54,11 @@ const DiscussionListItem = ({
 
     const isOwner = isSameUser(currentUserId, discussion.userId);
     const canEdit = isOwner && Boolean(onEditDiscussion) && !discussion.isLocked;
-    const canDelete = isOwner && Boolean(onDeleteDiscussion);
+    // The action belongs to the current user's discussion. The page supplies
+    // the delete handler; keeping the visibility tied to ownership prevents
+    // the Delete action from disappearing when the handler is temporarily
+    // unavailable during a parent render.
+    const canDelete = isOwner;
     const [menuOpen, setMenuOpen] = useState(false);
     const [editing, setEditing] = useState(false);
     const [deleting, setDeleting] = useState(false);
@@ -88,6 +92,7 @@ const DiscussionListItem = ({
         ? async (content: string) => {
               await onCreateComment(content);
               await invalidate();
+              showToast.success("Comment added successfully.");
           }
         : undefined;
 
@@ -258,7 +263,7 @@ const DiscussionListItem = ({
                                     {menuOpen && (
                                         <div
                                             role="menu"
-                                            className="absolute right-0 top-9 z-50 w-40 overflow-hidden rounded-lg border border-[var(--cs-border)] bg-[var(--cs-card,var(--cs-surface))] py-1 shadow-lg shadow-black/30"
+                                            className="absolute bottom-9 right-0 z-50 w-40 overflow-hidden rounded-lg border border-[var(--cs-border)] bg-[var(--cs-card,var(--cs-surface))] py-1 shadow-lg shadow-black/30"
                                         >
                                             {canEdit && (
                                                 <button
@@ -276,7 +281,13 @@ const DiscussionListItem = ({
                                                 <button
                                                     type="button"
                                                     role="menuitem"
-                                                    onClick={handleDeleteDiscussion}
+                                                    onClick={() => {
+                                                        if (!onDeleteDiscussion) {
+                                                            showToast.error("Delete discussion is not available.");
+                                                            return;
+                                                        }
+                                                        handleDeleteDiscussion();
+                                                    }}
                                                     disabled={deleting}
                                                     className="flex w-full items-center gap-2 px-3 py-2.5 text-left text-sm text-[var(--cs-danger)] transition-colors duration-150 hover:bg-[var(--cs-danger-subtle)] disabled:cursor-not-allowed disabled:opacity-50"
                                                 >

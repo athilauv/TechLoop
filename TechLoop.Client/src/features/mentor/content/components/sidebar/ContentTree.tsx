@@ -63,7 +63,7 @@ export default function ContentTree({
     return (
         <aside className="flex h-full min-h-0 flex-col overflow-hidden bg-[var(--cs-bg-surface)]">
             {/* HEADER */}
-            <div className="shrink-0 border-b border-[var(--cs-border)] px-5 py-5">
+            <div className="sticky top-0 z-20 shrink-0 border-b border-[var(--cs-border)] bg-[var(--cs-bg-surface)] px-3 py-4 sm:px-5 sm:py-5">
                 <div className="flex items-center justify-between">
                     <div className="min-w-0">
                         <p className="text-[10px] font-semibold uppercase tracking-[1.2px] text-[var(--cs-accent)]">
@@ -90,7 +90,7 @@ export default function ContentTree({
                     icon={<Plus size={15} />}
                     onClick={onCreateTopic}
                     fullWidth
-                    className="mt-4 py-2.5 hover:border-[var(--cs-accent-border)] hover:bg-[var(--cs-accent-subtle)] hover:text-[var(--cs-accent)]"
+                    className="mt-4 w-full min-w-0 whitespace-nowrap py-2.5 hover:border-[var(--cs-accent-border)] hover:bg-[var(--cs-accent-subtle)] hover:text-[var(--cs-accent)]"
                 >
                     Add Topic
                 </Button>

@@ -27,6 +27,7 @@ export default function CommentsSection({ role, postId, currentUserId }: Comment
             setSubmitting(true);
             await addComment(content);
             setContent("");
+            showToast.success("Comment added successfully.");
         } catch (err) {
             showToast.error(err instanceof Error ? err.message : "Unable to create comment.");
         } finally {

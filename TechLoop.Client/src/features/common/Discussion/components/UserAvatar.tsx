@@ -3,18 +3,18 @@ interface UserAvatarProps {
     size?: "sm" | "md" | "lg";
 }
 
-// Alternates between the primary teal and a restrained pink accent so
-// different participants in a thread stay visually distinct at a glance.
+// Alternate between two restrained blue tones so different participants
+// stay visually distinct while remaining consistent with the TechLoop theme.
 const ACCENTS = [
     {
-        bg: "bg-[var(--cs-primary)]/12",
-        text: "text-[var(--cs-primary)]",
-        ring: "ring-[var(--cs-primary)]/25",
+        bg: "bg-[#3b82f6]/12",
+        text: "text-[#60a5fa]",
+        ring: "ring-[#3b82f6]/25",
     },
     {
-        bg: "bg-pink-400/12",
-        text: "text-pink-400",
-        ring: "ring-pink-400/25",
+        bg: "bg-[#2563eb]/16",
+        text: "text-[#93c5fd]",
+        ring: "ring-[#2563eb]/30",
     },
 ];
 

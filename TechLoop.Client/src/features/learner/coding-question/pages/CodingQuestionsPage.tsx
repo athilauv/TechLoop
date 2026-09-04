@@ -1,38 +1,36 @@
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { ChevronRight } from "lucide-react";
 import { useCodingQuestions } from "../../../../hooks/useQuestion.ts";
 import { useTechnologies } from "../../../../hooks/useTechnology.ts";
 import type { LearnerCodingQuestion } from "../../../../types/question.types.ts";
 import { DifficultyLevel } from "../../../../types/enums/difficulty-level.ts";
-import CodingQuestionFilters, {
-    type DifficultyFilter,
-    type SortOption,
-} from "../components/CodingQuestionFilters.tsx";
+import CodingQuestionFilters, {type DifficultyFilter, type SortOption,} from "../components/CodingQuestionFilters.tsx";
+import InfiniteScrollTrigger from "../../../../shared/InfiniteScrollTrigger.tsx";
 
 const PAGE_SIZE = 10;
 
 const CodingQuestionsPage = () => {
     const navigate = useNavigate();
-    const loadMoreRef = useRef<HTMLDivElement | null>(null);
-
     const [search, setSearch] = useState("");
     const [selectedTechnology, setSelectedTechnology] = useState<number | null>(null);
     const [selectedDifficulty, setSelectedDifficulty] = useState<DifficultyFilter>("all");
     const [sortBy, setSortBy] = useState<SortOption>("default");
 
-    const { data: technologies = [] } = useTechnologies();
+    const {
+        data: technologies = [],
+    } = useTechnologies();
 
     const programmingLanguages = technologies.filter(
-        (technology) => technology.categoryId === 1
-    );
+        (technology) => technology.categoryId === 1);
+
 
     const {
         data,
         isLoading,
         isError,
-        isFetchingNextPage,
         hasNextPage,
+        isFetchingNextPage,
         fetchNextPage,
     } = useCodingQuestions(
         PAGE_SIZE,
@@ -47,28 +45,7 @@ const CodingQuestionsPage = () => {
                 : "difficulty_desc"
     );
 
-    const questions = data?.pages.flat() ?? [];
-
-    useEffect(() => {
-        const target = loadMoreRef.current;
-
-        if (!target || !hasNextPage || isFetchingNextPage) {
-            return;
-        }
-
-        const observer = new IntersectionObserver(
-            (entries) => {
-                if (entries[0]?.isIntersecting) {
-                    void fetchNextPage();
-                }
-            },
-            { rootMargin: "300px" }
-        );
-
-        observer.observe(target);
-
-        return () => observer.disconnect();
-    }, [fetchNextPage, hasNextPage, isFetchingNextPage]);
+    const questions = data?.pages.flatMap((page) => page) ?? [];
 
     const getDifficultyLabel = (difficulty: DifficultyLevel) => {
         const label = DifficultyLevel[difficulty];
@@ -98,7 +75,9 @@ const CodingQuestionsPage = () => {
         setSortBy("default");
     };
 
-    const handleQuestionClick = (question: LearnerCodingQuestion) => {
+    const handleQuestionClick = (
+        question: LearnerCodingQuestion
+    ) => {
         navigate(`/learner/coding-questions/${question.slug}`);
     };
 
@@ -109,14 +88,15 @@ const CodingQuestionsPage = () => {
                     <div className="h-7 w-48 animate-pulse rounded-md bg-[#14243C]" />
                     <div className="mt-2 h-4 w-80 animate-pulse rounded-md bg-[#14243C]" />
                 </div>
+
                 <div className="mb-6 h-28 animate-pulse rounded-2xl bg-[#14243C]" />
+
                 <div className="space-y-3">
-                    {[1, 2, 3, 4, 5].map((item) => (
-                        <div
-                            key={item}
-                            className="h-20 animate-pulse rounded-xl bg-[#14243C]"
-                        />
-                    ))}
+                    {[1, 2, 3, 4, 5].map(
+                        (item) => (
+                            <div key={item} className="h-20 animate-pulse rounded-xl bg-[#14243C]" />
+                        )
+                    )}
                 </div>
             </div>
         );
@@ -129,13 +109,17 @@ const CodingQuestionsPage = () => {
                     <h1 className="text-2xl font-semibold text-white">
                         Coding Problems
                     </h1>
+
                     <p className="mt-1 text-sm text-[#8CA3BF]">
-                        Practice coding problems and improve your problem-solving
+                        Practice coding problems and
+                        improve your problem-solving
                         skills.
                     </p>
                 </div>
+
                 <div className="rounded-2xl border border-red-500/20 bg-red-500/10 p-6 text-sm text-red-300">
-                    Unable to load coding problems. Please try again.
+                    Unable to load coding problems.
+                    Please try again.
                 </div>
             </div>
         );
@@ -147,11 +131,12 @@ const CodingQuestionsPage = () => {
                 <h1 className="text-2xl font-semibold text-white">
                     Coding Problems
                 </h1>
+
                 <p className="mt-1 text-sm text-[#8CA3BF]">
-                    Practice coding problems and improve your problem-solving skills.
+                    Practice coding problems and improve
+                    your problem-solving skills.
                 </p>
             </div>
-
             <CodingQuestionFilters
                 search={search}
                 selectedDifficulty={selectedDifficulty}
@@ -164,23 +149,23 @@ const CodingQuestionsPage = () => {
                 onSortChange={handleSortChange}
                 onClear={handleClearFilters}
             />
-
             {questions.length === 0 && (
                 <div className="rounded-2xl border border-[#223A59] bg-[#14243C] p-10 text-center">
                     <div className="mx-auto max-w-md">
                         <h3 className="text-base font-semibold text-white">
                             No coding problems found
                         </h3>
+
                         <p className="mt-2 text-sm text-[#8CA3BF]">
-                            Try changing your search or filters.
+                            Try changing your search or
+                            filters.
                         </p>
-                        <button
-                            type="button"
-                            onClick={handleClearFilters}
-                            className="mt-5 rounded-lg bg-[#00E8C2] px-4 py-2 text-sm font-medium text-[#081423] transition hover:bg-[#00DDB9]"
-                        >
+
+                        <button type="button" onClick={handleClearFilters}
+                                className="mt-5 rounded-lg bg-[#00E8C2] px-4 py-2 text-sm font-medium text-[#081423] transition hover:bg-[#00DDB9]">
                             Clear filters
                         </button>
+
                     </div>
                 </div>
             )}
@@ -188,69 +173,68 @@ const CodingQuestionsPage = () => {
             {questions.length > 0 && (
                 <>
                     <div className="overflow-hidden rounded-2xl border border-[#223A59] bg-[#14243C]">
+
                         {questions.map((question) => {
-                            const difficultyLabel = getDifficultyLabel(question.difficulty);
-                            const difficultyClass =
-                                difficultyLabel.toLowerCase() === "easy"
-                                    ? "text-emerald-400"
-                                    : difficultyLabel.toLowerCase() === "medium"
-                                        ? "text-amber-400"
-                                        : "text-red-400";
+                                const difficultyLabel = getDifficultyLabel(question.difficulty);
+                                const difficultyClass = difficultyLabel.toLowerCase() === "easy"
+                                    ? "text-emerald-400" : difficultyLabel.toLowerCase() ===
+                                    "medium" ? "text-amber-400" : "text-red-400";
 
-                            return (
-                                <button
-                                    key={question.id}
-                                    type="button"
-                                    onClick={() => handleQuestionClick(question)}
-                                    className="group flex w-full items-center gap-4 border-b border-[#223A59] px-5 py-4 text-left transition last:border-b-0 hover:bg-[#101C30]"
-                                >
-                                    <div className="min-w-0 flex-1">
-                                        <h3 className="truncate text-sm font-semibold text-white transition group-hover:text-[#00E8C2]">
-                                            {question.title}
-                                        </h3>
-                                        <p className="mt-1 truncate text-xs text-[#8CA3BF]">
-                                            {question.description}
-                                        </p>
-                                    </div>
+                                return (
+                                    <button key={question.id} type="button"
+                                            onClick={() => handleQuestionClick(question)}
+                                            className="group flex w-full items-center gap-4 border-b border-[#223A59] px-5 py-4 text-left transition last:border-b-0 hover:bg-[#101C30]">
 
-                                    <span className="hidden shrink-0 text-xs text-[#5C7394] lg:block">
-                                        {question.technologyName}
-                                    </span>
 
-                                    <span
-                                        className={`hidden shrink-0 text-sm font-medium sm:block ${difficultyClass}`}
-                                    >
-                                        {difficultyLabel}
-                                    </span>
 
-                                    <span className="hidden w-16 shrink-0 text-right text-xs text-[#5C7394] md:block">
-                                        {question.marks} marks
-                                    </span>
+                                        <div className="min-w-0 flex-1">
+                                            <h3 className="truncate text-sm font-semibold text-white transition group-hover:text-[#00E8C2]">
+                                                {question.title}
+                                            </h3>
 
-                                    <ChevronRight
-                                        size={18}
-                                        className="shrink-0 text-[#5C7394] transition group-hover:translate-x-1 group-hover:text-[#00E8C2]"
-                                    />
-                                </button>
-                            );
-                        })}
-                    </div>
+                                            <p className="mt-1 truncate text-xs text-[#8CA3BF]">
+                                                {question.description}
+                                            </p>
 
-                    <div ref={loadMoreRef} className="flex min-h-16 items-center justify-center py-6">
-                        {isFetchingNextPage && (
-                            <p className="text-sm text-[#8CA3BF]">
-                                Loading more problems...
-                            </p>
+                                        </div>
+
+
+                                        <span className="hidden shrink-0 text-xs text-[#5C7394] lg:block">
+                                            {question.technologyName}
+                                        </span>
+
+
+                                        <span className={`hidden shrink-0 text-sm font-medium sm:block ${difficultyClass}`}>
+                                            {difficultyLabel}
+                                        </span>
+
+
+                                        <span className="hidden w-16 shrink-0 text-right text-xs text-[#5C7394] md:block">
+                                            {question.marks}{" "}
+                                            marks
+                                        </span>
+
+
+                                        <ChevronRight
+                                            size={18}
+                                            className="shrink-0 text-[#5C7394] transition group-hover:translate-x-1 group-hover:text-[#00E8C2]"
+                                        />
+
+                                    </button>
+                                );
+                            }
                         )}
 
-                        {!isFetchingNextPage && !hasNextPage && (
-                            <p className="text-sm text-[#5C7394]">
-                                No more coding problems.
-                            </p>
-                        )}
                     </div>
+
+                    <InfiniteScrollTrigger
+                        hasNextPage={!!hasNextPage}
+                        isFetchingNextPage={isFetchingNextPage}
+                        onLoadMore={() => void fetchNextPage()}
+                    />
                 </>
             )}
+
         </div>
     );
 };

@@ -352,6 +352,14 @@ export default function MentorContentPage() {
         const submit = (shiftPositions: boolean) =>
             createSubTopic({ ...request, shiftPositions });
 
+        const topic = curriculum.topics.find((item) => item.id === request.topicId);
+        const positionAlreadyExists = topic?.subTopics.some(
+            (subTopic) => subTopic.position === request.position
+        ) ?? false;
+
+        const isGenericError = (message: string) =>
+            message.trim().toLowerCase() === "an unexpected error occurred.";
+
         const completeCreate = async (message: string) => {
             toast.success(message || "SubTopic created successfully.");
             await refreshCurriculum();
@@ -366,12 +374,20 @@ export default function MentorContentPage() {
             const response = await submit(false);
 
             if (!response.success) {
-                if (!isPositionConflict(response.message)) {
+                const positionConflict =
+                    isPositionConflict(response.message) ||
+                    (isGenericError(response.message) && positionAlreadyExists);
+
+                if (!positionConflict) {
                     toast.error(response.message);
                     return;
                 }
 
-                const confirmed = await confirmPositionShift(response.message, "subtopics");
+                const conflictMessage = isPositionConflict(response.message)
+                    ? response.message
+                    : `Sub topic position '${request.position}' is already occupied. Do you want to shift the existing subtopics?`;
+
+                const confirmed = await confirmPositionShift(conflictMessage, "subtopics");
                 if (!confirmed) return;
 
                 const retryResponse = await submit(true);
@@ -389,12 +405,20 @@ export default function MentorContentPage() {
         } catch (error: unknown) {
             const message = getErrorMessage(error, "Unable to create subtopic.");
 
-            if (!isPositionConflict(message)) {
+            const positionConflict =
+                isPositionConflict(message) ||
+                (isGenericError(message) && positionAlreadyExists);
+
+            if (!positionConflict) {
                 toast.error(message);
                 return;
             }
 
-            const confirmed = await confirmPositionShift(message, "subtopics");
+            const conflictMessage = isPositionConflict(message)
+                ? message
+                : `Sub topic position '${request.position}' is already occupied. Do you want to shift the existing subtopics?`;
+
+            const confirmed = await confirmPositionShift(conflictMessage, "subtopics");
             if (!confirmed) return;
 
             try {

@@ -7,7 +7,7 @@ interface MentorAboutProps {
 
 const MentorAbout = ({ profile }: MentorAboutProps) => {
     return (
-        <section className="rounded-2xl border border-white/10 bg-[#0B1B30] p-5 sm:p-6">
+        <section className="h-full rounded-2xl border border-white/10 bg-[#0B1B30] p-5 sm:p-6">
             <div className="flex items-center gap-3">
                 <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#18C6A4]/10">
                     <User className="h-5 w-5 text-[#18C6A4]" />

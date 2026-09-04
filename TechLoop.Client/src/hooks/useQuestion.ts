@@ -81,6 +81,7 @@ export const useCodingQuestions = (
             search,
             sort,
         ],
+        initialPageParam: 1,
         queryFn: ({ pageParam }) =>
             getCodingQuestions(
                 pageParam,
@@ -91,10 +92,7 @@ export const useCodingQuestions = (
                 search,
                 sort
             ),
-        initialPageParam: 1,
         getNextPageParam: (lastPage, allPages) =>
-            lastPage.length === pageSize
-                ? allPages.length + 1
-                : undefined,
+            lastPage.length === pageSize ? allPages.length + 1 : undefined,
     });
 };

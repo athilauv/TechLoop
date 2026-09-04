@@ -3,7 +3,7 @@ import type { Discussion } from "../types/discussion.types";
 import type { PagedResponse } from "../types/pagination.types";
 
 export const getMentorDiscussions = async (page = 1, pageSize = 20, search?: string, sort = "newest"): Promise<PagedResponse<Discussion>> => {
-    const response = await api.get<PagedResponse<Discussion>>("/api/discussions", { params: { page, pageSize, search: search || undefined, sort } });
+    const response = await api.get<PagedResponse<Discussion>>("/mentor/discussions", { params: { page, pageSize, search: search || undefined, sort } });
     return response.data;
 };
 

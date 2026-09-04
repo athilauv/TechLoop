@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { User } from "lucide-react";
 import { getMentorProfile, updateMentorProfile } from "../../../../api/mentor.api.ts";
 import type { MentorProfileData, UpdateMentorProfileRequest } from "../../../../types/mentor.types.ts";
@@ -15,6 +16,7 @@ const MentorProfile = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
     const [isEditing, setIsEditing] = useState(false);
+    const navigate = useNavigate();
 
     useEffect(() => {
         const loadProfile = async () => {
@@ -73,7 +75,7 @@ const MentorProfile = () => {
 
                     <div className="mt-6 h-56 rounded-2xl bg-[#0B1B30]" />
 
-                    <div className="mt-6 grid gap-6 lg:grid-cols-3">
+                    <div className="mt-6 grid items-stretch gap-6 lg:grid-cols-3">
                         <div className="h-64 rounded-2xl bg-[#0B1B30] lg:col-span-2" />
 
                         <div className="h-64 rounded-2xl bg-[#0B1B30]" />
@@ -139,19 +141,41 @@ const MentorProfile = () => {
                 />
 
                 {/* Profile Content */}
-                <div className="mt-6 grid gap-6 lg:grid-cols-3">
+                <div className="mt-6 grid items-stretch gap-6 lg:grid-cols-3">
 
                     {/* About */}
-                    <div className="lg:col-span-2">
+                    <div className="h-full lg:col-span-2">
                         <MentorAbout profile={profile} />
                     </div>
 
                     {/* Expertise */}
-                    <MentorExpertise profile={profile} />
+                    <div className="h-full">
+                        <MentorExpertise profile={profile} />
+                    </div>
 
                     {/* Contact */}
                     <div className="lg:col-span-3">
                         <MentorContact profile={profile} />
+                    </div>
+
+                    {/* Security */}
+                    <div className="lg:col-span-3 rounded-2xl border border-white/10 bg-[#0B1B30] p-5 sm:p-6">
+                        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                            <div>
+                                <h2 className="text-sm font-semibold text-white">Password</h2>
+                                <p className="mt-1 text-xs text-slate-500">
+                                    Change your password to keep your account secure.
+                                </p>
+                            </div>
+
+                            <button
+                                type="button"
+                                onClick={() => navigate("/change-password")}
+                                className="inline-flex shrink-0 items-center justify-center rounded-lg border border-[#18C6A4]/30 bg-[#18C6A4]/10 px-4 py-2.5 text-sm font-medium text-[#18C6A4] transition hover:border-[#18C6A4]/50 hover:bg-[#18C6A4]/20"
+                            >
+                                Change Password
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>

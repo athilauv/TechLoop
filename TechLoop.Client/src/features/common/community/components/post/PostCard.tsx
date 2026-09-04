@@ -115,6 +115,10 @@ export default function PostCard({
     }
 
     const avatarLetter = post.userName?.trim().charAt(0).toUpperCase() || "U";
+    const avatarTone =
+        (post.userName?.trim().toUpperCase().charCodeAt(0) ?? 0) % 2 === 0
+            ? "bg-[#3b82f6]/15 text-[#60a5fa] ring-1 ring-[#3b82f6]/25"
+            : "bg-[#2563eb]/20 text-[#93c5fd] ring-1 ring-[#2563eb]/30";
 
     return (
         <article className="rounded-2xl border border-[#1e3254] bg-[#0f1e35] p-5 transition hover:border-[#24506a]">
@@ -125,7 +129,7 @@ export default function PostCard({
                     onClick={() => (commentsMode === "navigate" ? onOpen?.(post.id) : undefined)}
                     className="flex min-w-0 items-center gap-3 text-left"
                 >
-                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#17D4C3] text-sm font-bold text-[#06141f]">
+                    <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-sm font-bold ${avatarTone}`}>
                         {avatarLetter}
                     </div>
 
