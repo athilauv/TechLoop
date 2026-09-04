@@ -23,22 +23,16 @@ function buildPageRange(
 
     const leftIndex = Math.max(currentPage - siblingCount, 1);
     const rightIndex = Math.min(currentPage + siblingCount, totalPages);
-
     const showLeftEllipsis = leftIndex > 2;
     const showRightEllipsis = rightIndex < totalPages - 1;
-
     const pages: PageItem[] = [1];
 
     if (showLeftEllipsis) pages.push(ELLIPSIS);
-    for (
-        let p = leftIndex === 1 ? 2 : leftIndex;
-        p <= (rightIndex === totalPages ? totalPages - 1 : rightIndex);
-        p++
-    ) {
+    for (let p = leftIndex === 1 ? 2 : leftIndex;
+        p <= (rightIndex === totalPages ? totalPages - 1 : rightIndex); p++) {
         if (p > 1 && p < totalPages) pages.push(p);
     }
     if (showRightEllipsis) pages.push(ELLIPSIS);
-
     pages.push(totalPages);
     return pages;
 }

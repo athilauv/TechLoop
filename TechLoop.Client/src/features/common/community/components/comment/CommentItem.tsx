@@ -1,11 +1,12 @@
 import { Check, MessageCircle, MoreVertical, Pencil, Send, Trash2, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
-import type { PostComment} from "../../../../../types/community.types.ts";
+import type { PostComment } from "../../../../../types/community.types.ts";
 import { useCurrentUser } from "../../../../../hooks/useCurrentUser.ts";
 import { isMentor } from "../../../../../utils/isMentor.ts";
 import MentorBadge from "../shared/MentorBadge";
 import { formatRelativeTime } from "../../../../../utils/formatRelativeTime.ts";
-import { showToast} from "../../../../../utils/toast.tsx";
+import { showToast } from "../../../../../utils/toast.tsx";
+import UserAvatar from "../../../Discussion/components/UserAvatar.tsx";
 
 interface CommentItemProps {
     comment: PostComment;
@@ -17,19 +18,15 @@ interface CommentItemProps {
 }
 
 export default function CommentItem({
-                                        comment,
-                                        currentUserId,
-                                        depth = 0,
-                                        onReply,
-                                        onEdit,
-                                        onDelete,
-                                    }: CommentItemProps) {
+    comment,
+    currentUserId,
+    depth = 0,
+    onReply,
+    onEdit,
+    onDelete,
+}: CommentItemProps) {
     const currentUser = useCurrentUser(currentUserId);
     const isOwner = currentUser.owns(comment);
-    const avatarTone =
-        (comment.userName?.trim().toUpperCase().charCodeAt(0) ?? 0) % 2 === 0
-            ? "bg-[#3b82f6]/15 text-[#60a5fa] ring-1 ring-[#3b82f6]/25"
-            : "bg-[#2563eb]/20 text-[#93c5fd] ring-1 ring-[#2563eb]/30";
 
     const [isEditing, setIsEditing] = useState(false);
     const [editText, setEditText] = useState(comment.content);
@@ -42,10 +39,6 @@ export default function CommentItem({
     const [error, setError] = useState<string | null>(null);
 
     const menuRef = useRef<HTMLDivElement | null>(null);
-
-    useEffect(() => {
-        if (!isEditing) setEditText(comment.content);
-    }, [comment.content, isEditing]);
 
     useEffect(() => {
         if (!menuOpen) return;
@@ -139,16 +132,16 @@ export default function CommentItem({
         }
     }
 
-    const indentStyle = { marginLeft: depth > 0 ? `${Math.min(depth, 4) * 20}px` : undefined };
+    const indentStyle = {
+        marginLeft: depth > 0 ? `${Math.min(depth, 4) * 20}px` : undefined,
+    };
 
     if (isEditing) {
         return (
-            <div className="space-y-2" style={indentStyle}>
-                <div className="rounded-xl border border-[#1e3254] bg-[#081423] p-3">
+            <div className="space-y-2 border-b border-[#1e3254]/60 pb-4 last:border-b-0 last:pb-0" style={indentStyle}>
+                <div className="relative bg-transparent p-0">
                     <div className="flex items-center gap-2">
-                        <div className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-xs font-semibold ${avatarTone}`}>
-                            {comment.userName.charAt(0).toUpperCase()}
-                        </div>
+                        <UserAvatar name={comment.userName} size="sm" />
                         <div>
                             <p className="text-xs font-semibold text-white">{comment.userName}</p>
                             <p className="text-[10px] text-[#526d8e]">Editing comment</p>
@@ -167,26 +160,11 @@ export default function CommentItem({
                     {error && <p className="mt-2 text-[10px] text-[#ef8b8b]">{error}</p>}
 
                     <div className="mt-3 flex justify-end gap-2">
-                        <button
-                            type="button"
-                            onClick={() => {
-                                setEditText(comment.content);
-                                setError(null);
-                                setIsEditing(false);
-                            }}
-                            disabled={savingEdit}
-                            className="inline-flex items-center gap-1 rounded-lg px-3 py-1.5 text-[11px] font-medium text-[#7189a8] transition hover:bg-[#10283e] hover:text-white disabled:opacity-50"
-                        >
+                        <button type="button" onClick={() => { setEditText(comment.content); setError(null); setIsEditing(false); }} disabled={savingEdit} className="inline-flex items-center gap-1 rounded-lg px-3 py-1.5 text-[11px] font-medium text-[#7189a8] transition hover:bg-[#10283e] hover:text-white disabled:opacity-50">
                             <X size={12} />
                             Cancel
                         </button>
-
-                        <button
-                            type="button"
-                            onClick={() => void handleEdit()}
-                            disabled={savingEdit}
-                            className="inline-flex items-center gap-1 rounded-lg bg-[#17D4C3] px-3 py-1.5 text-[11px] font-semibold text-[#06141f] transition hover:bg-[#35e2d3] disabled:cursor-not-allowed disabled:opacity-50"
-                        >
+                        <button type="button" onClick={() => void handleEdit()} disabled={savingEdit} className="inline-flex items-center gap-1 rounded-lg bg-[#17D4C3] px-3 py-1.5 text-[11px] font-semibold text-[#06141f] transition hover:bg-[#35e2d3] disabled:cursor-not-allowed disabled:opacity-50">
                             <Check size={12} />
                             {savingEdit ? "Saving..." : "Save"}
                         </button>
@@ -197,69 +175,33 @@ export default function CommentItem({
     }
 
     return (
-        <div className="space-y-2" style={indentStyle}>
-            <div className="rounded-xl border border-[#1e3254] bg-[#081423] p-3">
+        <div className="space-y-2 border-b border-[#1e3254]/60 pb-4 last:border-b-0 last:pb-0" style={indentStyle}>
+            <div className="relative bg-transparent p-0">
                 <div className="flex items-start justify-between gap-3">
                     <div className="flex min-w-0 items-center gap-2">
-                        <div className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-xs font-semibold ${avatarTone}`}>
-                            {comment.userName.charAt(0).toUpperCase()}
-                        </div>
-
+                        <UserAvatar name={comment.userName} size="sm" />
                         <div className="min-w-0">
                             <div className="flex items-center gap-2">
-                                <p className="truncate text-xs font-semibold text-white">
-                                    {comment.userName}
-                                </p>
+                                <p className="truncate text-xs font-semibold text-white">{comment.userName}</p>
                                 {isMentor(comment) && <MentorBadge />}
                             </div>
-
-                            <p className="text-[10px] text-[#526d8e]">
-                                {formatRelativeTime(comment.createdAt)}
-                            </p>
+                            <p className="text-[10px] text-[#526d8e]">{formatRelativeTime(comment.createdAt)}</p>
                         </div>
                     </div>
 
                     {isOwner && (
                         <div ref={menuRef} className="relative z-30 shrink-0">
-                            <button
-                                type="button"
-                                onClick={() => setMenuOpen((current) => !current)}
-                                disabled={deleting || savingEdit}
-                                className="flex h-8 w-8 items-center justify-center rounded-lg text-[#7189a8] transition hover:bg-[#10283e] hover:text-white disabled:cursor-not-allowed disabled:opacity-50"
-                                aria-label="Comment options"
-                                aria-haspopup="menu"
-                                aria-expanded={menuOpen}
-                            >
+                            <button type="button" onClick={() => setMenuOpen((current) => !current)} disabled={deleting || savingEdit} className="flex h-8 w-8 items-center justify-center rounded-lg text-[#7189a8] transition hover:bg-[#10283e] hover:text-white disabled:cursor-not-allowed disabled:opacity-50" aria-label="Comment options" aria-haspopup="menu" aria-expanded={menuOpen}>
                                 <MoreVertical size={17} />
                             </button>
 
                             {menuOpen && (
-                                <div
-                                    className="absolute right-0 top-full z-50 mt-2 w-32 overflow-hidden rounded-xl border border-[#1e3254] bg-[#0f1e35] p-1 shadow-2xl"
-                                    role="menu"
-                                >
-                                    <button
-                                        type="button"
-                                        onClick={() => {
-                                            setEditText(comment.content);
-                                            setError(null);
-                                            setIsEditing(true);
-                                            setMenuOpen(false);
-                                        }}
-                                        className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-xs text-[#a8bad0] transition hover:bg-[#10283e] hover:text-white"
-                                        role="menuitem"
-                                    >
+                                <div className="absolute right-0 top-9 z-50 w-32 overflow-hidden rounded-xl border border-[#1e3254] bg-[#0f1e35] p-1 shadow-2xl" role="menu">
+                                    <button type="button" onClick={() => { setEditText(comment.content); setError(null); setIsEditing(true); setMenuOpen(false); }} className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-xs text-[#a8bad0] transition hover:bg-[#10283e] hover:text-white" role="menuitem">
                                         <Pencil size={13} />
                                         Edit
                                     </button>
-
-                                    <button
-                                        type="button"
-                                        onClick={() => void handleDelete()}
-                                        disabled={deleting}
-                                        className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-xs text-[#ef8b8b] transition hover:bg-[#24151b] disabled:cursor-not-allowed disabled:opacity-50"
-                                        role="menuitem"
-                                    >
+                                    <button type="button" onClick={() => void handleDelete()} disabled={deleting} className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-xs text-[#ef8b8b] transition hover:bg-[#24151b] disabled:cursor-not-allowed disabled:opacity-50" role="menuitem">
                                         <Trash2 size={13} />
                                         {deleting ? "Deleting..." : "Delete"}
                                     </button>
@@ -269,19 +211,12 @@ export default function CommentItem({
                     )}
                 </div>
 
-                <p className="mt-3 whitespace-pre-wrap text-xs leading-5 text-[#a8bad0]">
-                    {comment.content}
-                </p>
-
+                <p className="mt-3 whitespace-pre-wrap text-xs leading-5 text-[#a8bad0]">{comment.content}</p>
                 {error && <p className="mt-2 text-[10px] text-[#ef8b8b]">{error}</p>}
 
                 <div className="mt-3 flex items-center gap-4">
                     {onReply && (
-                        <button
-                            type="button"
-                            onClick={() => setShowReplyBox((current) => !current)}
-                            className="inline-flex items-center gap-1.5 text-[10px] text-[#7189a8] transition hover:text-[#17D4C3]"
-                        >
+                        <button type="button" onClick={() => setShowReplyBox((current) => !current)} className="inline-flex items-center gap-1.5 text-[10px] text-[#7189a8] transition hover:text-[#17D4C3]">
                             <MessageCircle size={12} />
                             Reply
                         </button>
@@ -290,23 +225,9 @@ export default function CommentItem({
 
                 {showReplyBox && onReply && (
                     <div className="mt-3">
-                        <textarea
-                            value={replyText}
-                            onChange={(event) => setReplyText(event.target.value)}
-                            rows={3}
-                            maxLength={1000}
-                            disabled={submittingReply}
-                            placeholder="Write a reply..."
-                            className="w-full resize-none rounded-xl border border-[#1e3254] bg-[#06111f] px-3 py-2.5 text-xs leading-5 text-white outline-none placeholder:text-[#526d8e] focus:border-[#17D4C3] disabled:opacity-60"
-                        />
-
+                        <textarea value={replyText} onChange={(event) => setReplyText(event.target.value)} rows={3} maxLength={1000} disabled={submittingReply} placeholder="Write a reply..." className="w-full resize-none rounded-xl border border-[#1e3254] bg-[#06111f] px-3 py-2.5 text-xs leading-5 text-white outline-none placeholder:text-[#526d8e] focus:border-[#17D4C3] disabled:opacity-60" />
                         <div className="mt-2 flex justify-end">
-                            <button
-                                type="button"
-                                onClick={() => void handleReply()}
-                                disabled={submittingReply || !replyText.trim()}
-                                className="inline-flex items-center gap-1.5 rounded-lg bg-[#17D4C3] px-3 py-1.5 text-[10px] font-semibold text-[#06141f] transition hover:bg-[#35e2d3] disabled:cursor-not-allowed disabled:opacity-50"
-                            >
+                            <button type="button" onClick={() => void handleReply()} disabled={submittingReply || !replyText.trim()} className="inline-flex items-center gap-1.5 rounded-lg bg-[#17D4C3] px-3 py-1.5 text-[10px] font-semibold text-[#06141f] transition hover:bg-[#35e2d3] disabled:cursor-not-allowed disabled:opacity-50">
                                 <Send size={11} />
                                 {submittingReply ? "Sending..." : "Reply"}
                             </button>

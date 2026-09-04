@@ -69,12 +69,6 @@ html {
   background: transparent;
 }
 
-/* ==========================================================================
-   Content Studio — Theme Tokens
-   Scoped under .content-studio-theme so this never leaks into other areas
-   of the app. Values sourced directly from the Color Theme specification.
-   ========================================================================== */
-
 .content-studio-theme {
   /* Backgrounds */
   --cs-bg-primary: #0e192a;
@@ -181,61 +175,25 @@ body {
 }
 
 
-/* ==========================================================================
-   Mentor Question Management — token bridge
-   --------------------------------------------------------------------------
-   The Question Management components (src/.../questions/**) are written
-   against `--cs-*` custom properties (e.g. var(--cs-border), var(--cs-surface),
-   var(--cs-primary)) expecting them to be available globally.
-
-   In reality most of those names were never defined anywhere in this file,
-   and the ones that do exist (--cs-border, --cs-danger, --cs-danger-subtle,
-   --cs-text-muted, --cs-text-secondary) are scoped to `.content-studio-theme`,
-   which the Mentor Question routes are not wrapped in.
-
-   An undefined custom property makes `var(--cs-border)` invalid at compute
-   time. For a non-inherited property like border-color, the browser falls
-   back to its initial value, `currentColor` — which resolves to `#ffffff`
-   because of the global `body { color: #ffffff; }` rule. That is the actual
-   source of the bright white borders: they were never "white by design",
-   they were silently inheriting the page's text color.
-
-   This block does not introduce a new color system or fight the existing
-   theme — it exposes the SAME colors already defined above (either inside
-   `.content-studio-theme` or in the Tailwind `@theme` block) under the
-   `--cs-*` names the Question components already reference, so no component
-   file needs to change its class names.
-   ========================================================================== */
 :root {
-  --cs-bg: #0e192a;              /* same as --cs-bg-primary */
-  --cs-surface: #12233b;         /* same as --cs-bg-surface */
-  --cs-surface-muted: #14243c;   /* same as --cs-bg-card */
-  --cs-border: #223a59;          /* same as the scoped --cs-border */
-
-  --cs-text: #ffffff;            /* same as --cs-text-primary */
-  --cs-text-secondary: #8ca3bf;  /* same as the scoped value */
-  --cs-text-muted: #5c7394;      /* same as the scoped value */
-
-  --cs-primary: #00e8c2;         /* same as --cs-accent */
-  --cs-primary-hover: #00ddb9;   /* same as --cs-accent-hover */
-  --cs-primary-contrast: #081423;/* same as --cs-accent-on */
-
+  --cs-bg: #0e192a;
+  --cs-surface: #12233b;
+  --cs-surface-muted: #14243c;
+  --cs-border: #223a59;
+  --cs-text: #ffffff;
+  --cs-text-secondary: #8ca3bf;
+  --cs-text-muted: #5c7394;
+  --cs-primary: #00e8c2;
+  --cs-primary-hover: #00ddb9;
+  --cs-primary-contrast: #081423;
   --cs-danger: #f87171;
   --cs-danger-subtle: rgba(248, 113, 113, 0.1);
   --cs-danger-border: rgba(248, 113, 113, 0.35);
-
-  /* No "success" token existed anywhere in this file. The Question UI
-     already uses Tailwind's emerald-400 (#34d399) ad hoc for "Published",
-     "Correct answer" and "Visible" states — this just centralizes that
-     same color into a token instead of adding a new hue. */
   --cs-success: #34d399;
   --cs-success-subtle: rgba(52, 211, 153, 0.1);
   --cs-success-border: rgba(52, 211, 153, 0.35);
 }
 
-/* ==========================================================================
-   Horizontal drag-scroll containers (used by Question Management tables)
-   ========================================================================== */
 .cs-hscroll {
   scrollbar-width: thin;
   scrollbar-color: #00e8c2 transparent;

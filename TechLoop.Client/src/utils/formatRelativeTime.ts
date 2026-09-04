@@ -1,12 +1,8 @@
-export function formatRelativeTime(
-    dateString: string
-): string {
+export function formatRelativeTime(dateString: string): string {
     const date = new Date(dateString);
-
     const now = new Date();
     const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000);
-    if (
-        diffInSeconds < 0 || diffInSeconds < 6) {
+    if (diffInSeconds < 0 || diffInSeconds < 6) {
         return "Just now";
     }
 

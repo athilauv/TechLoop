@@ -3,13 +3,11 @@ interface UserAvatarProps {
     size?: "sm" | "md" | "lg";
 }
 
-// Alternate between two restrained blue tones so different participants
-// stay visually distinct while remaining consistent with the TechLoop theme.
 const ACCENTS = [
     {
-        bg: "bg-[#3b82f6]/12",
+        bg: "bg-[#00e8c2]/12",
         text: "text-[#60a5fa]",
-        ring: "ring-[#3b82f6]/25",
+        ring: "ring-[#00e8c2]/25",
     },
     {
         bg: "bg-[#2563eb]/16",
@@ -28,16 +26,11 @@ const UserAvatar = ({ name, size = "md" }: UserAvatarProps) => {
     const accent = getAccent(name || "U");
 
     const dimension =
-        size === "sm"
-            ? "h-8 w-8 text-xs"
-            : size === "lg"
-                ? "h-11 w-11 text-base"
-                : "h-9 w-9 text-sm";
+        size === "sm" ? "h-8 w-8 text-xs"
+            : size === "lg" ? "h-11 w-11 text-base" : "h-9 w-9 text-sm";
 
     return (
-        <div
-            className={`flex shrink-0 items-center justify-center rounded-full font-semibold ring-1 ${accent.bg} ${accent.text} ${accent.ring} ${dimension}`}
-        >
+        <div className={`flex shrink-0 items-center justify-center rounded-full font-semibold ring-1 ${accent.bg} ${accent.text} ${accent.ring} ${dimension}`}>
             {initial}
         </div>
     );

@@ -2,9 +2,7 @@ import type { DailyActivity } from "../types/analytics.types.ts";
 
 export type ActivityLevel = | "none" | "low" | "medium" | "high";
 
-export function getActivityLevel(
-    activity: DailyActivity,
-): ActivityLevel {
+export function getActivityLevel(activity: DailyActivity): ActivityLevel {
     if (activity.totalActivities <= 0) {
         return "none";
     }
@@ -20,9 +18,7 @@ export function getActivityLevel(
     return "high";
 }
 
-export function formatMinutes(
-    minutes: number,
-): string {
+export function formatMinutes(minutes: number): string {
     if (minutes <= 0) {
         return "0m";
     }
@@ -41,9 +37,7 @@ export function formatMinutes(
     return `${hours}h ${remainingMinutes}m`;
 }
 
-export function formatShortDate(
-    date: string,
-): string {
+export function formatShortDate(date: string): string {
     return new Date(date).toLocaleDateString(
         undefined,
         {

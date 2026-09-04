@@ -44,21 +44,10 @@ export default function LearningActivityPulse({
     const recentDays = days.slice(-14);
 
     const summary = useMemo(() => {
-        const totalActivities = data.reduce(
-            (sum, item) => sum + item.totalActivities,
-            0
-        );
-        const successful = data.reduce(
-            (sum, item) => sum + item.successfulAttempts,
-            0
-        );
-        const failed = data.reduce(
-            (sum, item) => sum + item.failedAttempts,
-            0
-        );
-        const activeDays = data.filter(
-            (item) => item.totalActivities > 0
-        ).length;
+        const totalActivities = data.reduce((sum, item) => sum + item.totalActivities, 0);
+        const successful = data.reduce((sum, item) => sum + item.successfulAttempts, 0);
+        const failed = data.reduce((sum, item) => sum + item.failedAttempts, 0);
+        const activeDays = data.filter((item) => item.totalActivities > 0).length;
         const bestDay = [...days].sort(
             (a, b) => b.totalActivities - a.totalActivities
         )[0];
@@ -94,10 +83,7 @@ export default function LearningActivityPulse({
         );
     }
 
-    const maxAttempts = Math.max(
-        ...recentDays.map((day) => day.totalActivities),
-        1
-    );
+    const maxAttempts = Math.max(...recentDays.map((day) => day.totalActivities), 1);
 
     return (
         <section className="rounded-2xl border border-[#1e3254] bg-[#0f1e35] p-5 sm:p-6">
@@ -139,18 +125,13 @@ export default function LearningActivityPulse({
                 <div className="min-w-[720px]">
                     <div className="grid grid-cols-14 items-end gap-2">
                         {recentDays.map((day) => {
-                            const percentage = Math.max(
-                                8,
-                                (day.totalActivities / maxAttempts) * 100
-                            );
+                            const percentage = Math.max(8, (day.totalActivities / maxAttempts) * 100);
 
                             return (
                                 <div key={dateKey(day.date)} className="group flex min-w-0 flex-col items-center">
                                     <div className="relative flex h-36 w-full items-end rounded-lg bg-[#0a1729] px-1">
-                                        <div
-                                            className="w-full rounded-md bg-[#17D4C3]/80 transition-all group-hover:bg-[#17D4C3]"
-                                            style={{ height: `${percentage}%` }}
-                                        />
+                                        <div className="w-full rounded-md bg-[#17D4C3]/80 transition-all group-hover:bg-[#17D4C3]"
+                                            style={{ height: `${percentage}%` }}/>
 
                                         <div className="pointer-events-none absolute bottom-full left-1/2 z-20 mb-2 hidden w-44 -translate-x-1/2 rounded-lg border border-[#29466d] bg-[#081423] p-3 shadow-xl group-hover:block">
                                             <p className="text-xs font-semibold text-white">

@@ -169,8 +169,67 @@ const DiscussionListItem = ({
     }
 
     return (
-        <div className="rounded-xl border border-[var(--cs-border)] bg-[var(--cs-card,var(--cs-surface))] p-5 transition-colors duration-150 hover:border-[var(--cs-border)]/90 sm:p-6">
-            <div className="flex items-start gap-3 sm:gap-4">
+        <div className="relative rounded-xl border border-[var(--cs-border)] bg-[var(--cs-card,var(--cs-surface))] p-5 transition-colors duration-150 hover:border-[var(--cs-border)]/90 sm:p-6">
+            {/* Keep pin + owner actions at the card's top-right. */}
+            <div className="absolute right-4 top-4 z-20 flex items-center gap-1 sm:right-5 sm:top-5">
+                {extraAction}
+
+                {isOwner && (canEdit || canDelete) && (
+                    <div ref={menuRef} className="relative">
+                        <button
+                            type="button"
+                            onClick={() => setMenuOpen((current) => !current)}
+                            disabled={deleting}
+                            aria-label="Discussion options"
+                            aria-haspopup="menu"
+                            aria-expanded={menuOpen}
+                            className="rounded-md p-1.5 text-[var(--cs-text-muted)] transition-colors duration-150 hover:bg-white/5 hover:text-[var(--cs-text)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--cs-primary)]/40 disabled:cursor-not-allowed disabled:opacity-50"
+                        >
+                            <MoreVertical size={16} />
+                        </button>
+
+                        {menuOpen && (
+                            <div
+                                role="menu"
+                                className="absolute right-0 top-9 z-50 w-40 overflow-hidden rounded-lg border border-[var(--cs-border)] bg-[var(--cs-card,var(--cs-surface))] py-1 shadow-lg shadow-black/30"
+                            >
+                                {canEdit && (
+                                    <button
+                                        type="button"
+                                        role="menuitem"
+                                        onClick={handleEditDiscussion}
+                                        className="flex w-full items-center gap-2 px-3 py-2.5 text-left text-sm text-[var(--cs-text-secondary)] transition-colors duration-150 hover:bg-white/5 hover:text-[var(--cs-text)]"
+                                    >
+                                        <Pencil size={14} />
+                                        Edit
+                                    </button>
+                                )}
+
+                                {canDelete && (
+                                    <button
+                                        type="button"
+                                        role="menuitem"
+                                        onClick={() => {
+                                            if (!onDeleteDiscussion) {
+                                                showToast.error("Delete discussion is not available.");
+                                                return;
+                                            }
+                                            handleDeleteDiscussion();
+                                        }}
+                                        disabled={deleting}
+                                        className="flex w-full items-center gap-2 px-3 py-2.5 text-left text-sm text-[var(--cs-danger)] transition-colors duration-150 hover:bg-[var(--cs-danger-subtle)] disabled:cursor-not-allowed disabled:opacity-50"
+                                    >
+                                        <Trash2 size={14} />
+                                        {deleting ? "Deleting..." : "Delete"}
+                                    </button>
+                                )}
+                            </div>
+                        )}
+                    </div>
+                )}
+            </div>
+
+            <div className="flex items-start gap-3 pr-16 sm:gap-4 sm:pr-20">
                 <UserAvatar name={discussion.userName} size="lg" />
 
                 <div className="min-w-0 flex-1">
@@ -225,7 +284,7 @@ const DiscussionListItem = ({
                         </p>
                     )}
 
-                    {/* Action row */}
+                    {/* Discussion actions stay in the card footer; pin + owner menu are at the top-right. */}
                     <div className="mt-3.5 flex items-center gap-4">
                         <button
                             type="button"
@@ -242,64 +301,6 @@ const DiscussionListItem = ({
                         </button>
 
                         {contextSlot && <span className="text-xs">{contextSlot}</span>}
-
-                        <div className="ml-auto flex shrink-0 items-center gap-1">
-                            {extraAction}
-
-                            {isOwner && (canEdit || canDelete) && (
-                                <div ref={menuRef} className="relative">
-                                    <button
-                                        type="button"
-                                        onClick={() => setMenuOpen((current) => !current)}
-                                        disabled={deleting}
-                                        aria-label="Discussion options"
-                                        aria-haspopup="menu"
-                                        aria-expanded={menuOpen}
-                                        className="rounded-md p-1.5 text-[var(--cs-text-muted)] transition-colors duration-150 hover:bg-white/5 hover:text-[var(--cs-text)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--cs-primary)]/40 disabled:cursor-not-allowed disabled:opacity-50"
-                                    >
-                                        <MoreVertical size={16} />
-                                    </button>
-
-                                    {menuOpen && (
-                                        <div
-                                            role="menu"
-                                            className="absolute bottom-9 right-0 z-50 w-40 overflow-hidden rounded-lg border border-[var(--cs-border)] bg-[var(--cs-card,var(--cs-surface))] py-1 shadow-lg shadow-black/30"
-                                        >
-                                            {canEdit && (
-                                                <button
-                                                    type="button"
-                                                    role="menuitem"
-                                                    onClick={handleEditDiscussion}
-                                                    className="flex w-full items-center gap-2 px-3 py-2.5 text-left text-sm text-[var(--cs-text-secondary)] transition-colors duration-150 hover:bg-white/5 hover:text-[var(--cs-text)]"
-                                                >
-                                                    <Pencil size={14} />
-                                                    Edit
-                                                </button>
-                                            )}
-
-                                            {canDelete && (
-                                                <button
-                                                    type="button"
-                                                    role="menuitem"
-                                                    onClick={() => {
-                                                        if (!onDeleteDiscussion) {
-                                                            showToast.error("Delete discussion is not available.");
-                                                            return;
-                                                        }
-                                                        handleDeleteDiscussion();
-                                                    }}
-                                                    disabled={deleting}
-                                                    className="flex w-full items-center gap-2 px-3 py-2.5 text-left text-sm text-[var(--cs-danger)] transition-colors duration-150 hover:bg-[var(--cs-danger-subtle)] disabled:cursor-not-allowed disabled:opacity-50"
-                                                >
-                                                    <Trash2 size={14} />
-                                                    {deleting ? "Deleting..." : "Delete"}
-                                                </button>
-                                            )}
-                                        </div>
-                                    )}
-                                </div>
-                            )}
-                        </div>
                     </div>
 
                     {/* Comments — open, unboxed conversation */}

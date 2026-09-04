@@ -107,15 +107,11 @@ export default function AnalyticsPage() {
     return (
         <div className="min-h-full bg-[#081423]">
             <div className="mx-auto max-w-7xl px-5 py-7 sm:px-6 lg:px-8">
-                <AnalyticsHeader
-                    hasData={Boolean(analytics.overview)}
-                />
+                <AnalyticsHeader hasData={Boolean(analytics.overview)}/>
 
                 {analytics.overview && (
                     <div className="mt-8">
-                        <AnalyticsOverview
-                            overview={analytics.overview}
-                        />
+                        <AnalyticsOverview overview={analytics.overview}/>
                     </div>
                 )}
 
@@ -128,25 +124,12 @@ export default function AnalyticsPage() {
                 </div>
 
                 <div className="mt-6 grid gap-6 xl:grid-cols-2">
-                    <PracticeOverview
-                        technologies={
-                            analytics.technologyPractice ?? []
-                        }
-                    />
-
-                    <TopicAnalytics
-                        topics={
-                            analytics.topicAnalytics ?? []
-                        }
-                    />
+                    <PracticeOverview technologies={analytics.technologyPractice ?? []}/>
+                    <TopicAnalytics topics={analytics.topicAnalytics ?? []}/>
                 </div>
 
                 <div className="mt-6">
-                    <DifficultyProgression
-                        difficulties={
-                            analytics.difficultyProgression
-                        }
-                    />
+                    <DifficultyProgression difficulties={analytics.difficultyProgression}/>
                 </div>
             </div>
         </div>

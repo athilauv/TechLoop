@@ -28,10 +28,7 @@ export default function TopicAnalytics({
             ) : (
                 <div className="mt-5 grid gap-3 sm:grid-cols-2">
                     {topics.map((topic) => (
-                        <div
-                            key={topic.topicId}
-                            className="rounded-xl border border-[#1e3254] bg-[#0b182b] p-4"
-                        >
+                        <div key={topic.topicId} className="rounded-xl border border-[#1e3254] bg-[#0b182b] p-4">
                             <div className="flex items-start justify-between gap-3">
                                 <p className="text-sm font-semibold text-white">
                                     {topic.topicName}
@@ -49,9 +46,7 @@ export default function TopicAnalytics({
                             {topic.lastPracticedAt && (
                                 <p className="mt-3 text-[11px] text-[#526d8e]">
                                     Last practiced{" "}
-                                    {new Date(
-                                        topic.lastPracticedAt
-                                    ).toLocaleDateString()}
+                                    {new Date(topic.lastPracticedAt).toLocaleDateString()}
                                 </p>
                             )}
                         </div>

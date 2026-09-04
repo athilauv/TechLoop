@@ -136,15 +136,11 @@ export default function DailyActivityTimeline({
                             );
 
                             return (
-                                <div
-                                    key={day.date}
-                                    className="group relative flex h-full min-w-[42px] flex-1 items-end"
-                                >
+                                <div key={day.date}
+                                    className="group relative flex h-full min-w-[42px] flex-1 items-end">
                                     <div className="relative flex h-full w-full items-end justify-center px-1">
-                                        <div
-                                            className="w-full max-w-9 rounded-t-md bg-[#17D4C3]/80 transition-all group-hover:bg-[#17D4C3]"
-                                            style={{ height: `${height}%` }}
-                                        />
+                                        <div className="w-full max-w-9 rounded-t-md bg-[#17D4C3]/80 transition-all group-hover:bg-[#17D4C3]"
+                                            style={{ height: `${height}%` }}/>
 
                                         <div className="pointer-events-none absolute bottom-[calc(100%-8px)] left-1/2 z-30 hidden w-48 -translate-x-1/2 rounded-lg border border-[#29466d] bg-[#081423] p-3 shadow-xl group-hover:block">
                                             <p className="text-xs font-semibold text-white">

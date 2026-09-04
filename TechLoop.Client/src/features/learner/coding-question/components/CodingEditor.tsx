@@ -36,11 +36,8 @@ const CodingEditor = ({
                     </span>
                 </div>
 
-                <button
-                    type="button"
-                    onClick={handleReset}
-                    className="inline-flex items-center gap-1.5 rounded-md px-2 py-1 text-xs text-[#8CA3BF] transition hover:bg-[#14243C] hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-[#00E8C2]/40"
-                >
+                <button type="button" onClick={handleReset}
+                    className="inline-flex items-center gap-1.5 rounded-md px-2 py-1 text-xs text-[#8CA3BF] transition hover:bg-[#14243C] hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-[#00E8C2]/40">
                     <RotateCcw size={13} />
                     Reset
                 </button>

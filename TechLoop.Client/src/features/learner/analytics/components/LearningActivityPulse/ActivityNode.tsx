@@ -1,9 +1,5 @@
 import type { DailyActivity } from "../../../../../types/analytics.types";
-import {
-    formatMinutes,
-    formatShortDate,
-    getActivityLevel
-} from "../../../../../utils/activityUtils.ts";
+import { formatMinutes, formatShortDate, getActivityLevel } from "../../../../../utils/activityUtils.ts";
 
 interface ActivityNodeProps {
     activity: DailyActivity;
@@ -55,37 +51,21 @@ export default function ActivityNode({
                 className="absolute inset-1 rounded-full transition-all"
                 style={{
                     background: styles.background,
-                    border: `1px solid ${
-                        selected
-                            ? "#ffffff"
-                            : styles.border
-                    }`,
-                    boxShadow: selected
-                        ? "0 0 0 3px rgba(23,212,195,0.25)"
-                        : styles.shadow,
-                }}
+                    border: `1px solid ${selected ? "#ffffff" : styles.border}`,
+                    boxShadow: selected ? "0 0 0 3px rgba(23,212,195,0.25)" : styles.shadow}}
             />
 
             {today && (
                 <span className="absolute inset-0 rounded-full border border-[#17D4C3]/50 animate-pulse" />
             )}
 
-            <span
-                className="relative z-10 h-1.5 w-1.5 rounded-full bg-white"
-                style={{
-                    opacity:
-                        level === "none"
-                            ? 0.2
-                            : 0.9,
-                }}
-            />
+            <span className="relative z-10 h-1.5 w-1.5 rounded-full bg-white"
+                style={{ opacity: level === "none" ? 0.2 : 0.9,}}/>
 
             <span className="pointer-events-none absolute bottom-full left-1/2 z-30 mb-2 hidden -translate-x-1/2 whitespace-nowrap rounded-md border border-[#29466d] bg-[#081423] px-2 py-1 text-[10px] text-white group-hover:block">
                 {formatShortDate(activity.date)}
                 {" · "}
-                {formatMinutes(
-                    activity.timeSpentMinutes,
-                )}
+                {formatMinutes(activity.timeSpentMinutes,)}
             </span>
         </button>
     );

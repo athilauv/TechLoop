@@ -1,6 +1,5 @@
 import { ExternalLink, GitCommitVertical, User } from "lucide-react";
 import type { ReactNode } from "react";
-
 import ContributionStatusBadge from "../../../../shared/ContributionStatusBadge.tsx";
 import ContributionTypeBadge from "../../../../shared/ContributionTypeBadge.tsx";
 import type { TopicContributionResponse } from "../../../../types/topicContribution.types.ts";

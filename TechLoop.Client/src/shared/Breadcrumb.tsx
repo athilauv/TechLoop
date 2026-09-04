@@ -31,9 +31,7 @@ export default function Breadcrumb({ items }: BreadcrumbProps) {
                         ) : (
                             <span
                                 className={
-                                    isLast
-                                        ? "flex items-center gap-1.5 truncate font-medium text-[var(--cs-text-primary)]"
-                                        : "flex items-center gap-1.5 truncate text-[var(--cs-text-secondary)]"
+                                    isLast ? "flex items-center gap-1.5 truncate font-medium text-[var(--cs-text-primary)]" : "flex items-center gap-1.5 truncate text-[var(--cs-text-secondary)]"
                                 }
                             >
                                 {item.icon}

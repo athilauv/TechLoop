@@ -5,9 +5,7 @@ interface ActivityTooltipProps {
     activity: DailyActivity;
 }
 
-export default function ActivityTooltip({
-                                            activity,
-                                        }: ActivityTooltipProps) {
+export default function ActivityTooltip({ activity }: ActivityTooltipProps) {
     return (
         <div className="rounded-xl border border-[#1e3254] bg-[#0a1729] p-4">
             <p className="text-sm font-semibold text-white">
@@ -17,9 +15,7 @@ export default function ActivityTooltip({
             <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-4">
                 <div>
                     <p className="text-sm font-semibold text-[#17D4C3]">
-                        {formatMinutes(
-                            activity.timeSpentMinutes,
-                        )}
+                        {formatMinutes(activity.timeSpentMinutes,)}
                     </p>
 
                     <p className="text-[10px] text-[#617b9d]">

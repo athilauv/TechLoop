@@ -5,9 +5,7 @@ interface PracticeOverviewProps {
     technologies: TechnologyPractice[];
 }
 
-export default function PracticeOverview({
-    technologies,
-}: PracticeOverviewProps) {
+export default function PracticeOverview({technologies}: PracticeOverviewProps) {
     if (technologies.length === 0) {
         return (
             <section className="rounded-2xl border border-[#1e3254] bg-[#0f1e35] p-5 sm:p-6">
@@ -35,12 +33,9 @@ export default function PracticeOverview({
         (sum, item) => sum + item.successfulAttempts,
         0
     );
-    const bestTechnology = [...technologies].sort(
-        (a, b) => b.totalAttempts - a.totalAttempts
-    )[0];
-    const overallRate = totalAttempts
-        ? Math.round((totalSuccessful / totalAttempts) * 100)
-        : 0;
+    const bestTechnology = [...technologies].sort((a, b) =>
+        b.totalAttempts - a.totalAttempts)[0];
+    const overallRate = totalAttempts ? Math.round((totalSuccessful / totalAttempts) * 100) : 0;
 
     return (
         <section className="rounded-2xl border border-[#1e3254] bg-[#0f1e35] p-5 sm:p-6">
@@ -100,22 +95,12 @@ export default function PracticeOverview({
                     .slice(0, 6)
                     .map((technology) => {
                         const rate = technology.totalAttempts
-                            ? Math.round(
-                                (technology.successfulAttempts /
-                                    technology.totalAttempts) *
-                                100
-                            )
-                            : 0;
+                            ? Math.round((technology.successfulAttempts / technology.totalAttempts) * 100) : 0;
                         const share = totalAttempts
-                            ? Math.round(
-                                (technology.totalAttempts / totalAttempts) *
-                                100
-                            )
-                            : 0;
+                            ? Math.round((technology.totalAttempts / totalAttempts) * 100) : 0;
 
                         return (
-                            <div
-                                key={technology.technologyId}
+                            <div key={technology.technologyId}
                                 className="rounded-xl border border-[#1e3254] bg-[#0b182b] p-4"
                             >
                                 <div className="flex items-center justify-between gap-3">

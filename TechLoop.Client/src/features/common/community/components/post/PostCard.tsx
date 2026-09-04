@@ -1,7 +1,6 @@
-import { MoreVertical } from "lucide-react";
-import { Pencil, Trash2 } from "lucide-react";
+import { MoreVertical, Pencil, Trash2 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
-import type { CommunityPost, CommunityTechnology} from "../../../../../types/community.types.ts";
+import type { CommunityPost, CommunityTechnology, CommunityRole } from "../../../../../types/community.types.ts";
 import { useCurrentUser } from "../../../../../hooks/useCurrentUser.ts";
 import { isMentor } from "../../../../../utils/isMentor.ts";
 import MentorBadge from "../shared/MentorBadge";
@@ -10,7 +9,7 @@ import PostComposer from "../composer/PostComposer";
 import CommentsSection from "../comment/CommentsSection";
 import { formatRelativeTime } from "../../../../../utils/formatRelativeTime";
 import { showToast } from "../../../../../utils/toast";
-import type { CommunityRole } from "../../../../../types/community.types.ts";
+import UserAvatar from "../../../Discussion/components/UserAvatar.tsx";
 
 interface PostCardProps {
     post: CommunityPost;
@@ -51,7 +50,6 @@ export default function PostCard({
     const [editing, setEditing] = useState(false);
     const [savingEdit, setSavingEdit] = useState(false);
     const [deleting, setDeleting] = useState(false);
-
     const menuRef = useRef<HTMLDivElement | null>(null);
     const currentUser = useCurrentUser(currentUserId);
     const isOwner = currentUser.owns(post);
@@ -60,13 +58,19 @@ export default function PostCard({
         if (!menuOpen) return;
 
         function handleOutsideClick(event: MouseEvent) {
-            if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+            if (
+                menuRef.current &&
+                !menuRef.current.contains(event.target as Node)
+            ) {
                 setMenuOpen(false);
             }
         }
 
         document.addEventListener("mousedown", handleOutsideClick);
-        return () => document.removeEventListener("mousedown", handleOutsideClick);
+
+        return () => {
+            document.removeEventListener("mousedown", handleOutsideClick);
+        };
     }, [menuOpen]);
 
     function handleCommentsToggle() {
@@ -74,6 +78,7 @@ export default function PostCard({
             onOpen?.(post.id);
             return;
         }
+
         setCommentsOpen((current) => !current);
     }
 
@@ -101,10 +106,15 @@ export default function PostCard({
         }
     }
 
-    async function handleEditSubmit(technologyId: number | null, title: string, content: string) {
+    async function handleEditSubmit(
+        technologyId: number | null,
+        title: string,
+        content: string
+    ) {
         if (!onEdit) return;
 
         setSavingEdit(true);
+
         try {
             await onEdit(post.id, technologyId, title, content);
             setEditing(false);
@@ -114,32 +124,29 @@ export default function PostCard({
         }
     }
 
-    const avatarLetter = post.userName?.trim().charAt(0).toUpperCase() || "U";
-    const avatarTone =
-        (post.userName?.trim().toUpperCase().charCodeAt(0) ?? 0) % 2 === 0
-            ? "bg-[#3b82f6]/15 text-[#60a5fa] ring-1 ring-[#3b82f6]/25"
-            : "bg-[#2563eb]/20 text-[#93c5fd] ring-1 ring-[#2563eb]/30";
-
     return (
-        <article className="rounded-2xl border border-[#1e3254] bg-[#0f1e35] p-5 transition hover:border-[#24506a]">
-            {/* AUTHOR + MENU */}
+        <article className="relative rounded-xl border border-[#1e3254] bg-[#0f1e35] p-5 transition hover:border-[#24506a] sm:p-6">
+            {/* AUTHOR + OWNER ACTIONS */}
             <div className="flex items-start justify-between gap-4">
                 <button
                     type="button"
-                    onClick={() => (commentsMode === "navigate" ? onOpen?.(post.id) : undefined)}
-                    className="flex min-w-0 items-center gap-3 text-left"
+                    onClick={() =>
+                        commentsMode === "navigate" ? onOpen?.(post.id) : undefined
+                    }
+                    className="flex min-w-0 items-center gap-3 pr-16 text-left sm:gap-4 sm:pr-20"
                 >
-                    <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-sm font-bold ${avatarTone}`}>
-                        {avatarLetter}
-                    </div>
+                    <UserAvatar name={post.userName} size="lg" />
 
                     <div className="min-w-0">
-                        <div className="flex items-center gap-2">
-                            <p className="truncate text-sm font-semibold text-white">{post.userName}</p>
+                        <div className="flex flex-wrap items-center gap-2">
+                            <p className="truncate text-sm font-semibold text-white">
+                                {post.userName}
+                            </p>
+
                             {isMentor(post) && <MentorBadge />}
                         </div>
 
-                        <p className="mt-0.5 text-[10px] text-[#526d8e]">
+                        <p className="mt-0.5 text-xs text-[#526d8e]">
                             {formatRelativeTime(post.createdAt)}
                         </p>
                     </div>
@@ -149,7 +156,9 @@ export default function PostCard({
                     <div ref={menuRef} className="relative shrink-0">
                         <button
                             type="button"
-                            onClick={() => setMenuOpen((current) => !current)}
+                            onClick={() =>
+                                setMenuOpen((current) => !current)
+                            }
                             disabled={deleting || savingEdit}
                             className="flex h-8 w-8 items-center justify-center rounded-lg text-[#7189a8] transition hover:bg-[#10283e] hover:text-white disabled:cursor-not-allowed disabled:opacity-50"
                             aria-label="Post options"
@@ -160,13 +169,10 @@ export default function PostCard({
                         </button>
 
                         {menuOpen && (
-                            <div
-                                className="absolute right-0 top-full z-50 mt-2 w-32 overflow-hidden rounded-xl border border-[#1e3254] bg-[#0f1e35] p-1 shadow-2xl"
-                                role="menu"
-                            >
+                            <div className="absolute right-0 top-9 z-50 w-32 overflow-hidden rounded-xl border border-[#1e3254] bg-[#0f1e35] p-1 shadow-2xl"
+                                role="menu">
                                 {onEdit && (
-                                    <button
-                                        type="button"
+                                    <button type="button"
                                         onClick={() => {
                                             setEditing(true);
                                             setMenuOpen(false);
@@ -221,7 +227,9 @@ export default function PostCard({
                         </div>
                     )}
 
-                    <h2 className="mt-4 text-base font-semibold text-white">{post.title}</h2>
+                    <h2 className="mt-4 text-lg font-bold leading-snug text-white">
+                        {post.title}
+                    </h2>
 
                     <p className="mt-2 whitespace-pre-wrap text-sm leading-6 text-[#a8bad0]">
                         {post.content}

@@ -8,8 +8,7 @@ export const confirmPositionShift = (
     noun: string,
 ): Promise<boolean> =>
     new Promise((resolve) => {
-        showToast.confirm(
-            "Position already exists",
+        showToast.confirm("Position already exists",
             `${message} Shift the existing ${noun} down?`,
             () => resolve(true),
             () => resolve(false),

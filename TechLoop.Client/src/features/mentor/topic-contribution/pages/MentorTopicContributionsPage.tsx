@@ -9,9 +9,6 @@ import type { TopicContributionPendingResponse } from "../../../../types/topicCo
 
 type TypeFilter = "all" | "topic" | "subtopic";
 
-/* ---------------------------------------------------------------------- */
-/* Local presentational primitives                                        */
-/* ---------------------------------------------------------------------- */
 
 interface FilterTabProps {
     active: boolean;
@@ -45,10 +42,6 @@ function FilterTab({ active, label, count, onClick }: FilterTabProps) {
         </button>
     );
 }
-
-/* ---------------------------------------------------------------------- */
-/* Page                                                                    */
-/* ---------------------------------------------------------------------- */
 
 export default function MentorTopicContributionsPage() {
     const [contributions, setContributions] =
@@ -91,15 +84,12 @@ export default function MentorTopicContributionsPage() {
 
     const filteredContributions = useMemo(() => {
         return contributions.filter((contribution) => {
-            const matchesType =
-                typeFilter === "all" ||
-                contribution.contributionType
+            const matchesType = typeFilter === "all" || contribution.contributionType
                     .toLowerCase()
                     .includes(typeFilter === "subtopic" ? "sub" : "topic");
 
             const query = search.trim().toLowerCase();
-            const matchesSearch =
-                query.length === 0 ||
+            const matchesSearch = query.length === 0 ||
                 contribution.title.toLowerCase().includes(query) ||
                 contribution.description.toLowerCase().includes(query);
 

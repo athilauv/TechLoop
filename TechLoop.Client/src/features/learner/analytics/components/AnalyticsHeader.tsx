@@ -11,11 +11,7 @@ export default function AnalyticsHeader({
         <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
             <div>
                 <div className="flex items-center gap-2">
-                    <Activity
-                        size={18}
-                        className="text-[#17D4C3]"
-                    />
-
+                    <Activity size={18} className="text-[#17D4C3]"/>
                     <span className="text-xs font-semibold uppercase tracking-[1.5px] text-[#17D4C3]">
                         Learning Analytics
                     </span>

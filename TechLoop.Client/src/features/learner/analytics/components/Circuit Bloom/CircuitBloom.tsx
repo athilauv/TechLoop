@@ -39,27 +39,13 @@ export default function CircuitBloom({
 
         const centerX = width / 2;
         const centerY = height / 2;
-
         const horizontalRadius = 275;
         const verticalRadius = 135;
 
         return visibleTechnologies.map((technology, index) => {
-            const angle =
-                (index / visibleTechnologies.length) *
-                Math.PI *
-                2 -
-                Math.PI / 2;
-
-            const activityLevel =
-                technology.totalAttempts > 0
-                    ? Math.min(
-                        technology.totalAttempts / 20,
-                        1
-                    )
-                    : 0;
-
-            const radius =
-                34 + Math.round(activityLevel * 10);
+            const angle = (index / visibleTechnologies.length) * Math.PI * 2 - Math.PI / 2;
+            const activityLevel = technology.totalAttempts > 0 ? Math.min(technology.totalAttempts / 20, 1) : 0;
+            const radius = 34 + Math.round(activityLevel * 10);
 
             return {
                 technologyId: technology.technologyId,
@@ -69,25 +55,15 @@ export default function CircuitBloom({
                 technology.successfulAttempts,
                 failedAttempts:
                 technology.failedAttempts,
-                x:
-                    centerX +
-                    Math.cos(angle) *
-                    horizontalRadius,
-                y:
-                    centerY +
-                    Math.sin(angle) *
-                    verticalRadius,
+                x: centerX + Math.cos(angle) * horizontalRadius,
+                y: centerY + Math.sin(angle) * verticalRadius,
                 radius,
             };
         });
     }, [technologies]);
 
-    const selectedNode =
-        nodes.find(
-            (node) =>
-                node.technologyId ===
-                selectedTechnologyId
-        ) ?? null;
+    const selectedNode = nodes.find((node) =>
+                node.technologyId === selectedTechnologyId) ?? null;
 
     if (nodes.length === 0) {
         return (
@@ -151,11 +127,7 @@ export default function CircuitBloom({
                     className="h-auto min-w-[720px] w-full"
                 >
                     {nodes.map((node, index) => {
-                        const nextNode =
-                            nodes[
-                            (index + 1) %
-                            nodes.length
-                                ];
+                        const nextNode = nodes[(index + 1) % nodes.length];
 
                         return (
                             <CircuitTrace
@@ -164,12 +136,8 @@ export default function CircuitBloom({
                                 y1={node.y}
                                 x2={nextNode.x}
                                 y2={nextNode.y}
-                                active={
-                                    node.successfulAttempts >
-                                    0 &&
-                                    nextNode.successfulAttempts >
-                                    0
-                                }
+                                active={ node.successfulAttempts >
+                                    0 && nextNode.successfulAttempts > 0 }
                             />
                         );
                     })}
@@ -181,22 +149,13 @@ export default function CircuitBloom({
                             y={node.y}
                             radius={node.radius}
                             label={node.label}
-                            successfulAttempts={
-                                node.successfulAttempts
-                            }
-                            failedAttempts={
-                                node.failedAttempts
-                            }
-                            selected={
-                                selectedTechnologyId ===
-                                node.technologyId
-                            }
+                            successfulAttempts={ node.successfulAttempts }
+                            failedAttempts={ node.failedAttempts }
+                            selected={ selectedTechnologyId === node.technologyId }
                             onClick={() => {
                                 setSelectedTechnologyId(
                                     selectedTechnologyId ===
-                                    node.technologyId
-                                        ? null
-                                        : node.technologyId
+                                    node.technologyId ? null : node.technologyId
                                 );
                             }}
                         />
@@ -221,15 +180,10 @@ export default function CircuitBloom({
                             </p>
                         </div>
 
-                        <button
-                            type="button"
-                            onClick={() =>
-                                setSelectedTechnologyId(
-                                    null
-                                )
+                        <button type="button" onClick={() =>
+                                setSelectedTechnologyId(null)
                             }
-                            className="text-xs text-[#617b9d] transition-colors hover:text-white"
-                        >
+                            className="text-xs text-[#617b9d] transition-colors hover:text-white">
                             Close
                         </button>
                     </div>
@@ -237,9 +191,7 @@ export default function CircuitBloom({
                     <div className="mt-4 grid grid-cols-3 gap-3">
                         <div className="rounded-lg bg-[#081423] p-3">
                             <p className="text-lg font-semibold text-white">
-                                {
-                                    selectedNode.totalAttempts
-                                }
+                                { selectedNode.totalAttempts}
                             </p>
 
                             <p className="text-[10px] text-[#617b9d]">
@@ -249,9 +201,7 @@ export default function CircuitBloom({
 
                         <div className="rounded-lg bg-[#081423] p-3">
                             <p className="text-lg font-semibold text-[#17D4C3]">
-                                {
-                                    selectedNode.successfulAttempts
-                                }
+                                { selectedNode.successfulAttempts }
                             </p>
 
                             <p className="text-[10px] text-[#617b9d]">
@@ -261,9 +211,7 @@ export default function CircuitBloom({
 
                         <div className="rounded-lg bg-[#081423] p-3">
                             <p className="text-lg font-semibold text-[#e05c5c]">
-                                {
-                                    selectedNode.failedAttempts
-                                }
+                                { selectedNode.failedAttempts }
                             </p>
 
                             <p className="text-[10px] text-[#617b9d]">
@@ -282,10 +230,8 @@ export default function CircuitBloom({
 
                     <div className="flex flex-wrap gap-2">
                         {topics.slice(0, 8).map((topic) => (
-                            <span
-                                key={topic.topicId}
-                                className="rounded-full border border-[#1e3254] bg-[#0b182b] px-3 py-1.5 text-[10px] text-[#7189a8]"
-                            >
+                            <span key={topic.topicId}
+                                className="rounded-full border border-[#1e3254] bg-[#0b182b] px-3 py-1.5 text-[10px] text-[#7189a8]">
                                 {topic.topicName}
                             </span>
                         ))}

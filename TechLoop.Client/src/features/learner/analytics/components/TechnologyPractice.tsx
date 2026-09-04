@@ -5,9 +5,7 @@ interface TechnologyPracticeProps {
     technologies: TechnologyPracticeData[];
 }
 
-export default function TechnologyPractice({
-    technologies,
-}: TechnologyPracticeProps) {
+export default function TechnologyPractice({technologies }: TechnologyPracticeProps) {
     return (
         <section className="rounded-2xl border border-[#1e3254] bg-[#0f1e35] p-5 sm:p-6">
             <p className="text-xs font-semibold uppercase tracking-[1px] text-[#17D4C3]">
@@ -31,13 +29,7 @@ export default function TechnologyPractice({
                     {[...technologies]
                         .sort((a, b) => b.totalAttempts - a.totalAttempts)
                         .map((technology) => {
-                            const successRate = technology.totalAttempts
-                                ? Math.round(
-                                    (technology.successfulAttempts /
-                                        technology.totalAttempts) *
-                                    100
-                                )
-                                : 0;
+                            const successRate = technology.totalAttempts ? Math.round((technology.successfulAttempts / technology.totalAttempts) * 100) : 0;
 
                             return (
                                 <div

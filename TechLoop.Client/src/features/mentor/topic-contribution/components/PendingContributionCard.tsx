@@ -14,13 +14,12 @@ export default function PendingContributionCard({
     const navigate = useNavigate();
 
     return (
-        <button
-            type="button"
+        <button type="button"
             onClick={() => navigate(`/mentor/contributions/${contribution.id}`)}
             className="
                 group relative grid w-full grid-cols-1 items-stretch gap-3
                 overflow-hidden rounded-lg
-                border border-transparent border-l-2 border-l-[var(--cs-warning)]
+                border border-transparent border-l-2 border-l-[#00e8c2]
                 bg-[var(--cs-bg-card)]
                 pl-4 pr-3 py-3.5
                 text-left transition
@@ -32,14 +31,13 @@ export default function PendingContributionCard({
             {/* Primary column: id, type, title, description */}
             <div className="min-w-0">
                 <div className="flex flex-wrap items-center gap-2">
-                    <span className="inline-flex items-center gap-1 text-[10px] font-medium text-[var(--cs-warning)]">
+                    <span className="inline-flex items-center gap-1 text-[10px] font-medium text-[#60a5fa]">
                         <Clock3 size={11} />
                         Awaiting review
                     </span>
-                    <span className="text-[11px] text-[var(--cs-text-muted)]">
-                        #{String(contribution.id).padStart(4, "0")}
-                    </span>
+
                     <ContributionTypeBadge type={contribution.contributionType} />
+
                     {contribution.referenceUrl && (
                         <span className="inline-flex items-center gap-1 text-[10px] text-[var(--cs-text-muted)]">
                             <Link2 size={10} />
@@ -69,10 +67,7 @@ export default function PendingContributionCard({
             </div>
 
             {/* Chevron column */}
-            <ChevronRight
-                size={16}
-                className="hidden shrink-0 justify-self-end text-[var(--cs-text-muted)] transition group-hover:translate-x-0.5 group-hover:text-[var(--cs-accent)] md:block"
-            />
+            <ChevronRight size={16} className="hidden shrink-0 justify-self-end text-[var(--cs-text-muted)] transition group-hover:translate-x-0.5 group-hover:text-[var(--cs-accent)] md:block"/>
         </button>
     );
 }

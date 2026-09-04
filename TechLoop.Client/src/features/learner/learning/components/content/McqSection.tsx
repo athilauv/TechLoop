@@ -1,9 +1,6 @@
-import { ListChecks, Loader2, Trophy } from "lucide-react";
+import { ListChecks, Trophy } from "lucide-react";
 import { useState } from "react";
-import {
-    useMcqQuestion,
-    useSubmitMcqAnswer,
-} from "../../../../../hooks/useMcqQuestion.ts";
+import { useMcqQuestion, useSubmitMcqAnswer } from "../../../../../hooks/useMcqQuestion.ts";
 import { showToast } from "../../../../../utils/toast.tsx";
 import McqOptions from "../question/McqOptions";
 
@@ -12,13 +9,8 @@ interface McqSectionProps {
     technologyId: number;
 }
 
-function McqQuestionCard({
-    question,
-    technologyId,
-}: {
-    question: NonNullable<
-        ReturnType<typeof useMcqQuestion>["data"]
-    >[number];
+function McqQuestionCard({ question, technologyId,}: {
+    question: NonNullable<ReturnType<typeof useMcqQuestion>["data"]>[number];
     technologyId: number;
 }) {
     const submitMutation = useSubmitMcqAnswer();
@@ -34,24 +26,13 @@ function McqQuestionCard({
 
             if (result.isCorrect) {
                 setSolved(true);
-                showToast.success(
-                    `Correct Answer — You earned ${result.score} ${
-                        result.score === 1 ? "mark" : "marks"
-                    }.`
-                );
+                showToast.success(`Correct Answer — You earned ${result.score} ${result.score === 1 ? "mark" : "marks"}.`);
             } else {
                 submitMutation.reset();
                 showToast.error("Wrong Answer");
             }
-        } catch (error: unknown) {
+        } catch {
             submitMutation.reset();
-
-            const message =
-                error instanceof Error
-                    ? error.message
-                    : "Unable to submit your answer. Please try again.";
-
-            showToast.error(message);
         }
     };
 
@@ -83,21 +64,14 @@ function McqQuestionCard({
                 solved={solved}
                 onSubmit={handleSubmit}
             />
-
-            {submitMutation.isPending && (
-                <div className="mt-4 flex items-center justify-center gap-2 text-xs text-[#5C7394]">
-                    <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                    Checking your answer...
-                </div>
-            )}
         </div>
     );
 }
 
 export default function McqSection({
-    subTopicId,
-    technologyId,
-}: McqSectionProps) {
+                                       subTopicId,
+                                       technologyId,
+                                   }: McqSectionProps) {
     const {
         data: questions,
         isLoading,
@@ -156,8 +130,7 @@ export default function McqSection({
                     .slice()
                     .sort((a, b) => a.position - b.position)
                     .map((question) => (
-                        <McqQuestionCard
-                            key={question.id}
+                        <McqQuestionCard key={question.id}
                             question={question}
                             technologyId={technologyId}
                         />
