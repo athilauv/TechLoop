@@ -108,13 +108,7 @@ public sealed class TopicRepository : ITopicsRepository
 
         return await connection.ExecuteScalarAsync<int>(
             new CommandDefinition(
-                @"SELECT id
-                  FROM public.topics
-                  WHERE technology_id = @TechnologyId
-                    AND slug = @Slug
-                    AND deleted_at IS NULL
-                  ORDER BY created_at DESC, id DESC
-                  LIMIT 1;",
+                "SELECT fn_get_topic_id_by_technology_slug(@TechnologyId,@Slug);",
                 new { topic.TechnologyId, topic.Slug },
                 cancellationToken: cancellationToken));
     }
@@ -135,33 +129,14 @@ public sealed class TopicRepository : ITopicsRepository
 
     public async Task<MentorTopicResponse?> GetMentorByIdAsync(int id, CancellationToken cancellationToken)
     {
-        const string sql = @"SELECT
-                t.id,
-                t.technology_id,
-                t.title,
-                t.slug,
-                t.description,
-                t.image_url,
-                t.example,
-                t.example_type,
-                t.position,
-                t.published_at,
-                published_user.username AS published_by,
-                created_user.username AS created_by,
-                t.created_at,
-                updated_user.username AS updated_by,
-                t.updated_at
-            FROM fn_get_topic_by_id(@Id) t
-            LEFT JOIN users published_user ON published_user.id = t.published_by
-            LEFT JOIN users created_user ON created_user.id = t.created_by
-            LEFT JOIN users updated_user ON updated_user.id = t.updated_by;";
-
         using var connection = _context.CreateConnection();
         return await connection.QuerySingleOrDefaultAsync<MentorTopicResponse>(
-            new CommandDefinition(sql, new { Id = id }, cancellationToken: cancellationToken));
+            new CommandDefinition(
+                "SELECT * FROM fn_get_mentor_topic_by_id(@Id);",
+                new { Id = id },
+                cancellationToken: cancellationToken));
     }
 
-    
     // Update an existing topic.
     public async Task<int> UpdateAsync(Topic topic, bool shiftPositions, CancellationToken cancellationToken)
     {
@@ -208,14 +183,12 @@ public sealed class TopicRepository : ITopicsRepository
     public async Task<int> SoftDeleteAsync(int id, Guid deletedBy, CancellationToken cancellationToken)
     {
         using var connection = _context.CreateConnection();
-        return await connection.ExecuteAsync(new CommandDefinition(@"CALL sp_soft_delete_topic(@Id, @DeletedBy, @DeletedAt);",
-                new
-                {
-                    Id = id,
-                    DeletedBy = deletedBy,
-                    DeletedAt = DateTime.UtcNow
-                },
-                cancellationToken: cancellationToken));
+        return await connection.ExecuteAsync(new CommandDefinition(
+            @"CALL public.sp_manage_topic(
+                'DELETE', @Id, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
+                NULL, NULL, NULL, @DeletedBy, FALSE);",
+            new { Id = id, DeletedBy = deletedBy },
+            cancellationToken: cancellationToken));
     }
     
     // Get all active topics.
@@ -227,36 +200,12 @@ public sealed class TopicRepository : ITopicsRepository
 
     public async Task<IEnumerable<MentorTopicResponse>> GetAllMentorAsync(Guid mentorId, CancellationToken cancellationToken)
     {
-        const string sql = @"
-            SELECT
-                t.id,
-                t.technology_id,
-                t.title,
-                t.slug,
-                t.description,
-                t.image_url,
-                t.example,
-                t.example_type,
-                t.position,
-                t.published_at,
-                published_user.username AS published_by,
-                created_user.username AS created_by,
-                t.created_at,
-                updated_user.username AS updated_by,
-                t.updated_at
-            FROM fn_get_all_topics() t
-            INNER JOIN mentor mentor_user
-                ON mentor_user.technology_id = t.technology_id
-                AND mentor_user.user_id = @MentorId
-                AND mentor_user.deleted_at IS NULL
-            LEFT JOIN users published_user ON published_user.id = t.published_by
-            LEFT JOIN users created_user ON created_user.id = t.created_by
-            LEFT JOIN users updated_user ON updated_user.id = t.updated_by
-            ORDER BY t.position;";
-
         using var connection = _context.CreateConnection();
         return await connection.QueryAsync<MentorTopicResponse>(
-            new CommandDefinition(sql, new { MentorId = mentorId }, cancellationToken: cancellationToken));
+            new CommandDefinition(
+                "SELECT * FROM fn_get_mentor_topics(@MentorId);",
+                new { MentorId = mentorId },
+                cancellationToken: cancellationToken));
     }
 
     // Publish a topic.
@@ -265,8 +214,12 @@ public sealed class TopicRepository : ITopicsRepository
         using var connection = _context.CreateConnection();
 
         await connection.ExecuteAsync(
-            new CommandDefinition(@"CALL sp_publish_topic( @Id, @PublishedBy, @PublishedAt);",
-                topic, cancellationToken: cancellationToken));
+            new CommandDefinition(
+                @"CALL public.sp_manage_topic(
+                    'PUBLISH', @Id, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
+                    NULL, NULL, @PublishedBy, NULL, FALSE);",
+                new { topic.Id, PublishedBy = topic.PublishedBy },
+                cancellationToken: cancellationToken));
 
         // PostgreSQL CALL does not provide a reliable affected-row count
         // through Dapper. The procedure either completes or throws.
@@ -319,33 +272,11 @@ public sealed class TopicRepository : ITopicsRepository
     public async Task<IEnumerable<MentorTopicResponse>>
         GetUnpublishedTopicsForMentorAsync(Guid mentorId, CancellationToken cancellationToken)
     {
-        const string sql = @"
-            SELECT
-                t.id,
-                t.technology_id,
-                t.title,
-                t.slug,
-                t.description,
-                t.image_url,
-                t.position,
-                t.published_at,
-                published_user.username AS published_by,
-                created_user.username AS created_by,
-                t.created_at,
-                updated_user.username AS updated_by,
-                source_topic.updated_at
-            FROM fn_get_mentor_unpublished_topics(@MentorId) t
-            INNER JOIN topics source_topic ON source_topic.id = t.id AND source_topic.deleted_at IS NULL
-            LEFT JOIN users published_user ON published_user.id = t.published_by
-            LEFT JOIN users created_user ON created_user.id = t.created_by
-            LEFT JOIN users updated_user ON updated_user.id = source_topic.updated_by;";
         using var connection = _context.CreateConnection();
-        return await connection.QueryAsync<MentorTopicResponse>(new CommandDefinition(sql,
-                new
-                {
-                    MentorId = mentorId
-                },
+        return await connection.QueryAsync<MentorTopicResponse>(
+            new CommandDefinition(
+                "SELECT * FROM fn_get_mentor_unpublished_topic_details(@MentorId);",
+                new { MentorId = mentorId },
                 cancellationToken: cancellationToken));
     }
 }
-    

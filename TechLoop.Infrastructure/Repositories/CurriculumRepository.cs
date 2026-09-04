@@ -1,4 +1,4 @@
-﻿using Dapper;
+using Dapper;
 using TechLoop.Application.Features.Curriculum.DTOs;
 using TechLoop.Application.Interfaces.Infrastructure;
 using TechLoop.Application.Interfaces.Repositories;
@@ -9,74 +9,15 @@ public sealed class CurriculumRepository : ICurriculumRepository
 {
     private readonly IDapperContext _context;
 
-    public CurriculumRepository(IDapperContext context)
-    {
-        _context = context;
-    }
-
-    public async Task<MentorCurriculumResponse?> GetMentorCurriculumAsync(
-        Guid userId,
-        CancellationToken cancellationToken)
+    public CurriculumRepository(IDapperContext context) => _context = context;
+    public async Task<MentorCurriculumResponse?> GetMentorCurriculumAsync(Guid userId, CancellationToken cancellationToken)
     {
         using var connection = _context.CreateConnection();
-
         var rows = (await connection.QueryAsync<CurriculumRowResponse>(
-            @"SELECT * FROM fn_get_mentor_curriculum(@UserId);"
-            ,
-            new {
-                UserId = userId
-            }))
-            .ToList();
+            new CommandDefinition("SELECT * FROM fn_get_mentor_curriculum(@UserId);",
+                new { UserId = userId }, cancellationToken: cancellationToken))).ToList();
 
-        if (!rows.Any())
-            return null;
-
-        var response = new MentorCurriculumResponse
-        {
-            TechnologyId = rows.First().TechnologyId,
-            TechnologyName = rows.First().TechnologyName
-        };
-
-        response.Topics = rows
-            .Where(x => x.TopicId.HasValue)
-            .GroupBy(x => x.TopicId!.Value)
-            .Select(group =>
-            {
-                var first = group.First();
-
-                return new CurriculumTopicResponse
-                {
-                    Id = first.TopicId.Value,
-                    Title = first.TopicTitle!,
-                    Slug = first.TopicSlug!,
-                    Position = first.TopicPosition!.Value,
-                    CreatedAt = first.TopicCreatedAt!.Value,
-                    UpdatedAt = first.TopicUpdatedAt,
-                    PublishedAt = first.TopicPublishedAt,
-                    //subtopic
-                    SubTopics = OrderSubTopics(
-                        group
-                            .Where(x => x.SubTopicId.HasValue)
-                            .Select(x => new CurriculumSubTopicResponse
-                            {
-                                Id = x.SubTopicId!.Value,
-                                TopicId = x.TopicId!.Value,
-                                ParentSubTopicId = x.ParentSubTopicId,
-                                Title = x.SubTopicTitle!,
-                                Slug = x.SubTopicSlug!,
-                                Position = x.SubTopicPosition!.Value,
-                                CreatedAt = x.SubTopicCreatedAt!.Value,
-                                UpdatedAt = x.SubTopicUpdatedAt,
-                                PublishedAt = x.SubTopicPublishedAt
-                            })
-                            .ToList()
-                    )
-                };
-            })
-            .OrderBy(x => x.Position)
-            .ToList();
-
-        return response;
+        return BuildMentorResponse(rows);
     }
 
     public async Task<LearnerCurriculumResponse?> GetLearnerCurriculumAsync(
@@ -84,95 +25,119 @@ public sealed class CurriculumRepository : ICurriculumRepository
         CancellationToken cancellationToken)
     {
         using var connection = _context.CreateConnection();
-
         var rows = (await connection.QueryAsync<CurriculumRowResponse>(
-            @"SELECT * FROM fn_get_learner_curriculum(@TechnologyId);",
-            new
-            {
-                TechnologyId = technologyId
-            }))
-            .ToList();
+            new CommandDefinition("SELECT * FROM fn_get_learner_curriculum(@TechnologyId);",
+                new { TechnologyId = technologyId },
+                cancellationToken: cancellationToken))).ToList();
 
-        if (!rows.Any())
+        return BuildLearnerResponse(rows);
+    }
+
+    private static MentorCurriculumResponse? BuildMentorResponse(IReadOnlyList<CurriculumRowResponse> rows)
+    {
+        if (rows.Count == 0)
             return null;
 
-        var response = new LearnerCurriculumResponse
+        var first = rows[0];
+        var topics = new Dictionary<int, CurriculumTopicResponse>();
+
+        foreach (var row in rows)
         {
-            TechnologyId = rows.First().TechnologyId,
-            TechnologyName = rows.First().TechnologyName
-        };
+            if (!row.TopicId.HasValue)
+                continue;
 
-        response.Topics = rows
-            .Where(x => x.TopicId.HasValue)
-            .GroupBy(x => x.TopicId!.Value)
-            .Select(group =>
+            if (!topics.TryGetValue(row.TopicId.Value, out var topic))
             {
-                var first = group.First();
-
-                return new CurriculumTopicResponse
+                topic = new CurriculumTopicResponse
                 {
-                    Id = first.TopicId.Value,
-                    Title = first.TopicTitle!,
-                    Slug = first.TopicSlug!,
-                    Position = first.TopicPosition!.Value,
-                    CreatedAt = first.TopicCreatedAt!.Value,
-                    UpdatedAt = first.TopicUpdatedAt,
-                    PublishedAt = null,
-                    //subtopic
-                    SubTopics = OrderSubTopics(
-                        group
-                            .Where(x => x.SubTopicId.HasValue)
-                            .Select(x => new CurriculumSubTopicResponse
-                            {
-                                Id = x.SubTopicId!.Value,
-                                TopicId = x.TopicId!.Value,
-                                ParentSubTopicId = x.ParentSubTopicId,
-                                Title = x.SubTopicTitle!,
-                                Slug = x.SubTopicSlug!,
-                                Position = x.SubTopicPosition!.Value,
-                                CreatedAt = x.SubTopicCreatedAt!.Value,
-                                UpdatedAt = x.SubTopicUpdatedAt,
-                                PublishedAt = null
-                            })
-                            .ToList()
-                    )
+                    Id = row.TopicId.Value,
+                    Title = row.TopicTitle!,
+                    Slug = row.TopicSlug!,
+                    Position = row.TopicPosition!.Value,
+                    CreatedAt = row.TopicCreatedAt!.Value,
+                    UpdatedAt = row.TopicUpdatedAt,
+                    PublishedAt = row.TopicPublishedAt,
+                    SubTopics = new List<CurriculumSubTopicResponse>()
                 };
-            })
-            .OrderBy(x => x.Position)
-            .ToList();
+                topics.Add(topic.Id, topic);
+            }
 
-        return response;
-    }
-    
-    
-    private static List<CurriculumSubTopicResponse> OrderSubTopics(
-        List<CurriculumSubTopicResponse> subTopics)
-    {
-        var ordered = new List<CurriculumSubTopicResponse>();
-
-        void AddSubTopic(CurriculumSubTopicResponse subTopic)
-        {
-            ordered.Add(subTopic);
-
-            var children = subTopics
-                .Where(x => x.ParentSubTopicId == subTopic.Id)
-                .OrderBy(x => x.Position);
-
-            foreach (var child in children)
+            if (row.SubTopicId.HasValue)
             {
-                AddSubTopic(child);
+                topic.SubTopics.Add(new CurriculumSubTopicResponse
+                {
+                    Id = row.SubTopicId.Value,
+                    TopicId = row.TopicId.Value,
+                    ParentSubTopicId = row.ParentSubTopicId,
+                    Title = row.SubTopicTitle!,
+                    Slug = row.SubTopicSlug!,
+                    Position = row.SubTopicPosition!.Value,
+                    CreatedAt = row.SubTopicCreatedAt!.Value,
+                    UpdatedAt = row.SubTopicUpdatedAt,
+                    PublishedAt = row.SubTopicPublishedAt
+                });
             }
         }
 
-        var rootSubTopics = subTopics
-            .Where(x => x.ParentSubTopicId == null)
-            .OrderBy(x => x.Position);
-
-        foreach (var root in rootSubTopics)
+        return new MentorCurriculumResponse
         {
-            AddSubTopic(root);
+            TechnologyId = first.TechnologyId,
+            TechnologyName = first.TechnologyName,
+            Topics = topics.Values.ToList()
+        };
+    }
+
+    private static LearnerCurriculumResponse? BuildLearnerResponse(IReadOnlyList<CurriculumRowResponse> rows)
+    {
+        if (rows.Count == 0)
+            return null;
+
+        var first = rows[0];
+        var topics = new Dictionary<int, CurriculumTopicResponse>();
+
+        foreach (var row in rows)
+        {
+            if (!row.TopicId.HasValue)
+                continue;
+
+            if (!topics.TryGetValue(row.TopicId.Value, out var topic))
+            {
+                topic = new CurriculumTopicResponse
+                {
+                    Id = row.TopicId.Value,
+                    Title = row.TopicTitle!,
+                    Slug = row.TopicSlug!,
+                    Position = row.TopicPosition!.Value,
+                    CreatedAt = row.TopicCreatedAt!.Value,
+                    UpdatedAt = row.TopicUpdatedAt,
+                    PublishedAt = null,
+                    SubTopics = new List<CurriculumSubTopicResponse>()
+                };
+                topics.Add(topic.Id, topic);
+            }
+
+            if (row.SubTopicId.HasValue)
+            {
+                topic.SubTopics.Add(new CurriculumSubTopicResponse
+                {
+                    Id = row.SubTopicId.Value,
+                    TopicId = row.TopicId.Value,
+                    ParentSubTopicId = row.ParentSubTopicId,
+                    Title = row.SubTopicTitle!,
+                    Slug = row.SubTopicSlug!,
+                    Position = row.SubTopicPosition!.Value,
+                    CreatedAt = row.SubTopicCreatedAt!.Value,
+                    UpdatedAt = row.SubTopicUpdatedAt,
+                    PublishedAt = null
+                });
+            }
         }
 
-        return ordered;
+        return new LearnerCurriculumResponse
+        {
+            TechnologyId = first.TechnologyId,
+            TechnologyName = first.TechnologyName,
+            Topics = topics.Values.ToList()
+        };
     }
 }

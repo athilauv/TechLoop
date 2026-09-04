@@ -18,13 +18,7 @@ public sealed class AnalyticsRepository : IAnalyticsRepository
         const string sql = @"SELECT * FROM fn_analytics_overview(@UserId);";
         using var connection = _context.CreateConnection();
         return await connection.QuerySingleOrDefaultAsync<AnalyticsOverviewResponse>(
-            new CommandDefinition(
-                sql,
-                new
-                {
-                    UserId = userId
-                },
-                cancellationToken: cancellationToken));
+            new CommandDefinition(sql, new { UserId = userId },cancellationToken: cancellationToken));
     }
 
     public async Task<IReadOnlyList<PracticeActivityResponse>> GetPracticeActivityAsync(Guid userId, CancellationToken cancellationToken)
@@ -32,13 +26,7 @@ public sealed class AnalyticsRepository : IAnalyticsRepository
         const string sql = @"SELECT * FROM fn_analytics_practice_activity(@UserId);";
         using var connection = _context.CreateConnection();
         var result = await connection.QueryAsync<PracticeActivityResponse>(
-            new CommandDefinition(
-                sql,
-                new
-                {
-                    UserId = userId
-                },
-                cancellationToken: cancellationToken));
+            new CommandDefinition(sql, new { UserId = userId }, cancellationToken: cancellationToken));
 
         return result.ToList();
     }
@@ -48,13 +36,7 @@ public sealed class AnalyticsRepository : IAnalyticsRepository
         const string sql = @"SELECT * FROM fn_analytics_technology_practice(@UserId);";
         using var connection = _context.CreateConnection();
         var result = await connection.QueryAsync<TechnologyPracticeResponse>(
-            new CommandDefinition(
-                sql,
-                new
-                {
-                    UserId = userId
-                },
-                cancellationToken: cancellationToken));
+            new CommandDefinition(sql, new { UserId = userId }, cancellationToken: cancellationToken));
 
         return result.ToList();
     }
