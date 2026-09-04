@@ -52,32 +52,18 @@ public sealed class SubmissionExecutionService : ISubmissionExecutionService
             .ToList();
 
         if (testCases.Count == 0)
-            throw new InvalidOperationException(
-                "No test cases found for this coding question.");
+            throw new InvalidOperationException("No test cases found for this coding question.");
 
-        var templates = await _codingTemplateRepository.GetByQuestionIdAsync(
-            submission.QuestionId,
-            cancellationToken);
-
-        var template = templates.FirstOrDefault(
-            x => x.TechnologyId == submission.TechnologyId);
-
+        var templates = await _codingTemplateRepository.GetByQuestionIdAsync(submission.QuestionId, cancellationToken);
+        var template = templates.FirstOrDefault(x => x.TechnologyId == submission.TechnologyId);
         if (template is null)
-            throw new InvalidOperationException(
-                "Coding template is not configured for the submitted technology.");
+            throw new InvalidOperationException("Coding template is not configured for the submitted technology.");
 
-        var languageId = await _technologyRepository.GetJudge0LanguageIdAsync(
-            submission.TechnologyId,
-            cancellationToken);
-
+        var languageId = await _technologyRepository.GetJudge0LanguageIdAsync(submission.TechnologyId, cancellationToken);
         if (languageId <= 0)
-            throw new InvalidOperationException(
-                "Judge0 language is not configured for the submitted technology.");
+            throw new InvalidOperationException("Judge0 language is not configured for the submitted technology.");
 
-        var executableSource = CodingExecutionSourceBuilder.Build(
-            template.ExecutionCode,
-            submission.SourceCode);
-
+        var executableSource = CodingExecutionSourceBuilder.Build(template.ExecutionCode, submission.SourceCode);
         var passed = 0;
         Judge0ResultResponse? lastResult = null;
         string? firstFailureOutput = null;
@@ -95,8 +81,6 @@ public sealed class SubmissionExecutionService : ISubmissionExecutionService
                     SourceCode = executableSource,
                     LanguageId = languageId,
                     StandardInput = testCase.Input,
-                    // We compare output ourselves so every test case can be
-                    // evaluated and the final score can be calculated correctly.
                     ExpectedOutput = null,
                     CpuTimeLimit = question.TimeLimitSeconds,
                     MemoryLimit = ToJudge0MemoryLimitKb(question.MemoryLimitMb)
@@ -106,14 +90,10 @@ public sealed class SubmissionExecutionService : ISubmissionExecutionService
             if (judgeSubmission is null ||
                 string.IsNullOrWhiteSpace(judgeSubmission.Token))
             {
-                throw new InvalidOperationException(
-                    "Judge0 did not return a submission token.");
+                throw new InvalidOperationException("Judge0 did not return a submission token.");
             }
 
-            lastResult = await _judge0Service.WaitForResultAsync(
-                judgeSubmission.Token,
-                cancellationToken: cancellationToken);
-
+            lastResult = await _judge0Service.WaitForResultAsync(judgeSubmission.Token, cancellationToken: cancellationToken);
             if (lastResult.Status.Id != 3)
             {
                 executionFailureStatus = MapStatus(lastResult.Status.Id);
@@ -122,14 +102,10 @@ public sealed class SubmissionExecutionService : ISubmissionExecutionService
                 firstFailureCompilerOutput ??= lastResult.CompileOutput;
                 firstFailureMessage ??= lastResult.Message;
 
-                // Compilation/runtime/time-limit failures make further
-                // test-case execution meaningless.
                 break;
             }
 
-            if (OutputsMatch(
-                    lastResult.StandardOutput,
-                    testCase.ExpectedOutput))
+            if (OutputsMatch(lastResult.StandardOutput, testCase.ExpectedOutput))
             {
                 passed++;
             }
@@ -142,48 +118,22 @@ public sealed class SubmissionExecutionService : ISubmissionExecutionService
         submission.PassedTestCases = passed;
         submission.TotalTestCases = testCases.Count;
         submission.Score = testCases.Count == 0
-            ? 0
-            : (int)Math.Round(
-                (double)passed / testCases.Count * 100,
+            ? 0 : (int)Math.Round((double)passed / testCases.Count * 100,
                 MidpointRounding.AwayFromZero);
 
-        submission.ExecutionTimeMs =
-            ConvertTimeToMilliseconds(lastResult?.Time);
+        submission.ExecutionTimeMs = ConvertTimeToMilliseconds(lastResult?.Time);
+        submission.MemoryUsedMb = ConvertMemoryKbToMb(lastResult?.Memory);
+        submission.CompilerOutput = firstFailureCompilerOutput ?? lastResult?.CompileOutput;
+        submission.RuntimeOutput = firstFailureOutput;
+        submission.JudgeToken = lastResult?.Token;
+        submission.Status = executionFailureStatus ?? (passed == testCases.Count ? SubmissionStatus.Accepted : SubmissionStatus.WrongAnswer);
 
-        submission.MemoryUsedMb =
-            ConvertMemoryKbToMb(lastResult?.Memory);
-
-        submission.CompilerOutput =
-            firstFailureCompilerOutput ?? lastResult?.CompileOutput;
-
-        submission.RuntimeOutput =
-            firstFailureOutput;
-
-        submission.JudgeToken =
-            lastResult?.Token;
-
-        submission.Status =
-            executionFailureStatus
-            ?? (passed == testCases.Count
-                ? SubmissionStatus.Accepted
-                : SubmissionStatus.WrongAnswer);
-
-        await _submissionRepository.UpdateResultAsync(
-            submission,
-            cancellationToken);
-
-        await _mediator.Send(
-            new UpdateUserStatisticsCommand(submission),
-            cancellationToken);
-
-        await _mediator.Send(
-            new UpdateUserTopicProgressCommand(submission, question),
-            cancellationToken);
+        await _submissionRepository.UpdateResultAsync(submission, cancellationToken);
+        await _mediator.Send(new UpdateUserStatisticsCommand(submission), cancellationToken);
+        await _mediator.Send(new UpdateUserTopicProgressCommand(submission, question), cancellationToken);
     }
 
-    private static bool OutputsMatch(
-        string? actual,
-        string expected)
+    private static bool OutputsMatch(string? actual, string expected)
     {
         static string Normalize(string value) =>
             value.Replace("\r\n", "\n")
@@ -207,9 +157,7 @@ public sealed class SubmissionExecutionService : ISubmissionExecutionService
             return null;
         }
 
-        return (int)Math.Round(
-            value * 1000m,
-            MidpointRounding.AwayFromZero);
+        return (int)Math.Round(value * 1000m, MidpointRounding.AwayFromZero);
     }
 
     private static int? ConvertMemoryKbToMb(int? memoryKb)

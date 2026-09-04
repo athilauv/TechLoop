@@ -33,7 +33,7 @@ export default function SavedPostsPage({ role, routeBase }: SavedPostsPageProps)
 
     const savedPosts = useMemo(() => {
         const savedIds = new Set((savedQuery.data ?? []).map((item) => item.postId));
-        return (feedQuery.data ?? []).filter((post) => savedIds.has(post.id));
+        return (feedQuery.data?.items ?? []).filter((post) => savedIds.has(post.id));
     }, [feedQuery.data, savedQuery.data]);
 
     const likeStatusQueries = useQueries({

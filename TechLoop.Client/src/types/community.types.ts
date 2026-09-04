@@ -11,6 +11,7 @@ export interface CommunityPost {
     likeCount: number;
     commentCount: number;
     createdAt: string;
+    totalItems: number;
 }
 
 export interface CreatePostRequest {

@@ -3,15 +3,12 @@ import type { ReviewTopicContributionRequest, TopicContributionPendingResponse, 
 
 
 export const getPendingTopicContributions = async (): Promise<
-    TopicContributionPendingResponse[]
-> => {
+    TopicContributionPendingResponse[]> => {
     const { data } = await api.get<TopicContributionPendingResponse[]>("/mentor/topic-contributions/pending");
     return data;
 };
 
-export const getMentorTopicContributionById = async (
-    id: number
-): Promise<TopicContributionResponse> => {
+export const getMentorTopicContributionById = async (id: number): Promise<TopicContributionResponse> => {
     const { data } = await api.get<TopicContributionResponse>(`/mentor/topic-contributions/${id}`);
     return data;
 };

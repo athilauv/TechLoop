@@ -11,9 +11,6 @@ const api = axios.create({
 
 api.interceptors.request.use(
     (config: InternalAxiosRequestConfig) => {
-        // Mirror the server-side FluentValidation rules before any write
-        // request leaves the browser. This is intentionally centralized so
-        // every feature uses the same validation contract.
         const method = (config.method ?? "get").toUpperCase();
         if (method !== "GET" && method !== "HEAD") {
             assertBackendValidation(

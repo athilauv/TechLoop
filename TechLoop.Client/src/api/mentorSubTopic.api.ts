@@ -14,46 +14,23 @@ export const getMentorSubTopics = async (
     return data;
 };
 
-export const createSubTopic = async (
-    request: CreateSubTopicRequest
-): Promise<OperationResponse> => {
-    const { data } = await api.post<OperationResponse>(
-        "/mentor/subtopics",
-        request
-    );
-
+export const createSubTopic = async (request: CreateSubTopicRequest): Promise<OperationResponse> => {
+    const { data } = await api.post<OperationResponse>("/mentor/subtopics", request);
     return data;
 };
 
-export const updateSubTopic = async (
-    id: number,
-    request: UpdateSubTopicRequest
-): Promise<OperationResponse> => {
-    const { data } = await api.put<OperationResponse>(
-        `/mentor/subtopics/${id}`,
-        request
-    );
-
+export const updateSubTopic = async (id: number, request: UpdateSubTopicRequest): Promise<OperationResponse> => {
+    const { data } = await api.put<OperationResponse>(`/mentor/subtopics/${id}`, request);
     return data;
 };
 
-export const deleteSubTopic = async (
-    id: number
-): Promise<OperationResponse> => {
-    const { data } = await api.delete<OperationResponse>(
-        `/mentor/subtopics/${id}`
-    );
-
+export const deleteSubTopic = async (id: number): Promise<OperationResponse> => {
+    const { data } = await api.delete<OperationResponse>(`/mentor/subtopics/${id}`);
     return data;
 };
 
-export const publishSubTopic = async (
-    id: number
-): Promise<OperationResponse> => {
-    const { data } = await api.patch<OperationResponse>(
-        `/mentor/subtopics/${id}/publish`
-    );
-
+export const publishSubTopic = async (id: number): Promise<OperationResponse> => {
+    const { data } = await api.patch<OperationResponse>(`/mentor/subtopics/${id}/publish`);
     return data;
 };
 

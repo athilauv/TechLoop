@@ -7,7 +7,6 @@ namespace TechLoop.Application.Features.Admin.Commands.UpdateUserRole;
 public sealed class UpdateUserRoleCommandHandler : IRequestHandler<UpdateUserRoleCommand, bool>
 {
     private readonly IAdminRepository _repository;
-
     public UpdateUserRoleCommandHandler(IAdminRepository repository)
     {
         _repository = repository;

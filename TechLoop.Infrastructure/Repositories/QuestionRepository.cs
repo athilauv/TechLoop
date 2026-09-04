@@ -1,4 +1,5 @@
 using Dapper;
+using TechLoop.Application.Common.Pagination;
 using TechLoop.Application.Features.Questions.DTOs;
 using TechLoop.Application.Interfaces.Infrastructure;
 using TechLoop.Application.Interfaces.Repositories;
@@ -144,39 +145,29 @@ public sealed class QuestionRepository : IQuestionRepository
         return stillExists ? 0 : 1;
     }
 
-    public async Task<IEnumerable<Question>> GetAllAsync(CancellationToken cancellationToken)
+    public async Task<PagedResult<Question>> GetAllAsync(
+        int page, int pageSize, short? questionType, short? difficulty, int? subTopicId,
+        string? search, bool? published, string? sort, CancellationToken cancellationToken)
     {
-        const string sql = @"SELECT * FROM fn_get_all_questions();";
+        const string sql = "SELECT * FROM fn_get_all_questions(@Page,@PageSize,@QuestionType,@Difficulty,@SubTopicId,@Search,@Published,@Sort);";
         using var connection = _context.CreateConnection();
-        return await connection.QueryAsync<Question>(new CommandDefinition(sql, cancellationToken: cancellationToken));
+        var rows = (await connection.QueryAsync<QuestionPagedRow>(new CommandDefinition(sql, new { Page=page, PageSize=pageSize, QuestionType=questionType, Difficulty=difficulty, SubTopicId=subTopicId, Search=search, Published=published, Sort=sort }, cancellationToken: cancellationToken))).ToList();
+        return new PagedResult<Question> { Items = rows.Cast<Question>().ToList(), Page = page, PageSize = pageSize, TotalItems = rows.FirstOrDefault()?.TotalItems ?? 0 };
     }
 
-    public async Task<IEnumerable<Question>> GetAllMentorAsync(
-        Guid mentorId,
-        CancellationToken cancellationToken)
+    public async Task<PagedResult<Question>> GetAllMentorAsync(
+        Guid mentorId, int page, int pageSize, int? difficulty, int? subTopicId, short? questionType, string? search, string? sort, CancellationToken cancellationToken)
     {
-        const string sql = @"
-            SELECT q.*
-            FROM fn_get_all_questions() q
-            INNER JOIN sub_topics st
-                ON st.id = q.sub_topic_id
-                AND st.deleted_at IS NULL
-            INNER JOIN topics t
-                ON t.id = st.topic_id
-                AND t.deleted_at IS NULL
-            INNER JOIN mentor mentor_user
-                ON mentor_user.technology_id = t.technology_id
-                AND mentor_user.user_id = @MentorId
-                AND mentor_user.deleted_at IS NULL;";
-
+        const string sql = "SELECT * FROM fn_get_mentor_questions(@MentorId,@Page,@PageSize,@Difficulty,@SubTopicId,@QuestionType,@Search,@Sort);";
         using var connection = _context.CreateConnection();
-        return await connection.QueryAsync<Question>(
-            new CommandDefinition(
-                sql,
-                new { MentorId = mentorId },
-                cancellationToken: cancellationToken));
+        var rows = (await connection.QueryAsync<QuestionPagedRow>(new CommandDefinition(sql, new { MentorId=mentorId, Page=page, PageSize=pageSize, Difficulty=difficulty, SubTopicId=subTopicId, QuestionType=questionType, Search=search, Sort=sort }, cancellationToken: cancellationToken))).ToList();
+        return new PagedResult<Question> { Items = rows.Cast<Question>().ToList(), Page = page, PageSize = pageSize, TotalItems = rows.FirstOrDefault()?.TotalItems ?? 0 };
     }
 
+    private sealed class QuestionPagedRow : Question
+    {
+        public int TotalItems { get; set; }
+    }
 
     public async Task<int> PublishAsync(
         Question question,

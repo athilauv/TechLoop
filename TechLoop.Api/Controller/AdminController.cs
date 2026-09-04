@@ -52,9 +52,9 @@ public sealed class AdminController : ControllerBase
     }
 
     [HttpGet("users")]
-    public async Task<ActionResult<IEnumerable<AdminUserResponse>>> GetUsers(CancellationToken cancellationToken)
+    public async Task<IActionResult> GetUsers([FromQuery] int page = 1, [FromQuery] int pageSize = 20, [FromQuery] string? search = null, [FromQuery] string? status = null, [FromQuery] string? sort = "created-desc", CancellationToken cancellationToken = default)
     {
-        return Ok(await _mediator.Send(new GetUsersQuery(), cancellationToken));
+        return Ok(await _mediator.Send(new GetUsersQuery(page, pageSize, search, status, sort), cancellationToken));
     }
 
     [HttpPatch("users/{userId:guid}/role")]
@@ -82,15 +82,15 @@ public sealed class AdminController : ControllerBase
     }
 
     [HttpGet("questions")]
-    public async Task<IActionResult> GetQuestions(CancellationToken cancellationToken)
+    public async Task<IActionResult> GetQuestions([FromQuery] int page = 1, [FromQuery] int pageSize = 20, [FromQuery] short? questionType = null, [FromQuery] short? difficulty = null, [FromQuery] int? subTopicId = null, [FromQuery] string? search = null, [FromQuery] bool? published = null, [FromQuery] string? sort = "position-asc", CancellationToken cancellationToken = default)
     {
-        return Ok(await _mediator.Send(new GetQuestionsQuery(), cancellationToken));
+        return Ok(await _mediator.Send(new GetQuestionsQuery(page, pageSize, questionType, difficulty, subTopicId, search, published, sort), cancellationToken));
     }
 
     [HttpGet("community")]
-    public async Task<IActionResult> GetCommunity(CancellationToken cancellationToken)
+    public async Task<IActionResult> GetCommunity([FromQuery] int page = 1, [FromQuery] int pageSize = 20, [FromQuery] int? technologyId = null, [FromQuery] string? search = null, [FromQuery] string? sort = "newest", CancellationToken cancellationToken = default)
     {
-        return Ok(await _mediator.Send(new GetCommunityQuery(), cancellationToken));
+        return Ok(await _mediator.Send(new GetCommunityQuery(page, pageSize, technologyId, search, sort), cancellationToken));
     }
 
     [HttpPost("technology-categories")]

@@ -9,6 +9,7 @@ import type {
     UpdateCommentRequest,
     UpdatePostRequest,
 } from "../types/community.types";
+import type { PagedResponse } from "../types/pagination.types";
 
 const ROLE_BASE_PATHS: Record<CommunityRole, string> = {
     learner: "/api/learner/community",
@@ -20,8 +21,8 @@ function basePath(role: CommunityRole): string {
 }
 
 //POSTS
-export const getCommunityFeed = async (role: CommunityRole): Promise<CommunityPost[]> => {
-    const { data } = await api.get<CommunityPost[]>(`${basePath(role)}/posts`);
+export const getCommunityFeed = async (role: CommunityRole, page = 1, pageSize = 20, search?: string, technologyId?: number, sort = "newest"): Promise<PagedResponse<CommunityPost>> => {
+    const { data } = await api.get<PagedResponse<CommunityPost>>(`${basePath(role)}/posts`, { params: { page, pageSize, search: search || undefined, technologyId, sort } });
     return data;
 };
 
@@ -55,10 +56,7 @@ export const deleteCommunityPost = async (role: CommunityRole, postId: number): 
 };
 
 //COMMENTS
-export const getPostComments = async (
-    role: CommunityRole,
-    postId: number
-): Promise<PostComment[]> => {
+export const getPostComments = async (role: CommunityRole, postId: number): Promise<PostComment[]> => {
     const { data } = await api.get<PostComment[]>(`${basePath(role)}/posts/${postId}/comments`);
     return data;
 };

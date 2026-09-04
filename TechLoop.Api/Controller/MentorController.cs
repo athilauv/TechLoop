@@ -320,9 +320,9 @@ public sealed class MentorController : ControllerBase
     }
 
     [HttpGet("questions")]
-    public async Task<ActionResult<IEnumerable<MentorQuestionResponse>>> GetAllQuestions(CancellationToken cancellationToken)
+    public async Task<IActionResult> GetAllQuestions([FromQuery] int page = 1, [FromQuery] int pageSize = 20, [FromQuery] int? difficulty = null, [FromQuery] int? subTopicId = null, [FromQuery] short? questionType = null, [FromQuery] string? search = null, [FromQuery] string? sort = "position-asc", CancellationToken cancellationToken = default)
     {
-        var result = await _mediator.Send( new GetAllMentorQuestionsQuery(), cancellationToken);
+        var result = await _mediator.Send(new GetAllMentorQuestionsQuery(page, pageSize, difficulty, subTopicId, questionType, search, sort), cancellationToken);
         return Ok(result);
     }
 
@@ -538,9 +538,9 @@ public sealed class MentorController : ControllerBase
     
     
     [HttpGet("discussions")]
-    public async Task<IActionResult> GetAll()
+    public async Task<IActionResult> GetAll([FromQuery] int page = 1, [FromQuery] int pageSize = 20, [FromQuery] string? search = null, [FromQuery] string? sort = "newest", CancellationToken cancellationToken = default)
     {
-        var result = await _mediator.Send(new GetDiscussionsQuery());
+        var result = await _mediator.Send(new GetDiscussionsQuery(page, pageSize, search, sort), cancellationToken);
         return Ok(result);
     }
 
@@ -607,9 +607,9 @@ public sealed class MentorController : ControllerBase
     
     
     [HttpGet("posts")]
-    public async Task<IActionResult> GetFeed(CancellationToken cancellationToken)
+    public async Task<IActionResult> GetFeed([FromQuery] int page = 1, [FromQuery] int pageSize = 20, [FromQuery] int? technologyId = null, [FromQuery] string? search = null, [FromQuery] string? sort = "newest", CancellationToken cancellationToken = default)
     {
-        var result = await _mediator.Send(new GetFeedQuery(), cancellationToken);
+        var result = await _mediator.Send(new GetFeedQuery(page, pageSize, technologyId, search, sort), cancellationToken);
         return Ok(result);
     }
 

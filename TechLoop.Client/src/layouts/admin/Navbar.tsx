@@ -23,12 +23,7 @@ const Navbar = ({
         retry: false,
     });
 
-    // The admin navbar must never inherit a learner/mentor name or initial
-    // from stale localStorage data. Admin is represented by "A".
-    const isAdmin =
-        currentUser?.roleId === 3 ||
-        currentUser?.role?.trim().toLowerCase() === "admin";
-
+    const isAdmin = currentUser?.roleId === 3 || currentUser?.role?.trim().toLowerCase() === "admin";
     const name = isAdmin ? "Admin" : "Admin";
     const initial = "A";
 
@@ -36,9 +31,7 @@ const Navbar = ({
         <header
             className={[
                 "fixed inset-x-0 top-0 z-30 h-16 border-b border-white/5 bg-[#0E192A]/95 backdrop-blur-md transition-all duration-300",
-                sidebarCollapsed
-                    ? "md:left-[72px]"
-                    : "md:left-64",
+                sidebarCollapsed ? "md:left-[72px]" : "md:left-64",
             ].join(" ")}
         >
             <div className="flex h-full items-center justify-between px-4 md:px-6">
@@ -59,10 +52,7 @@ const Navbar = ({
 
                 <div className="hidden flex-1 justify-center px-8 md:flex">
                     <div className="relative w-full max-w-xl">
-                        <Search
-                            size={18}
-                            className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500"
-                        />
+                        <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500"/>
 
                         <input
                             type="text"
@@ -97,25 +87,14 @@ const Navbar = ({
                                 </p>
                             </div>
 
-                            <ChevronDown
-                                size={16}
-                                className="hidden text-slate-500 lg:block"
-                            />
+                            <ChevronDown size={16} className="hidden text-slate-500 lg:block"/>
                         </button>
 
                         {profileOpen && (
-                            <div
-                                role="menu"
-                                className="absolute right-0 top-12 z-30 w-44 overflow-hidden rounded-xl border border-white/10 bg-[#0A1930] shadow-2xl"
-                            >
-                                <button
-                                    type="button"
-                                    onClick={() =>
-                                        navigate("/admin/dashboard")
-                                    }
-                                    role="menuitem"
-                                    className="block w-full px-3.5 py-2.5 text-left text-sm text-slate-400 hover:bg-white/5 hover:text-white"
-                                >
+                            <div role="menu" className="absolute right-0 top-12 z-30 w-44 overflow-hidden rounded-xl border border-white/10 bg-[#0A1930] shadow-2xl">
+                                <button type="button" onClick={() =>
+                                        navigate("/admin/dashboard")}
+                                    role="menuitem" className="block w-full px-3.5 py-2.5 text-left text-sm text-slate-400 hover:bg-white/5 hover:text-white">
                                     Profile
                                 </button>
                             </div>

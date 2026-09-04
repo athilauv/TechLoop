@@ -14,4 +14,5 @@ public sealed class CommunityPostDto
     public long LikeCount { get; set; }
     public long CommentCount { get; set; }
     public DateTimeOffset CreatedAt { get; set; }
+    public int TotalItems { get; set; }
 }

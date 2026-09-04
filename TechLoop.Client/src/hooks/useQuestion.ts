@@ -1,4 +1,4 @@
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useInfiniteQuery, useMutation, useQuery } from "@tanstack/react-query";
 import {
     getCodingQuestions,
     getCodingTemplates,
@@ -64,7 +64,6 @@ export const useTestCases = (questionId: number) => {
 };
 
 export const useCodingQuestions = (
-    page: number,
     pageSize: number,
     technologyId?: number,
     difficulty?: number,
@@ -72,10 +71,9 @@ export const useCodingQuestions = (
     search?: string,
     sort?: string
 ) => {
-    return useQuery({
+    return useInfiniteQuery({
         queryKey: [
             "coding-questions",
-            page,
             pageSize,
             technologyId,
             difficulty,
@@ -83,9 +81,9 @@ export const useCodingQuestions = (
             search,
             sort,
         ],
-        queryFn: () =>
+        queryFn: ({ pageParam }) =>
             getCodingQuestions(
-                page,
+                pageParam,
                 pageSize,
                 technologyId,
                 difficulty,
@@ -93,5 +91,10 @@ export const useCodingQuestions = (
                 search,
                 sort
             ),
+        initialPageParam: 1,
+        getNextPageParam: (lastPage, allPages) =>
+            lastPage.length === pageSize
+                ? allPages.length + 1
+                : undefined,
     });
 };

@@ -23,4 +23,5 @@ public sealed class DiscussionDto
     public int CommentCount { get; set; }
 
     public DateTimeOffset CreatedAt { get; set; }
+    public int TotalItems { get; set; }
 }

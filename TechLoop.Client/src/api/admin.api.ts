@@ -1,5 +1,6 @@
 import api from "./axios.ts";
 import type { OperationResponse } from "../types/common.types.ts";
+import type { PagedResponse } from "../types/pagination.types.ts";
 import type {
     AdminDashboardResponse,
     AdminMentorOverview,
@@ -17,8 +18,8 @@ export const getAdminDashboard = async (): Promise<AdminDashboardResponse> => {
     return data;
 };
 
-export const getAdminUsers = async (): Promise<AdminUser[]> => {
-    const { data } = await api.get<AdminUser[]>("/admin/users");
+export const getAdminUsers = async (page = 1, pageSize = 20, search?: string, status?: string, sort = "created-desc"): Promise<PagedResponse<AdminUser>> => {
+    const { data } = await api.get<PagedResponse<AdminUser>>("/admin/users", { params: { page, pageSize, search: search || undefined, status: status || undefined, sort } });
     return data;
 };
 
@@ -32,13 +33,13 @@ export const getAdminMentorOverview = async (mentorId: number): Promise<AdminMen
     return data;
 };
 
-export const getAdminQuestions = async (): Promise<AdminQuestionResponse[]> => {
-    const { data } = await api.get<AdminQuestionResponse[]>("/admin/questions");
+export const getAdminQuestions = async (page = 1, pageSize = 20, search?: string, difficulty?: number, questionType?: number, sort = "position-asc"): Promise<PagedResponse<AdminQuestionResponse>> => {
+    const { data } = await api.get<PagedResponse<AdminQuestionResponse>>("/admin/questions", { params: { page, pageSize, search: search || undefined, difficulty, questionType, sort } });
     return data;
 };
 
-export const getAdminCommunity = async (): Promise<AdminCommunityPost[]> => {
-    const { data } = await api.get<AdminCommunityPost[]>("/admin/community");
+export const getAdminCommunity = async (page = 1, pageSize = 20, search?: string, technologyId?: number, sort = "newest"): Promise<PagedResponse<AdminCommunityPost>> => {
+    const { data } = await api.get<PagedResponse<AdminCommunityPost>>("/admin/community", { params: { page, pageSize, search: search || undefined, technologyId, sort } });
     return data;
 };
 

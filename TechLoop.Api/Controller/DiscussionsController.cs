@@ -52,9 +52,9 @@ public sealed class DiscussionsController : ControllerBase
 
     // Returns all discussions.
     [HttpGet]
-    public async Task<IActionResult> GetAllDiscussions(CancellationToken cancellationToken)
+    public async Task<IActionResult> GetAllDiscussions([FromQuery] int page = 1, [FromQuery] int pageSize = 20, [FromQuery] string? search = null, [FromQuery] string? sort = "newest", CancellationToken cancellationToken = default)
     {
-        var result = await _mediator.Send(new GetDiscussionsQuery(), cancellationToken);
+        var result = await _mediator.Send(new GetDiscussionsQuery(page, pageSize, search, sort), cancellationToken);
         return Ok(result);
     }
 

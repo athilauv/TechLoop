@@ -1,33 +1,22 @@
 using MediatR;
+using TechLoop.Application.Common.Pagination;
 using TechLoop.Application.Features.Admin.DTOs;
 using TechLoop.Application.Interfaces.Repositories;
 
 namespace TechLoop.Application.Features.Admin.Queries.GetQuestions;
 
-public sealed class GetQuestionsQueryHandler : IRequestHandler<GetQuestionsQuery, IEnumerable<AdminQuestionResponse>>
+public sealed class GetQuestionsQueryHandler : IRequestHandler<GetQuestionsQuery, PagedResult<AdminQuestionResponse>>
 {
     private readonly IQuestionRepository _repository;
+    public GetQuestionsQueryHandler(IQuestionRepository repository) => _repository = repository;
 
-    public GetQuestionsQueryHandler(IQuestionRepository repository)
+    public async Task<PagedResult<AdminQuestionResponse>> Handle(GetQuestionsQuery request, CancellationToken cancellationToken)
     {
-        _repository = repository;
-    }
-
-    public async Task<IEnumerable<AdminQuestionResponse>> Handle(GetQuestionsQuery request, CancellationToken cancellationToken)
-    {
-        var questions = await _repository.GetAllAsync(cancellationToken);
-        return questions.Select(question => new AdminQuestionResponse
+        var result = await _repository.GetAllAsync(request.Page, request.PageSize, request.QuestionType, request.Difficulty, request.SubTopicId, request.Search, request.Published, request.Sort, cancellationToken);
+        return new PagedResult<AdminQuestionResponse>
         {
-            Id = question.Id,
-            SubTopicId = question.SubTopicId,
-            QuestionType = question.QuestionType,
-            Slug = question.Slug,
-            Title = question.Title,
-            Difficulty = question.Difficulty,
-            Mark = question.Mark,
-            Position = question.Position,
-            PublishedAt = question.PublishedAt,
-            CreatedAt = question.CreatedAt
-        });
+            Items = result.Items.Select(q => new AdminQuestionResponse { Id=q.Id, SubTopicId=q.SubTopicId, QuestionType=q.QuestionType, Slug=q.Slug, Title=q.Title, Difficulty=q.Difficulty, Mark=q.Mark, Position=q.Position, PublishedAt=q.PublishedAt, CreatedAt=q.CreatedAt, TotalItems=result.TotalItems }).ToList(),
+            Page=result.Page, PageSize=result.PageSize, TotalItems=result.TotalItems
+        };
     }
 }

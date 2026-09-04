@@ -14,4 +14,5 @@ public sealed class AdminQuestionResponse
     public int Position { get; set; }
     public DateTime? PublishedAt { get; set; }
     public DateTime CreatedAt { get; set; }
+    public int TotalItems { get; set; }
 }

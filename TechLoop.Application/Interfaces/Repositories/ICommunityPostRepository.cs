@@ -1,4 +1,5 @@
-﻿using TechLoop.Application.Features.Community.CommunityPosts.DTOs;
+﻿using TechLoop.Application.Common.Pagination;
+using TechLoop.Application.Features.Community.CommunityPosts.DTOs;
 using TechLoop.Domain.Entities;
 
 namespace TechLoop.Application.Interfaces.Repositories;
@@ -11,6 +12,6 @@ public interface ICommunityPostRepository
     Task<bool> PinAsync(int id, bool isPinned, Guid updatedBy);
     Task<CommunityPost?> GetEntityByIdAsync(int id);
     Task<CommunityPostDto?> GetByIdAsync(int id);
-    Task<IEnumerable<CommunityPostDto>> GetFeedAsync();
+    Task<PagedResult<CommunityPostDto>> GetFeedAsync(int page, int pageSize, int? technologyId, string? search, string? sort);
     Task<bool> ExistsAsync(int id);
 }

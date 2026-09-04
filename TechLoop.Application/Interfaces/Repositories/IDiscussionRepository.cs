@@ -1,4 +1,5 @@
-﻿using TechLoop.Application.Features.Discussions.DTOs;
+﻿using TechLoop.Application.Common.Pagination;
+using TechLoop.Application.Features.Discussions.DTOs;
 using TechLoop.Domain.Entities;
 
 namespace TechLoop.Application.Interfaces.Repositories;
@@ -11,7 +12,7 @@ public interface IDiscussionRepository
     Task<bool> PinAsync(int id, bool isPinned, Guid updatedBy);
     // Read operations return DTOs
     Task<DiscussionDto?> GetByIdAsync(int id);
-    Task<IEnumerable<DiscussionDto>> GetAllAsync();
+    Task<PagedResult<DiscussionDto>> GetAllAsync(int page, int pageSize, string? search, string? sort);
     Task<IEnumerable<DiscussionDto>> GetByQuestionIdAsync(int questionId);
     // Validation
     Task<bool> ExistsAsync(int id);

@@ -1,5 +1,6 @@
 ﻿using System.Data;
 using Dapper;
+using TechLoop.Application.Common.Pagination;
 using TechLoop.Application.Features.Discussions.DTOs;
 using TechLoop.Application.Interfaces.Infrastructure;
 using TechLoop.Application.Interfaces.Repositories;
@@ -83,12 +84,14 @@ public sealed class DiscussionRepository : IDiscussionRepository
                 new { Id = id });
         });
 
-    public Task<IEnumerable<DiscussionDto>> GetAllAsync()
-        => WithConnection(async connection =>
-        {
-            return await connection.QueryAsync<DiscussionDto>(
-                "SELECT * FROM fn_discussion_get_all()");
-        });
+    public async Task<PagedResult<DiscussionDto>> GetAllAsync(int page, int pageSize, string? search, string? sort)
+    {
+        using var connection = _context.CreateConnection();
+        var rows = (await connection.QueryAsync<DiscussionDto>(
+            "SELECT * FROM fn_discussion_get_all(@Page,@PageSize,@Search,@Sort)",
+            new { Page=page, PageSize=pageSize, Search=search, Sort=sort })).ToList();
+        return new PagedResult<DiscussionDto> { Items=rows, Page=page, PageSize=pageSize, TotalItems=rows.FirstOrDefault()?.TotalItems ?? 0 };
+    }
 
     public Task<IEnumerable<DiscussionDto>> GetByQuestionIdAsync(int questionId)
         => WithConnection(async connection =>

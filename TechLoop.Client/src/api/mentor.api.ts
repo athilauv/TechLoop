@@ -16,13 +16,7 @@ export const getMentorProfile = async (): Promise<MentorProfileData> => {
     return data;
 };
 
-export const updateMentorProfile = async (
-    request: UpdateMentorProfileRequest,
-): Promise<OperationResponse> => {
-    const { data } = await api.put<OperationResponse>(
-        "/mentor/profile",
-        request,
-    );
-
+export const updateMentorProfile = async (request: UpdateMentorProfileRequest): Promise<OperationResponse> => {
+    const { data } = await api.put<OperationResponse>("/mentor/profile", request,);
     return data;
 };

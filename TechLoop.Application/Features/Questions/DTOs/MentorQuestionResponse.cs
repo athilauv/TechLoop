@@ -25,4 +25,5 @@ public sealed class MentorQuestionResponse
     public DateTime? UpdatedAt { get; set; }
     public Guid? UpdatedBy { get; set; }
 
+    public int TotalItems { get; set; }
 }

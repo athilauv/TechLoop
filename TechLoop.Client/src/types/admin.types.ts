@@ -22,6 +22,7 @@ export interface AdminUser {
     lockedUntil: string | null;
     lastLoginAt: string | null;
     createdAt: string;
+    totalItems: number;
 }
 
 export interface AdminMentorOverview {
@@ -77,6 +78,7 @@ export interface AdminQuestionResponse {
     position: number;
     publishedAt: string | null;
     createdAt: string;
+    totalItems: number;
 }
 
 export interface AdminCommunityPost {
@@ -91,4 +93,5 @@ export interface AdminCommunityPost {
     likeCount: number;
     commentCount: number;
     createdAt: string;
+    totalItems: number;
 }

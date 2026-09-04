@@ -10,6 +10,7 @@ export interface Discussion {
     isLocked: boolean;
     commentCount: number;
     createdAt: string;
+    totalItems: number;
 }
 
 export interface DiscussionComment {

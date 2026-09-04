@@ -11,4 +11,5 @@ public sealed class AdminUserResponse
     public DateTime? LockedUntil { get; set; }
     public DateTime? LastLoginAt { get; set; }
     public DateTime CreatedAt { get; set; }
+    public int TotalItems { get; set; }
 }

@@ -4,12 +4,12 @@ import { useNavigate } from "react-router-dom";
 import type { CommunityRole } from "../../../../types/community.types";
 import { useCommunityFeed } from "../../../../hooks/useCommunityFeed";
 import { usePostMutations } from "../../../../hooks/usePostMutations";
-import { useFilteredPosts } from "../../../../hooks/useFilteredPosts.ts";
 import { useCurrentUser } from "../../../../hooks/useCurrentUser.ts";
 import CommunityHeader from "../components/feed/CommunityHeader";
 import TechnologyFilter from "../components/feed/TechnologyFilter";
 import PostList from "../components/feed/PostList";
 import PostComposer from "../components/composer/PostComposer";
+import InfiniteScrollTrigger from "../../../../shared/InfiniteScrollTrigger";
 import { getErrorMessage } from "../../../../utils/error.utils";
 
 interface CommunityFeedPageProps {
@@ -39,12 +39,15 @@ export default function CommunityFeedPage({ role, routeBase }: CommunityFeedPage
         isLoading,
         isLoadingTechnologies,
         error,
-    } = useCommunityFeed(role);
+        hasNextPage,
+        isFetchingNextPage,
+        fetchNextPage,
+    } = useCommunityFeed(role, search, selectedTechnologyId);
 
     const { toggleLike, toggleSave, createPost, updatePost, deletePost, isCreating } =
         usePostMutations(role);
 
-    const filteredPosts = useFilteredPosts(posts, search, selectedTechnologyId);
+
 
     async function handleCreate(technologyId: number | null, title: string, content: string) {
         await createPost({ technologyId, title, content });
@@ -126,7 +129,7 @@ export default function CommunityFeedPage({ role, routeBase }: CommunityFeedPage
 
                 <div className="mt-6">
                     <PostList
-                        posts={filteredPosts}
+                        posts={posts}
                         role={role}
                         likedPostIds={likedPostIds}
                         savedPostIds={savedPostIds}
@@ -139,6 +142,7 @@ export default function CommunityFeedPage({ role, routeBase }: CommunityFeedPage
                         onEdit={handleEdit}
                         onDelete={deletePost}
                     />
+                    <InfiniteScrollTrigger hasNextPage={hasNextPage} isFetchingNextPage={isFetchingNextPage} onLoadMore={() => void fetchNextPage()} />
                 </div>
             </div>
 

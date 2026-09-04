@@ -13,7 +13,7 @@ export const getMentorPendingQueue = async (): Promise<MentorPendingQueueData> =
     ] = await Promise.all([
         getMentorTopics(),
         getMentorSubTopics(),
-        getMentorQuestions(),
+        getMentorQuestions(1, 1000),
         getPendingTopicContributions(),
     ]);
 
@@ -21,11 +21,11 @@ export const getMentorPendingQueue = async (): Promise<MentorPendingQueueData> =
         pendingContributions,
         allTopics,
         allSubTopics,
-        allQuestions,
+        allQuestions: allQuestions.items,
         unpublishedTopics: allTopics.filter((topic) => !topic.publishedAt),
         unpublishedSubTopics: allSubTopics.filter(
             (subTopic) => !subTopic.publishedAt,),
-        unpublishedQuestions: allQuestions.filter(
+        unpublishedQuestions: allQuestions.items.filter(
             (question) => !question.publishedAt,),
     };
 };

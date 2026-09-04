@@ -13,7 +13,7 @@ export default function CommunityPreview() {
         queryFn: () => getCommunityFeed("learner"),
     });
 
-    const posts = (data ?? []).slice(0, PREVIEW_COUNT);
+    const posts = (data?.items ?? []).slice(0, PREVIEW_COUNT);
 
     return (
         <section className="rounded-2xl border border-[#1e3254] bg-[#0f1e35] p-5 sm:p-6">

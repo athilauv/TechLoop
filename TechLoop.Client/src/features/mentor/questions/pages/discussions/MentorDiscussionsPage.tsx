@@ -1,4 +1,5 @@
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useInfiniteQuery, useQueryClient } from "@tanstack/react-query";
+import { useState } from "react";
 import Breadcrumb from "../../../../../shared/Breadcrumb.tsx";
 import { showToast } from "../../../../../utils/toast.tsx";
 import {
@@ -22,15 +23,18 @@ import PinToggleButton from "../../components/discussions/PinToggleButton.tsx";
 const MentorDiscussionsPage = () => {
     const queryClient = useQueryClient();
     const currentUserId = useCurrentUserId();
+    const [search, setSearch] = useState("");
+    const [sort, setSort] = useState<"newest" | "oldest" | "most-commented">("newest");
 
-    const {
-        data: discussions = [],
-        isLoading,
-        isError,
-    } = useQuery<Discussion[]>({
-        queryKey: ["mentor-discussions"],
-        queryFn: getMentorDiscussions,
+    const query = useInfiniteQuery({
+        queryKey: ["mentor-discussions", search, sort],
+        initialPageParam: 1,
+        queryFn: ({ pageParam }) => getMentorDiscussions(pageParam, 20, search, sort),
+        getNextPageParam: (page) => page.hasNextPage ? page.page + 1 : undefined,
     });
+    const discussions = query.data?.pages.flatMap(page => page.items) ?? [];
+    const isLoading = query.isLoading;
+    const isError = query.isError;
 
     const invalidateDiscussions = async () => {
         await queryClient.invalidateQueries({
@@ -174,6 +178,12 @@ const MentorDiscussionsPage = () => {
                 <div className="mt-7">
                     <DiscussionList
                         discussions={discussions}
+                        serverSide
+                        onSearchChange={setSearch}
+                        onSortChange={setSort}
+                        hasNextPage={!!query.hasNextPage}
+                        isFetchingNextPage={query.isFetchingNextPage}
+                        onLoadMore={() => void query.fetchNextPage()}
                         isLoading={isLoading}
                         isError={isError}
                         currentUserId={currentUserId}

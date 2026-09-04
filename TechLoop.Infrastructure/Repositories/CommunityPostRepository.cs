@@ -1,5 +1,6 @@
 ﻿using System.Data;
 using Dapper;
+using TechLoop.Application.Common.Pagination;
 using TechLoop.Application.Features.Community.CommunityPosts.DTOs;
 using TechLoop.Application.Interfaces.Infrastructure;
 using TechLoop.Application.Interfaces.Repositories;
@@ -84,12 +85,14 @@ public sealed class CommunityPostRepository : ICommunityPostRepository
                 new { Id = id });
         });
 
-    public Task<IEnumerable<CommunityPostDto>> GetFeedAsync()
-        => WithConnection(async connection =>
-        {
-            return await connection.QueryAsync<CommunityPostDto>(
-                "SELECT * FROM fn_community_post_get_feed()");
-        });
+    public async Task<PagedResult<CommunityPostDto>> GetFeedAsync(int page, int pageSize, int? technologyId, string? search, string? sort)
+    {
+        using var connection = _context.CreateConnection();
+        var rows = (await connection.QueryAsync<CommunityPostDto>(
+            "SELECT * FROM fn_community_post_get_feed(@Page,@PageSize,@TechnologyId,@Search,@Sort)",
+            new { Page=page, PageSize=pageSize, TechnologyId=technologyId, Search=search, Sort=sort })).ToList();
+        return new PagedResult<CommunityPostDto> { Items=rows, Page=page, PageSize=pageSize, TotalItems=rows.FirstOrDefault()?.TotalItems ?? 0 };
+    }
 
     public Task<bool> ExistsAsync(int id)
         => WithConnection(async connection =>

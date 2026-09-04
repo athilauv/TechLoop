@@ -5,6 +5,7 @@ import LoadingSpinner from "../../../../shared/LoadingSpinner";
 import type { Discussion, DiscussionComment } from "../../../../types/discussion.types.ts";
 import DiscussionListItem from "./DiscussionListItem";
 import CustomSelect from "../../../../shared/Customselect.tsx";
+import InfiniteScrollTrigger from "../../../../shared/InfiniteScrollTrigger.tsx";
 
 type SortOption = "newest" | "oldest" | "most-commented";
 
@@ -37,6 +38,12 @@ interface DiscussionListProps {
 
     emptyTitle?: string;
     emptyDescription?: string;
+    serverSide?: boolean;
+    onSearchChange?: (value: string) => void;
+    onSortChange?: (value: SortOption) => void;
+    hasNextPage?: boolean;
+    isFetchingNextPage?: boolean;
+    onLoadMore?: () => void;
 }
 
 const DiscussionList = ({
@@ -56,6 +63,12 @@ const DiscussionList = ({
     renderContextSlot,
     emptyTitle = "No discussions yet",
     emptyDescription = "Start the first discussion.",
+    serverSide = false,
+    onSearchChange,
+    onSortChange,
+    hasNextPage = false,
+    isFetchingNextPage = false,
+    onLoadMore,
 }: DiscussionListProps) => {
     const [search, setSearch] = useState("");
     const [sort, setSort] = useState<SortOption>("newest");
@@ -74,30 +87,12 @@ const DiscussionList = ({
     };
 
     const filteredAndSorted = useMemo(() => {
+        if (serverSide) return discussions;
         const normalized = search.trim().toLowerCase();
-
-        const filtered = normalized
-            ? discussions.filter(
-                  (discussion) =>
-                      discussion.title.toLowerCase().includes(normalized) ||
-                      discussion.content.toLowerCase().includes(normalized) ||
-                      discussion.userName.toLowerCase().includes(normalized),
-              )
-            : discussions;
-
-        const sorted = [...filtered].sort((a, b) => {
-            if (sort === "oldest") {
-                return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
-            }
-            if (sort === "most-commented") {
-                return b.commentCount - a.commentCount;
-            }
-            return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
-        });
-
-        // Pinned discussions always float to the top, regardless of sort.
-        return [...sorted].sort((a, b) => Number(b.isPinned) - Number(a.isPinned));
-    }, [discussions, search, sort]);
+        const filtered = normalized ? discussions.filter(d => d.title.toLowerCase().includes(normalized) || d.content.toLowerCase().includes(normalized) || d.userName.toLowerCase().includes(normalized)) : discussions;
+        const sorted = [...filtered].sort((a,b) => sort === "oldest" ? new Date(a.createdAt).getTime()-new Date(b.createdAt).getTime() : sort === "most-commented" ? b.commentCount-a.commentCount : new Date(b.createdAt).getTime()-new Date(a.createdAt).getTime());
+        return [...sorted].sort((a,b)=>Number(b.isPinned)-Number(a.isPinned));
+    }, [discussions, search, sort, serverSide]);
 
     return (
         <div>
@@ -110,7 +105,7 @@ const DiscussionList = ({
                     <input
                         type="text"
                         value={search}
-                        onChange={(event) => setSearch(event.target.value)}
+                        onChange={(event) => { setSearch(event.target.value); onSearchChange?.(event.target.value); }}
                         placeholder="Search discussions..."
                         aria-label="Search discussions"
                         className="w-full rounded-lg border border-[var(--cs-border)] bg-[var(--cs-input-bg,var(--cs-surface-muted))] py-2.5 pl-10 pr-3.5 text-sm text-[var(--cs-text)] outline-none transition-colors duration-150 placeholder:text-[var(--cs-text-muted)] hover:border-[var(--cs-border)]/80 focus:border-[var(--cs-primary)] focus:ring-2 focus:ring-[var(--cs-primary)]/15"
@@ -119,7 +114,7 @@ const DiscussionList = ({
 
                 <CustomSelect
                     value={sort}
-                    onChange={(value) => setSort(value as SortOption)}
+                    onChange={(value) => { setSort(value as SortOption); onSortChange?.(value as SortOption); }}
                     options={[
                         { value: "newest", label: "Newest first" },
                         { value: "oldest", label: "Oldest first" },
@@ -196,6 +191,7 @@ const DiscussionList = ({
                         ))}
                     </div>
                 )}
+                {serverSide && <InfiniteScrollTrigger hasNextPage={hasNextPage} isFetchingNextPage={isFetchingNextPage} onLoadMore={onLoadMore ?? (() => undefined)} />}
             </div>
         </div>
     );

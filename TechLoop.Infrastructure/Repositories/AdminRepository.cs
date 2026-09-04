@@ -1,4 +1,5 @@
 using Dapper;
+using TechLoop.Application.Common.Pagination;
 using TechLoop.Application.Features.Admin.DTOs;
 using TechLoop.Application.Features.TopicContributions.DTOs;
 using TechLoop.Application.Interfaces.Infrastructure;
@@ -27,11 +28,12 @@ public sealed class AdminRepository : IAdminRepository
             new CommandDefinition(sql, cancellationToken: cancellationToken)));
     }
 
-    public Task<IEnumerable<AdminUserResponse>> GetUsersAsync(CancellationToken cancellationToken)
+    public async Task<PagedResult<AdminUserResponse>> GetUsersAsync(int page, int pageSize, string? search, string? status, string? sort, CancellationToken cancellationToken)
     {
-        const string sql = "SELECT * FROM fn_admin_get_users();";
-        return WithConnection(connection => connection.QueryAsync<AdminUserResponse>(
-            new CommandDefinition(sql, cancellationToken: cancellationToken)));
+        const string sql = "SELECT * FROM fn_admin_get_users(@Page,@PageSize,@Search,@Status,@Sort);";
+        using var connection = _context.CreateConnection();
+        var rows = (await connection.QueryAsync<AdminUserResponse>(new CommandDefinition(sql, new { Page=page, PageSize=pageSize, Search=search, Status=status, Sort=sort }, cancellationToken: cancellationToken))).ToList();
+        return new PagedResult<AdminUserResponse> { Items=rows, Page=page, PageSize=pageSize, TotalItems=rows.FirstOrDefault()?.TotalItems ?? 0 };
     }
 
     public Task<bool> UpdateUserRoleAsync(Guid userId, int roleId, CancellationToken cancellationToken)

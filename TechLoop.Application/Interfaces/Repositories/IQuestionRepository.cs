@@ -1,3 +1,4 @@
+using TechLoop.Application.Common.Pagination;
 using TechLoop.Application.Features.Questions.DTOs;
 using TechLoop.Domain.Entities;
 
@@ -8,8 +9,8 @@ public interface IQuestionRepository
     Task<int> CreateAsync(Question question, bool shiftPositions, CancellationToken cancellationToken);
     Task<int> UpdateAsync(Question question, bool shiftPositions, CancellationToken cancellationToken);
     Task<int> SoftDeleteAsync(int id, Guid deletedBy, CancellationToken cancellationToken);
-    Task<IEnumerable<Question>> GetAllAsync(CancellationToken cancellationToken);
-    Task<IEnumerable<Question>> GetAllMentorAsync(Guid mentorId, CancellationToken cancellationToken);
+    Task<PagedResult<Question>> GetAllAsync(int page, int pageSize, short? questionType, short? difficulty, int? subTopicId, string? search, bool? published, string? sort, CancellationToken cancellationToken);
+    Task<PagedResult<Question>> GetAllMentorAsync(Guid mentorId, int page, int pageSize, int? difficulty, int? subTopicId, short? questionType, string? search, string? sort, CancellationToken cancellationToken);
     Task<Question?> GetByIdAsync(int id, CancellationToken cancellationToken);
     Task<Question?> GetBySlugAsync(string slug, CancellationToken cancellationToken);
     Task<IEnumerable<Question>> GetPublishedAsync(CancellationToken cancellationToken);

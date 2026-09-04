@@ -11,9 +11,7 @@ export async function login(data: {
     assertBackendValidation("POST", "/Auth/login", data);
     const response = await fetch(`${API_URL}/login`, {
         method: "POST",
-        headers: {
-            "Content-Type": "application/json",
-        },
+        headers: {"Content-Type": "application/json",},
         credentials: "include",
         body: JSON.stringify(data),
     });
@@ -21,11 +19,7 @@ export async function login(data: {
     const result = await response.json();
 
     if (!response.ok) {
-        throw new Error(
-            result?.message ||
-            result?.Message ||
-            "Login failed"
-        );
+        throw new Error(result?.message || result?.Message || "Login failed");
     }
 
     return result;
@@ -40,9 +34,7 @@ export async function register(data: {
     assertBackendValidation("POST", "/Auth/register", data);
     const response = await fetch(`${API_URL}/register`, {
         method: "POST",
-        headers: {
-            "Content-Type": "application/json",
-        },
+        headers: {"Content-Type": "application/json",},
         credentials: "include",
         body: JSON.stringify(data),
     });
@@ -50,11 +42,7 @@ export async function register(data: {
     const result = await response.json();
 
     if (!response.ok) {
-        throw new Error(
-            result?.message ||
-            result?.Message ||
-            "Registration failed"
-        );
+        throw new Error(result?.message || result?.Message || "Registration failed");
     }
 
     return result;
@@ -70,11 +58,7 @@ export async function refreshToken() {
     const result = await response.json();
 
     if (!response.ok) {
-        throw new Error(
-            result?.message ||
-            result?.Message ||
-            "Session expired"
-        );
+        throw new Error(result?.message || result?.Message || "Session expired");
     }
 
     return result;
@@ -90,11 +74,7 @@ export async function logout() {
     const result = await response.json();
 
     if (!response.ok) {
-        throw new Error(
-            result?.message ||
-            result?.Message ||
-            "Logout failed"
-        );
+        throw new Error(result?.message || result?.Message || "Logout failed");
     }
 
     return result;
@@ -109,9 +89,7 @@ export async function changePassword(data: {
     assertBackendValidation("PUT", "/Auth/change-password", data);
     const response = await fetch(`${API_URL}/change-password`, {
         method: "PUT",
-        headers: {
-            "Content-Type": "application/json",
-        },
+        headers: {"Content-Type": "application/json"},
         credentials: "include",
         body: JSON.stringify(data),
     });
@@ -119,11 +97,7 @@ export async function changePassword(data: {
     const result = await response.json();
 
     if (!response.ok) {
-        throw new Error(
-            result?.message ||
-            result?.Message ||
-            "Failed to change password"
-        );
+        throw new Error(result?.message || result?.Message || "Failed to change password");
     }
 
     return result;
@@ -136,9 +110,7 @@ export async function forgotPassword(data: {
     assertBackendValidation("POST", "/Auth/forgot-password", data);
     const response = await fetch(`${API_URL}/forgot-password`, {
         method: "POST",
-        headers: {
-            "Content-Type": "application/json",
-        },
+        headers: {"Content-Type": "application/json",},
         credentials: "include",
         body: JSON.stringify(data),
     });
@@ -146,11 +118,7 @@ export async function forgotPassword(data: {
     const result = await response.json();
 
     if (!response.ok) {
-        throw new Error(
-            result?.message ||
-            result?.Message ||
-            "Failed to send password reset link"
-        );
+        throw new Error(result?.message || result?.Message || "Failed to send password reset link");
     }
 
     return result;
@@ -165,9 +133,7 @@ export async function resetPassword(data: {
     assertBackendValidation("PUT", "/Auth/reset-password", data);
     const response = await fetch(`${API_URL}/reset-password`, {
         method: "PUT",
-        headers: {
-            "Content-Type": "application/json",
-        },
+        headers: {"Content-Type": "application/json",},
         credentials: "include",
         body: JSON.stringify(data),
     });
@@ -175,11 +141,7 @@ export async function resetPassword(data: {
     const result = await response.json();
 
     if (!response.ok) {
-        throw new Error(
-            result?.message ||
-            result?.Message ||
-            "Failed to reset password"
-        );
+        throw new Error(result?.message || result?.Message || "Failed to reset password");
     }
 
     return result;
@@ -204,22 +166,15 @@ export async function setupMentorProfile(
         `${API_URL}/mentor-setup?token=${encodeURIComponent(token)}`,
         {
             method: "PUT",
-            headers: {
-                "Content-Type": "application/json",
-            },
+            headers: {"Content-Type": "application/json",},
             credentials: "include",
             body: JSON.stringify(data),
         }
     );
 
     const result = await response.json();
-
     if (!response.ok) {
-        throw new Error(
-            result?.message ||
-            result?.Message ||
-            "Unable to activate mentor account"
-        );
+        throw new Error(result?.message || result?.Message || "Unable to activate mentor account");
     }
 
     return result;

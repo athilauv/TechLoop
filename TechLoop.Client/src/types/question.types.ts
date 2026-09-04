@@ -119,6 +119,7 @@ export interface MentorQuestion {
     createdBy?: string | null;
     updatedAt?: string | null;
     updatedBy?: string | null;
+    totalItems: number;
 }
 
 export interface CreateQuestionRequest {
