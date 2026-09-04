@@ -1,7 +1,8 @@
 //import { ArrowLeft } from "lucide-react";
 // import { useNavigate } from "react-router-dom";
 import type { LearnerQuestion } from "../../../../types/question.types.ts";
-import { DifficultyLevel } from "../../../../types/enums/difficulty-level.ts";
+import { type DifficultyLevel } from "../../../../types/enums/difficulty-level.ts";
+import { useDifficultyLevels } from "../../../../hooks/useLookups.ts";
 
 interface CodingQuestionHeaderProps {
     question: LearnerQuestion;
@@ -12,10 +13,10 @@ const CodingQuestionHeader = ({
                               }: CodingQuestionHeaderProps) => {
     // const navigate = useNavigate();
 
-    const getDifficultyLabel = (difficulty: DifficultyLevel) => {
-        const label = DifficultyLevel[difficulty];
-        return typeof label === "string" ? label : String(difficulty);
-    };
+    const { data: difficultyLevels = [] } = useDifficultyLevels();
+
+    const getDifficultyLabel = (difficulty: DifficultyLevel) =>
+        difficultyLevels.find((item) => item.id === difficulty)?.name ?? String(difficulty);
 
     const difficultyLabel = getDifficultyLabel(question.difficulty);
 

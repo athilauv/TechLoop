@@ -12,6 +12,7 @@ import { validateQuestion } from "../../../../../validations/question.validation
 import { showToast } from "../../../../../utils/toast.tsx";
 import SubTopicSelect from "../shared/SubTopicSelect";
 import CustomSelect from "../../../../../shared/Customselect.tsx";
+import { useDifficultyLevels } from "../../../../../hooks/useLookups.ts";
 //import {MessageSquarePlus} from "lucide-react";
 
 interface McqQuestionFormProps {
@@ -57,14 +58,6 @@ const slugify = (value: string): string =>
         .replace(/\s+/g, "-")
         .replace(/-+/g, "-");
 
-const DIFFICULTY_OPTIONS: Array<{ value: DifficultyLevelType; label: string }> = [
-    { value: DifficultyLevel.Beginner, label: "Beginner" },
-    { value: DifficultyLevel.Easy, label: "Easy" },
-    { value: DifficultyLevel.Medium, label: "Medium" },
-    { value: DifficultyLevel.Hard, label: "Hard" },
-    { value: DifficultyLevel.Expert, label: "Expert" },
-];
-
 const McqQuestionForm = ({
                              question,
                              subTopics,
@@ -74,6 +67,9 @@ const McqQuestionForm = ({
                              onCancel,
                          }: McqQuestionFormProps) => {
     const [form, setForm] = useState<FormState>(() => createInitialState(question));
+
+    const { data: difficultyLevels = [] } = useDifficultyLevels();
+    const difficultyOptions = difficultyLevels ?? [];
 
     const updateField = <K extends keyof FormState>(field: K, value: FormState[K]) => {
         setForm((current) => ({ ...current, [field]: value }));
@@ -223,9 +219,9 @@ const McqQuestionForm = ({
                     <CustomSelect
                         value={String(form.difficulty)}
                         onChange={(value: string) => updateField("difficulty", Number(value) as DifficultyLevelType)}
-                        options={DIFFICULTY_OPTIONS.map((option) => ({
-                            value: String(option.value),
-                            label: option.label,
+                        options={difficultyOptions.map((option) => ({
+                            value: String(option.id),
+                            label: option.name,
                         }))}
                     />
                 </div>

@@ -39,9 +39,9 @@ public sealed class CreateTopicCommandHandler : IRequestHandler<CreateTopicComma
         }
 
         var positionExists = await _repository.PositionExistsAsync(request.TechnologyId,request.Position, cancellationToken);
-        if (positionExists)
+        if (positionExists && !request.ShiftPositions)
         {
-            throw new ValidationException($"Topic position '{request.Position}' already exists in the technology.");
+            throw new ValidationException($"Topic position '{request.Position}' already exists in the technology. Do you want to shift the existing topics?");
         }
         
         var exists = await _repository.ExistsAsync(request.TechnologyId,request.Title,cancellationToken);

@@ -15,6 +15,7 @@ public static class RepositoryServiceCollectionExtensions
         services.AddScoped<ISubTopicsRepository, SubTopicsRepository>();
         services.AddScoped<ITechnologyCategoryRepository, TechnologyCategoryRepository>();
         services.AddScoped<IQuestionRepository, QuestionRepository>();
+        services.AddScoped<ILookupRepository, LookupRepository>();
         services.AddScoped<IMcqOptionRepository, McqOptionRepository>();
         services.AddScoped<ICodingTemplateRepository, CodingTemplateRepository>();
         services.AddScoped<ITestCaseRepository, TestCaseRepository>();

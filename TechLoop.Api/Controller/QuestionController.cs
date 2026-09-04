@@ -1,4 +1,4 @@
-﻿using MediatR;
+using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using TechLoop.Application.Features.Coding.Queries.GetCodingTemplatesByQuestion.Learner;
 using TechLoop.Application.Features.Coding.Queries.GetTestCasesByQuestion.Learner;

@@ -120,7 +120,14 @@ public sealed class ExceptionMiddleware
             _ => StatusCodes.Status500InternalServerError
         };
 
-        await HandleExceptionAsync(context, statusCode, exception.Message);
+        var message = exception.ConstraintName switch
+        {
+            "sub_topics_slug_key" => "A subtopic with this slug already exists. Please use a different slug.",
+            "topics_slug_key" => "A topic with this slug already exists. Please use a different slug.",
+            _ => exception.Message
+        };
+
+        await HandleExceptionAsync(context, statusCode, message);
     }
 
     private static async Task HandleExceptionAsync(

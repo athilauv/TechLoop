@@ -1,9 +1,7 @@
 import { Filter, Search, X } from "lucide-react";
-import {
-    DifficultyLevel,
-    type DifficultyLevel as DifficultyLevelType,
-} from "../../../../../types/enums/difficulty-level.ts";
+import { type DifficultyLevel as DifficultyLevelType } from "../../../../../types/enums/difficulty-level.ts";
 import CustomSelect, { type SelectOption } from "../../../../../shared/Customselect.tsx";
+import { useDifficultyLevels } from "../../../../../hooks/useLookups.ts";
 
 interface QuestionFiltersProps {
     search: string;
@@ -13,15 +11,6 @@ interface QuestionFiltersProps {
     onClear: () => void;
 }
 
-const DIFFICULTY_OPTIONS: Array<SelectOption<DifficultyLevelType | "all">> = [
-    { value: "all", label: "All difficulties" },
-    { value: DifficultyLevel.Beginner, label: "Beginner" },
-    { value: DifficultyLevel.Easy, label: "Easy" },
-    { value: DifficultyLevel.Medium, label: "Medium" },
-    { value: DifficultyLevel.Hard, label: "Hard" },
-    { value: DifficultyLevel.Expert, label: "Expert" },
-];
-
 const QuestionFilters = ({
                              search,
                              difficulty,
@@ -29,6 +18,15 @@ const QuestionFilters = ({
                              onDifficultyChange,
                              onClear,
                          }: QuestionFiltersProps) => {
+    const { data: difficultyLevels = [] } = useDifficultyLevels();
+    const difficultyOptions: Array<SelectOption<DifficultyLevelType | "all">> = [
+        { value: "all", label: "All difficulties" },
+        ...(difficultyLevels ?? []).map((item) => ({
+            value: item.id as DifficultyLevelType,
+            label: item.name,
+        })),
+    ];
+
     const hasFilters = search.trim().length > 0 || difficulty !== "all";
 
     return (
@@ -53,7 +51,7 @@ const QuestionFilters = ({
                 <div className="w-full sm:w-[190px]">
                     <CustomSelect
                         value={difficulty}
-                        options={DIFFICULTY_OPTIONS}
+                        options={difficultyOptions}
                         onChange={onDifficultyChange}
                         placeholder="All difficulties"
                     />

@@ -1,4 +1,4 @@
-import { ExampleType } from "../../../../../types/enums/example-type";
+import { useExampleTypes } from "../../../../../hooks/useLookups.ts";
 import CustomSelect from "../../../../../shared/Customselect";
 
 interface ExampleTypeSelectProps {
@@ -12,20 +12,21 @@ export default function ExampleTypeSelect({
                                               onChange,
                                               error,
                                           }: ExampleTypeSelectProps) {
+    const { data: exampleTypes = [] } = useExampleTypes();
+    const options = [
+        { value: "", label: "None" },
+        ...(exampleTypes ?? []).map((item) => ({
+            value: String(item.id),
+            label: item.name,
+        })),
+    ];
+
     return (
         <div>
             <CustomSelect
                 value={value}
                 onChange={(value: string) => onChange(value)}
-                options={[
-                    { value: "", label: "None" },
-                    { value: String(ExampleType.Text), label: "Text" },
-                    { value: String(ExampleType.Code), label: "Code" },
-                    { value: String(ExampleType.Link), label: "Link" },
-                    { value: String(ExampleType.Image), label: "Image" },
-                    { value: String(ExampleType.Video), label: "Video" },
-                    { value: String(ExampleType.Pdf), label: "PDF" },
-                ]}
+                options={options}
             />
 
             {error && (

@@ -4,7 +4,8 @@ import { ChevronRight } from "lucide-react";
 import { useCodingQuestions } from "../../../../hooks/useQuestion.ts";
 import { useTechnologies } from "../../../../hooks/useTechnology.ts";
 import type { LearnerCodingQuestion } from "../../../../types/question.types.ts";
-import { DifficultyLevel } from "../../../../types/enums/difficulty-level.ts";
+import { type DifficultyLevel } from "../../../../types/enums/difficulty-level.ts";
+import { useDifficultyLevels } from "../../../../hooks/useLookups.ts";
 import CodingQuestionFilters, {type DifficultyFilter, type SortOption,} from "../components/CodingQuestionFilters.tsx";
 import InfiniteScrollTrigger from "../../../../shared/InfiniteScrollTrigger.tsx";
 
@@ -47,10 +48,10 @@ const CodingQuestionsPage = () => {
 
     const questions = data?.pages.flatMap((page) => page) ?? [];
 
-    const getDifficultyLabel = (difficulty: DifficultyLevel) => {
-        const label = DifficultyLevel[difficulty];
-        return typeof label === "string" ? label : String(difficulty);
-    };
+    const { data: difficultyLevels = [] } = useDifficultyLevels();
+
+    const getDifficultyLabel = (difficulty: DifficultyLevel) =>
+        difficultyLevels.find((item) => item.id === difficulty)?.name ?? String(difficulty);
 
     const handleSearchChange = (value: string) => {
         setSearch(value);

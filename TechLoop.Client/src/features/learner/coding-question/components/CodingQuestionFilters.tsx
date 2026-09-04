@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { ChevronDown, Search, X } from "lucide-react";
-import { DifficultyLevel } from "../../../../types/enums/difficulty-level.ts";
+import { type DifficultyLevel } from "../../../../types/enums/difficulty-level.ts";
+import { useDifficultyLevels } from "../../../../hooks/useLookups.ts";
 
 export type DifficultyFilter = DifficultyLevel | "all";
 export type SortOption = | "default" | "difficulty-asc" | "difficulty-desc";
@@ -36,6 +37,12 @@ const CodingQuestionFilters = ({
                                    onSortChange,
                                    onClear,
                                }: CodingQuestionFiltersProps) => {
+    const { data: difficultyLevels = [] } = useDifficultyLevels();
+    const difficultyOptions = (difficultyLevels ?? []).map((item) => item.id as DifficultyLevel);
+
+    const getDifficultyLabel = (difficulty: DifficultyLevel): string =>
+        difficultyLevels.find((item) => item.id === difficulty)?.name ?? String(difficulty);
+
     const [openDropdown, setOpenDropdown] =
         useState<DropdownType>(null);
 
@@ -53,20 +60,6 @@ const CodingQuestionFilters = ({
             document.removeEventListener("mousedown", handleOutsideClick);
         };
     }, []);
-
-    const difficultyOptions = Object.values(
-        DifficultyLevel,
-    ).filter(
-        (value): value is DifficultyLevel =>
-            typeof value === "number",
-    );
-
-    const getDifficultyLabel = (
-        difficulty: DifficultyLevel,
-    ): string => {
-        const label = DifficultyLevel[difficulty];
-        return typeof label === "string" ? label : String(difficulty);
-    };
 
     const currentSearch = search ?? "";
 

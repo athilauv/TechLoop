@@ -24,7 +24,7 @@ import type {
     CurriculumSubTopic,
 } from "../../../../types/curriculum.types.ts";
 import type { CreateTopicContributionRequest } from "../../../../types/topicContribution.types.ts";
-import { ExampleType } from "../../../../types/enums/example-type.ts";
+import { useExampleTypes } from "../../../../hooks/useLookups.ts";
 import CustomSelect from "../../../../shared/Customselect.tsx";
 
 interface FormState {
@@ -71,6 +71,7 @@ const STEPS = [
 
 export default function TopicContributionForm() {
     const navigate = useNavigate();
+    const { data: exampleTypes = [] } = useExampleTypes();
 
     const [step, setStep] = useState(0);
     const [form, setForm] = useState<FormState>(initialState);
@@ -304,17 +305,8 @@ export default function TopicContributionForm() {
     const selectedSubTopic =
         selectedTopic?.subTopics.find((subTopic) => subTopic.id === form.subTopicId) ?? null;
 
-    const exampleTypeLabel = (value: string) => {
-        const labels: Record<string, string> = {
-            [String(ExampleType.Text)]: "Text",
-            [String(ExampleType.Code)]: "Code",
-            [String(ExampleType.Link)]: "Link",
-            [String(ExampleType.Image)]: "Image",
-            [String(ExampleType.Video)]: "Video",
-            [String(ExampleType.Pdf)]: "PDF",
-        };
-        return labels[value] ?? null;
-    };
+    const exampleTypeLabel = (value: string) =>
+        exampleTypes.find((item) => String(item.id) === value)?.name ?? null;
 
     const renderSelector = (type: "technology" | "topic" | "subTopic") => {
         const isOpen = activeSelector === type;
@@ -678,12 +670,10 @@ export default function TopicContributionForm() {
                                     onChange={(value: string) => updateField("exampleType", value)}
                                     options={[
                                         { value: "", label: "Select example type" },
-                                        { value: String(ExampleType.Text), label: "Text" },
-                                        { value: String(ExampleType.Code), label: "Code" },
-                                        { value: String(ExampleType.Link), label: "Link" },
-                                        { value: String(ExampleType.Image), label: "Image" },
-                                        { value: String(ExampleType.Video), label: "Video" },
-                                        { value: String(ExampleType.Pdf), label: "PDF" },
+                                        ...(exampleTypes ?? []).map((item) => ({
+                                            value: String(item.id),
+                                            label: item.name,
+                                        })),
                                     ]}/>
 
                                 {errors.exampleType && (
