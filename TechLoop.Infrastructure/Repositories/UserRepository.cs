@@ -9,79 +9,123 @@ public sealed class UserRepository : IUserRepository
 {
     private readonly IDapperContext _context;
 
+    private async Task<T> WithConnection<T>(Func<System.Data.IDbConnection, Task<T>> action)
+    {
+        using var connection = _context.CreateConnection();
+        return await action(connection);
+    }
+
+    private async Task WithConnection(Func<System.Data.IDbConnection, Task> action)
+    {
+        using var connection = _context.CreateConnection();
+        await action(connection);
+    }
+
     public UserRepository(IDapperContext context) => _context = context;
 
-    public async Task<User?> GetByIdAsync(Guid userId)
+    public Task<User?> GetByIdAsync(Guid userId)
     {
-        using var connection = _context.CreateConnection();
-        return await connection.QueryFirstOrDefaultAsync<User>(
-            "SELECT * FROM public.fn_user_get_by_id(@Id);",
-            new { Id = userId });
+    return WithConnection(async connection =>
+    {
+        
+            return await connection.QueryFirstOrDefaultAsync<User>(
+                "SELECT * FROM public.fn_user_get_by_id(@Id);",
+                new { Id = userId });
+    
+    });
     }
 
-    public async Task<User?> GetByUsernameAsync(string username)
+    public Task<User?> GetByUsernameAsync(string username)
     {
-        using var connection = _context.CreateConnection();
-        return await connection.QueryFirstOrDefaultAsync<User>(
-            "SELECT * FROM public.fn_user_get_by_username(@Username);",
-            new { Username = username });
+    return WithConnection(async connection =>
+    {
+        
+            return await connection.QueryFirstOrDefaultAsync<User>(
+                "SELECT * FROM public.fn_user_get_by_username(@Username);",
+                new { Username = username });
+    
+    });
     }
 
-    public async Task<User?> GetByEmailAsync(string email)
+    public Task<User?> GetByEmailAsync(string email)
     {
-        using var connection = _context.CreateConnection();
-        return await connection.QueryFirstOrDefaultAsync<User>(
-            "SELECT * FROM public.fn_user_get_by_email(@Email);",
-            new { Email = email });
+    return WithConnection(async connection =>
+    {
+        
+            return await connection.QueryFirstOrDefaultAsync<User>(
+                "SELECT * FROM public.fn_user_get_by_email(@Email);",
+                new { Email = email });
+    
+    });
     }
 
-    public async Task AddAsync(User user)
+    public Task AddAsync(User user)
     {
-        using var connection = _context.CreateConnection();
-        await connection.ExecuteAsync(
-            @"CALL public.sp_manage_user(
-                'CREATE', @Id, @Username, @Email, @PasswordHash, @RoleId,
-                @FailedLoginAttempts, @LockedUntil, @LastLoginAt, @CreatedAt, @UpdatedAt, FALSE);",
-            user);
+    return WithConnection(async connection =>
+    {
+        
+            await connection.ExecuteAsync(
+                @"CALL public.sp_manage_user(
+                    'CREATE', @Id, @Username, @Email, @PasswordHash, @RoleId,
+                    @FailedLoginAttempts, @LockedUntil, @LastLoginAt, @CreatedAt, @UpdatedAt, FALSE);",
+                user);
+    
+    });
     }
 
-    public async Task UpdateAsync(User user)
+    public Task UpdateAsync(User user)
     {
-        using var connection = _context.CreateConnection();
-        await connection.ExecuteAsync(
-            @"CALL public.sp_manage_user(
-                'UPDATE', @Id, @Username, @Email, @PasswordHash, @RoleId,
-                NULL, NULL, NULL, NULL, @UpdatedAt, FALSE);",
-            user);
+    return WithConnection(async connection =>
+    {
+        
+            await connection.ExecuteAsync(
+                @"CALL public.sp_manage_user(
+                    'UPDATE', @Id, @Username, @Email, @PasswordHash, @RoleId,
+                    NULL, NULL, NULL, NULL, @UpdatedAt, FALSE);",
+                user);
+    
+    });
     }
 
-    public async Task UpdateSecurityAsync(User user)
+    public Task UpdateSecurityAsync(User user)
     {
-        using var connection = _context.CreateConnection();
-        await connection.ExecuteAsync(
-            @"CALL public.sp_manage_user(
-                'UPDATE_SECURITY', @Id, NULL, NULL, NULL, NULL,
-                @FailedLoginAttempts, @LockedUntil, @LastLoginAt, NULL, @UpdatedAt, FALSE);",
-            user);
+    return WithConnection(async connection =>
+    {
+        
+            await connection.ExecuteAsync(
+                @"CALL public.sp_manage_user(
+                    'UPDATE_SECURITY', @Id, NULL, NULL, NULL, NULL,
+                    @FailedLoginAttempts, @LockedUntil, @LastLoginAt, NULL, @UpdatedAt, FALSE);",
+                user);
+    
+    });
     }
 
-    public async Task DeleteAsync(Guid userId)
+    public Task DeleteAsync(Guid userId)
     {
-        using var connection = _context.CreateConnection();
-        await connection.ExecuteAsync(
-            @"CALL public.sp_manage_user(
-                'DELETE', @Id, NULL, NULL, NULL, NULL,
-                NULL, NULL, NULL, NULL, NULL, FALSE);",
-            new { Id = userId });
+    return WithConnection(async connection =>
+    {
+        
+            await connection.ExecuteAsync(
+                @"CALL public.sp_manage_user(
+                    'DELETE', @Id, NULL, NULL, NULL, NULL,
+                    NULL, NULL, NULL, NULL, NULL, FALSE);",
+                new { Id = userId });
+    
+    });
     }
 
-    public async Task UpdatePasswordAsync(Guid userId, string passwordHash, DateTime updatedAt)
+    public Task UpdatePasswordAsync(Guid userId, string passwordHash, DateTime updatedAt)
     {
-        using var connection = _context.CreateConnection();
-        await connection.ExecuteAsync(
-            @"CALL public.sp_manage_user(
-                'UPDATE_PASSWORD', @Id, NULL, NULL, @PasswordHash, NULL,
-                NULL, NULL, NULL, NULL, @UpdatedAt, FALSE);",
-            new { Id = userId, PasswordHash = passwordHash, UpdatedAt = updatedAt });
+    return WithConnection(async connection =>
+    {
+        
+            await connection.ExecuteAsync(
+                @"CALL public.sp_manage_user(
+                    'UPDATE_PASSWORD', @Id, NULL, NULL, @PasswordHash, NULL,
+                    NULL, NULL, NULL, NULL, @UpdatedAt, FALSE);",
+                new { Id = userId, PasswordHash = passwordHash, UpdatedAt = updatedAt });
+    
+    });
     }
 }

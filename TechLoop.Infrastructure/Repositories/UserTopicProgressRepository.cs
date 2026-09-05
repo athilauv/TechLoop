@@ -9,125 +9,153 @@ public sealed class UserTopicProgressRepository : IUserTopicProgressRepository
 {
     private readonly IDapperContext _context;
 
+    private async Task<T> WithConnection<T>(Func<System.Data.IDbConnection, Task<T>> action)
+    {
+        using var connection = _context.CreateConnection();
+        return await action(connection);
+    }
+
+    private async Task WithConnection(Func<System.Data.IDbConnection, Task> action)
+    {
+        using var connection = _context.CreateConnection();
+        await action(connection);
+    }
+
     public UserTopicProgressRepository(IDapperContext context)
     {
         _context = context;
     }
 
-    public async Task<UserTopicProgress?> GetByUserAndTopicAsync(
+    public Task<UserTopicProgress?> GetByUserAndTopicAsync(
         Guid userId,
         int topicId,
         CancellationToken cancellationToken)
     {
-        const string sql = @"SELECT * FROM fn_get_user_topic_progress(@UserId, @TopicId);";
+    return WithConnection(async connection =>
+    {
+            const string sql = @"SELECT * FROM fn_get_user_topic_progress(@UserId, @TopicId);";
 
-        using var connection = _context.CreateConnection();
+        
 
-        return await connection.QuerySingleOrDefaultAsync<UserTopicProgress>(
-            new CommandDefinition(
-                sql,
-                new
-                {
-                    UserId = userId,
-                    TopicId = topicId
-                },
-                cancellationToken: cancellationToken));
+            return await connection.QuerySingleOrDefaultAsync<UserTopicProgress>(
+                new CommandDefinition(
+                    sql,
+                    new
+                    {
+                        UserId = userId,
+                        TopicId = topicId
+                    },
+                    cancellationToken: cancellationToken));
+    
+    });
     }
 
-    public async Task<Guid> CreateAsync(
+    public Task<Guid> CreateAsync(
         UserTopicProgress progress,
         CancellationToken cancellationToken)
     {
-        const string sql = @"
-            CALL sp_manage_user_topic_progress(
-                'CREATE',
-                @UserId,
-                @TopicId,
-                @CompletedQuestions,
-                @LastPracticedAt,
-                @CreatedAt,
-                @UpdatedAt,
-                NULL
-            );";
+    return WithConnection(async connection =>
+    {
+            const string sql = @"
+                CALL sp_manage_user_topic_progress(
+                    'CREATE',
+                    @UserId,
+                    @TopicId,
+                    @CompletedQuestions,
+                    @LastPracticedAt,
+                    @CreatedAt,
+                    @UpdatedAt,
+                    NULL
+                );";
 
-        using var connection = _context.CreateConnection();
+        
 
-        await connection.ExecuteAsync(
-            new CommandDefinition(
-                sql,
-                new
-                {
-                    progress.UserId,
-                    progress.TopicId,
-                    progress.CompletedQuestions,
-                    progress.LastPracticedAt,
-                    progress.CreatedAt,
-                    progress.UpdatedAt
-                },
-                cancellationToken: cancellationToken));
+            await connection.ExecuteAsync(
+                new CommandDefinition(
+                    sql,
+                    new
+                    {
+                        progress.UserId,
+                        progress.TopicId,
+                        progress.CompletedQuestions,
+                        progress.LastPracticedAt,
+                        progress.CreatedAt,
+                        progress.UpdatedAt
+                    },
+                    cancellationToken: cancellationToken));
 
-        var created = await GetByUserAndTopicAsync(
-            progress.UserId,
-            progress.TopicId,
-            cancellationToken);
+            var created = await GetByUserAndTopicAsync(
+                progress.UserId,
+                progress.TopicId,
+                cancellationToken);
 
-        if (created is null)
-        {
-            throw new InvalidOperationException(
-                "Unable to create user topic progress.");
-        }
+            if (created is null)
+            {
+                throw new InvalidOperationException(
+                    "Unable to create user topic progress.");
+            }
 
-        return created.Id;
+            return created.Id;
+    
+    });
     }
 
-    public async Task<int> UpdateAsync(
+    public Task<int> UpdateAsync(
         UserTopicProgress progress,
         CancellationToken cancellationToken)
     {
-        const string sql = @"
-            CALL sp_manage_user_topic_progress(
-                'UPDATE',
-                @UserId,
-                @TopicId,
-                @CompletedQuestions,
-                @LastPracticedAt,
-                NULL,
-                @UpdatedAt,
-                NULL
-            );";
+    return WithConnection(async connection =>
+    {
+            const string sql = @"
+                CALL sp_manage_user_topic_progress(
+                    'UPDATE',
+                    @UserId,
+                    @TopicId,
+                    @CompletedQuestions,
+                    @LastPracticedAt,
+                    NULL,
+                    @UpdatedAt,
+                    NULL
+                );";
 
-        using var connection = _context.CreateConnection();
+        
 
-        return await connection.ExecuteAsync(
-            new CommandDefinition(
-                sql,
-                new
-                {
-                    progress.UserId,
-                    progress.TopicId,
-                    progress.CompletedQuestions,
-                    progress.LastPracticedAt,
-                    progress.UpdatedAt
-                },
-                cancellationToken: cancellationToken));
+            return await connection.ExecuteAsync(
+                new CommandDefinition(
+                    sql,
+                    new
+                    {
+                        progress.UserId,
+                        progress.TopicId,
+                        progress.CompletedQuestions,
+                        progress.LastPracticedAt,
+                        progress.UpdatedAt
+                    },
+                    cancellationToken: cancellationToken));
+    
+    });
     }
 
-    public async Task<IEnumerable<UserTopicProgress>> GetByUserIdAsync(
+    public Task<IEnumerable<UserTopicProgress>> GetByUserIdAsync(
         Guid userId,
         CancellationToken cancellationToken)
     {
-        const string sql =
-            @"SELECT * FROM fn_get_user_topic_progress_list(@UserId);";
+    return WithConnection(async connection =>
+    {
+            const string sql =
+                @"SELECT * FROM fn_get_user_topic_progress_list(@UserId);";
 
-        using var connection = _context.CreateConnection();
+        
 
-        return await connection.QueryAsync<UserTopicProgress>(
-            new CommandDefinition(
-                sql,
-                new
-                {
-                    UserId = userId
-                },
-                cancellationToken: cancellationToken));
+            return await connection.QueryAsync<UserTopicProgress>(
+                new CommandDefinition(
+                    sql,
+                    new
+                    {
+                        UserId = userId
+                    },
+                    cancellationToken: cancellationToken));
+    
+    });
     }
 }

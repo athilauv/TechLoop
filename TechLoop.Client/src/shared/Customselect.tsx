@@ -190,30 +190,29 @@ function CustomSelect<T extends string | number>({
                     onKeyDown={handleListKeyDown}
                     ref={(node) => node?.focus()}
                     className="
-                        absolute
-                        z-20
-                        mt-1.5
-                        w-full
-                        overflow-hidden
-                        rounded-lg
-                        border
-                        border-[var(--cs-border)]
-                        bg-[#0E1B2E]
-                        py-1
-                        shadow-[0_8px_24px_rgba(2,8,20,0.45)]
-                        outline-none
-                        animate-in
-                        fade-in
-                        slide-in-from-top-1
-                        duration-150
-                    "
+            absolute
+            right-0
+            top-full
+            z-[100]
+            mt-2
+            min-w-[180px]
+            overflow-hidden
+            rounded-lg
+            border
+            border-[var(--cs-border)]
+            bg-[var(--cs-surface)]
+            py-1
+            shadow-[0_12px_30px_rgba(2,8,20,0.45)]
+            outline-none
+            animate-in
+            fade-in
+            slide-in-from-top-1
+            duration-150
+        "
                 >
                     {options.map((option, index) => {
-                        const isSelected =
-                            option.value === value;
-
-                        const isActive =
-                            index === activeIndex;
+                        const isSelected = option.value === value;
+                        const isActive = index === activeIndex;
 
                         return (
                             <li
@@ -224,46 +223,34 @@ function CustomSelect<T extends string | number>({
                                     type="button"
                                     role="option"
                                     aria-selected={isSelected}
-                                    onMouseEnter={() =>
-                                        setActiveIndex(index)
-                                    }
-                                    onClick={() =>
-                                        commit(index)
-                                    }
+                                    onMouseEnter={() => setActiveIndex(index)}
+                                    onClick={() => commit(index)}
                                     className={`
-                                        flex
-                                        w-full
-                                        items-center
-                                        justify-between
-                                        gap-2
-                                        px-3
-                                        py-2
-                                        text-left
-                                        text-sm
-                                        transition-colors
-                                        duration-100
-                                        ${
-                                        isSelected
-                                            ? "text-[var(--cs-primary)]"
+                            flex
+                            w-full
+                            items-center
+                            justify-between
+                            gap-3
+                            px-3.5
+                            py-2.5
+                            text-left
+                            text-sm
+                            transition-colors
+                            duration-100
+                            ${
+                                        isSelected ? "text-[var(--cs-primary)]"
                                             : "text-[var(--cs-text)]"
                                     }
-                                        ${
-                                        isActive
-                                            ? "bg-[var(--cs-surface-muted)]"
-                                            : ""
+                            ${
+                                        isActive ? "bg-[var(--cs-surface-muted)]"
+                                            : "hover:bg-[var(--cs-surface-muted)]"
                                     }
-                                    `}
+                        `}
                                 >
                                     {option.label}
 
                                     {isSelected && (
-                                        <Check
-                                            size={15}
-                                            className="
-                                                shrink-0
-                                                text-[var(--cs-primary)]
-                                            "
-                                        />
+                                        <Check size={15} className="shrink-0 text-[var(--cs-primary)]"/>
                                     )}
                                 </button>
                             </li>

@@ -38,7 +38,7 @@ public sealed class PostCommentRepository : IPostCommentRepository
         parameters.Add("UpdatedBy", comment.UpdatedBy);
         parameters.Add("Result", 0, DbType.Int32, ParameterDirection.InputOutput);
 
-        var result = await connection.QuerySingleAsync<int>("CALL public.sp_manage_post_comment('UPDATE', NULL, NULL, NULL, NULL, NULL, @Id, @UpdatedBy, @Result);", parameters);
+        var result = await connection.QuerySingleAsync<int>("CALL public.sp_manage_post_comment('UPDATE', NULL, NULL, NULL, @Content, NULL, @Id, @UpdatedBy, @Result);", parameters);
         return result == 1;
     });
 

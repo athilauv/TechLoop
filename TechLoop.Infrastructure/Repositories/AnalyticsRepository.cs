@@ -8,84 +8,133 @@ namespace TechLoop.Infrastructure.Repositories;
 public sealed class AnalyticsRepository : IAnalyticsRepository
 {
     private readonly IDapperContext _context;
+
     public AnalyticsRepository(IDapperContext context)
     {
         _context = context;
     }
 
-    public async Task<AnalyticsOverviewResponse?> GetOverviewAsync(Guid userId, CancellationToken cancellationToken)
+    private async Task<T> WithConnection<T>(
+        Func<System.Data.IDbConnection, Task<T>> action)
     {
-        const string sql = @"SELECT * FROM fn_analytics_overview(@UserId);";
         using var connection = _context.CreateConnection();
-        return await connection.QuerySingleOrDefaultAsync<AnalyticsOverviewResponse>(
-            new CommandDefinition(sql, new { UserId = userId },cancellationToken: cancellationToken));
+        return await action(connection);
     }
 
-    public async Task<IReadOnlyList<PracticeActivityResponse>> GetPracticeActivityAsync(Guid userId, CancellationToken cancellationToken)
+    private async Task WithConnection(
+        Func<System.Data.IDbConnection, Task> action)
     {
-        const string sql = @"SELECT * FROM fn_analytics_practice_activity(@UserId);";
         using var connection = _context.CreateConnection();
-        var result = await connection.QueryAsync<PracticeActivityResponse>(
-            new CommandDefinition(sql, new { UserId = userId }, cancellationToken: cancellationToken));
-
-        return result.ToList();
+        await action(connection);
     }
 
-    public async Task<IReadOnlyList<TechnologyPracticeResponse>> GetTechnologyPracticeAsync(Guid userId, CancellationToken cancellationToken)
+    public Task<AnalyticsOverviewResponse?> GetOverviewAsync(
+        Guid userId,
+        CancellationToken cancellationToken)
     {
-        const string sql = @"SELECT * FROM fn_analytics_technology_practice(@UserId);";
-        using var connection = _context.CreateConnection();
-        var result = await connection.QueryAsync<TechnologyPracticeResponse>(
-            new CommandDefinition(sql, new { UserId = userId }, cancellationToken: cancellationToken));
+        const string sql =
+            "SELECT * FROM fn_analytics_overview(@UserId);";
 
-        return result.ToList();
+        return WithConnection(connection =>
+            connection.QuerySingleOrDefaultAsync<AnalyticsOverviewResponse>(
+                new CommandDefinition(
+                    sql,
+                    new { UserId = userId },
+                    cancellationToken: cancellationToken)));
     }
 
-    public async Task<IReadOnlyList<TopicAnalyticsResponse>> GetTopicAnalyticsAsync(Guid userId, CancellationToken cancellationToken)
+    public Task<IReadOnlyList<PracticeActivityResponse>> GetPracticeActivityAsync(
+        Guid userId,
+        CancellationToken cancellationToken)
     {
-        const string sql = @"SELECT * FROM fn_analytics_topic(@UserId);";
-        using var connection = _context.CreateConnection();
-        var result = await connection.QueryAsync<TopicAnalyticsResponse>(
-            new CommandDefinition(
-                sql,
-                new
-                {
-                    UserId = userId
-                },
-                cancellationToken: cancellationToken));
+        return WithConnection<IReadOnlyList<PracticeActivityResponse>>(async connection =>
+        {
+            const string sql =
+                "SELECT * FROM fn_analytics_practice_activity(@UserId);";
 
-        return result.ToList();
+            var result = await connection.QueryAsync<PracticeActivityResponse>(
+                new CommandDefinition(
+                    sql,
+                    new { UserId = userId },
+                    cancellationToken: cancellationToken));
+
+            return result.ToList();
+        });
     }
 
-    public async Task<IReadOnlyList<DifficultyProgressionResponse>> GetDifficultyProgressionAsync(Guid userId, CancellationToken cancellationToken)
+    public Task<IReadOnlyList<TechnologyPracticeResponse>> GetTechnologyPracticeAsync(
+        Guid userId,
+        CancellationToken cancellationToken)
     {
-        const string sql = @"SELECT * FROM fn_analytics_difficulty(@UserId);";
-        using var connection = _context.CreateConnection();
-        var result = await connection.QueryAsync<DifficultyProgressionResponse>(
-            new CommandDefinition(
-                sql,
-                new
-                {
-                    UserId = userId
-                },
-                cancellationToken: cancellationToken));
+        return WithConnection<IReadOnlyList<TechnologyPracticeResponse>>(async connection =>
+        {
+            const string sql =
+                "SELECT * FROM fn_analytics_technology_practice(@UserId);";
 
-        return result.ToList();
+            var result = await connection.QueryAsync<TechnologyPracticeResponse>(
+                new CommandDefinition(
+                    sql,
+                    new { UserId = userId },
+                    cancellationToken: cancellationToken));
+
+            return result.ToList();
+        });
     }
 
-    public async Task<IReadOnlyList<DailyActivityResponse>> GetDailyActivityAsync(Guid userId, CancellationToken cancellationToken)
+    public Task<IReadOnlyList<TopicAnalyticsResponse>> GetTopicAnalyticsAsync(
+        Guid userId,
+        CancellationToken cancellationToken)
     {
-        const string sql = @"SELECT * FROM fn_analytics_daily_activity(@UserId);";
-        using var connection = _context.CreateConnection();
-        var result = await connection.QueryAsync<DailyActivityResponse>(
-            new CommandDefinition(
-                sql,
-                new
-                {
-                    UserId = userId
-                },
-                cancellationToken: cancellationToken));
+        return WithConnection<IReadOnlyList<TopicAnalyticsResponse>>(async connection =>
+        {
+            const string sql =
+                "SELECT * FROM fn_analytics_topic(@UserId);";
 
-        return result.ToList();
+            var result = await connection.QueryAsync<TopicAnalyticsResponse>(
+                new CommandDefinition(
+                    sql,
+                    new { UserId = userId },
+                    cancellationToken: cancellationToken));
+
+            return result.ToList();
+        });
+    }
+
+    public Task<IReadOnlyList<DifficultyProgressionResponse>> GetDifficultyProgressionAsync(
+        Guid userId,
+        CancellationToken cancellationToken)
+    {
+        return WithConnection<IReadOnlyList<DifficultyProgressionResponse>>(async connection =>
+        {
+            const string sql =
+                "SELECT * FROM fn_analytics_difficulty(@UserId);";
+
+            var result = await connection.QueryAsync<DifficultyProgressionResponse>(
+                new CommandDefinition(
+                    sql,
+                    new { UserId = userId },
+                    cancellationToken: cancellationToken));
+
+            return result.ToList();
+        });
+    }
+
+    public Task<IReadOnlyList<DailyActivityResponse>> GetDailyActivityAsync(
+        Guid userId,
+        CancellationToken cancellationToken)
+    {
+        return WithConnection<IReadOnlyList<DailyActivityResponse>>(async connection =>
+        {
+            const string sql =
+                "SELECT * FROM fn_analytics_daily_activity(@UserId);";
+
+            var result = await connection.QueryAsync<DailyActivityResponse>(
+                new CommandDefinition(
+                    sql,
+                    new { UserId = userId },
+                    cancellationToken: cancellationToken));
+
+            return result.ToList();
+        });
     }
 }

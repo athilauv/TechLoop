@@ -76,7 +76,7 @@ const McqOptionForm = ({
                     Cancel
                 </Button>
 
-                <Button type="submit" disabled={submitting || !optionText.trim()}>
+                <Button type="submit" disabled={submitting || !optionText.trim()} className="inline-flex shrink-0 items-center gap-2 rounded-lg border border-[var(--cs-primary,#00C9A7)] bg-[var(--cs-primary,#00C9A7)] px-3.5 py-2 text-sm font-semibold text-[var(--cs-primary-contrast,#081423)] transition-colors hover:bg-[var(--cs-primary-hover,#00DDB9)]">
                     {submitting ? "Saving..." : option ? "Update Option" : "Add Option"}
                 </Button>
             </div>

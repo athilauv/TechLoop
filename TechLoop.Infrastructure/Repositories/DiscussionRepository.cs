@@ -1,4 +1,4 @@
-﻿using System.Data;
+using System.Data;
 using Dapper;
 using TechLoop.Application.Common.Pagination;
 using TechLoop.Application.Features.Discussions.DTOs;
@@ -22,11 +22,16 @@ public sealed class DiscussionRepository : IDiscussionRepository
         return await action(connection);
     }
 
+    private async Task WithConnection(Func<System.Data.IDbConnection, Task> action)
+    {
+        using var connection = _context.CreateConnection();
+        await action(connection);
+    }
+
     public Task<int> CreateAsync(Discussion discussion)
         => WithConnection(async connection =>
         {
-            return await connection.ExecuteScalarAsync<int>(
-                "SELECT fn_discussion_create(@UserId, @QuestionId, @Title, @Content, @CreatedBy)",
+            return await connection.ExecuteScalarAsync<int>("SELECT fn_discussion_create(@UserId, @QuestionId, @Title, @Content, @CreatedBy)",
                 new
                 {
                     discussion.UserId,
@@ -40,8 +45,7 @@ public sealed class DiscussionRepository : IDiscussionRepository
     public Task<bool> UpdateAsync(Discussion discussion)
         => WithConnection(async connection =>
         {
-            return await connection.ExecuteScalarAsync<bool>(
-                "SELECT fn_discussion_update(@Id, @Title, @Content, @UpdatedBy)",
+            return await connection.ExecuteScalarAsync<bool>("SELECT fn_discussion_update(@Id, @Title, @Content, @UpdatedBy)",
                 new
                 {
                     discussion.Id,
@@ -54,69 +58,54 @@ public sealed class DiscussionRepository : IDiscussionRepository
     public Task<bool> DeleteAsync(int id, Guid userId)
         => WithConnection(async connection =>
         {
-            return await connection.ExecuteScalarAsync<bool>(
-                "SELECT fn_discussion_delete(@Id, @UserId)",
-                new
-                {
-                    Id = id,
-                    UserId = userId
-                });
+            return await connection.ExecuteScalarAsync<bool>("SELECT fn_discussion_delete(@Id, @UserId)",
+                new { Id = id, UserId = userId });
         });
 
     public Task<bool> PinAsync(int id, bool isPinned, Guid updatedBy)
         => WithConnection(async connection =>
         {
-            return await connection.ExecuteScalarAsync<bool>(
-                "SELECT fn_discussion_pin(@Id, @IsPinned, @UpdatedBy)",
-                new
-                {
-                    Id = id,
-                    IsPinned = isPinned,
-                    UpdatedBy = updatedBy
-                });
+            return await connection.ExecuteScalarAsync<bool>("SELECT fn_discussion_pin(@Id, @IsPinned, @UpdatedBy)",
+                new { Id = id, IsPinned = isPinned, UpdatedBy = updatedBy });
         });
 
     public Task<DiscussionDto?> GetByIdAsync(int id)
         => WithConnection(async connection =>
         {
-            return await connection.QueryFirstOrDefaultAsync<DiscussionDto>(
-                "SELECT * FROM fn_discussion_get_by_id(@Id)",
+            return await connection.QueryFirstOrDefaultAsync<DiscussionDto>("SELECT * FROM fn_discussion_get_by_id(@Id)",
                 new { Id = id });
         });
 
-    public async Task<PagedResult<DiscussionDto>> GetAllAsync(int page, int pageSize, string? search, string? sort)
+    public Task<PagedResult<DiscussionDto>> GetAllAsync(int page, int pageSize, string? search, string? sort)
     {
-        using var connection = _context.CreateConnection();
-        var rows = (await connection.QueryAsync<DiscussionDto>(
-            "SELECT * FROM fn_discussion_get_all(@Page,@PageSize,@Search,@Sort)",
-            new { Page=page, PageSize=pageSize, Search=search, Sort=sort })).ToList();
-        return new PagedResult<DiscussionDto> { Items=rows, Page=page, PageSize=pageSize, TotalItems=rows.FirstOrDefault()?.TotalItems ?? 0 };
+    return WithConnection(async connection =>
+    {
+        
+            var rows = (await connection.QueryAsync<DiscussionDto>("SELECT * FROM fn_discussion_get_all(@Page,@PageSize,@Search,@Sort)",
+                new { Page=page, PageSize=pageSize, Search=search, Sort=sort })).ToList();
+            return new PagedResult<DiscussionDto> { Items=rows, Page=page, PageSize=pageSize, TotalItems=rows.FirstOrDefault()?.TotalItems ?? 0 };
+    
+    });
     }
 
     public Task<IEnumerable<DiscussionDto>> GetByQuestionIdAsync(int questionId)
         => WithConnection(async connection =>
         {
-            return await connection.QueryAsync<DiscussionDto>(
-                "SELECT * FROM fn_discussion_get_by_question(@QuestionId)",
-                new
-                {
-                    QuestionId = questionId
-                });
+            return await connection.QueryAsync<DiscussionDto>("SELECT * FROM fn_discussion_get_by_question(@QuestionId)",
+                new { QuestionId = questionId });
         });
 
     public Task<bool> ExistsAsync(int id)
         => WithConnection(async connection =>
         {
-            return await connection.ExecuteScalarAsync<bool>(
-                "SELECT fn_discussion_exists(@Id)",
+            return await connection.ExecuteScalarAsync<bool>("SELECT fn_discussion_exists(@Id)",
                 new { Id = id });
         });
     
     public Task<Discussion?> GetEntityByIdAsync(int id)
         => WithConnection(async connection =>
         {
-            return await connection.QueryFirstOrDefaultAsync<Discussion>(
-                "SELECT * FROM discussions WHERE id = @Id AND deleted_at IS NULL",
+            return await connection.QueryFirstOrDefaultAsync<Discussion>("SELECT * FROM discussions WHERE id = @Id AND deleted_at IS NULL",
                 new { Id = id });
         });
 }

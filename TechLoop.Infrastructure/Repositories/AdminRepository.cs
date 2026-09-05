@@ -21,6 +21,12 @@ public sealed class AdminRepository : IAdminRepository
         return await action(connection);
     }
 
+    private async Task WithConnection(Func<System.Data.IDbConnection, Task> action)
+    {
+        using var connection = _context.CreateConnection();
+        await action(connection);
+    }
+
     public Task<AdminDashboardResponse> GetDashboardAsync(CancellationToken cancellationToken)
     {
         const string sql = "SELECT * FROM fn_admin_dashboard();";
@@ -28,12 +34,16 @@ public sealed class AdminRepository : IAdminRepository
             new CommandDefinition(sql, cancellationToken: cancellationToken)));
     }
 
-    public async Task<PagedResult<AdminUserResponse>> GetUsersAsync(int page, int pageSize, string? search, string? status, string? sort, CancellationToken cancellationToken)
+    public Task<PagedResult<AdminUserResponse>> GetUsersAsync(int page, int pageSize, string? search, string? status, string? sort, CancellationToken cancellationToken)
     {
-        const string sql = "SELECT * FROM fn_admin_get_users(@Page,@PageSize,@Search,@Status,@Sort);";
-        using var connection = _context.CreateConnection();
-        var rows = (await connection.QueryAsync<AdminUserResponse>(new CommandDefinition(sql, new { Page=page, PageSize=pageSize, Search=search, Status=status, Sort=sort }, cancellationToken: cancellationToken))).ToList();
-        return new PagedResult<AdminUserResponse> { Items=rows, Page=page, PageSize=pageSize, TotalItems=rows.FirstOrDefault()?.TotalItems ?? 0 };
+    return WithConnection(async connection =>
+    {
+            const string sql = "SELECT * FROM fn_admin_get_users(@Page,@PageSize,@Search,@Status,@Sort);";
+        
+            var rows = (await connection.QueryAsync<AdminUserResponse>(new CommandDefinition(sql, new { Page=page, PageSize=pageSize, Search=search, Status=status, Sort=sort }, cancellationToken: cancellationToken))).ToList();
+            return new PagedResult<AdminUserResponse> { Items=rows, Page=page, PageSize=pageSize, TotalItems=rows.FirstOrDefault()?.TotalItems ?? 0 };
+    
+    });
     }
 
     public Task<bool> UpdateUserRoleAsync(Guid userId, int roleId, CancellationToken cancellationToken)

@@ -9,38 +9,62 @@ public sealed class LookupRepository : ILookupRepository
 {
     private readonly IDapperContext _context;
 
+    private async Task<T> WithConnection<T>(Func<System.Data.IDbConnection, Task<T>> action)
+    {
+        using var connection = _context.CreateConnection();
+        return await action(connection);
+    }
+
+    private async Task WithConnection(Func<System.Data.IDbConnection, Task> action)
+    {
+        using var connection = _context.CreateConnection();
+        await action(connection);
+    }
+
     public LookupRepository(IDapperContext context)
     {
         _context = context;
     }
 
-    public async Task<IEnumerable<LookupOptionResponse>> GetDifficultyLevelsAsync(
+    public Task<IEnumerable<LookupOptionResponse>> GetDifficultyLevelsAsync(
         CancellationToken cancellationToken)
     {
-        const string sql = "SELECT * FROM public.fn_get_difficulty_levels();";
-        using var connection = _context.CreateConnection();
+    return WithConnection(async connection =>
+    {
+            const string sql = "SELECT * FROM public.fn_get_difficulty_levels();";
+        
 
-        return await connection.QueryAsync<LookupOptionResponse>(
-            new CommandDefinition(sql, cancellationToken: cancellationToken));
+            return await connection.QueryAsync<LookupOptionResponse>(
+                new CommandDefinition(sql, cancellationToken: cancellationToken));
+    
+    });
     }
 
-    public async Task<IEnumerable<LookupOptionResponse>> GetQuestionTypesAsync(
+    public Task<IEnumerable<LookupOptionResponse>> GetQuestionTypesAsync(
         CancellationToken cancellationToken)
     {
-        const string sql = "SELECT * FROM public.fn_get_question_types();";
-        using var connection = _context.CreateConnection();
+    return WithConnection(async connection =>
+    {
+            const string sql = "SELECT * FROM public.fn_get_question_types();";
+        
 
-        return await connection.QueryAsync<LookupOptionResponse>(
-            new CommandDefinition(sql, cancellationToken: cancellationToken));
+            return await connection.QueryAsync<LookupOptionResponse>(
+                new CommandDefinition(sql, cancellationToken: cancellationToken));
+    
+    });
     }
 
-    public async Task<IEnumerable<LookupOptionResponse>> GetExampleTypesAsync(
+    public Task<IEnumerable<LookupOptionResponse>> GetExampleTypesAsync(
         CancellationToken cancellationToken)
     {
-        const string sql = "SELECT * FROM public.fn_get_example_types();";
-        using var connection = _context.CreateConnection();
+    return WithConnection(async connection =>
+    {
+            const string sql = "SELECT * FROM public.fn_get_example_types();";
+        
 
-        return await connection.QueryAsync<LookupOptionResponse>(
-            new CommandDefinition(sql, cancellationToken: cancellationToken));
+            return await connection.QueryAsync<LookupOptionResponse>(
+                new CommandDefinition(sql, cancellationToken: cancellationToken));
+    
+    });
     }
 }

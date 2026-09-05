@@ -9,28 +9,46 @@ public sealed class CurriculumRepository : ICurriculumRepository
 {
     private readonly IDapperContext _context;
 
-    public CurriculumRepository(IDapperContext context) => _context = context;
-    public async Task<MentorCurriculumResponse?> GetMentorCurriculumAsync(Guid userId, CancellationToken cancellationToken)
+    private async Task<T> WithConnection<T>(Func<System.Data.IDbConnection, Task<T>> action)
     {
         using var connection = _context.CreateConnection();
-        var rows = (await connection.QueryAsync<CurriculumRowResponse>(
-            new CommandDefinition("SELECT * FROM fn_get_mentor_curriculum(@UserId);",
-                new { UserId = userId }, cancellationToken: cancellationToken))).ToList();
-
-        return BuildMentorResponse(rows);
+        return await action(connection);
     }
 
-    public async Task<LearnerCurriculumResponse?> GetLearnerCurriculumAsync(
-        int technologyId,
-        CancellationToken cancellationToken)
+    private async Task WithConnection(Func<System.Data.IDbConnection, Task> action)
     {
         using var connection = _context.CreateConnection();
-        var rows = (await connection.QueryAsync<CurriculumRowResponse>(
-            new CommandDefinition("SELECT * FROM fn_get_learner_curriculum(@TechnologyId);",
-                new { TechnologyId = technologyId },
-                cancellationToken: cancellationToken))).ToList();
+        await action(connection);
+    }
 
-        return BuildLearnerResponse(rows);
+    public CurriculumRepository(IDapperContext context) => _context = context;
+    public Task<MentorCurriculumResponse?> GetMentorCurriculumAsync(Guid userId, CancellationToken cancellationToken)
+    {
+    return WithConnection(async connection =>
+    {
+        
+            var rows = (await connection.QueryAsync<CurriculumRowResponse>(
+                new CommandDefinition("SELECT * FROM fn_get_mentor_curriculum(@UserId);",
+                    new { UserId = userId }, cancellationToken: cancellationToken))).ToList();
+
+            return BuildMentorResponse(rows);
+    
+    });
+    }
+
+    public Task<LearnerCurriculumResponse?> GetLearnerCurriculumAsync(int technologyId, CancellationToken cancellationToken)
+    {
+    return WithConnection(async connection =>
+    {
+        
+            var rows = (await connection.QueryAsync<CurriculumRowResponse>(
+                new CommandDefinition("SELECT * FROM fn_get_learner_curriculum(@TechnologyId);",
+                    new { TechnologyId = technologyId },
+                    cancellationToken: cancellationToken))).ToList();
+
+            return BuildLearnerResponse(rows);
+    
+    });
     }
 
     private static MentorCurriculumResponse? BuildMentorResponse(IReadOnlyList<CurriculumRowResponse> rows)

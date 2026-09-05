@@ -1,4 +1,4 @@
-﻿using Dapper;
+using Dapper;
 using TechLoop.Application.Features.TopicContributions.DTOs;
 using TechLoop.Application.Interfaces.Infrastructure;
 using TechLoop.Application.Interfaces.Repositories;
@@ -9,27 +9,43 @@ public sealed class TopicContributionRepository : ITopicContributionRepository
 {
     private readonly IDapperContext _context;
 
+    private async Task<T> WithConnection<T>(Func<System.Data.IDbConnection, Task<T>> action)
+    {
+        using var connection = _context.CreateConnection();
+        return await action(connection);
+    }
+
+    private async Task WithConnection(Func<System.Data.IDbConnection, Task> action)
+    {
+        using var connection = _context.CreateConnection();
+        await action(connection);
+    }
+
     public TopicContributionRepository(IDapperContext context)
     {
         _context = context;
     }
 
     // Checks whether the specified technology exists
-    public async Task<bool> TechnologyExistsAsync(int technologyId, CancellationToken cancellationToken)
+    public Task<bool> TechnologyExistsAsync(int technologyId, CancellationToken cancellationToken)
     {
-        const string sql = @"SELECT fn_topic_contribution_technology_exists(@TechnologyId);";
-        using var connection = _context.CreateConnection();
-        return await connection.ExecuteScalarAsync<bool>(new CommandDefinition(
-                sql,
-                new
-                {
-                    TechnologyId = technologyId
-                },
-                cancellationToken: cancellationToken));
+    return WithConnection(async connection =>
+    {
+            const string sql = @"SELECT fn_topic_contribution_technology_exists(@TechnologyId);";
+        
+            return await connection.ExecuteScalarAsync<bool>(new CommandDefinition(
+                    sql,
+                    new
+                    {
+                        TechnologyId = technologyId
+                    },
+                    cancellationToken: cancellationToken));
+    
+    });
     }
 
     // Creates a new topic contribution
-    public async Task<int> CreateAsync(
+    public Task<int> CreateAsync(
         Guid learnerId,
         int technologyId,
         int? topicId,
@@ -41,62 +57,66 @@ public sealed class TopicContributionRepository : ITopicContributionRepository
         string? referenceUrl,
         CancellationToken cancellationToken)
     {
-        const string sql = @"CALL public.sp_manage_topic_contribution(
-            'CREATE',
-            NULL,
-            @LearnerId,
-            @TechnologyId,
-            @TopicId,
-            @SubTopicId,
-            @Title,
-            @Description,
-            @Example,
-            @ExampleType,
-            @ReferenceUrl,
-            NULL,
-            NULL,
-            NULL,
-            NULL,
-            NULL,
-            NULL,
-            NULL,
-            NULL,
-            0);";
+    return WithConnection(async connection =>
+    {
+            const string sql = @"CALL public.sp_manage_topic_contribution(
+                'CREATE',
+                NULL,
+                @LearnerId,
+                @TechnologyId,
+                @TopicId,
+                @SubTopicId,
+                @Title,
+                @Description,
+                @Example,
+                @ExampleType,
+                @ReferenceUrl,
+                NULL,
+                NULL,
+                NULL,
+                NULL,
+                NULL,
+                NULL,
+                NULL,
+                NULL,
+                0);";
 
-        using var connection = _context.CreateConnection();
+        
 
-        await connection.ExecuteAsync(
-            new CommandDefinition(
-                sql,
-                new
-                {
-                    LearnerId = learnerId,
-                    TechnologyId = technologyId,
-                    TopicId = topicId,
-                    SubTopicId = subTopicId,
-                    Title = title,
-                    Description = description,
-                    Example = example,
-                    ExampleType = exampleType,
-                    ReferenceUrl = referenceUrl
-                },
-                cancellationToken: cancellationToken));
+            await connection.ExecuteAsync(
+                new CommandDefinition(
+                    sql,
+                    new
+                    {
+                        LearnerId = learnerId,
+                        TechnologyId = technologyId,
+                        TopicId = topicId,
+                        SubTopicId = subTopicId,
+                        Title = title,
+                        Description = description,
+                        Example = example,
+                        ExampleType = exampleType,
+                        ReferenceUrl = referenceUrl
+                    },
+                    cancellationToken: cancellationToken));
 
-        return await connection.ExecuteScalarAsync<int>(
-            new CommandDefinition(
-                @"SELECT id
-                  FROM public.tobic_contributions
-                  WHERE created_by = @LearnerId
-                    AND technology_id = @TechnologyId
-                    AND title = @Title
-                  ORDER BY created_at DESC, id DESC
-                  LIMIT 1;",
-                new { LearnerId = learnerId, TechnologyId = technologyId, Title = title },
-                cancellationToken: cancellationToken));
+            return await connection.ExecuteScalarAsync<int>(
+                new CommandDefinition(
+                    @"SELECT id
+                      FROM public.tobic_contributions
+                      WHERE created_by = @LearnerId
+                        AND technology_id = @TechnologyId
+                        AND title = @Title
+                      ORDER BY created_at DESC, id DESC
+                      LIMIT 1;",
+                    new { LearnerId = learnerId, TechnologyId = technologyId, Title = title },
+                    cancellationToken: cancellationToken));
+    
+    });
     }
 
     // Reviews a contribution
-    public async Task<bool> ReviewAsync(
+    public Task<bool> ReviewAsync(
         int contributionId,
         short status,
         string? reviewNotes,
@@ -105,138 +125,166 @@ public sealed class TopicContributionRepository : ITopicContributionRepository
         Guid reviewedBy,
         CancellationToken cancellationToken)
     {
-        const string sql = @"
-            CALL public.sp_manage_topic_contribution(
-                'REVIEW',
-                @ContributionId,
-                NULL,
-                NULL,
-                NULL,
-                NULL,
-                NULL,
-                NULL,
-                NULL,
-                NULL,
-                NULL,
-                @Status,
-                @ReviewNotes,
-                @Position,
-                @ParentSubTopicId,
-                @ReviewedBy,
-                @ReviewedAt,
-                @ReviewedBy,
-                NULL,
-                0
-            );";
+    return WithConnection(async connection =>
+    {
+            const string sql = @"
+                CALL public.sp_manage_topic_contribution(
+                    'REVIEW',
+                    @ContributionId,
+                    NULL,
+                    NULL,
+                    NULL,
+                    NULL,
+                    NULL,
+                    NULL,
+                    NULL,
+                    NULL,
+                    NULL,
+                    @Status,
+                    @ReviewNotes,
+                    @Position,
+                    @ParentSubTopicId,
+                    @ReviewedBy,
+                    @ReviewedAt,
+                    @ReviewedBy,
+                    NULL,
+                    0
+                );";
 
-        using var connection = _context.CreateConnection();
+        
 
-        await connection.ExecuteAsync(
-            new CommandDefinition(
-                sql,
-                new
-                {
-                    ContributionId = contributionId,
-                    Status = status,
-                    ReviewNotes = reviewNotes,
-                    Position = position,
-                    ParentSubTopicId = parentSubTopicId,
-                    ReviewedBy = reviewedBy,
-                    ReviewedAt = DateTimeOffset.UtcNow
-                },
-                cancellationToken: cancellationToken));
+            await connection.ExecuteAsync(
+                new CommandDefinition(
+                    sql,
+                    new
+                    {
+                        ContributionId = contributionId,
+                        Status = status,
+                        ReviewNotes = reviewNotes,
+                        Position = position,
+                        ParentSubTopicId = parentSubTopicId,
+                        ReviewedBy = reviewedBy,
+                        ReviewedAt = DateTimeOffset.UtcNow
+                    },
+                    cancellationToken: cancellationToken));
 
-        return true;
+            return true;
+    
+    });
     }
 
     // Gets all contributions created by a learner
-    public async Task<IEnumerable<TopicContributionSummaryResponse>>
+    public Task<IEnumerable<TopicContributionSummaryResponse>>
         GetMyContributionsAsync( Guid learnerId, CancellationToken cancellationToken)
     {
-        const string sql = @"SELECT * FROM fn_get_my_topic_contributions(@LearnerId);";
-        using var connection = _context.CreateConnection();
-        return await connection.QueryAsync<TopicContributionSummaryResponse>(
-            new CommandDefinition(
-                sql,
-                new
-                {
-                    LearnerId = learnerId
-                },
-                cancellationToken: cancellationToken));
+    return WithConnection(async connection =>
+    {
+            const string sql = @"SELECT * FROM fn_get_my_topic_contributions(@LearnerId);";
+        
+            return await connection.QueryAsync<TopicContributionSummaryResponse>(
+                new CommandDefinition(
+                    sql,
+                    new
+                    {
+                        LearnerId = learnerId
+                    },
+                    cancellationToken: cancellationToken));
+    
+    });
     }
 
     // Gets contributions for a technology
-    public async Task<IEnumerable<TopicContributionResponse>> GetTechnologyContributionsAsync(int technologyId, CancellationToken cancellationToken)
+    public Task<IEnumerable<TopicContributionResponse>> GetTechnologyContributionsAsync(int technologyId, CancellationToken cancellationToken)
     {
-        const string sql = @"SELECT * FROM fn_get_technology_topic_contributions(@TechnologyId);";
-        using var connection = _context.CreateConnection();
-        return await connection.QueryAsync<TopicContributionResponse>(new CommandDefinition(
-                sql,
-                new
-                {
-                    TechnologyId = technologyId
-                },
-                cancellationToken: cancellationToken));
+    return WithConnection(async connection =>
+    {
+            const string sql = @"SELECT * FROM fn_get_technology_topic_contributions(@TechnologyId);";
+        
+            return await connection.QueryAsync<TopicContributionResponse>(new CommandDefinition(
+                    sql,
+                    new
+                    {
+                        TechnologyId = technologyId
+                    },
+                    cancellationToken: cancellationToken));
+    
+    });
     }
 
     // Gets a contribution by ID
-    public async Task<TopicContributionResponse?> GetByIdAsync(int contributionId, CancellationToken cancellationToken)
+    public Task<TopicContributionResponse?> GetByIdAsync(int contributionId, CancellationToken cancellationToken)
     {
-        const string sql = @"SELECT * FROM fn_get_topic_contribution_by_id(@ContributionId);";
-        using var connection = _context.CreateConnection();
-        return await connection.QuerySingleOrDefaultAsync<TopicContributionResponse>(
-            new CommandDefinition(
-                sql,
-                new
-                {
-                    ContributionId = contributionId
-                },
-                cancellationToken: cancellationToken));
+    return WithConnection(async connection =>
+    {
+            const string sql = @"SELECT * FROM fn_get_topic_contribution_by_id(@ContributionId);";
+        
+            return await connection.QuerySingleOrDefaultAsync<TopicContributionResponse>(
+                new CommandDefinition(
+                    sql,
+                    new
+                    {
+                        ContributionId = contributionId
+                    },
+                    cancellationToken: cancellationToken));
+    
+    });
     }
 
     // Retrieves a contribution created by the specified learner
-    public async Task<TopicContributionResponse?> GetMyContributionByIdAsync(Guid learnerId, int contributionId, CancellationToken cancellationToken)
+    public Task<TopicContributionResponse?> GetMyContributionByIdAsync(Guid learnerId, int contributionId, CancellationToken cancellationToken)
     {
-        const string sql = @"SELECT * FROM fn_get_my_topic_contribution_by_id(@LearnerId, @ContributionId);";
-        using var connection = _context.CreateConnection();
-        return await connection.QuerySingleOrDefaultAsync<TopicContributionResponse>(
-            new CommandDefinition(
-                sql,
-                new
-                {
-                    LearnerId = learnerId,
-                    ContributionId = contributionId
-                },
-                cancellationToken: cancellationToken));
+    return WithConnection(async connection =>
+    {
+            const string sql = @"SELECT * FROM fn_get_my_topic_contribution_by_id(@LearnerId, @ContributionId);";
+        
+            return await connection.QuerySingleOrDefaultAsync<TopicContributionResponse>(
+                new CommandDefinition(
+                    sql,
+                    new
+                    {
+                        LearnerId = learnerId,
+                        ContributionId = contributionId
+                    },
+                    cancellationToken: cancellationToken));
+    
+    });
     }
 
-    public async Task<IEnumerable<TopicContributionPendingResponse>> GetPendingContributionsAsync(Guid mentorId, CancellationToken cancellationToken)
+    public Task<IEnumerable<TopicContributionPendingResponse>> GetPendingContributionsAsync(Guid mentorId, CancellationToken cancellationToken)
     {
-        const string sql = @"SELECT * FROM fn_get_pending_topic_contributions(@MentorId);";
-        using var connection = _context.CreateConnection();
-        return await connection.QueryAsync<TopicContributionPendingResponse>(new CommandDefinition(
-                sql,
-                new
-                {
-                    MentorId = mentorId
-                },
-                cancellationToken: cancellationToken));
+    return WithConnection(async connection =>
+    {
+            const string sql = @"SELECT * FROM fn_get_pending_topic_contributions(@MentorId);";
+        
+            return await connection.QueryAsync<TopicContributionPendingResponse>(new CommandDefinition(
+                    sql,
+                    new
+                    {
+                        MentorId = mentorId
+                    },
+                    cancellationToken: cancellationToken));
+    
+    });
     }
 
     // Gets a contribution for a mentor by ID.
     // All SQL/data shaping is kept inside the PostgreSQL function.
-    public async Task<TopicContributionResponse?>
+    public Task<TopicContributionResponse?>
         GetMentorContributionByIdAsync(Guid mentorId, int contributionId, CancellationToken cancellationToken)
     {
-        const string sql = @"SELECT * FROM fn_get_mentor_topic_contribution_by_id( @MentorId, @ContributionId);";
-        using var connection = _context.CreateConnection();
-        return await connection.QuerySingleOrDefaultAsync<TopicContributionResponse>(new CommandDefinition(
-                sql,
-                new
-                {
-                    MentorId = mentorId,
-                    ContributionId = contributionId
-                },
-                cancellationToken: cancellationToken));
+    return WithConnection(async connection =>
+    {
+            const string sql = @"SELECT * FROM fn_get_mentor_topic_contribution_by_id( @MentorId, @ContributionId);";
+        
+            return await connection.QuerySingleOrDefaultAsync<TopicContributionResponse>(new CommandDefinition(
+                    sql,
+                    new
+                    {
+                        MentorId = mentorId,
+                        ContributionId = contributionId
+                    },
+                    cancellationToken: cancellationToken));
+    
+    });
     }
 }

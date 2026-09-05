@@ -653,13 +653,11 @@ const CodingQuestionDetailsPage = () => {
                                             onToggle={() => void handleTogglePin(discussion,)}
                                         />
                                     )}
-                                    renderContextSlot={(
-                                        discussion,
-                                    ) => (
-                                        <span className="text-[var(--cs-text-muted)]">
-                                        Question #{discussion.questionId}
-                                    </span>
-                                    )}
+                                    // renderContextSlot={(discussion) => (
+                                    //     <span className="text-[var(--cs-text-muted)]">
+                                    //     Question #{discussion.questionId}
+                                    // </span>
+                                    // )}
                                     emptyTitle="No discussions"
                                     emptyDescription="There are no discussions for this coding question yet."
                                 />
