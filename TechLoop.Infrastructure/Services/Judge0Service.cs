@@ -24,8 +24,7 @@ public sealed class Judge0Service : IJudge0Service
     }
 
     public async Task<Judge0SubmissionResponse?> SubmitAsync(
-        Judge0SubmissionRequest request,
-        CancellationToken cancellationToken = default)
+        Judge0SubmissionRequest request, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(request);
 
@@ -47,75 +46,46 @@ public sealed class Judge0Service : IJudge0Service
 
         var json = JsonSerializer.Serialize(payload, JsonOptions);
 
-        using var httpRequest = new HttpRequestMessage(
-            HttpMethod.Post,
+        using var httpRequest = new HttpRequestMessage(HttpMethod.Post,
             "submissions?base64_encoded=false&wait=false");
 
-        httpRequest.Content = new StringContent(
-            json,
-            Encoding.UTF8,
-            "application/json");
+        httpRequest.Content = new StringContent(json, Encoding.UTF8, "application/json");
+        httpRequest.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
 
-        httpRequest.Headers.Accept.Add(
-            new MediaTypeWithQualityHeaderValue("application/json"));
+        using var response = await _httpClient.SendAsync(httpRequest, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
 
-        using var response = await _httpClient.SendAsync(
-            httpRequest,
-            HttpCompletionOption.ResponseHeadersRead,
-            cancellationToken);
-
-        var responseBody = await response.Content.ReadAsStringAsync(
-            cancellationToken);
-
+        var responseBody = await response.Content.ReadAsStringAsync(cancellationToken);
         if (!response.IsSuccessStatusCode)
         {
-            throw new Judge0Exception(
-                $"Judge0 submission failed ({(int)response.StatusCode}). {responseBody}");
+            throw new Judge0Exception($"Judge0 submission failed ({(int)response.StatusCode}). {responseBody}");
         }
 
-        var result = JsonSerializer.Deserialize<Judge0SubmissionResponse>(
-            responseBody,
-            JsonOptions);
+        var result = JsonSerializer.Deserialize<Judge0SubmissionResponse>(responseBody, JsonOptions);
 
         if (result is null || string.IsNullOrWhiteSpace(result.Token))
-            throw new Judge0Exception(
-                "Judge0 returned an invalid submission response.");
+            throw new Judge0Exception("Judge0 returned an invalid submission response.");
 
         return result;
     }
 
-    public async Task<Judge0ResultResponse?> GetResultAsync(
-        string token,
-        CancellationToken cancellationToken = default)
+    public async Task<Judge0ResultResponse?> GetResultAsync(string token, CancellationToken cancellationToken = default)
     {
         if (string.IsNullOrWhiteSpace(token))
             throw new Judge0Exception("Judge0 submission token is required.");
 
-        using var response = await _httpClient.GetAsync(
-            $"submissions/{Uri.EscapeDataString(token)}?base64_encoded=false",
-            cancellationToken);
-
+        using var response = await _httpClient.GetAsync($"submissions/{Uri.EscapeDataString(token)}?base64_encoded=false", cancellationToken);
         if (!response.IsSuccessStatusCode)
         {
-            var error = await response.Content.ReadAsStringAsync(
-                cancellationToken);
-
-            throw new Judge0Exception(
-                $"Judge0 result retrieval failed ({(int)response.StatusCode}). {error}");
+            var error = await response.Content.ReadAsStringAsync(cancellationToken);
+            throw new Judge0Exception($"Judge0 result retrieval failed ({(int)response.StatusCode}). {error}");
         }
 
-        var responseBody = await response.Content.ReadAsStringAsync(
-            cancellationToken);
-
-        return JsonSerializer.Deserialize<Judge0ResultResponse>(
-            responseBody,
-            JsonOptions);
+        var responseBody = await response.Content.ReadAsStringAsync(cancellationToken);
+        return JsonSerializer.Deserialize<Judge0ResultResponse>(responseBody, JsonOptions);
     }
 
     public async Task<Judge0ResultResponse> WaitForResultAsync(
-        string token,
-        TimeSpan? timeout = null,
-        CancellationToken cancellationToken = default)
+        string token, TimeSpan? timeout = null, CancellationToken cancellationToken = default)
     {
         var maxWait = timeout ?? TimeSpan.FromSeconds(60);
         var startedAt = DateTime.UtcNow;
@@ -125,17 +95,13 @@ public sealed class Judge0Service : IJudge0Service
             cancellationToken.ThrowIfCancellationRequested();
 
             var result = await GetResultAsync(token, cancellationToken);
-
             if (result is not null && result.Status.Id > 2)
                 return result;
 
-            await Task.Delay(
-                TimeSpan.FromMilliseconds(300),
-                cancellationToken);
+            await Task.Delay(TimeSpan.FromMilliseconds(300), cancellationToken);
         }
 
-        throw new Judge0Exception(
-            $"Judge0 execution timed out while waiting for token '{token}'.");
+        throw new Judge0Exception($"Judge0 execution timed out while waiting for token '{token}'.");
     }
 
     private sealed class Judge0CreateSubmissionPayload

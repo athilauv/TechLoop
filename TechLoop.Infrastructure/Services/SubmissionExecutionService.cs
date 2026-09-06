@@ -140,19 +140,12 @@ public sealed class SubmissionExecutionService : ISubmissionExecutionService
                  .Replace("\r", "\n")
                  .Trim();
 
-        return string.Equals(
-            Normalize(actual ?? string.Empty),
-            Normalize(expected ?? string.Empty),
-            StringComparison.Ordinal);
+        return string.Equals(Normalize(actual ?? string.Empty), Normalize(expected ?? string.Empty), StringComparison.Ordinal);
     }
 
     private static int? ConvertTimeToMilliseconds(string? seconds)
     {
-        if (!decimal.TryParse(
-                seconds,
-                NumberStyles.Number,
-                CultureInfo.InvariantCulture,
-                out var value))
+        if (!decimal.TryParse(seconds, NumberStyles.Number, CultureInfo.InvariantCulture, out var value))
         {
             return null;
         }

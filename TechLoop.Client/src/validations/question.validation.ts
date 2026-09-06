@@ -15,14 +15,9 @@ export interface QuestionValidationData {
     shiftPositions: boolean;
 }
 
-export const validateQuestion = (
-    data: QuestionValidationData,
-    isUpdate = false,
-): string | null => {
+export const validateQuestion = (data: QuestionValidationData, isUpdate = false): string | null => {
     if (data.subTopicId <= 0) {
-        return isUpdate
-            ? "SubTopicId cannot be empty"
-            : "Sub topic is required.";
+        return isUpdate ? "SubTopicId cannot be empty" : "Sub topic is required.";
     }
 
     if (!Object.values(QuestionType).includes(data.questionType)) {
@@ -30,37 +25,25 @@ export const validateQuestion = (
     }
 
     const title = data.title.trim();
-
     if (!title) {
-        return isUpdate
-            ? "Title cannot be empty"
-            : "Title is required.";
+        return isUpdate ? "Title cannot be empty" : "Title is required.";
     }
 
     if (title.length > 200) {
-        return isUpdate
-            ? "Title cannot exceed 200 characters"
-            : "Title cannot exceed 200 characters";
+        return "Title cannot exceed 200 characters";
     }
 
     const slug = data.slug.trim();
-
     if (!slug) {
-        return isUpdate
-            ? "Slug cannot be empty"
-            : "Slug is required.";
+        return isUpdate ? "Slug cannot be empty" : "Slug is required.";
     }
 
     if (slug.length > 200) {
-        return isUpdate
-            ? "Slug cannot exceed 200 characters"
-            : "Slug cannot exceed 200 characters";
+        return "Slug cannot exceed 200 characters";
     }
 
     if (!data.description.trim()) {
-        return isUpdate
-            ? "Description cannot be empty"
-            : "Description is required.";
+        return isUpdate ? "Description cannot be empty" : "Description is required.";
     }
 
     if (isUpdate) {
@@ -72,9 +55,7 @@ export const validateQuestion = (
     }
 
     if (data.position <= 0) {
-        return isUpdate
-            ? "Position must be greater than 0"
-            : "Position must be greater than 0";
+        return "Position must be greater than 0";
     }
 
     if (!Object.values(DifficultyLevel).includes(data.difficulty)) {
@@ -82,44 +63,21 @@ export const validateQuestion = (
     }
 
     if (isUpdate) {
-        if (
-            data.timeLimitSeconds !== null &&
-            data.timeLimitSeconds !== undefined &&
-            data.timeLimitSeconds < 0
-        ) {
+        if (data.timeLimitSeconds !== null && data.timeLimitSeconds !== undefined && data.timeLimitSeconds < 0) {
             return "TimeLimitSeconds must be greater than or equal 0";
         }
 
-        if (
-            data.memoryLimitMb !== null &&
-            data.memoryLimitMb !== undefined &&
-            data.memoryLimitMb < 0
-        ) {
+        if (data.memoryLimitMb !== null && data.memoryLimitMb !== undefined && data.memoryLimitMb < 0) {
             return "MemoryLimitMb must be greater than or equal 0";
-        }
-
-        if (
-            data.memoryLimitMb === null ||
-            data.memoryLimitMb === undefined
-        ) {
-            return "MemoryLimitMb cannot be empty";
         }
     }
 
     if (data.questionType === QuestionType.Coding) {
-        if (
-            data.timeLimitSeconds === null ||
-            data.timeLimitSeconds === undefined ||
-            data.timeLimitSeconds <= 0
-        ) {
+        if (data.timeLimitSeconds === null || data.timeLimitSeconds === undefined || data.timeLimitSeconds <= 0) {
             return "Time limit is required for coding questions.";
         }
 
-        if (
-            data.memoryLimitMb === null ||
-            data.memoryLimitMb === undefined ||
-            data.memoryLimitMb <= 0
-        ) {
+        if (data.memoryLimitMb === null || data.memoryLimitMb === undefined || data.memoryLimitMb <= 0) {
             return "Memory limit is required for coding questions.";
         }
     }

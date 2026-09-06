@@ -97,12 +97,17 @@ public sealed class UserRepository : IUserRepository
 
     public Task UpdatePasswordAsync(Guid userId, string passwordHash, DateTime updatedAt)
     {
-    return WithConnection(async connection =>
-    {
+        return WithConnection(async connection =>
+        {
             await connection.ExecuteAsync(@"CALL public.sp_manage_user(
-                    'UPDATE_PASSWORD', @Id, NULL, NULL, @PasswordHash, NULL, NULL, NULL, NULL, @UpdatedAt, FALSE);",
-                new { Id = userId, PasswordHash = passwordHash, UpdatedAt = updatedAt });
-    
-    });
+                'UPDATE_PASSWORD', @Id, NULL, NULL, @PasswordHash, NULL,
+                NULL, NULL, NULL, NULL, @UpdatedAt, FALSE);",
+                new
+                {
+                    Id = userId,
+                    PasswordHash = passwordHash,
+                    UpdatedAt = updatedAt
+                });
+        });
     }
 }

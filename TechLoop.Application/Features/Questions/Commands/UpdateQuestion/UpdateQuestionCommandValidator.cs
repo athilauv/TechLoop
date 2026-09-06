@@ -1,4 +1,5 @@
 ﻿using FluentValidation;
+using TechLoop.Domain.Enums;
 
 namespace TechLoop.Application.Features.Questions.Commands.UpdateQuestion;
 
@@ -34,19 +35,21 @@ public sealed class UpdateQuestionCommandValidator : AbstractValidator<UpdateQue
             .GreaterThanOrEqualTo(0)
             .WithMessage("Mark must be greater than or equal 0");
 
+        // Time limit is required only for coding questions
         RuleFor(x => x.TimeLimitSeconds)
-            .GreaterThanOrEqualTo(0)
-            .WithMessage("TimeLimitSeconds must be greater than or equal 0");
+            .GreaterThan(0)
+            .WithMessage("Time limit is required for coding questions.")
+            .When(x => x.QuestionType == QuestionType.coding);
 
+        // Memory limit is required only for coding questions
         RuleFor(x => x.MemoryLimitMb)
-            .GreaterThanOrEqualTo(0)
-            .WithMessage("MemoryLimitMb must be greater than or equal 0")
-            .NotEmpty()
-            .WithMessage("MemoryLimitMb cannot be empty");
+            .GreaterThan(0)
+            .WithMessage("Memory limit is required for coding questions.")
+            .When(x => x.QuestionType == QuestionType.coding);
 
         RuleFor(x => x.Position)
             .GreaterThan(0)
-            .WithMessage("Position must be greater than or equal 0")
+            .WithMessage("Position must be greater than or equal to 0")
             .NotEmpty()
             .WithMessage("Position cannot be empty");
 

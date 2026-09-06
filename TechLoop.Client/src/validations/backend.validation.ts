@@ -51,48 +51,35 @@ const validatePassword = (value: unknown, field: string): string | null => {
     const password = text(value);
 
     return first(isEmpty(password) ? `${field} is required.` : null,
-        password.length < 8
-            ? `${field} must be at least 8 characters.` : null,
-        !/[A-Z]/.test(password)
-            ? `${field} must contain an uppercase letter.` : null,
-        !/[a-z]/.test(password)
-            ? `${field} must contain a lowercase letter.` : null,
-        !/[0-9]/.test(password)
-            ? `${field} must contain a digit.` : null,
-        !/[^a-zA-Z0-9]/.test(password)
-            ? `${field} must contain a special character.` : null,
+        password.length < 8 ? `${field} must be at least 8 characters.` : null,
+        !/[A-Z]/.test(password) ? `${field} must contain an uppercase letter.` : null,
+        !/[a-z]/.test(password) ? `${field} must contain a lowercase letter.` : null,
+        !/[0-9]/.test(password) ? `${field} must contain a digit.` : null,
+        !/[^a-zA-Z0-9]/.test(password) ? `${field} must contain a special character.` : null,
     );
 };
 
 function validateMentorCreate(data: AnyRecord): string | null {
     return first(
         requireText(data.name, "Username is required."),
-        !isEmpty(data.name) && !max(data.name, 100)
-            ? "Username must not exceed 100 characters." : null,
+        !isEmpty(data.name) && !max(data.name, 100) ? "Username must not exceed 100 characters." : null,
         requireText(data.email, "Email is required."),
-        !isEmpty(data.email) && data.email !== text(data.email).trim()
-            ? "Email cannot contain leading or trailing spaces." : null,
-        !isEmpty(data.email) && !isEmail(text(data.email))
-            ? "Please enter a valid email address." : null,
-        !isEmpty(data.email) && !isMentorEmail(text(data.email))
-            ? "Invalid email format." : null,
+        !isEmpty(data.email) && data.email !== text(data.email).trim() ? "Email cannot contain leading or trailing spaces." : null,
+        !isEmpty(data.email) && !isEmail(text(data.email)) ? "Please enter a valid email address." : null,
+        !isEmpty(data.email) && !isMentorEmail(text(data.email)) ? "Invalid email format." : null,
         requirePositive(data.technologyId, "Technology is required."),
     );
 }
 
-function validateTechnology(data: AnyRecord): string | null {
+function validateTechnology(data: AnyRecord, update = false): string | null {
     return first(
-        requirePositive(data.categoryId, "Category is required."),
+        !update ? requirePositive(data.categoryId, "Category is required.") : null,
         requireText(data.name, "Name is required."),
-        !max(data.name, 500)
-            ? "Name must not exceed 500 characters." : null,
+        !max(data.name, 500) ? "Name must not exceed 500 characters." : null,
         requireText(data.description, "Description is required."),
-        !max(data.description, 100000)
-            ? "Description must not exceed 100000 characters." : null,
-        !max(data.imageUrl, 500)
-            ? "Image URL must not exceed 500 characters." : null,
-        !isPositive(data.position)
-            ? "Position is required and must be greater than or equal to 0." : null,
+        !max(data.description, 100000) ? "Description must not exceed 100000 characters." : null,
+        !max(data.imageUrl, 500) ? "Image URL must not exceed 500 characters." : null,
+        !isPositive(data.position) ? "Position is required and must be greater than or equal to 0." : null,
     );
 }
 
@@ -106,35 +93,28 @@ function validateCategory(data: AnyRecord, update = false): string | null {
     );
 }
 
-function validateTopic(data: AnyRecord): string | null {
+function validateTopic(data: AnyRecord, update = false): string | null {
     return first(
-        requirePositive(data.technologyId, "Technology is required."),
+        !update ? requirePositive(data.technologyId, "Technology is required.") : null,
         requireText(data.title, "Title is required."),
-        !max(data.title, 100)
-            ? "Title must not exceed 100 characters." : null,
+        !max(data.title, 100) ? "Title must not exceed 100 characters." : null,
         requireText(data.slug, "Slug is required."),
-        !max(data.slug, 150)
-            ? "Slug must not exceed 150 characters." : null,
+        !max(data.slug, 150) ? "Slug must not exceed 150 characters." : null,
         requireText(data.description, "Description is required."),
-        !max(data.imageUrl, 255)
-            ? "Image URL must not exceed 255 characters." : null,
-        !isNonNegative(data.position)
-            ? "Position must be greater than or equal to 0." : null,
+        !max(data.imageUrl, 255) ? "Image URL must not exceed 255 characters." : null,
+        !isNonNegative(data.position) ? "Position must be greater than or equal to 0." : null,
     );
 }
 
 function validateSubTopic(data: AnyRecord, update = false): string | null {
     return first(
-        requirePositive(data.topicId, "Topic Id is required."),
+        !update ? requirePositive(data.topicId, "Topic Id is required.") : null,
         requireText(data.title, "Title is required."),
-        !max(data.title, update ? 200 : 500)
-            ? `Title must not exceed ${update ? 200 : 500} characters.` : null,
+        !max(data.title, update ? 200 : 500) ? `Title must not exceed ${update ? 200 : 500} characters.` : null,
         requireText(data.slug, "Slug is required."),
         requireText(data.description, "Description is required."),
-        !max(data.imageUrl, 500)
-            ? "Image URL must not exceed 500 characters." : null,
-        !isPositive(data.position)
-            ? "Position must be greater than 0." : null,
+        !max(data.imageUrl, 500) ? "Image URL must not exceed 500 characters." : null,
+        !isPositive(data.position) ? "Position must be greater than 0." : null,
     );
 }
 
@@ -142,58 +122,41 @@ function validateQuestion(data: AnyRecord, update = false): string | null {
     const type = Number(data.questionType);
     const difficulty = Number(data.difficulty);
 
-    return first(requirePositive(data.subTopicId, "Sub topic is required."),
-        ![1, 2, 3].includes(type)
-            ? "Question type is invalid." : null,
+    return first(
+        !update ? requirePositive(data.subTopicId, "Sub topic is required.") : null,
+        ![1, 2, 3].includes(type) ? "Question type is invalid." : null,
         requireText(data.title, update ? "Title cannot be empty" : "Title is required.",),
-        !max(data.title, 200)
-            ? "Title cannot exceed 200 characters" : null,
+        !max(data.title, 200) ? "Title cannot exceed 200 characters" : null,
         requireText(data.slug, update ? "Slug cannot be empty" : "Slug is required.",),
-        !max(data.slug, 200)
-            ? "Slug cannot exceed 200 characters" : null,
+        !max(data.slug, 200) ? "Slug cannot exceed 200 characters" : null,
         requireText(data.description, update ? "Description cannot be empty" : "Description is required.",),
-        update ? !isNonNegative(data.mark)
-                ? "Mark must be greater than or equal 0" : null
-            : !isPositive(data.mark)
-                ? "Mark must be greater than 0." : null,
-        !isPositive(data.position)
-            ? "Position must be greater than 0" : null,
-        ![1, 2, 3, 4, 5].includes(difficulty)
-            ? "Difficulty is invalid." : null,
-        update &&
-        data.timeLimitSeconds != null &&
-        !isNonNegative(data.timeLimitSeconds)
-            ? "TimeLimitSeconds must be greater than or equal 0" : null,
-        update &&
-        data.memoryLimitMb != null &&
-        !isNonNegative(data.memoryLimitMb)
-            ? "MemoryLimitMb must be greater than or equal 0" : null,
-        update && data.memoryLimitMb == null
-            ? "MemoryLimitMb cannot be empty" : null,
-        type === 2 && !isPositive(data.timeLimitSeconds)
-            ? "Time limit is required for coding questions." : null,
-        type === 2 && !isPositive(data.memoryLimitMb)
-            ? "Memory limit is required for coding questions." : null,
+        update ? !isNonNegative(data.mark) ? "Mark must be greater than or equal 0" : null
+            : !isPositive(data.mark) ? "Mark must be greater than 0." : null,
+        !isPositive(data.position) ? "Position must be greater than 0" : null,
+        ![1, 2, 3, 4, 5].includes(difficulty) ? "Difficulty is invalid." : null,
+        // Coding question only
+        type === 2 && data.timeLimitSeconds != null && !isNonNegative(data.timeLimitSeconds) ? "TimeLimitSeconds must be greater than or equal 0" : null,
+        type === 2 && data.memoryLimitMb != null && !isNonNegative(data.memoryLimitMb) ? "MemoryLimitMb must be greater than or equal 0" : null,
+        // Coding question only
+        type === 2 && !isPositive(data.timeLimitSeconds) ? "Time limit is required for coding questions." : null,
+        type === 2 && !isPositive(data.memoryLimitMb) ? "Memory limit is required for coding questions." : null,
     );
 }
 
 function validateCodingTemplate(data: AnyRecord, update = false): string | null {
     return first(
-        update && !isPositive(data.id)
-            ? "Coding template id is required." : null,
-        requirePositive(data.questionId, "Question is required."),
-        requirePositive(data.technologyId, "Technology is required."),
+        update && !isPositive(data.id) ? "Coding template id is required." : null,
+        !update && !isPositive(data.questionId) ? "Question is required." : null,
+        !update && !isPositive(data.technologyId) ? "Technology is required." : null,
         requireText(data.starterCode, "Starter code is required."),
-        !max(data.starterCode, 50000)
-            ? "Starter code cannot exceed 50000 characters." : null,
-        !max(data.solutionCode, 50000)
-            ? "Solution code cannot exceed 50000 characters." : null,
+        !max(data.starterCode, 50000) ? "Starter code cannot exceed 50000 characters." : null,
+        !max(data.solutionCode, 50000) ? "Solution code cannot exceed 50000 characters." : null,
     );
 }
 
 function validateTestCase(data: AnyRecord, update = false): string | null {
-    return first(update && !isPositive(data.id)
-            ? "Test case id is required." : null,
+    return first(
+        update && !isPositive(data.id) ? "Test case id is required." : null,
         !update ? requirePositive(data.questionId, "Question is required.") : null,
         !update && data.input == null ? "Input is required." : null,
         !update && data.expectedOutput == null ? "Expected output is required." : null,
@@ -204,39 +167,32 @@ function validateTestCase(data: AnyRecord, update = false): string | null {
 }
 
 function validateMcqOption(data: AnyRecord, update = false): string | null {
-    return first(!update ? requirePositive(data.questionId, "Question is required.") : null,
+    return first(
+        !update ? requirePositive(data.questionId, "Question is required.") : null,
         requireText(data.optionText, "OptionText cannot be empty."),
-        !max(data.optionText, 500)
-            ? "OptionText cannot exceed 500 characters." : null,
-        !isPositive(data.position)
-            ? "Position must be greater than 0." : null,
+        !max(data.optionText, 500) ? "OptionText cannot exceed 500 characters." : null,
+        !isPositive(data.position) ? "Position must be greater than 0." : null,
     );
 }
 
 function validateDiscussion(data: AnyRecord, update = false): string | null {
     return first(
         !update ? requirePositive(data.questionId, "Question is required.") : null,
-        update && !isPositive(data.id)
-            ? "Invalid discussion id." : null,
+        update && !isPositive(data.id) ? "Invalid discussion id." : null,
         requireText(data.title, "Title is required."),
-        !max(data.title, 200)
-            ? "Title must not exceed 200 characters." : null,
+        !max(data.title, 200) ? "Title must not exceed 200 characters." : null,
         requireText(data.content, "Content is required."),
-        !update && !max(data.content, 5000)
-            ? "Content must not exceed 5000 characters." : null,
+        !update && !max(data.content, 5000) ? "Content must not exceed 5000 characters." : null,
     );
 }
 
 function validateComment(data: AnyRecord, update = false): string | null {
     return first(!update ? requirePositive(data.postId ?? data.discussionId,
                 "Post/Discussion id is required.") : null,
-        update && !isPositive(data.id)
-            ? "Invalid comment." : null,
+        update && !isPositive(data.id) ? "Invalid comment." : null,
         requireText(data.content, "Content is required."),
-        !max(data.content, update ? 2000 : 1000)
-            ? `Content must not exceed ${update ? 2000 : 1000} characters.` : null,
-        data.parentCommentId != null && !isPositive(data.parentCommentId)
-            ? "ParentCommentId must be greater than 0." : null,
+        !max(data.content, update ? 2000 : 1000) ? `Content must not exceed ${update ? 2000 : 1000} characters.` : null,
+        data.parentCommentId != null && !isPositive(data.parentCommentId) ? "ParentCommentId must be greater than 0." : null,
     );
 }
 
@@ -245,8 +201,7 @@ function validateCommunityPost(data: AnyRecord): string | null {
         requireText(data.title, "Title is required."),
         !max(data.title, 200) ? "Title must not exceed 200 characters." : null,
         requireText(data.content, "Content is required."),
-        data.technologyId != null && !isPositive(data.technologyId)
-            ? "Technology ID must be greater than 0" : null,
+        data.technologyId != null && !isPositive(data.technologyId) ? "Technology ID must be greater than 0" : null,
     );
 }
 
@@ -264,8 +219,7 @@ function validateAuth(path: string, data: AnyRecord): string | null {
     if (path.endsWith("/login")) {
         return first(
             requireText(data.email, "Email is required."),
-            !isEmpty(data.email) &&
-            !isEmail(text(data.email)) ? "Please enter a valid email address." : null,
+            !isEmpty(data.email) && !isEmail(text(data.email)) ? "Please enter a valid email address." : null,
             requireText(data.password, "Password is required."),
         );
     }
@@ -286,8 +240,7 @@ function validateAuth(path: string, data: AnyRecord): string | null {
             requireText(data.currentPassword, "CurrentPassword is required.",),
             validatePassword(data.newPassword, "NewPassword"),
             requireText(data.confirmPassword, "ConfirmPassword is required.",),
-            data.confirmPassword !== data.newPassword
-                ? "Password and Confirm Password do not match." : null,
+            data.confirmPassword !== data.newPassword ? "Password and Confirm Password do not match." : null,
         );
     }
 
@@ -322,41 +275,28 @@ function validateAuth(path: string, data: AnyRecord): string | null {
 }
 
 function validateProfile(data: AnyRecord): string | null {
-    return first(
-        !max(data.phoneNumber, 20) || (!isEmpty(data.phoneNumber) && !/^[0-9+\-\s()]*$/.test(text(data.phoneNumber)))
-            ? "Phone number contains invalid characters." : null,
-        !max(data.bio, 1000)
-            ? "Bio must not exceed 1000 characters." : null,
-        !max(data.linkedInUrl, 500) ||
-        (!isEmpty(data.linkedInUrl) && !isUrl(text(data.linkedInUrl)))
+    return first(!isEmpty(data.phoneNumber) && !/^\d{10}$/.test(text(data.phoneNumber).trim())
+            ? "Phone number must contain exactly 10 digits." : null,
+        !max(data.bio, 1000) ? "Bio must not exceed 1000 characters." : null,
+        !max(data.linkedInUrl, 500) || (!isEmpty(data.linkedInUrl) && !isUrl(text(data.linkedInUrl)))
             ? "Invalid LinkedIn URL." : null,
-        !max(data.githubUrl, 500) ||
-        (!isEmpty(data.githubUrl) && !isUrl(text(data.githubUrl)))
+        !max(data.githubUrl, 500) || (!isEmpty(data.githubUrl) && !isUrl(text(data.githubUrl)))
             ? "Invalid GitHub URL." : null,
-        !max(data.profileImageUrl, 500)
-            ? "Profile image URL must not exceed 500 characters." : null,
+        !max(data.profileImageUrl, 500) ? "Profile image URL must not exceed 500 characters." : null,
     );
 }
 
 function validateContributionReview(data: AnyRecord): string | null {
     const status = Number(data.status);
 
-    return first(!isPositive(data.id)
-            ? "Contribution ID must be greater than zero." : null,
-        ![2, 3].includes(status)
-            ? "Status must be Approved or Rejected." : null,
-        status === 2 && data.position == null
-            ? "Position is required when approving a contribution." : null,
-        status === 2 && data.position != null && !isPositive(data.position)
-            ? "Position must be greater than zero." : null,
-        status === 2 && data.parentSubTopicId != null && !isPositive(data.parentSubTopicId)
-            ? "ParentSubTopicId must be greater than zero." : null,
-        status === 3 && data.position != null
-            ? "Position should not be provided when rejecting a contribution." : null,
-        status === 3 && data.parentSubTopicId != null
-            ? "ParentSubTopicId should not be provided when rejecting a contribution." : null,
-        !max(data.reviewNotes, 2000)
-            ? "ReviewNotes must not exceed 2000 characters." : null,
+    return first(!isPositive(data.id) ? "Contribution ID must be greater than zero." : null,
+        ![2, 3].includes(status) ? "Status must be Approved or Rejected." : null,
+        status === 2 && data.position == null ? "Position is required when approving a contribution." : null,
+        status === 2 && data.position != null && !isPositive(data.position) ? "Position must be greater than zero." : null,
+        status === 2 && data.parentSubTopicId != null && !isPositive(data.parentSubTopicId) ? "ParentSubTopicId must be greater than zero." : null,
+        status === 3 && data.position != null ? "Position should not be provided when rejecting a contribution." : null,
+        status === 3 && data.parentSubTopicId != null ? "ParentSubTopicId should not be provided when rejecting a contribution." : null,
+        !max(data.reviewNotes, 2000) ? "ReviewNotes must not exceed 2000 characters." : null,
     );
 }
 
@@ -397,8 +337,7 @@ function validateRequest(method: string, rawUrl: string, data: AnyRecord): strin
     }
 
     if (url.startsWith("api/judge0/submit")) {
-        const request =
-            data.request !== null && typeof data.request === "object"
+        const request = data.request !== null && typeof data.request === "object"
                 ? data.request as Record<string, unknown> : undefined;
 
         return first(
@@ -408,9 +347,7 @@ function validateRequest(method: string, rawUrl: string, data: AnyRecord): strin
         );
     }
 
-    const idInPath = Number(
-        url.match(/\/(\d+)(?:\/|$)/)?.[1] ?? 0,
-    );
+    const idInPath = Number(url.match(/\/(\d+)(?:\/|$)/)?.[1] ?? 0,);
 
     if (url.startsWith("admin/mentors") && m === "POST") {
         return validateMentorCreate(data);
@@ -484,10 +421,7 @@ function validateRequest(method: string, rawUrl: string, data: AnyRecord): strin
         return validateQuestion({...data, id: idInPath}, true);
     }
 
-    if (
-        url.match(/^mentor\/posts(?:\/\d+)?$/) &&
-        (m === "POST" || m === "PUT")
-    ) {
+    if (url.match(/^mentor\/posts(?:\/\d+)?$/) && (m === "POST" || m === "PUT")) {
         return validateCommunityPost(data);
     }
 

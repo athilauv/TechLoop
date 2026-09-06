@@ -15,10 +15,7 @@ public sealed class EmailService : IEmailService
     }
 
     // Mentor invitation
-    public async Task SendMentorInvitationAsync(
-        string mentorName,
-        string email,
-        string invitationToken)
+    public async Task SendMentorInvitationAsync(string mentorName, string email, string invitationToken)
     {
         var subject = "Mentor Invitation";
 
@@ -27,12 +24,9 @@ public sealed class EmailService : IEmailService
         var frontendBaseUrl = _settings.FrontendBaseUrl?.TrimEnd('/');
 
         if (string.IsNullOrWhiteSpace(frontendBaseUrl))
-            throw new InvalidOperationException(
-                "EmailSettings:FrontendBaseUrl is not configured.");
+            throw new InvalidOperationException("EmailSettings:FrontendBaseUrl is not configured.");
 
-        var invitationLink =
-            $"{frontendBaseUrl}/mentor/setup?token={Uri.EscapeDataString(invitationToken)}";
-
+        var invitationLink = $"{frontendBaseUrl}/mentor/setup?token={Uri.EscapeDataString(invitationToken)}";
         var safeMentorName = WebUtility.HtmlEncode(mentorName);
         var safeInvitationLink = WebUtility.HtmlEncode(invitationLink);
 
@@ -86,21 +80,13 @@ public sealed class EmailService : IEmailService
             TechLoop Team
             """;
 
-        await SendEmailAsync(
-            email,
-            subject,
-            plainTextBody,
-            htmlBody);
+        await SendEmailAsync(email, subject, plainTextBody, htmlBody);
     }
 
     // Password reset - common for all users
-    public async Task SendPasswordResetAsync(
-        string username,
-        string email,
-        string resetLink)
+    public async Task SendPasswordResetAsync(string username, string email, string resetLink)
     {
         var subject = "Reset Password";
-
         var safeUsername = WebUtility.HtmlEncode(username);
         var safeResetLink = WebUtility.HtmlEncode(resetLink);
 
@@ -146,18 +132,10 @@ public sealed class EmailService : IEmailService
             TechLoop Team
             """;
 
-        await SendEmailAsync(
-            email,
-            subject,
-            plainTextBody,
-            htmlBody);
+        await SendEmailAsync(email, subject, plainTextBody, htmlBody);
     }
 
-    private async Task SendEmailAsync(
-        string to,
-        string subject,
-        string plainTextBody,
-        string htmlBody)
+    private async Task SendEmailAsync( string to, string subject, string plainTextBody, string htmlBody)
     {
         using var message = new MailMessage
         {
@@ -174,26 +152,15 @@ public sealed class EmailService : IEmailService
 
         // Send both plain-text and HTML versions so mail clients can
         // render a clickable button/link when HTML is supported.
-        message.AlternateViews.Add(
-            AlternateView.CreateAlternateViewFromString(
-                plainTextBody,
-                null,
-                "text/plain"));
+        message.AlternateViews.Add(AlternateView.CreateAlternateViewFromString(
+                plainTextBody, null, "text/plain"));
 
-        message.AlternateViews.Add(
-            AlternateView.CreateAlternateViewFromString(
-                htmlBody,
-                null,
-                "text/html"));
+        message.AlternateViews.Add(AlternateView.CreateAlternateViewFromString(
+                htmlBody, null, "text/html"));
 
-        using var client = new SmtpClient(
-            _settings.Host,
-            _settings.Port)
+        using var client = new SmtpClient(_settings.Host, _settings.Port)
         {
-            Credentials = new NetworkCredential(
-                _settings.Username,
-                _settings.Password),
-
+            Credentials = new NetworkCredential(_settings.Username, _settings.Password),
             EnableSsl = _settings.EnableSsl
         };
 
