@@ -31,14 +31,9 @@ public sealed class TopicRepository : ITopicsRepository
     {
     return WithConnection(async connection =>
     {
-        
             return await connection.ExecuteScalarAsync<bool>(
                 new CommandDefinition("SELECT fn_topic_exists(@TechnologyId,@Title);",
-                    new
-                    {
-                        TechnologyId = technologyId,
-                        Title = title
-                    },
+                    new { TechnologyId = technologyId, Title = title },
                     cancellationToken: cancellationToken));
     
     });
@@ -49,14 +44,9 @@ public sealed class TopicRepository : ITopicsRepository
     {
     return WithConnection(async connection =>
     {
-        
             return await connection.ExecuteScalarAsync<bool>(
                 new CommandDefinition("SELECT fn_topic_slug_exists(@Slug);",
-                    new
-                    {
-                        Slug = slug
-                    },
-                    cancellationToken: cancellationToken));
+                    new { Slug = slug }, cancellationToken: cancellationToken));
     
     });
     }
@@ -66,14 +56,9 @@ public sealed class TopicRepository : ITopicsRepository
     {
     return WithConnection(async connection =>
     {
-        
             return await connection.ExecuteScalarAsync<bool>(
                 new CommandDefinition("SELECT fn_topic_position_exists(@TechnologyId,@Position);",
-                    new
-                    {
-                        TechnologyId = technologyId,
-                        Position = position
-                    },
+                    new { TechnologyId = technologyId, Position = position },
                     cancellationToken: cancellationToken));
     
     });
@@ -84,14 +69,9 @@ public sealed class TopicRepository : ITopicsRepository
     {
     return WithConnection(async connection =>
     {
-        
             return await connection.ExecuteScalarAsync<bool>(
                 new CommandDefinition("SELECT fn_topic_technology_exists(@TechnologyId);",
-                    new
-                    {
-                        TechnologyId = technologyId
-                    },
-                    cancellationToken: cancellationToken));
+                    new { TechnologyId = technologyId }, cancellationToken: cancellationToken));
     
     });
     }
@@ -101,10 +81,7 @@ public sealed class TopicRepository : ITopicsRepository
     {
     return WithConnection(async connection =>
     {
-        
-
-            await connection.ExecuteAsync(
-                new CommandDefinition(
+            await connection.ExecuteAsync(new CommandDefinition(
                     @"CALL public.sp_manage_topic(
                         'CREATE',
                         NULL,
@@ -137,8 +114,7 @@ public sealed class TopicRepository : ITopicsRepository
                     cancellationToken: cancellationToken));
 
             return await connection.ExecuteScalarAsync<int>(
-                new CommandDefinition(
-                    "SELECT fn_get_topic_id_by_technology_slug(@TechnologyId,@Slug);",
+                new CommandDefinition("SELECT fn_get_topic_id_by_technology_slug(@TechnologyId,@Slug);",
                     new { topic.TechnologyId, topic.Slug },
                     cancellationToken: cancellationToken));
     
@@ -151,14 +127,9 @@ public sealed class TopicRepository : ITopicsRepository
     {
     return WithConnection(async connection =>
     {
-        
             return await connection.QuerySingleOrDefaultAsync<Topic>(
                 new CommandDefinition("SELECT * FROM fn_get_topic_by_id(@Id);",
-                    new
-                    {
-                        Id = id
-                    },
-                    cancellationToken: cancellationToken));
+                    new { Id = id }, cancellationToken: cancellationToken));
     
     });
     }
@@ -167,12 +138,9 @@ public sealed class TopicRepository : ITopicsRepository
     {
     return WithConnection(async connection =>
     {
-        
             return await connection.QuerySingleOrDefaultAsync<MentorTopicResponse>(
-                new CommandDefinition(
-                    "SELECT * FROM fn_get_mentor_topic_by_id(@Id);",
-                    new { Id = id },
-                    cancellationToken: cancellationToken));
+                new CommandDefinition("SELECT * FROM fn_get_mentor_topic_by_id(@Id);",
+                    new { Id = id }, cancellationToken: cancellationToken));
     
     });
     }
@@ -182,7 +150,6 @@ public sealed class TopicRepository : ITopicsRepository
     {
     return WithConnection(async connection =>
     {
-        
             return await connection.ExecuteAsync(new CommandDefinition(
                     @"
                     CALL public.sp_manage_topic(
@@ -228,7 +195,6 @@ public sealed class TopicRepository : ITopicsRepository
     {
     return WithConnection(async connection =>
     {
-        
             return await connection.ExecuteAsync(new CommandDefinition(
                 @"CALL public.sp_manage_topic(
                     'DELETE', @Id, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
@@ -244,7 +210,6 @@ public sealed class TopicRepository : ITopicsRepository
     {
     return WithConnection(async connection =>
     {
-        
             return await connection.QueryAsync<Topic>(new CommandDefinition("SELECT * FROM fn_get_all_topics();", cancellationToken: cancellationToken));
     
     });
@@ -254,12 +219,9 @@ public sealed class TopicRepository : ITopicsRepository
     {
     return WithConnection(async connection =>
     {
-        
             return await connection.QueryAsync<MentorTopicResponse>(
-                new CommandDefinition(
-                    "SELECT * FROM fn_get_mentor_topics(@MentorId);",
-                    new { MentorId = mentorId },
-                    cancellationToken: cancellationToken));
+                new CommandDefinition("SELECT * FROM fn_get_mentor_topics(@MentorId);",
+                    new { MentorId = mentorId }, cancellationToken: cancellationToken));
     
     });
     }
@@ -271,8 +233,7 @@ public sealed class TopicRepository : ITopicsRepository
     {
         
 
-            await connection.ExecuteAsync(
-                new CommandDefinition(
+            await connection.ExecuteAsync(new CommandDefinition(
                     @"CALL public.sp_manage_topic(
                         'PUBLISH', @Id, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
                         NULL, NULL, @PublishedBy, NULL, FALSE);",
@@ -280,7 +241,6 @@ public sealed class TopicRepository : ITopicsRepository
                     cancellationToken: cancellationToken));
 
             // PostgreSQL CALL does not provide a reliable affected-row count
-            // through Dapper. The procedure either completes or throws.
             return 1;
     
     });
@@ -292,7 +252,6 @@ public sealed class TopicRepository : ITopicsRepository
     {
     return WithConnection(async connection =>
     {
-        
             return await connection.QueryAsync<Topic>(new CommandDefinition("SELECT * FROM fn_get_published_topics();", cancellationToken: cancellationToken));
     
     });
@@ -304,13 +263,8 @@ public sealed class TopicRepository : ITopicsRepository
     {
     return WithConnection(async connection =>
     {
-        
             return await connection.QuerySingleOrDefaultAsync<Topic>(new CommandDefinition("SELECT * FROM fn_get_published_topic_by_slug(@Slug);",
-                    new
-                    {
-                        Slug = slug
-                    },
-                    cancellationToken: cancellationToken));
+                    new { Slug = slug }, cancellationToken: cancellationToken));
     
     });
     }
@@ -319,13 +273,8 @@ public sealed class TopicRepository : ITopicsRepository
     {
     return WithConnection(async connection =>
     {
-        
             return await connection.ExecuteScalarAsync<int?>(new CommandDefinition("SELECT fn_get_topic_technology(@TopicId);",
-                    new
-                    {
-                        TopicId = topicId
-                    },
-                    cancellationToken: cancellationToken));
+                    new { TopicId = topicId }, cancellationToken: cancellationToken));
     
     });
     }
@@ -336,11 +285,7 @@ public sealed class TopicRepository : ITopicsRepository
     {
         
             return await connection.ExecuteScalarAsync<int?>(new CommandDefinition("SELECT fn_get_mentor_technology(@UserId);",
-                    new
-                    {
-                        UserId = userId
-                    },
-                    cancellationToken: cancellationToken));
+                    new { UserId = userId }, cancellationToken: cancellationToken));
     
     });
     }
@@ -352,10 +297,8 @@ public sealed class TopicRepository : ITopicsRepository
     {
         
             return await connection.QueryAsync<MentorTopicResponse>(
-                new CommandDefinition(
-                    "SELECT * FROM fn_get_mentor_unpublished_topic_details(@MentorId);",
-                    new { MentorId = mentorId },
-                    cancellationToken: cancellationToken));
+                new CommandDefinition("SELECT * FROM fn_get_mentor_unpublished_topic_details(@MentorId);",
+                    new { MentorId = mentorId }, cancellationToken: cancellationToken));
     
     });
     }

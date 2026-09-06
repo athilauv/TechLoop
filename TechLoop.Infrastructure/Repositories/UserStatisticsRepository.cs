@@ -31,15 +31,8 @@ public sealed class UserStatisticsRepository : IUserStatisticsRepository
     return WithConnection(async connection =>
     {
             const string sql = @"SELECT * FROM fn_get_user_statistics(@UserId);";
-        
-            return await connection.QuerySingleOrDefaultAsync<UserStatistics>(
-                new CommandDefinition(
-                    sql,
-                    new
-                    {
-                        UserId = userId
-                    },
-                    cancellationToken: cancellationToken));
+            return await connection.QuerySingleOrDefaultAsync<UserStatistics>(new CommandDefinition(
+                    sql, new { UserId = userId }, cancellationToken: cancellationToken));
     
     });
     }
@@ -49,14 +42,8 @@ public sealed class UserStatisticsRepository : IUserStatisticsRepository
     return WithConnection(async connection =>
     {
             const string sql = @"CALL sp_manage_user_statistics('CREATE', NULL, @UserId, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);";
-        
             await connection.ExecuteAsync(new CommandDefinition(
-                    sql,
-                    new
-                    {
-                        statistics.UserId
-                    },
-                    cancellationToken: cancellationToken));
+                    sql, new { statistics.UserId }, cancellationToken: cancellationToken));
 
             var created = await GetByUserIdAsync(statistics.UserId, cancellationToken);
             if (created is null)
@@ -74,9 +61,7 @@ public sealed class UserStatisticsRepository : IUserStatisticsRepository
     return WithConnection(async connection =>
     {
             const string sql = @"CALL sp_manage_user_statistics('UPDATE', @Id, NULL, @ReputationPoints, @QuestionsSolved, @McqSolved, @CodingSolved, @TotalSubmissions, @AcceptedSubmissions, @FailedSubmissions, @TotalTimeSpentMinutes);";
-        
-            return await connection.ExecuteAsync(new CommandDefinition(
-                    sql,
+            return await connection.ExecuteAsync(new CommandDefinition(sql,
                     new
                     {
                         statistics.Id,

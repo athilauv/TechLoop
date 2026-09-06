@@ -27,27 +27,15 @@ public sealed class TechnologyRepository : ITechnologyRepository
     {
         const string sql = @"SELECT fn_technology_exists(@CategoryId, @Name);";
         return WithConnection(connection => connection.ExecuteScalarAsync<bool>(
-                new CommandDefinition(
-                    sql,
-                    new
-                    {
-                        CategoryId = categoryId,
-                        Name = name
-                    },
+                new CommandDefinition(sql, new { CategoryId = categoryId, Name = name },
                     cancellationToken: cancellationToken)));
     }
 
     public Task<bool> NameExistsAsync(int categoryId, string name, int excludeId, CancellationToken cancellationToken)
     {
         const string sql = @"SELECT fn_technology_name_exists(@CategoryId, @Name, @ExcludeId);";
-        return WithConnection(connection => connection.ExecuteScalarAsync<bool>( new CommandDefinition(
-                    sql,
-                    new
-                    {
-                        CategoryId = categoryId,
-                        Name = name,
-                        ExcludeId = excludeId
-                    },
+        return WithConnection(connection => connection.ExecuteScalarAsync<bool>( new CommandDefinition(sql, new
+                    { CategoryId = categoryId, Name = name, ExcludeId = excludeId },
                     cancellationToken: cancellationToken)));
     }
 
@@ -55,34 +43,21 @@ public sealed class TechnologyRepository : ITechnologyRepository
     {
         const string sql = @"SELECT fn_technology_slug_exists(@Slug);";
         return WithConnection(connection => connection.ExecuteScalarAsync<bool>(new CommandDefinition(
-                    sql,
-                    new { Slug = slug },
-                    cancellationToken: cancellationToken)));
+                    sql, new { Slug = slug }, cancellationToken: cancellationToken)));
     }
 
     public Task<bool> SlugExistsAsync(string slug, int excludeId, CancellationToken cancellationToken)
     {
         const string sql = @"SELECT fn_technology_slug_exists(@Slug, @ExcludeId);";
         return WithConnection(connection => connection.ExecuteScalarAsync<bool>(new CommandDefinition(
-                    sql,
-                    new
-                    {
-                        Slug = slug,
-                        ExcludeId = excludeId
-                    },
-                    cancellationToken: cancellationToken)));
+                    sql, new { Slug = slug, ExcludeId = excludeId }, cancellationToken: cancellationToken)));
     }
 
     public Task<bool> PositionExistsAsync(int categoryId, int position, CancellationToken cancellationToken)
     {
         const string sql = @"SELECT fn_technology_position_exists( @CategoryId, @Position);";
         return WithConnection(connection => connection.ExecuteScalarAsync<bool>(new CommandDefinition(
-                    sql,
-                    new
-                    {
-                        CategoryId = categoryId,
-                        Position = position
-                    },
+                    sql, new { CategoryId = categoryId, Position = position },
                     cancellationToken: cancellationToken)));
     }
 
@@ -90,13 +65,7 @@ public sealed class TechnologyRepository : ITechnologyRepository
     {
         const string sql = @"SELECT fn_technology_position_exists( @CategoryId, @Position, @ExcludeId);";
         return WithConnection(connection => connection.ExecuteScalarAsync<bool>(new CommandDefinition(
-                    sql,
-                    new
-                    {
-                        CategoryId = categoryId,
-                        Position = position,
-                        ExcludeId = excludeId
-                    },
+                    sql, new { CategoryId = categoryId, Position = position, ExcludeId = excludeId },
                     cancellationToken: cancellationToken)));
     }
 
@@ -104,9 +73,7 @@ public sealed class TechnologyRepository : ITechnologyRepository
     {
         const string sql = @"SELECT fn_technology_category_exists(@CategoryId);";
         return WithConnection(connection => connection.ExecuteScalarAsync<bool>(new CommandDefinition(
-                    sql,
-                    new { CategoryId = categoryId },
-                    cancellationToken: cancellationToken)));
+                    sql, new { CategoryId = categoryId }, cancellationToken: cancellationToken)));
     }
 
     public Task<int> CreateAsync(Technology technology, CancellationToken cancellationToken)
@@ -257,64 +224,49 @@ public sealed class TechnologyRepository : ITechnologyRepository
     public Task<IEnumerable<Technology>> GetAllAsync(CancellationToken cancellationToken)
     {
         const string sql = @"SELECT * FROM fn_get_all_technologies();";
-        return WithConnection(connection => connection.QueryAsync<Technology>(new CommandDefinition(
-                    sql,
-                    cancellationToken: cancellationToken)));
+        return WithConnection(connection => connection.QueryAsync<Technology>(
+            new CommandDefinition(sql, cancellationToken: cancellationToken)));
     }
 
     public Task<Technology?> GetByIdAsync(int id, CancellationToken cancellationToken)
     {
         const string sql = @"SELECT * FROM fn_get_technology_by_id(@Id);";
         return WithConnection(connection => connection.QuerySingleOrDefaultAsync<Technology>(
-                new CommandDefinition(
-                    sql,
-                    new { Id = id },
-                    cancellationToken: cancellationToken)));
+                new CommandDefinition(sql, new { Id = id }, cancellationToken: cancellationToken)));
     }
 
     public Task<IEnumerable<Technology>> GetPublishedAsync(CancellationToken cancellationToken)
     {
         const string sql = @"SELECT * FROM fn_get_published_technologies();";
         return WithConnection(connection => connection.QueryAsync<Technology>(new CommandDefinition(
-                    sql,
-                    cancellationToken: cancellationToken)));
+                    sql, cancellationToken: cancellationToken)));
     }
 
     public Task<Technology?> GetPublishedBySlugAsync(string slug, CancellationToken cancellationToken)
     {
         const string sql = @"SELECT * FROM fn_get_published_technology_by_slug(@Slug);";
         return WithConnection(connection => connection.QuerySingleOrDefaultAsync<Technology>(new CommandDefinition(
-                    sql,
-                    new { Slug = slug },
-                    cancellationToken: cancellationToken)));
+                    sql, new { Slug = slug }, cancellationToken: cancellationToken)));
     }
 
     public Task<int?> GetTechnologyIdAsync(int technologyId, CancellationToken cancellationToken)
     {
         const string sql = @"SELECT fn_technology_get_category_id(@TechnologyId);";
         return WithConnection(connection => connection.ExecuteScalarAsync<int?>(
-                new CommandDefinition(
-                    sql,
-                    new { TechnologyId = technologyId },
-                    cancellationToken: cancellationToken)));
+                new CommandDefinition(sql, new { TechnologyId = technologyId }, cancellationToken: cancellationToken)));
     }
 
     public Task<int?> GetMentorTechnologyIdAsync(Guid userId, CancellationToken cancellationToken)
     {
         const string sql = @"SELECT fn_mentor_get_technology_id(@UserId);";
         return WithConnection(connection => connection.ExecuteScalarAsync<int?>(
-                new CommandDefinition(
-                    sql,
-                    new { UserId = userId },
-                    cancellationToken: cancellationToken)));
+                new CommandDefinition(sql, new { UserId = userId }, cancellationToken: cancellationToken)));
     }
 
     public Task<int> GetJudge0LanguageIdAsync(int technologyId, CancellationToken cancellationToken)
     {
         const string sql = @"SELECT fn_get_judge0_language_id(@TechnologyId);";
-        return WithConnection(connection => connection.ExecuteScalarAsync<int>(new CommandDefinition(
-                    sql,
-                    new { TechnologyId = technologyId },
-                    cancellationToken: cancellationToken)));
+        return WithConnection(connection => connection.ExecuteScalarAsync<int>(
+            new CommandDefinition(sql, new { TechnologyId = technologyId }, cancellationToken: cancellationToken)));
     }
 }

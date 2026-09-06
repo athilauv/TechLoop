@@ -8,7 +8,6 @@ namespace TechLoop.Infrastructure.Repositories;
 public sealed class UserRepository : IUserRepository
 {
     private readonly IDapperContext _context;
-
     private async Task<T> WithConnection<T>(Func<System.Data.IDbConnection, Task<T>> action)
     {
         using var connection = _context.CreateConnection();
@@ -27,9 +26,7 @@ public sealed class UserRepository : IUserRepository
     {
     return WithConnection(async connection =>
     {
-        
-            return await connection.QueryFirstOrDefaultAsync<User>(
-                "SELECT * FROM public.fn_user_get_by_id(@Id);",
+            return await connection.QueryFirstOrDefaultAsync<User>("SELECT * FROM public.fn_user_get_by_id(@Id);",
                 new { Id = userId });
     
     });
@@ -39,9 +36,7 @@ public sealed class UserRepository : IUserRepository
     {
     return WithConnection(async connection =>
     {
-        
-            return await connection.QueryFirstOrDefaultAsync<User>(
-                "SELECT * FROM public.fn_user_get_by_username(@Username);",
+            return await connection.QueryFirstOrDefaultAsync<User>("SELECT * FROM public.fn_user_get_by_username(@Username);",
                 new { Username = username });
     
     });
@@ -51,9 +46,7 @@ public sealed class UserRepository : IUserRepository
     {
     return WithConnection(async connection =>
     {
-        
-            return await connection.QueryFirstOrDefaultAsync<User>(
-                "SELECT * FROM public.fn_user_get_by_email(@Email);",
+            return await connection.QueryFirstOrDefaultAsync<User>("SELECT * FROM public.fn_user_get_by_email(@Email);",
                 new { Email = email });
     
     });
@@ -63,12 +56,9 @@ public sealed class UserRepository : IUserRepository
     {
     return WithConnection(async connection =>
     {
-        
-            await connection.ExecuteAsync(
-                @"CALL public.sp_manage_user(
-                    'CREATE', @Id, @Username, @Email, @PasswordHash, @RoleId,
-                    @FailedLoginAttempts, @LockedUntil, @LastLoginAt, @CreatedAt, @UpdatedAt, FALSE);",
-                user);
+            await connection.ExecuteAsync(@"CALL public.sp_manage_user(
+                   'CREATE', @Id, @Username, @Email, @PasswordHash, @RoleId,
+                    @FailedLoginAttempts, @LockedUntil, @LastLoginAt, @CreatedAt, @UpdatedAt, FALSE);", user);
     
     });
     }
@@ -77,12 +67,9 @@ public sealed class UserRepository : IUserRepository
     {
     return WithConnection(async connection =>
     {
-        
-            await connection.ExecuteAsync(
-                @"CALL public.sp_manage_user(
+            await connection.ExecuteAsync(@"CALL public.sp_manage_user(
                     'UPDATE', @Id, @Username, @Email, @PasswordHash, @RoleId,
-                    NULL, NULL, NULL, NULL, @UpdatedAt, FALSE);",
-                user);
+                    NULL, NULL, NULL, NULL, @UpdatedAt, FALSE);", user);
     
     });
     }
@@ -91,12 +78,8 @@ public sealed class UserRepository : IUserRepository
     {
     return WithConnection(async connection =>
     {
-        
-            await connection.ExecuteAsync(
-                @"CALL public.sp_manage_user(
-                    'UPDATE_SECURITY', @Id, NULL, NULL, NULL, NULL,
-                    @FailedLoginAttempts, @LockedUntil, @LastLoginAt, NULL, @UpdatedAt, FALSE);",
-                user);
+            await connection.ExecuteAsync(@"CALL public.sp_manage_user('UPDATE_SECURITY', @Id, NULL, NULL, NULL, NULL,
+                    @FailedLoginAttempts, @LockedUntil, @LastLoginAt, NULL, @UpdatedAt, FALSE);", user);
     
     });
     }
@@ -105,11 +88,8 @@ public sealed class UserRepository : IUserRepository
     {
     return WithConnection(async connection =>
     {
-        
-            await connection.ExecuteAsync(
-                @"CALL public.sp_manage_user(
-                    'DELETE', @Id, NULL, NULL, NULL, NULL,
-                    NULL, NULL, NULL, NULL, NULL, FALSE);",
+            await connection.ExecuteAsync(@"CALL public.sp_manage_user(
+                    'DELETE', @Id, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, FALSE);",
                 new { Id = userId });
     
     });
@@ -119,11 +99,8 @@ public sealed class UserRepository : IUserRepository
     {
     return WithConnection(async connection =>
     {
-        
-            await connection.ExecuteAsync(
-                @"CALL public.sp_manage_user(
-                    'UPDATE_PASSWORD', @Id, NULL, NULL, @PasswordHash, NULL,
-                    NULL, NULL, NULL, NULL, @UpdatedAt, FALSE);",
+            await connection.ExecuteAsync(@"CALL public.sp_manage_user(
+                    'UPDATE_PASSWORD', @Id, NULL, NULL, @PasswordHash, NULL, NULL, NULL, NULL, @UpdatedAt, FALSE);",
                 new { Id = userId, PasswordHash = passwordHash, UpdatedAt = updatedAt });
     
     });

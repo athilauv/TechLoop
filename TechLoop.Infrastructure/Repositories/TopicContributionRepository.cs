@@ -8,7 +8,6 @@ namespace TechLoop.Infrastructure.Repositories;
 public sealed class TopicContributionRepository : ITopicContributionRepository
 {
     private readonly IDapperContext _context;
-
     private async Task<T> WithConnection<T>(Func<System.Data.IDbConnection, Task<T>> action)
     {
         using var connection = _context.CreateConnection();
@@ -32,14 +31,8 @@ public sealed class TopicContributionRepository : ITopicContributionRepository
     return WithConnection(async connection =>
     {
             const string sql = @"SELECT fn_topic_contribution_technology_exists(@TechnologyId);";
-        
             return await connection.ExecuteScalarAsync<bool>(new CommandDefinition(
-                    sql,
-                    new
-                    {
-                        TechnologyId = technologyId
-                    },
-                    cancellationToken: cancellationToken));
+                    sql, new { TechnologyId = technologyId }, cancellationToken: cancellationToken));
     
     });
     }
@@ -83,9 +76,7 @@ public sealed class TopicContributionRepository : ITopicContributionRepository
 
         
 
-            await connection.ExecuteAsync(
-                new CommandDefinition(
-                    sql,
+            await connection.ExecuteAsync(new CommandDefinition(sql,
                     new
                     {
                         LearnerId = learnerId,
@@ -101,12 +92,8 @@ public sealed class TopicContributionRepository : ITopicContributionRepository
                     cancellationToken: cancellationToken));
 
             return await connection.ExecuteScalarAsync<int>(
-                new CommandDefinition(
-                    @"SELECT id
-                      FROM public.tobic_contributions
-                      WHERE created_by = @LearnerId
-                        AND technology_id = @TechnologyId
-                        AND title = @Title
+                new CommandDefinition(@"SELECT id FROM public.tobic_contributions
+                      WHERE created_by = @LearnerId AND technology_id = @TechnologyId AND title = @Title
                       ORDER BY created_at DESC, id DESC
                       LIMIT 1;",
                     new { LearnerId = learnerId, TechnologyId = technologyId, Title = title },
@@ -153,9 +140,7 @@ public sealed class TopicContributionRepository : ITopicContributionRepository
 
         
 
-            await connection.ExecuteAsync(
-                new CommandDefinition(
-                    sql,
+            await connection.ExecuteAsync(new CommandDefinition(sql,
                     new
                     {
                         ContributionId = contributionId,
@@ -180,15 +165,8 @@ public sealed class TopicContributionRepository : ITopicContributionRepository
     return WithConnection(async connection =>
     {
             const string sql = @"SELECT * FROM fn_get_my_topic_contributions(@LearnerId);";
-        
             return await connection.QueryAsync<TopicContributionSummaryResponse>(
-                new CommandDefinition(
-                    sql,
-                    new
-                    {
-                        LearnerId = learnerId
-                    },
-                    cancellationToken: cancellationToken));
+                new CommandDefinition(sql, new { LearnerId = learnerId }, cancellationToken: cancellationToken));
     
     });
     }
@@ -199,14 +177,8 @@ public sealed class TopicContributionRepository : ITopicContributionRepository
     return WithConnection(async connection =>
     {
             const string sql = @"SELECT * FROM fn_get_technology_topic_contributions(@TechnologyId);";
-        
             return await connection.QueryAsync<TopicContributionResponse>(new CommandDefinition(
-                    sql,
-                    new
-                    {
-                        TechnologyId = technologyId
-                    },
-                    cancellationToken: cancellationToken));
+                    sql, new { TechnologyId = technologyId }, cancellationToken: cancellationToken));
     
     });
     }
@@ -217,15 +189,8 @@ public sealed class TopicContributionRepository : ITopicContributionRepository
     return WithConnection(async connection =>
     {
             const string sql = @"SELECT * FROM fn_get_topic_contribution_by_id(@ContributionId);";
-        
             return await connection.QuerySingleOrDefaultAsync<TopicContributionResponse>(
-                new CommandDefinition(
-                    sql,
-                    new
-                    {
-                        ContributionId = contributionId
-                    },
-                    cancellationToken: cancellationToken));
+                new CommandDefinition(sql, new { ContributionId = contributionId }, cancellationToken: cancellationToken));
     
     });
     }
@@ -236,15 +201,8 @@ public sealed class TopicContributionRepository : ITopicContributionRepository
     return WithConnection(async connection =>
     {
             const string sql = @"SELECT * FROM fn_get_my_topic_contribution_by_id(@LearnerId, @ContributionId);";
-        
             return await connection.QuerySingleOrDefaultAsync<TopicContributionResponse>(
-                new CommandDefinition(
-                    sql,
-                    new
-                    {
-                        LearnerId = learnerId,
-                        ContributionId = contributionId
-                    },
+                new CommandDefinition(sql, new { LearnerId = learnerId, ContributionId = contributionId },
                     cancellationToken: cancellationToken));
     
     });
@@ -255,34 +213,20 @@ public sealed class TopicContributionRepository : ITopicContributionRepository
     return WithConnection(async connection =>
     {
             const string sql = @"SELECT * FROM fn_get_pending_topic_contributions(@MentorId);";
-        
             return await connection.QueryAsync<TopicContributionPendingResponse>(new CommandDefinition(
-                    sql,
-                    new
-                    {
-                        MentorId = mentorId
-                    },
-                    cancellationToken: cancellationToken));
+                    sql, new { MentorId = mentorId }, cancellationToken: cancellationToken));
     
     });
     }
 
     // Gets a contribution for a mentor by ID.
-    // All SQL/data shaping is kept inside the PostgreSQL function.
-    public Task<TopicContributionResponse?>
-        GetMentorContributionByIdAsync(Guid mentorId, int contributionId, CancellationToken cancellationToken)
+    public Task<TopicContributionResponse?> GetMentorContributionByIdAsync(Guid mentorId, int contributionId, CancellationToken cancellationToken)
     {
     return WithConnection(async connection =>
     {
             const string sql = @"SELECT * FROM fn_get_mentor_topic_contribution_by_id( @MentorId, @ContributionId);";
-        
             return await connection.QuerySingleOrDefaultAsync<TopicContributionResponse>(new CommandDefinition(
-                    sql,
-                    new
-                    {
-                        MentorId = mentorId,
-                        ContributionId = contributionId
-                    },
+                    sql, new { MentorId = mentorId, ContributionId = contributionId },
                     cancellationToken: cancellationToken));
     
     });

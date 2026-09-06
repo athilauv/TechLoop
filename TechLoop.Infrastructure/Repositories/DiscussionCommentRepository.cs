@@ -21,15 +21,13 @@ public sealed class DiscussionCommentRepository : IDiscussionCommentRepository
         return await action(connection);
     }
 
-    public Task<int> CreateAsync(DiscussionComment comment)
-        => WithConnection(async connection =>
+    public Task<int> CreateAsync(DiscussionComment comment) => WithConnection(async connection =>
         {
             return await connection.ExecuteScalarAsync<int>("SELECT fn_discussion_comment_create(@DiscussionId,@UserId,@ParentCommentId,@Content,@CreatedBy)",
                 new { comment.DiscussionId, comment.UserId, comment.ParentCommentId, comment.Content, comment.CreatedBy });
         });
 
-    public Task<bool> UpdateAsync(DiscussionComment comment)
-        => WithConnection(async connection =>
+    public Task<bool> UpdateAsync(DiscussionComment comment) => WithConnection(async connection =>
         {
             return await connection.ExecuteScalarAsync<bool>("SELECT fn_discussion_comment_update(@Id,@Content,@UpdatedBy)",
                 new
@@ -40,8 +38,7 @@ public sealed class DiscussionCommentRepository : IDiscussionCommentRepository
                 });
         });
 
-    public Task<bool> DeleteAsync(int id, Guid userId)
-        => WithConnection(async connection =>
+    public Task<bool> DeleteAsync(int id, Guid userId) => WithConnection(async connection =>
         {
             return await connection.ExecuteScalarAsync<bool>("SELECT fn_discussion_comment_delete(@Id,@UserId)",
                 new
@@ -51,29 +48,25 @@ public sealed class DiscussionCommentRepository : IDiscussionCommentRepository
                 });
         });
 
-    public Task<DiscussionComment?> GetEntityByIdAsync(int id)
-        => WithConnection(async connection =>
+    public Task<DiscussionComment?> GetEntityByIdAsync(int id) => WithConnection(async connection =>
         {
             return await connection.QueryFirstOrDefaultAsync<DiscussionComment>("SELECT * FROM discussion_comments WHERE id=@Id AND deleted_at IS NULL",
                 new { Id = id });
         });
 
-    public Task<DiscussionCommentDto?> GetByIdAsync(int id)
-        => WithConnection(async connection =>
+    public Task<DiscussionCommentDto?> GetByIdAsync(int id) => WithConnection(async connection =>
         {
             return await connection.QueryFirstOrDefaultAsync<DiscussionCommentDto>("SELECT * FROM fn_discussion_comment_get_by_id(@Id)",
                 new { Id = id });
         });
 
-    public Task<IEnumerable<DiscussionCommentDto>> GetByDiscussionIdAsync(int discussionId)
-        => WithConnection(async connection =>
+    public Task<IEnumerable<DiscussionCommentDto>> GetByDiscussionIdAsync(int discussionId) => WithConnection(async connection =>
         {
             return await connection.QueryAsync<DiscussionCommentDto>("SELECT * FROM fn_discussion_comment_get_by_discussion(@DiscussionId)",
                 new { DiscussionId = discussionId });
         });
 
-    public Task<bool> ExistsAsync(int id)
-        => WithConnection(async connection =>
+    public Task<bool> ExistsAsync(int id) => WithConnection(async connection =>
         {
             return await connection.ExecuteScalarAsync<bool>("SELECT fn_discussion_comment_exists(@Id)",
                 new { Id = id });

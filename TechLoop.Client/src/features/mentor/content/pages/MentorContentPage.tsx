@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "react-toastify";
-import { BookOpen } from "lucide-react";
+import { BookOpen, Menu } from "lucide-react";
 import { getErrorMessage } from "../../../../utils/error.utils.ts";
 import { getMentorCurriculum } from "../../../../api/mentor.api.ts";
 import { MENTOR_PENDING_QUERY_KEY } from "../../../../hooks/useMentorPendingQueue.ts";
@@ -89,6 +89,7 @@ export default function MentorContentPage() {
     const [selectedSubTopic, setSelectedSubTopic] =
         useState<MentorSubTopic | null>(null);
     const [formType, setFormType] = useState<FormType>(null);
+    const [curriculumOpen, setCurriculumOpen] = useState(false);
 
     const refreshCurriculum = async () => {
         await queryClient.invalidateQueries({
@@ -109,6 +110,7 @@ export default function MentorContentPage() {
         setSelectedId(topicId);
         setSelectedSubTopic(null);
         setFormType(null);
+        setCurriculumOpen(false);
 
         try {
             const topic = await getMentorTopicById(topicId);
@@ -124,6 +126,7 @@ export default function MentorContentPage() {
         setSelectedId(subTopicId);
         setSelectedTopic(null);
         setFormType(null);
+        setCurriculumOpen(false);
 
         try {
             const subTopic = await getMentorSubTopicById(subTopicId);
@@ -604,7 +607,8 @@ export default function MentorContentPage() {
             className="content-studio-theme flex w-full overflow-hidden"
             style={{ height: "100dvh" }}
         >
-            <div className="flex h-full w-[280px] shrink-0 flex-col overflow-hidden border-r border-[var(--cs-border)]">
+            {/* Full curriculum on wide screens. */}
+            <div className="hidden h-full w-[280px] shrink-0 flex-col overflow-hidden border-r border-[var(--cs-border)] xl:flex">
                 <ContentTree
                     selectedType={selectedType}
                     selectedId={selectedId}
@@ -616,7 +620,49 @@ export default function MentorContentPage() {
                 />
             </div>
 
+            {/* On smaller screens the curriculum opens as a side panel. */}
+            {curriculumOpen && (
+                <div className="absolute inset-y-0 left-0 z-50 flex w-[min(280px,82vw)] flex-col overflow-hidden border-r border-[var(--cs-border)] bg-[var(--cs-bg-card)] shadow-2xl xl:hidden">
+                    <ContentTree
+                        selectedType={selectedType}
+                        selectedId={selectedId}
+                        onCreateTopic={handleCreateTopic}
+                        onSelectTopic={handleSelectTopic}
+                        onSelectSubTopic={handleSelectSubTopic}
+                        onCreateSubTopic={handleCreateSubTopic}
+                        onEditSubTopic={handleEditSubTopic}
+                    />
+                </div>
+            )}
+
+            {curriculumOpen && (
+                <button
+                    type="button"
+                    onClick={() => setCurriculumOpen(false)}
+                    className="fixed inset-0 z-40 bg-black/40 xl:hidden"
+                    aria-label="Close curriculum"
+                />
+            )}
+
             <main className="cs-scroll h-full min-w-0 flex-1 flex-col overflow-y-auto">
+                {!curriculumOpen && (
+                    <div className="sticky top-0 z-30 px-4 pt-4 xl:hidden sm:px-6">
+                        <div className="flex justify-start">
+                            <div className="rounded-xl border border-[var(--cs-border)] bg-[var(--cs-bg-surface)]/90 p-1.5 shadow-sm backdrop-blur-sm">
+                                <button
+                                    type="button"
+                                    onClick={() => setCurriculumOpen(true)}
+                                    className="inline-flex items-center gap-2 rounded-lg bg-[#0B4A68] px-4 py-2 text-sm font-semibold text-[#66E8FF] shadow-sm transition hover:bg-[#0F5B7D]"
+                                    aria-label="Open curriculum"
+                                >
+                                    <Menu className="h-4 w-4" />
+                                    Curriculum
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
                 {!selectedType && !formType && (
                     <EmptyState
                         icon={<BookOpen size={22} />}

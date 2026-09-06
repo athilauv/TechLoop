@@ -8,7 +8,6 @@ namespace TechLoop.Infrastructure.Repositories;
 public class RefreshTokenRepository : IRefreshTokenRepository
 {
     private readonly IDapperContext _context;
-
     private async Task<T> WithConnection<T>(Func<System.Data.IDbConnection, Task<T>> action)
     {
         using var connection = _context.CreateConnection();
@@ -31,21 +30,9 @@ public class RefreshTokenRepository : IRefreshTokenRepository
     return WithConnection(async connection =>
     {
         
-            const string sql = """
-                SELECT
-                    id,
-                    user_id,
-                    token,
-                    expires_at,
-                    is_revoked,
-                    created_at,
-                    updated_at
-                FROM refresh_tokens
-                WHERE token = @Token;
-                """;
+            const string sql = @"SELECT id, user_id, token, expires_at, is_revoked, created_at, updated_at FROM refresh_tokens WHERE token = @Token;";
             return await connection.QueryFirstOrDefaultAsync<RefreshToken>(
-                sql,
-                new { Token = token });
+                sql, new { Token = token });
     
     });
     }
@@ -55,22 +42,9 @@ public class RefreshTokenRepository : IRefreshTokenRepository
     return WithConnection(async connection =>
     {
         
-            const string sql = """
-                SELECT
-                    id,
-                    user_id,
-                    token,
-                    expires_at,
-                    is_revoked,
-                    created_at,
-                    updated_at
-                FROM refresh_tokens
-                WHERE user_id = @UserId
-                ORDER BY created_at DESC;
-                """;
+            const string sql = @"SELECT id, user_id, token, expires_at, is_revoked, created_at, updated_at FROM refresh_tokens WHERE user_id = @UserId ORDER BY created_at DESC;";
             return await connection.QueryAsync<RefreshToken>(
-                sql,
-                new { UserId = userId });
+                sql, new { UserId = userId });
     
     });
     }
@@ -80,28 +54,8 @@ public class RefreshTokenRepository : IRefreshTokenRepository
     return WithConnection(async connection =>
     {
         
-            const string sql = """
-                INSERT INTO refresh_tokens
-                (
-                    id,
-                    user_id,
-                    token,
-                    expires_at,
-                    is_revoked,
-                    created_at,
-                    updated_at
-                )
-                VALUES
-                (
-                    @Id,
-                    @UserId,
-                    @Token,
-                    @ExpiresAt,
-                    @IsRevoked,
-                    @CreatedAt,
-                    @UpdatedAt
-                );
-                """;
+            const string sql = @"INSERT INTO refresh_tokens(id, user_id, token, expires_at, is_revoked, created_at, updated_at)
+                VALUES(@Id, @UserId, @Token, @ExpiresAt, @IsRevoked, @CreatedAt, @UpdatedAt);";
             await connection.ExecuteAsync(sql, refreshToken);
     
     });
@@ -111,15 +65,12 @@ public class RefreshTokenRepository : IRefreshTokenRepository
     return WithConnection(async connection =>
     {
         
-            const string sql = """
-                UPDATE refresh_tokens
-                SET
+            const string sql = @"UPDATE refresh_tokens SET
                     token = @Token,
                     expires_at = @ExpiresAt,
                     is_revoked = @IsRevoked,
                     updated_at = @UpdatedAt
-                WHERE id = @Id;
-                """;
+                WHERE id = @Id;";
             await connection.ExecuteAsync(sql, refreshToken);
     
     });
@@ -129,13 +80,7 @@ public class RefreshTokenRepository : IRefreshTokenRepository
     return WithConnection(async connection =>
     {
         
-            const string sql = """
-                UPDATE refresh_tokens
-                SET
-                    is_revoked = TRUE,
-                    updated_at = NOW()
-                WHERE id = @Id;
-                """;
+            const string sql = @" UPDATE refresh_tokens SET is_revoked = TRUE, updated_at = NOW() WHERE id = @Id;";
             await connection.ExecuteAsync(sql, new { Id = id });
     
     });

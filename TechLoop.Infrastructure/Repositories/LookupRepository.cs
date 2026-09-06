@@ -32,16 +32,13 @@ public sealed class LookupRepository : ILookupRepository
     return WithConnection(async connection =>
     {
             const string sql = "SELECT * FROM public.fn_get_difficulty_levels();";
-        
-
             return await connection.QueryAsync<LookupOptionResponse>(
                 new CommandDefinition(sql, cancellationToken: cancellationToken));
     
     });
     }
 
-    public Task<IEnumerable<LookupOptionResponse>> GetQuestionTypesAsync(
-        CancellationToken cancellationToken)
+    public Task<IEnumerable<LookupOptionResponse>> GetQuestionTypesAsync(CancellationToken cancellationToken)
     {
     return WithConnection(async connection =>
     {
@@ -54,14 +51,11 @@ public sealed class LookupRepository : ILookupRepository
     });
     }
 
-    public Task<IEnumerable<LookupOptionResponse>> GetExampleTypesAsync(
-        CancellationToken cancellationToken)
+    public Task<IEnumerable<LookupOptionResponse>> GetExampleTypesAsync(CancellationToken cancellationToken)
     {
     return WithConnection(async connection =>
     {
             const string sql = "SELECT * FROM public.fn_get_example_types();";
-        
-
             return await connection.QueryAsync<LookupOptionResponse>(
                 new CommandDefinition(sql, cancellationToken: cancellationToken));
     

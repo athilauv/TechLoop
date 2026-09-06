@@ -30,7 +30,6 @@ public sealed class McqOptionRepository : IMcqOptionRepository
     return WithConnection(async connection =>
     {
             const string sql = @"SELECT fn_mcq_option_exists(@QuestionId, @OptionText);";
-        
             return await connection.ExecuteScalarAsync<bool>(new CommandDefinition(sql,
                     new
                     {
@@ -48,7 +47,6 @@ public sealed class McqOptionRepository : IMcqOptionRepository
     return WithConnection(async connection =>
     {
             const string sql = @"SELECT fn_mcq_option_position_exists(@QuestionId, @Position);";
-        
             return await connection.ExecuteScalarAsync<bool>(new CommandDefinition(sql,
                     new
                     {
@@ -66,13 +64,7 @@ public sealed class McqOptionRepository : IMcqOptionRepository
     return WithConnection(async connection =>
     {
             const string sql = @"SELECT fn_mcq_option_count(@QuestionId);";
-        
-            return await connection.ExecuteScalarAsync<int>(new CommandDefinition(sql,
-                    new
-                    {
-                        QuestionId = questionId
-                    },
-                    cancellationToken: cancellationToken));
+            return await connection.ExecuteScalarAsync<int>(new CommandDefinition(sql, new { QuestionId = questionId }, cancellationToken: cancellationToken));
     
     });
     }
@@ -83,8 +75,7 @@ public sealed class McqOptionRepository : IMcqOptionRepository
     return WithConnection(async connection =>
     {
             const string sql = @"CALL public.sp_manage_mcq_option(
-                'CREATE', NULL, @QuestionId, @OptionText, @IsCorrect, @Position,
-                @CreatedBy, NULL, NULL);";
+                'CREATE', NULL, @QuestionId, @OptionText, @IsCorrect, @Position, @CreatedBy, NULL, NULL);";
         
             await connection.ExecuteAsync(new CommandDefinition(sql, option, cancellationToken: cancellationToken));
             return 1;
@@ -98,7 +89,6 @@ public sealed class McqOptionRepository : IMcqOptionRepository
     return WithConnection(async connection =>
     {
             const string sql = @"CALL sp_update_mcq_option(@Id,@OptionText,@IsCorrect,@Position,@UpdatedBy,@UpdatedAt);";
-        
             return await connection.ExecuteAsync(new CommandDefinition(sql, option, cancellationToken: cancellationToken));
     
     });
@@ -110,10 +100,8 @@ public sealed class McqOptionRepository : IMcqOptionRepository
     return WithConnection(async connection =>
     {
             const string sql = @"CALL sp_soft_delete_mcq_option(@Id,@DeletedBy,@DeletedAt);";
-        
             return await connection.ExecuteAsync(new CommandDefinition(
-                    sql,
-                    new
+                    sql, new
                     {
                         Id = id,
                         DeletedBy = deletedBy,
@@ -130,7 +118,6 @@ public sealed class McqOptionRepository : IMcqOptionRepository
     return WithConnection(async connection =>
     {
             const string sql = @"CALL sp_soft_delete_mcq_option_by_question(@QuestionId,@DeletedBy,@DeletedAt);";
-        
             return await connection.ExecuteAsync(new CommandDefinition(
                     sql,
                     new
@@ -150,7 +137,6 @@ public sealed class McqOptionRepository : IMcqOptionRepository
     return WithConnection(async connection =>
     {
             const string sql = @"SELECT fn_mcq_has_correct_option(@QuestionId);";
-        
             return await connection.ExecuteScalarAsync<bool>(new CommandDefinition(
                     sql,
                     new
@@ -168,13 +154,8 @@ public sealed class McqOptionRepository : IMcqOptionRepository
     return WithConnection(async connection =>
     {
             const string sql = @"SELECT * FROM fn_get_mcq_option_by_id(@Id);";
-        
             return await connection.QuerySingleOrDefaultAsync<McqOption>(new CommandDefinition(sql,
-                    new
-                    {
-                        Id = id
-                    },
-                    cancellationToken: cancellationToken));
+                    new { Id = id }, cancellationToken: cancellationToken));
     
     });
     }
@@ -185,13 +166,8 @@ public sealed class McqOptionRepository : IMcqOptionRepository
     return WithConnection(async connection =>
     {
             const string sql = @"SELECT * FROM fn_get_mcq_options_by_question_id(@QuestionId);";
-        
             return await connection.QueryAsync<McqOption>(new CommandDefinition(sql,
-                    new
-                    {
-                        QuestionId = questionId
-                    },
-                    cancellationToken: cancellationToken));
+                    new { QuestionId = questionId }, cancellationToken: cancellationToken));
     
     });
     }
@@ -200,17 +176,9 @@ public sealed class McqOptionRepository : IMcqOptionRepository
     {
     return WithConnection(async connection =>
     {
-            const string sql = """
-                               SELECT public.fn_mcq_option_is_correct( @QuestionId, @OptionId);
-                               """;
-        
+        const string sql = @"SELECT public.fn_mcq_option_is_correct( @QuestionId, @OptionId);";
             return await connection.QuerySingleOrDefaultAsync<bool?>(new CommandDefinition(sql,
-                    new
-                    {
-                        QuestionId = questionId,
-                        OptionId = optionId
-                    },
-                    cancellationToken: cancellationToken));
+                    new { QuestionId = questionId, OptionId = optionId }, cancellationToken: cancellationToken));
     
     });
     }

@@ -1,7 +1,7 @@
 import { useEffect, useMemo, type Dispatch, type SetStateAction } from "react";
 import { useNavigate, useOutletContext, useParams } from "react-router-dom";
 import { useQueries } from "@tanstack/react-query";
-import { ArrowLeft, ArrowRight, BookOpen, Menu } from "lucide-react";
+import { ArrowLeft, ArrowRight, BookOpen } from "lucide-react";
 import LearningLayout from "../components/layout/LearningLayout";
 import ContentHeader from "../components/content/ContentHeader";
 import ContentBody from "../components/content/ContentBody";
@@ -106,20 +106,6 @@ export default function LearningPage() {
         [currentTopic],
     );
 
-    useEffect(() => {
-        if (!technologySlug || !curriculum || topicSlug) return;
-
-        const firstTopic = curriculum.topics?.[0];
-        const firstSubTopic = firstLesson(firstTopic);
-
-        if (!firstTopic || !firstSubTopic) return;
-
-        navigate(
-            `/learner/learning/${technologySlug}/${firstTopic.slug}/${firstSubTopic.slug}`,
-            { replace: true },
-        );
-    }, [technologySlug, curriculum, topicSlug, navigate]);
-
     const subTopicQueries = useQueries({
         queries: lessonNodes.map((subTopic) => ({
             queryKey: ["subTopic", subTopic.slug],
@@ -188,19 +174,32 @@ export default function LearningPage() {
         return null;
     }, [curriculum, currentTopicIndex, technologySlug]);
 
+    const introductionNextDestination = useMemo(() => {
+        if (!curriculum || !technologySlug) return null;
+
+        for (const topic of curriculum.topics) {
+            const lesson = firstLesson(topic);
+            if (lesson) {
+                return `/learner/learning/${technologySlug}/${topic.slug}/${lesson.slug}`;
+            }
+        }
+
+        return null;
+    }, [curriculum, technologySlug]);
+
     const navigateToTopic = (destination: string | null) => {
         if (!destination) return;
         navigate(destination);
         setMobileCurriculumOpen(false);
     };
 
-    if (!technologySlug || !topicSlug) {
+    if (!technologySlug) {
         return (
             <LearningLayout>
                 <EmptyState
                     icon={<BookOpen className="h-7 w-7" />}
-                    title="No lesson selected"
-                    description="Pick a topic from the sidebar to start learning."
+                    title="No technology selected"
+                    description="Select a technology to start learning."
                 />
             </LearningLayout>
         );
@@ -222,7 +221,7 @@ export default function LearningPage() {
         curriculumError ||
         !technology ||
         !curriculum ||
-        !currentTopic
+        (topicSlug && !currentTopic)
     ) {
         return (
             <LearningLayout>
@@ -234,24 +233,85 @@ export default function LearningPage() {
         );
     }
 
+    if (!topicSlug) {
+        return (
+            <LearningLayout
+                onMobileCurriculumChange={setMobileCurriculumOpen}
+                mobileCurriculumOpen={mobileCurriculumOpen}
+                keepCurriculumOpenInitially
+            >
+                <Breadcrumb
+                    items={[
+                        { label: "Learning", href: "/learner/learning" },
+                        { label: technology.name },
+                    ]}
+                />
+
+                <header className="border-b border-[#223A59] pb-8">
+                    <div className="flex items-center gap-4">
+                        <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border border-[#00E8C2]/30 bg-[#0B3444]">
+                            <BookOpen className="h-6 w-6 text-[#00E8C2]" />
+                        </div>
+
+                        <h1 className="text-3xl font-bold tracking-tight text-white sm:text-4xl">
+                            Introduction to {technology.name}
+                        </h1>
+                    </div>
+                </header>
+
+                <div className="mt-8">
+                    <div className="whitespace-pre-line text-base leading-8 text-[#8CA3BF]">
+                        {technology.description || "No description available for this technology."}
+                    </div>
+                </div>
+
+                {/* Same topic pagination used by the learning pages.
+                    From the technology introduction, Next starts at the first
+                    available lesson in the first topic. */}
+                <div className="mt-16 border-t border-[#223A59] pt-6">
+                    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                        <button
+                            type="button"
+                            disabled
+                            className="group flex min-h-16 items-center justify-between gap-4 rounded-xl border border-[#223A59] bg-[#0E192A] px-5 py-4 text-left opacity-35"
+                        >
+                            <span className="flex items-center gap-3">
+                                <ArrowLeft className="h-5 w-5 shrink-0 text-[#00E8C2]" />
+                                <span>
+                                    <span className="block text-[11px] font-medium uppercase tracking-wider text-[#5C7394]">
+                                        Previous
+                                    </span>
+                                    <span className="mt-1 block truncate text-sm font-semibold text-white">
+                                        Technology introduction
+                                    </span>
+                                </span>
+                            </span>
+                        </button>
+
+                        <button
+                            type="button"
+                            disabled={!introductionNextDestination}
+                            onClick={() => navigateToTopic(introductionNextDestination)}
+                            className="group flex min-h-16 items-center justify-between gap-4 rounded-xl border border-[#223A59] bg-[#0E192A] px-5 py-4 text-right transition hover:border-[#00E8C2]/40 hover:bg-[#14243C] disabled:cursor-not-allowed disabled:opacity-35"
+                        >
+                            <span className="ml-auto">
+                                <span className="block text-[11px] font-medium uppercase tracking-wider text-[#5C7394]">
+                                    Next topic
+                                </span>
+                                <span className="mt-1 block truncate text-sm font-semibold text-white">
+                                    {introductionNextDestination ? "Start learning" : "No topics available"}
+                                </span>
+                            </span>
+                            <ArrowRight className="h-5 w-5 shrink-0 text-[#00E8C2]" />
+                        </button>
+                    </div>
+                </div>
+            </LearningLayout>
+        );
+    }
+
     return (
         <LearningLayout onMobileCurriculumChange={setMobileCurriculumOpen} mobileCurriculumOpen={mobileCurriculumOpen}>
-            <div className="sticky top-3 z-20 mb-4 flex items-center justify-between gap-3 xl:hidden">
-                <button
-                    type="button"
-                    onClick={() => setMobileCurriculumOpen(true)}
-                    className="inline-flex items-center gap-2 rounded-lg border border-[#223A59] bg-[#0E192A] px-3 py-2 text-sm font-medium text-white shadow-sm transition hover:bg-[#14243C]"
-                    aria-label="Open curriculum"
-                >
-                    <Menu className="h-4 w-4 text-[#00E8C2]" />
-                    Curriculum
-                </button>
-
-                <span className="max-w-[55%] truncate text-xs text-[#5C7394]">
-                    {currentTopic.title}
-                </span>
-            </div>
-
             <Breadcrumb
                 items={[
                     { label: "Learning", href: "/learner/learning" },

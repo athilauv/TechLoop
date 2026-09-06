@@ -28,8 +28,7 @@ public sealed class CommunityPostRepository : ICommunityPostRepository
         await action(connection);
     }
 
-    public Task<int> CreateAsync(CommunityPost post)
-        => WithConnection(async connection =>
+    public Task<int> CreateAsync(CommunityPost post) => WithConnection(async connection =>
         {
             return await connection.ExecuteScalarAsync<int>("SELECT fn_community_post_create(@UserId,@TechnologyId,@Title,@Content,@CreatedBy)",
                 new
@@ -42,8 +41,7 @@ public sealed class CommunityPostRepository : ICommunityPostRepository
                 });
         });
 
-    public Task<bool> UpdateAsync(CommunityPost post)
-        => WithConnection(async connection =>
+    public Task<bool> UpdateAsync(CommunityPost post) => WithConnection(async connection =>
         {
             return await connection.ExecuteScalarAsync<bool>("SELECT fn_community_post_update(@Id,@Title,@Content,@UpdatedBy)",
                 new
@@ -55,22 +53,19 @@ public sealed class CommunityPostRepository : ICommunityPostRepository
                 });
         });
 
-    public Task<bool> DeleteAsync(int id, Guid userId)
-        => WithConnection(async connection =>
+    public Task<bool> DeleteAsync(int id, Guid userId) => WithConnection(async connection =>
         {
             return await connection.ExecuteScalarAsync<bool>("SELECT fn_community_post_delete(@Id,@UserId)",
                 new { Id = id, UserId = userId });
         });
 
-    public Task<bool> PinAsync(int id, bool isPinned, Guid updatedBy)
-        => WithConnection(async connection =>
+    public Task<bool> PinAsync(int id, bool isPinned, Guid updatedBy) => WithConnection(async connection =>
         {
             return await connection.ExecuteScalarAsync<bool>("SELECT fn_community_post_pin(@Id,@IsPinned,@UpdatedBy)",
                 new { Id = id, IsPinned = isPinned, UpdatedBy = updatedBy });
         });
 
-    public Task<CommunityPostDto?> GetByIdAsync(int id)
-        => WithConnection(async connection =>
+    public Task<CommunityPostDto?> GetByIdAsync(int id) => WithConnection(async connection =>
         {
             return await connection.QueryFirstOrDefaultAsync<CommunityPostDto>("SELECT * FROM fn_community_post_get_by_id(@Id)",
                 new { Id = id });
@@ -88,14 +83,12 @@ public sealed class CommunityPostRepository : ICommunityPostRepository
     });
     }
 
-    public Task<bool> ExistsAsync(int id)
-        => WithConnection(async connection =>
+    public Task<bool> ExistsAsync(int id) => WithConnection(async connection =>
         {
             return await connection.ExecuteScalarAsync<bool>("SELECT fn_community_post_exists(@Id)", new { Id = id });
         });
 
-    public Task<CommunityPost?> GetEntityByIdAsync(int id)
-        => WithConnection(async connection =>
+    public Task<CommunityPost?> GetEntityByIdAsync(int id) => WithConnection(async connection =>
         {
             return await connection.QueryFirstOrDefaultAsync<CommunityPost>(@"SELECT * FROM community_posts WHERE id = @Id AND deleted_at IS NULL", new { Id = id });
         });

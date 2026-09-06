@@ -1,34 +1,8 @@
-import { useEffect, useMemo } from "react";
+import { useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useTechnology } from "../../../../../hooks/useTechnology.ts";
 import { useCurriculum } from "../../../../../hooks/useCurriculum.ts";
-import LessonProgress from "./LessonProgress";
 import TopicAccordion from "./TopicAccordion";
-
-export interface CurriculumSubTopicNode {
-    id: number;
-    title: string;
-    slug: string;
-    position?: number;
-    subTopics?: CurriculumSubTopicNode[];
-}
-
-function countSubTopics(
-    subTopics: CurriculumSubTopicNode[]
-): number {
-    return subTopics.reduce(
-        (total, subTopic) => {
-            return (
-                total +
-                1 +
-                countSubTopics(
-                    subTopic.subTopics ?? []
-                )
-            );
-        },
-        0
-    );
-}
 
 interface CurriculumSidebarProps {
     onNavigate?: () => void;
@@ -97,25 +71,6 @@ export default function CurriculumSidebar({ onNavigate }: CurriculumSidebarProps
         curriculum,
         navigate,
     ]);
-    const totalLessons = useMemo(() => {
-        if (!curriculum?.topics) {
-            return 0;
-        }
-
-        return curriculum.topics.reduce(
-            (total, topic) => {
-                return (
-                    total +
-                    countSubTopics(
-                        (topic.subTopics ??
-                            []) as CurriculumSubTopicNode[]
-                    )
-                );
-            },
-            0
-        );
-    }, [curriculum]);
-
 
     if (!technologySlug) {
         return (
@@ -125,10 +80,7 @@ export default function CurriculumSidebar({ onNavigate }: CurriculumSidebarProps
         );
     }
 
-    if (
-        technologyLoading ||
-        curriculumLoading
-    ) {
+    if ( technologyLoading || curriculumLoading ) {
         return (
             <aside className="flex h-full min-h-0 items-center justify-center text-slate-400">
                 Loading curriculum...
@@ -137,12 +89,8 @@ export default function CurriculumSidebar({ onNavigate }: CurriculumSidebarProps
     }
 
 
-    if (
-        technologyError ||
-        curriculumError ||
-        !technology ||
-        !curriculum
-    ) {
+    if ( technologyError || curriculumError ||
+        !technology || !curriculum) {
         return (
             <aside className="flex h-full min-h-0 items-center justify-center text-red-400">
                 Unable to load curriculum.
@@ -167,20 +115,13 @@ export default function CurriculumSidebar({ onNavigate }: CurriculumSidebarProps
                     border-white/5
                     p-6
                 ">
-                <h2 className="text-xl font-semibold text-white">
-                    {technology.name}
+                <h2 className="text-xl font-semibold text-[#00E8C2]">
+                    Introduction to {technology.name}
                 </h2>
 
                 <p className="mt-2 text-sm text-slate-400">
                     {curriculum.topics.length} Topics
                 </p>
-            </div>
-
-            <div className="shrink-0">
-                <LessonProgress
-                    completed={0}
-                    total={totalLessons}
-                />
             </div>
 
             <div

@@ -7,7 +7,6 @@ namespace TechLoop.Infrastructure.Repositories;
 public sealed class CodingTemplateRepository : ICodingTemplateRepository
 {
     private readonly IDapperContext _context;
-
     private async Task<T> WithConnection<T>(Func<System.Data.IDbConnection, Task<T>> action)
     {
         using var connection = _context.CreateConnection();
@@ -77,8 +76,7 @@ public sealed class CodingTemplateRepository : ICodingTemplateRepository
 
             var stillExists = await connection.ExecuteScalarAsync<bool>(new CommandDefinition(
                 "SELECT EXISTS (SELECT 1 FROM coding_templates WHERE id = @Id AND deleted_at IS NULL);",
-                new { Id = id },
-                cancellationToken: cancellationToken));
+                new { Id = id }, cancellationToken: cancellationToken));
 
             return stillExists ? 0 : 1;
     
@@ -107,7 +105,6 @@ public sealed class CodingTemplateRepository : ICodingTemplateRepository
     return WithConnection(async connection =>
     {
             const string sql = @"SELECT * FROM fn_get_coding_template_by_id(@Id);";
-        
             return await connection.QuerySingleOrDefaultAsync<CodingTemplate>(new CommandDefinition(sql,
                     new
                     {
@@ -123,13 +120,7 @@ public sealed class CodingTemplateRepository : ICodingTemplateRepository
     return WithConnection(async connection =>
     {
             const string sql = @"SELECT * FROM fn_get_coding_templates_by_question_id(@QuestionId);";
-        
-            return await connection.QueryAsync<CodingTemplate>(new CommandDefinition(sql,
-                    new
-                    {
-                        QuestionId = questionId
-                    },
-                    cancellationToken: cancellationToken));
+            return await connection.QueryAsync<CodingTemplate>(new CommandDefinition(sql, new { QuestionId = questionId }, cancellationToken: cancellationToken));
     
     });
     }

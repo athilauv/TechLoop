@@ -24,25 +24,16 @@ public sealed class TechnologyCategoryRepository : ITechnologyCategoryRepository
     public Task<int> CreateAsync(TechnologyCategory technologyCategory, CancellationToken cancellationToken)
     {
         const string sql = @"CALL public.sp_manage_technology_category('CREATE', NULL, @Name, @CreatedBy, NULL, NULL, 0);";
-
-        return WithConnection(connection =>
-            connection.QuerySingleAsync<int>(new CommandDefinition(
-                    sql,
-                    new
-                    {
-                        technologyCategory.Name,
-                        technologyCategory.CreatedBy
-                    },
+        return WithConnection(connection => connection.QuerySingleAsync<int>(new CommandDefinition(
+                    sql, new { technologyCategory.Name, technologyCategory.CreatedBy },
                     cancellationToken: cancellationToken)));
     }
 
     public Task<int> UpdateAsync(TechnologyCategory technologyCategory, CancellationToken cancellationToken)
     {
         const string sql = @"CALL public.sp_manage_technology_category('UPDATE', @Id, @Name, NULL, @UpdatedBy, NULL, 0 );";
-        return WithConnection(connection =>
-            connection.QuerySingleAsync<int>(new CommandDefinition(
-                    sql,
-                    new
+        return WithConnection(connection => connection.QuerySingleAsync<int>(new CommandDefinition(
+                    sql, new
                     {
                         technologyCategory.Id,
                         technologyCategory.Name,
@@ -53,51 +44,17 @@ public sealed class TechnologyCategoryRepository : ITechnologyCategoryRepository
 
     public Task<int> PublishAsync(int id, Guid publishedBy, CancellationToken cancellationToken)
     {
-        const string sql = @"
-            CALL public.sp_manage_technology_category(
-                'PUBLISH',
-                @Id,
-                NULL,
-                NULL,
-                @UpdatedBy,
-                NULL,
-                0
-            );";
-
-        return WithConnection(connection =>
-            connection.QuerySingleAsync<int>(
-                new CommandDefinition(
-                    sql,
-                    new
-                    {
-                        Id = id,
-                        UpdatedBy = publishedBy
-                    },
+        const string sql = @"CALL public.sp_manage_technology_category('PUBLISH', @Id, NULL, NULL, @UpdatedBy, NULL, 0);";
+        return WithConnection(connection => connection.QuerySingleAsync<int>(
+                new CommandDefinition(sql, new { Id = id, UpdatedBy = publishedBy },
                     cancellationToken: cancellationToken)));
     }
 
     public Task<int> DeleteAsync(int id, Guid deletedBy, CancellationToken cancellationToken)
     {
-        const string sql = @"
-            CALL public.sp_manage_technology_category(
-                'DELETE',
-                @Id,
-                NULL,
-                NULL,
-                NULL,
-                @DeletedBy,
-                0
-            );";
-
-        return WithConnection(connection =>
-            connection.QuerySingleAsync<int>(
-                new CommandDefinition(
-                    sql,
-                    new
-                    {
-                        Id = id,
-                        DeletedBy = deletedBy
-                    },
+        const string sql = @"CALL public.sp_manage_technology_category('DELETE', @Id, NULL, NULL, NULL, @DeletedBy, 0);";
+        return WithConnection(connection => connection.QuerySingleAsync<int>(
+                new CommandDefinition(sql, new { Id = id, DeletedBy = deletedBy },
                     cancellationToken: cancellationToken)));
     }
 
@@ -138,10 +95,7 @@ public sealed class TechnologyCategoryRepository : ITechnologyCategoryRepository
     {
         const string sql = "SELECT fn_technology_category_name_exists(@Name,@ExcludeId);";
         return WithConnection(connection => connection.ExecuteScalarAsync<bool>(
-            new CommandDefinition(sql, new
-            {
-                Name = name,
-                ExcludeId = excludeId
-            }, cancellationToken: cancellationToken)));
+            new CommandDefinition(sql, new { Name = name, ExcludeId = excludeId },
+                cancellationToken: cancellationToken)));
     }
 }

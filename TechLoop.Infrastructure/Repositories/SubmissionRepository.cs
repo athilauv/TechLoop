@@ -31,26 +31,18 @@ public class SubmissionRepository : ISubmissionRepository
     return WithConnection(async connection =>
     {
             const string sql = @"SELECT fn_submission_exists(@UserId, @QuestionId);";
-        
             return await connection.ExecuteScalarAsync<bool>(new CommandDefinition(sql,
-                    new
-                    {
-                        UserId = userId,
-                        QuestionId = questionId
-                    },
+                    new { UserId = userId, QuestionId = questionId },
                     cancellationToken: cancellationToken));
     
     });
     }
     
-    public Task<int> CreateAsync(
-        Submission submission,
-        CancellationToken cancellationToken)
+    public Task<int> CreateAsync(Submission submission, CancellationToken cancellationToken)
     {
     return WithConnection(async connection =>
     {
-            const string sql = @"
-                CALL sp_manage_submission(
+            const string sql = @"CALL sp_manage_submission(
                     'CREATE',
                     NULL,
                     @UserId,
@@ -73,8 +65,7 @@ public class SubmissionRepository : ISubmissionRepository
                 );";
 
         
-            await connection.ExecuteAsync(new CommandDefinition(
-                sql,
+            await connection.ExecuteAsync(new CommandDefinition(sql,
                 new
                 {
                     submission.UserId,
@@ -107,17 +98,12 @@ public class SubmissionRepository : ISubmissionRepository
                 },
                 cancellationToken: cancellationToken));
 
-            const string idSql = @"
-                SELECT id
-                FROM public.submissions
-                WHERE user_id = @UserId
-                  AND question_id = @QuestionId
-                  AND attempt_number = @AttemptNumber
+            const string idSql = @"SELECT id FROM public.submissions
+                WHERE user_id = @UserId AND question_id = @QuestionId AND attempt_number = @AttemptNumber
                 ORDER BY id DESC
                 LIMIT 1;";
 
-            return await connection.ExecuteScalarAsync<int>(new CommandDefinition(
-                idSql,
+            return await connection.ExecuteScalarAsync<int>(new CommandDefinition(idSql,
                 new
                 {
                     submission.UserId,
@@ -135,11 +121,8 @@ public class SubmissionRepository : ISubmissionRepository
     return WithConnection(async connection =>
     {
             const string sql = @"SELECT * FROM fn_get_submission_by_id(@Id);";
-        
             return await connection.QuerySingleOrDefaultAsync<Submission>(
-                new CommandDefinition(sql,
-                    new { Id = id },
-                    cancellationToken: cancellationToken));
+                new CommandDefinition(sql, new { Id = id }, cancellationToken: cancellationToken));
     
     });
     }
@@ -149,15 +132,8 @@ public class SubmissionRepository : ISubmissionRepository
     return WithConnection(async connection =>
     {
             const string sql = @"SELECT * FROM fn_get_user_submissions(@UserId);";
-        
             return await connection.QueryAsync<Submission>(
-                new CommandDefinition(
-                    sql,
-                    new
-                    {
-                        UserId = userId
-                    },
-                    cancellationToken: cancellationToken));
+                new CommandDefinition(sql, new { UserId = userId }, cancellationToken: cancellationToken));
     
     });
     }
@@ -167,14 +143,8 @@ public class SubmissionRepository : ISubmissionRepository
     return WithConnection(async connection =>
     {
             const string sql = @"SELECT * FROM fn_get_question_submissions(@QuestionId);";
-        
             return await connection.QueryAsync<Submission>(new CommandDefinition(
-                    sql,
-                    new
-                    {
-                        QuestionId = questionId
-                    },
-                    cancellationToken: cancellationToken));
+                    sql, new { QuestionId = questionId }, cancellationToken: cancellationToken));
     
     });
     }
@@ -184,11 +154,8 @@ public class SubmissionRepository : ISubmissionRepository
     return WithConnection(async connection =>
     {
             const string sql = @"CALL sp_manage_submission('UPDATE_RESULT', @Id, NULL, NULL, NULL, NULL, @Status, NULL, @ExecutionTimeMs, @MemoryUsedMb, @PassedTestCases, @TotalTestCases, @Score, @CompilerOutput, @RuntimeOutput, @AiReview, @JudgeToken);";
-        
             return await connection.ExecuteAsync(
-                new CommandDefinition(
-                    sql,
-                    new
+                new CommandDefinition(sql, new
                     {
                         submission.Id,
                         Status = submission.Status switch
@@ -222,16 +189,8 @@ public class SubmissionRepository : ISubmissionRepository
     return WithConnection(async connection =>
     {
             const string sql = @"SELECT fn_get_next_attempt_number(@UserId, @QuestionId);";
-        
             return await connection.ExecuteScalarAsync<int>(
-                new CommandDefinition(
-                    sql,
-                    new
-                    {
-                        UserId = userId,
-                        QuestionId = questionId
-                    },
-                    cancellationToken: cancellationToken));
+                new CommandDefinition(sql, new { UserId = userId, QuestionId = questionId }, cancellationToken: cancellationToken));
     
     });
     }
@@ -241,14 +200,8 @@ public class SubmissionRepository : ISubmissionRepository
     return WithConnection(async connection =>
     {
             const string sql = @" SELECT fn_submission_already_solved( @UserId, @QuestionId);";
-        
             return await connection.ExecuteScalarAsync<bool>(new CommandDefinition(
-                    sql,
-                    new
-                    {
-                        UserId = userId,
-                        QuestionId = questionId
-                    },
+                    sql, new { UserId = userId, QuestionId = questionId },
                     cancellationToken: cancellationToken));
     
     });

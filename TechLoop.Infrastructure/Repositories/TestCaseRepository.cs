@@ -31,13 +31,8 @@ public sealed class TestCaseRepository : ITestCaseRepository
     return WithConnection(async connection =>
     {
             const string sql = @"SELECT fn_test_case_position_exists(@QuestionId, @Position);";
-        
             return await connection.ExecuteScalarAsync<bool>(new CommandDefinition(sql,
-                    new
-                    {
-                        QuestionId = questionId,
-                        Position = position
-                    },
+                    new { QuestionId = questionId, Position = position },
                     cancellationToken: cancellationToken));
     
     });
@@ -49,7 +44,6 @@ public sealed class TestCaseRepository : ITestCaseRepository
     return WithConnection(async connection =>
     {
             const string sql = @"SELECT fn_create_test_case( @QuestionId, @Input, @ExpectedOutput, @IsHidden, @Position, @CreatedBy,@CreatedAt);";
-        
             return await connection.ExecuteScalarAsync<int>(new CommandDefinition(sql, testCase, cancellationToken: cancellationToken));
     
     });
@@ -61,7 +55,6 @@ public sealed class TestCaseRepository : ITestCaseRepository
     return WithConnection(async connection =>
     {
             const string sql = @"CALL sp_update_test_case( @Id, @Input, @ExpectedOutput, @IsHidden, @Position,@UpdatedBy,@UpdatedAt);";
-        
             return await connection.ExecuteAsync(new CommandDefinition(sql, testCase, cancellationToken: cancellationToken));
     
     });
@@ -73,21 +66,12 @@ public sealed class TestCaseRepository : ITestCaseRepository
     return WithConnection(async connection =>
     {
             const string sql = @"CALL sp_soft_delete_test_case(@Id,@DeletedBy,@DeletedAt);";
-        
             await connection.ExecuteAsync(new CommandDefinition(
-                    sql,
-                    new
-                    {
-                        Id = id,
-                        DeletedBy = deletedBy,
-                        DeletedAt = DateTime.UtcNow
-                    },
+                    sql, new { Id = id, DeletedBy = deletedBy, DeletedAt = DateTime.UtcNow },
                     cancellationToken: cancellationToken));
 
-            var stillExists = await connection.ExecuteScalarAsync<bool>(new CommandDefinition(
-                "SELECT EXISTS (SELECT 1 FROM test_cases WHERE id = @Id AND deleted_at IS NULL);",
-                new { Id = id },
-                cancellationToken: cancellationToken));
+            var stillExists = await connection.ExecuteScalarAsync<bool>(new CommandDefinition("SELECT EXISTS (SELECT 1 FROM test_cases WHERE id = @Id AND deleted_at IS NULL);",
+                new { Id = id }, cancellationToken: cancellationToken));
 
             return stillExists ? 0 : 1;
     
@@ -100,7 +84,6 @@ public sealed class TestCaseRepository : ITestCaseRepository
     return WithConnection(async connection =>
     {
             const string sql = @"CALL sp_soft_delete_test_case_by_question(@QuestionId, @DeletedBy,@DeletedAt);";
-        
             return await connection.ExecuteAsync(new CommandDefinition(sql,
                     new
                     {
@@ -119,13 +102,8 @@ public sealed class TestCaseRepository : ITestCaseRepository
     return WithConnection(async connection =>
     {
             const string sql = @"SELECT * FROM fn_get_test_case_by_id(@Id);";
-        
             return await connection.QuerySingleOrDefaultAsync<TestCase>(new CommandDefinition(sql,
-                    new
-                    {
-                        Id = id
-                    },
-                    cancellationToken: cancellationToken));
+                    new { Id = id }, cancellationToken: cancellationToken));
     
     });
     }
@@ -136,13 +114,8 @@ public sealed class TestCaseRepository : ITestCaseRepository
     return WithConnection(async connection =>
     {
             const string sql = @"SELECT * FROM fn_get_test_cases_by_question_id(@QuestionId);";
-        
             return await connection.QueryAsync<TestCase>(new CommandDefinition(sql,
-                    new
-                    {
-                        QuestionId = questionId
-                    },
-                    cancellationToken: cancellationToken));
+                    new { QuestionId = questionId }, cancellationToken: cancellationToken));
     
     });
     }
@@ -153,13 +126,8 @@ public sealed class TestCaseRepository : ITestCaseRepository
     return WithConnection(async connection =>
     {
             const string sql = @"SELECT * FROM fn_get_visible_test_cases_by_question_id(@QuestionId);";
-        
             return await connection.QueryAsync<TestCase>(new CommandDefinition(sql,
-                    new
-                    {
-                        QuestionId = questionId
-                    },
-                    cancellationToken: cancellationToken));
+                    new { QuestionId = questionId }, cancellationToken: cancellationToken));
     
     });
     }

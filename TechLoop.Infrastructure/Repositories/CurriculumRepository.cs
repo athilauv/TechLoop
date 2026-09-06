@@ -43,8 +43,7 @@ public sealed class CurriculumRepository : ICurriculumRepository
         
             var rows = (await connection.QueryAsync<CurriculumRowResponse>(
                 new CommandDefinition("SELECT * FROM fn_get_learner_curriculum(@TechnologyId);",
-                    new { TechnologyId = technologyId },
-                    cancellationToken: cancellationToken))).ToList();
+                    new { TechnologyId = technologyId }, cancellationToken: cancellationToken))).ToList();
 
             return BuildLearnerResponse(rows);
     
