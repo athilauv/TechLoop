@@ -196,7 +196,10 @@ export default function MentorSetupPage() {
                 "Passwords do not match.";
         }
 
-        if (linkedInUrl.trim()) {
+        if (!linkedInUrl.trim()) {
+            e.linkedInUrl =
+                "LinkedIn URL is required.";
+        } else {
             try {
                 new URL(linkedInUrl);
             } catch {
@@ -205,7 +208,10 @@ export default function MentorSetupPage() {
             }
         }
 
-        if (githubUrl.trim()) {
+        if (!githubUrl.trim()) {
+            e.githubUrl =
+                "GitHub URL is required.";
+        } else {
             try {
                 new URL(githubUrl);
             } catch {
@@ -214,7 +220,10 @@ export default function MentorSetupPage() {
             }
         }
 
-        if (profileImageUrl.trim()) {
+        if (!profileImageUrl.trim()) {
+            e.profileImageUrl =
+                "Profile image URL is required.";
+        } else {
             try {
                 new URL(profileImageUrl);
             } catch {
@@ -445,14 +454,14 @@ export default function MentorSetupPage() {
                         <div className="grid grid-cols-2 gap-3">
 
                             <TextField
-                                label="LinkedIn URL"
+                                label="LinkedIn URL *"
                                 placeholder="https://linkedin.com/in/..."
                                 value={linkedInUrl}
                                 onChange={setLinkedInUrl}
                                 error={errors.linkedInUrl}/>
 
                             <TextField
-                                label="GitHub URL"
+                                label="GitHub URL *"
                                 placeholder="https://github.com/..."
                                 value={githubUrl}
                                 onChange={setGithubUrl}
@@ -463,7 +472,7 @@ export default function MentorSetupPage() {
                         {/* PROFILE IMAGE */}
 
                         <TextField
-                            label="Profile Image URL"
+                            label="Profile Image URL *"
                             placeholder="https://..."
                             value={profileImageUrl}
                             onChange={setProfileImageUrl}

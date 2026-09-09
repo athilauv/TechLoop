@@ -46,11 +46,16 @@ public sealed class AdminRepository : IAdminRepository
     });
     }
 
-    public Task<bool> UpdateUserRoleAsync(Guid userId, int roleId, CancellationToken cancellationToken)
+    public async Task<bool> UpdateUserRoleAsync(Guid userId, int roleId, int? technologyId, CancellationToken cancellationToken)
     {
-        const string sql = "SELECT fn_admin_update_user_role(@UserId,@RoleId);";
-        return WithConnection(connection => connection.QuerySingleAsync<bool>(
-            new CommandDefinition(sql, new { UserId = userId, RoleId = roleId }, cancellationToken: cancellationToken)));
+        const string sql = "CALL public.sp_admin_change_user_role(@UserId, @RoleId, @TechnologyId, 0);";
+        var result = await WithConnection(connection => connection.QuerySingleAsync<int>(
+            new CommandDefinition(
+                sql,
+                new { UserId = userId, RoleId = roleId, TechnologyId = technologyId },
+                cancellationToken: cancellationToken)));
+
+        return result == 1;
     }
 
     public Task<AdminMentorOverviewResponse?> GetMentorOverviewAsync(int mentorId, CancellationToken cancellationToken)

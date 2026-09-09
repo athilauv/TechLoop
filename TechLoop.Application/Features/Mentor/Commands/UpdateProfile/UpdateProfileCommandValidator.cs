@@ -1,4 +1,4 @@
-﻿using FluentValidation;
+using FluentValidation;
 
 namespace TechLoop.Application.Features.Mentor.Commands.UpdateProfile;
 
@@ -37,14 +37,22 @@ public sealed class UpdateProfileCommandValidator : AbstractValidator<UpdateProf
         RuleFor(x => x.Bio)
             .MaximumLength(1000);
         RuleFor(x => x.LinkedInUrl)
+            .NotEmpty()
+            .WithMessage("LinkedIn URL is required for mentor setup.")
             .MaximumLength(500)
-            .Must(url => string.IsNullOrWhiteSpace(url) || Uri.TryCreate(url, UriKind.Absolute, out _))
+            .Must(url => Uri.TryCreate(url, UriKind.Absolute, out _))
             .WithMessage("Invalid LinkedIn URL.");
         RuleFor(x => x.GithubUrl)
+            .NotEmpty()
+            .WithMessage("GitHub URL is required for mentor setup.")
             .MaximumLength(500)
-            .Must(url => string.IsNullOrWhiteSpace(url) || Uri.TryCreate(url, UriKind.Absolute, out _))
+            .Must(url => Uri.TryCreate(url, UriKind.Absolute, out _))
             .WithMessage("Invalid GitHub URL.");
         RuleFor(x => x.ProfileImageUrl)
-            .MaximumLength(500);
+            .NotEmpty()
+            .WithMessage("Profile image URL is required for mentor setup.")
+            .MaximumLength(500)
+            .Must(url => Uri.TryCreate(url, UriKind.Absolute, out _))
+            .WithMessage("Invalid profile image URL.");
     }
 }

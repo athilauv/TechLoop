@@ -14,6 +14,10 @@ export default function AdminTechnologyCategoriesPage() {
     const [editingId, setEditingId] = useState<number | null>(null);
     const { data = [], isLoading } = useQuery({ queryKey: ["admin-technology-categories"], queryFn: getAdminTechnologyCategories });
     const refresh = () => client.invalidateQueries({ queryKey: ["admin-technology-categories"] });
+    const startEditing = (id: number, categoryName: string) => {
+        setEditingId(id);
+        setName(categoryName);
+    };
     const create = useMutation({ mutationFn: createAdminTechnologyCategory, onSuccess: (result) => { setName(""); showToast.success(result.message || "Category created successfully."); refresh(); }, onError: (error) => showToast.error(getErrorMessage(error, "Failed to create category.")) });
     const update = useMutation({ mutationFn: ({ id, value }: { id: number; value: string }) => updateAdminTechnologyCategory(id, value), onSuccess: (result) => { setName(""); setEditingId(null); showToast.success(result.message || "Category updated successfully."); refresh(); }, onError: (error) => showToast.error(getErrorMessage(error, "Failed to update category.")) });
     const publish = useMutation({ mutationFn: publishAdminTechnologyCategory, onSuccess: (result) => { showToast.success(result.message || "Category published successfully."); refresh(); }, onError: (error) => showToast.error(getErrorMessage(error, "Failed to publish category.")) });
@@ -22,8 +26,8 @@ export default function AdminTechnologyCategoriesPage() {
         event.preventDefault();
         const value = name;
         const validationMessage = getBackendValidationMessage(
-            editingId ? "PUT" : "POST",
-            editingId
+            editingId !== null ? "PUT" : "POST",
+            editingId !== null
                 ? `/admin/technology-categories/${editingId}`
                 : "/admin/technology-categories",
             { name: value },
@@ -34,7 +38,7 @@ export default function AdminTechnologyCategoriesPage() {
             return;
         }
 
-        if (editingId) update.mutate({ id: editingId, value: value.trim() });
+        if (editingId !== null) update.mutate({ id: editingId, value: value.trim() });
         else create.mutate(value.trim());
     };
     return <div className="p-6 lg:p-10">
@@ -51,7 +55,7 @@ export default function AdminTechnologyCategoriesPage() {
                 <td className="px-5 py-4 text-sm text-[#8CA3BF]">{new Date(item.createdAt).toLocaleDateString()}</td>
                 <td className="px-5 py-4"><span className={`rounded-full px-2.5 py-1 text-xs font-medium ${item.publishAt ? "bg-[#00E8C2]/10 text-[#00E8C2]" : "bg-[#F59E0B]/10 text-[#F59E0B]"}`}>{item.publishAt ? "Published" : "Draft"}</span></td>
                 <td className="px-5 py-4"><div className="flex items-center gap-2">
-                    <button type="button" onClick={() => { setEditingId(item.id); setName(item.name); }} className="rounded-lg p-2 text-[#8CA3BF] hover:bg-[#101C30] hover:text-white"><Edit3 size={15}/></button>
+                    <button type="button" aria-label={`Edit ${item.name}`} onClick={() => startEditing(item.id, item.name)} className="cursor-pointer rounded-lg p-2 text-[#8CA3BF] hover:bg-[#101C30] hover:text-white"><Edit3 size={15}/></button>
                     {!item.publishAt && <button type="button" onClick={() => showToast.confirm("Publish category", `Publish ${item.name}?`, () => publish.mutate(item.id), undefined, "Publish")} className="rounded-lg p-2 text-[#00E8C2] hover:bg-[#00E8C2]/10"><CheckCircle2 size={15}/></button>}
                     <button type="button" onClick={() => showToast.confirm("Delete category", `Delete ${item.name}? This action cannot be undone.`, () => remove.mutate(item.id), undefined, "Delete")} className="rounded-lg p-2 text-[#F87171] hover:bg-[#F87171]/10"><Trash2 size={15}/></button>
                 </div></td>

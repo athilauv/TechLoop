@@ -23,8 +23,15 @@ export const getAdminUsers = async (page = 1, pageSize = 20, search?: string, st
     return data;
 };
 
-export const updateAdminUserRole = async (userId: string, roleId: number): Promise<OperationResponse> => {
-    const { data } = await api.patch<OperationResponse>(`/admin/users/${userId}/role`, { roleId });
+export const updateAdminUserRole = async (
+    userId: string,
+    roleId: number,
+    technologyId?: number,
+): Promise<OperationResponse> => {
+    const { data } = await api.patch<OperationResponse>(
+        `/admin/users/${userId}/role`,
+        { roleId, technologyId },
+    );
     return data;
 };
 

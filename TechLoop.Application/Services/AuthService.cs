@@ -252,7 +252,7 @@ public class AuthService : IAuthService
         if (user == null) 
             return;
         var resetToken = _jwtGenerator.GeneratePasswordResetToken(user);
-        var resetLink = $"http://localhost:5173/reset-password?token={Uri.EscapeDataString(resetToken)}";
+        var resetLink = $"http://localhost:5174/reset-password?token={Uri.EscapeDataString(resetToken)}";
         await _emailService.SendPasswordResetAsync(user.Username, user.Email, resetLink);
     }
 

@@ -458,7 +458,7 @@ function validateRequest(method: string, rawUrl: string, data: AnyRecord): strin
     }
 
     if (url.match(/^api\/discussions\/comments\/\d+$/,) && m === "PUT") {
-        return validateComment(data, true);
+        return validateComment({ ...data, id: idInPath }, true);
     }
 
     if (url.match(/^api\/discussions\/comments\/\d+$/,) && m === "DELETE") {

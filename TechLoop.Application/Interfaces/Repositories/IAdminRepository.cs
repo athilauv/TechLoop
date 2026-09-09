@@ -8,7 +8,7 @@ public interface IAdminRepository
 {
     Task<AdminDashboardResponse> GetDashboardAsync(CancellationToken cancellationToken);
     Task<PagedResult<AdminUserResponse>> GetUsersAsync(int page, int pageSize, string? search, string? status, string? sort, CancellationToken cancellationToken);
-    Task<bool> UpdateUserRoleAsync(Guid userId, int roleId, CancellationToken cancellationToken);
+    Task<bool> UpdateUserRoleAsync(Guid userId, int roleId, int? technologyId, CancellationToken cancellationToken);
     Task<AdminMentorOverviewResponse?> GetMentorOverviewAsync(int mentorId, CancellationToken cancellationToken);
     Task<IEnumerable<TopicContributionPendingResponse>> GetPendingContributionsAsync(CancellationToken cancellationToken);
 }

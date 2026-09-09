@@ -1,4 +1,4 @@
-﻿using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace TechLoop.Infrastructure.DependencyInjection;
@@ -9,7 +9,7 @@ public static class DependencyInjection
     {
         services.AddRepositories();
         services.AddAuthenticationServices();
-        services.AddInfrastructureServices();
+        services.AddInfrastructureServices(configuration);
         services.AddExternalServices(configuration);
 
         return services;

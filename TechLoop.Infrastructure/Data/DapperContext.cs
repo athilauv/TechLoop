@@ -1,19 +1,16 @@
-﻿using System.Data;
-using Microsoft.Extensions.Configuration;
+using System.Data;
 using Npgsql;
 using TechLoop.Application.Interfaces.Infrastructure;
-using TechLoop.Domain.Enums;
 
 namespace TechLoop.Infrastructure.Data;
 
-public class DapperContext : IDapperContext
+public sealed class DapperContext : IDapperContext
 {
     private readonly NpgsqlDataSource _dataSource;
-    public DapperContext(IConfiguration configuration)
+
+    public DapperContext(NpgsqlDataSource dataSource)
     {
-        var connectionString = configuration.GetConnectionString("DefaultConnection")!;
-        var builder = new NpgsqlDataSourceBuilder(connectionString);
-        _dataSource = builder.Build();
+        _dataSource = dataSource;
     }
 
     public IDbConnection CreateConnection()
