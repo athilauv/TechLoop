@@ -48,12 +48,17 @@ public sealed class AdminRepository : IAdminRepository
 
     public async Task<bool> UpdateUserRoleAsync(Guid userId, int roleId, int? technologyId, CancellationToken cancellationToken)
     {
-        const string sql = "CALL public.sp_admin_change_user_role(@UserId, @RoleId, @TechnologyId, 0);";
-        var result = await WithConnection(connection => connection.QuerySingleAsync<int>(
-            new CommandDefinition(
-                sql,
-                new { UserId = userId, RoleId = roleId, TechnologyId = technologyId },
-                cancellationToken: cancellationToken)));
+        const string sql =@"CALL public.sp_admin_change_user_role(@UserId, @RoleId, @TechnologyId, NULL);";
+        var result = await WithConnection(connection =>
+            connection.QuerySingleAsync<int>(new CommandDefinition(
+                    sql,
+                    new
+                    {
+                        UserId = userId,
+                        RoleId = roleId,
+                        TechnologyId = technologyId
+                    },
+                    cancellationToken: cancellationToken)));
 
         return result == 1;
     }

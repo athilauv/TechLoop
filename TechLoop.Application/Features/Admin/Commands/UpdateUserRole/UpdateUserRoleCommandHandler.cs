@@ -10,7 +10,6 @@ public sealed class UpdateUserRoleCommandHandler : IRequestHandler<UpdateUserRol
 {
     private const int LearnerRoleId = 1;
     private const int MentorRoleId = 2;
-    private const int AdminRoleId = 3;
 
     private readonly IAdminRepository _repository;
     private readonly IUserRepository _userRepository;
@@ -33,8 +32,8 @@ public sealed class UpdateUserRoleCommandHandler : IRequestHandler<UpdateUserRol
     {
         var roleId = request.Request.RoleId;
 
-        if (roleId is < LearnerRoleId or > AdminRoleId)
-            throw new BadRequestException("RoleId must be 1, 2, or 3.");
+        if (roleId is not (LearnerRoleId or MentorRoleId))
+            throw new BadRequestException("RoleId must be 1 or 2.");
 
         var user = await _userRepository.GetByIdAsync(request.UserId);
         if (user is null)

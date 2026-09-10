@@ -90,7 +90,15 @@ export default function AdminUsersPage() {
             {query.isLoading && <tr><td colSpan={6} className="px-5 py-10 text-center text-sm text-[#8CA3BF]">Loading users...</td></tr>}
             {!query.isLoading && !query.isError && users.map((user) => <tr key={user.id}>
                 <td className="px-5 py-4 font-medium text-white">{user.username}</td><td className="px-5 py-4 text-sm text-[#8CA3BF]">{user.email}</td><td className="px-5 py-4 text-sm text-white">{user.role}</td><td className="px-5 py-4 text-sm text-[#8CA3BF]">{user.lastLoginAt ? new Date(user.lastLoginAt).toLocaleString() : "Never"}</td>
-                <td className="px-5 py-4"><span className="text-xs">{user.isLocked ? "Locked" : "Active"}</span></td><td className="px-5 py-4"><select value={user.roleId} onChange={(e) => requestRoleChange(user, Number(e.target.value))} disabled={roleMutation.isPending} className="rounded-lg border border-[#223A59] bg-[#101C30] px-2.5 py-2 text-xs text-white"><option value={1}>Learner</option><option value={2}>Mentor</option><option value={3}>Admin</option></select></td>
+                <td className="px-5 py-4"><span className="text-xs">{user.isLocked ? "Locked" : "Active"}</span></td><td className="px-5 py-4">
+                <select value={user.roleId} onChange={(e) => requestRoleChange(user, Number(e.target.value))} disabled={roleMutation.isPending} className="rounded-lg border border-[#223A59] bg-[#101C30] px-2.5 py-2 text-xs text-white">
+                    <option value={1}>
+                        Learner
+                    </option>
+                    <option value={2}>
+                        Mentor
+                    </option>
+                </select></td>
             </tr>)}
         </AdminTable>
         <InfiniteScrollTrigger hasNextPage={!!query.hasNextPage} isFetchingNextPage={query.isFetchingNextPage} onLoadMore={() => void query.fetchNextPage()} />
