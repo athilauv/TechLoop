@@ -15,16 +15,6 @@ using TechLoop.Infrastructure.DependencyInjection;
 
 var builder = WebApplication.CreateBuilder(args);
 
-Console.WriteLine("Connection");
-Console.WriteLine(builder.Configuration.GetConnectionString("DefaultConnection"));
-
-foreach (var kv in builder.Configuration.AsEnumerable())
-{
-    if (kv.Key.Contains("Connection", StringComparison.OrdinalIgnoreCase))
-    {
-        Console.WriteLine($"{kv.Key} = {kv.Value}");
-    }
-}
 DefaultTypeMap.MatchNamesWithUnderscores = true;
 
 // Controllers
