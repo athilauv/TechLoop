@@ -2,10 +2,6 @@ using System.Text;
 using Dapper;
 using TechLoop.Api.Middleware;
 using TechLoop.Application;
-using TechLoop.Application.Interfaces.Authentication;
-using TechLoop.Application.Interfaces.Services;
-using TechLoop.Infrastructure.Authentication;
-using TechLoop.Application.Services;
 using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.RateLimiting;
@@ -30,14 +26,10 @@ builder.Services.AddFluentValidationAutoValidation();
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddInfrastructure(builder.Configuration);
 
-// Fail fast when the local email configuration is not loaded. Without this,
-// mentor creation can persist the user/mentor and only then fail in
-// MailAddress with an empty sender address.
 var emailSender = builder.Configuration["EmailSettings:SenderEmail"];
 if (string.IsNullOrWhiteSpace(emailSender))
 {
-    throw new InvalidOperationException(
-        "EmailSettings:SenderEmail is missing. Start the API with the Development environment or configure a valid sender email.");
+    throw new InvalidOperationException("EmailSettings:SenderEmail is missing. Start the API with the Development environment or configure a valid sender email.");
 }
 
 // Swagger
@@ -76,17 +68,11 @@ builder.Services
                 ValidateAudience = true,
                 ValidateLifetime = true,
                 ValidateIssuerSigningKey = true,
-
                 ValidIssuer = builder.Configuration["Jwt:Issuer"],
                 ValidAudience = builder.Configuration["Jwt:Audience"],
-
-                IssuerSigningKey =
-                    new SymmetricSecurityKey(
-                        Encoding.UTF8.GetBytes(jwtSecret)),
-
+                IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSecret)),
                 RoleClaimType = ClaimTypes.Role,
                 NameClaimType = ClaimTypes.NameIdentifier,
-
                 ClockSkew = TimeSpan.FromMinutes(1)
             };
 
@@ -94,62 +80,10 @@ builder.Services
         {
             OnMessageReceived = context =>
             {
-                Console.WriteLine(
-                    $"Authorization Header: {context.Request.Headers.Authorization}"
-                );
-
                 if (string.IsNullOrEmpty(context.Token))
                 {
-                    context.Token =
-                        context.Request.Cookies["accessToken"];
+                    context.Token = context.Request.Cookies["accessToken"];
                 }
-
-                Console.WriteLine(
-                    $"Access Token From Cookie: {!string.IsNullOrEmpty(context.Token)}"
-                );
-
-                return Task.CompletedTask;
-            },
-
-            OnAuthenticationFailed = context =>
-            {
-                Console.WriteLine(
-                    $"JWT Authentication Failed: {context.Exception.Message}"
-                );
-
-                return Task.CompletedTask;
-            },
-
-            OnTokenValidated = context =>
-            {
-                Console.WriteLine(
-                    "JWT Token Validated Successfully"
-                );
-
-                Console.WriteLine(
-                    $"User: {context.Principal?.Identity?.Name}"
-                );
-
-                Console.WriteLine(
-                    $"NameIdentifier: {context.Principal?.FindFirst(ClaimTypes.NameIdentifier)?.Value}"
-                );
-
-                Console.WriteLine(
-                    $"Role: {context.Principal?.FindFirst(ClaimTypes.Role)?.Value}"
-                );
-
-                return Task.CompletedTask;
-            },
-
-            OnChallenge = context =>
-            {
-                Console.WriteLine(
-                    $"JWT Challenge: {context.Error}"
-                );
-
-                Console.WriteLine(
-                    $"JWT Error Description: {context.ErrorDescription}"
-                );
 
                 return Task.CompletedTask;
             }
@@ -162,8 +96,7 @@ builder.Services.AddCors(options =>
     options.AddPolicy("React", policy =>
     {
         policy
-            .WithOrigins(
-                "http://localhost:5174")
+            .WithOrigins("http://localhost:5174")
             .AllowAnyHeader()
             .AllowAnyMethod()
             .AllowCredentials();
@@ -198,18 +131,11 @@ if (!app.Environment.IsDevelopment())
 {
     app.UseHttpsRedirection();
 }
-
 app.UseRouting();
-
 app.UseCors("React");
-
 app.UseMiddleware<ExceptionMiddleware>();
 app.UseMiddleware<SecurityHeadersMiddleware>();
-
 app.UseAuthentication();
-
 app.UseAuthorization();
-
 app.MapControllers();
-
 app.Run();
